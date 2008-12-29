@@ -574,8 +574,7 @@ function square_num(s) {
 /******************************************************************************
  * UNIT TESTS
  *****************************************************************************/
-function run_tests() {
-  var chess = new Chess;
+function run_unit_tests() {
   var start = new Date;
   var console = document.getElementById('console');
 
@@ -584,6 +583,18 @@ function run_tests() {
     return
   }
 
+  perft_unit_tests(console);
+  checkmate_unit_tests(console);
+  stalemate_unit_tests(console);
+
+  var finish = new Date;
+  s = (finish - start) / 1000;
+  console.innerHTML += 'Total Time: ' + s + ' secs<br />';
+}
+
+function perft_unit_tests(console) {
+  var chess = new Chess;
+  var start = new Date;
   var perfts = [
     {fen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1', 
       depth: 3, nodes: 97862},
@@ -595,15 +606,46 @@ function run_tests() {
       depth: 3, nodes: 23509},
   ];
 
-
+  var total_nodes = 0;
   for (var i = 0; i < perfts.length; i++) {
     chess.load(perfts[i].fen);
     var nodes = chess.perft(perfts[i].depth);
     s = 'Perft Test #' + i + ': ' + perfts[i].fen + ' - ' + nodes + ' : ';
     s += (nodes != perfts[i].nodes) ? 'FAILED!' : 'PASSED!';
-    console.innerHTML += s + "<br />";
+    total_nodes += nodes;
+    console.innerHTML += s + '<br />';
+  }
+  var finish = new Date;
+  s = (finish - start) / 1000 
+  console.innerHTML += '--> Perft Time: ' + s + ' secs ' +
+                       '(' + Math.floor(total_nodes / s) + ' NPS) <br /><br />';
+}
+
+function checkmate_unit_tests(console) {
+  var chess = new Chess;
+  var start = new Date;
+  var checkmates = [
+    '8/5r2/4K1q1/4p3/3k4/8/8/8 w - - 0 7',
+    '4r2r/p6p/1pnN2p1/kQp5/3pPq2/3P4/PPP3PP/R5K1 b - - 0 2',
+    'r3k2r/ppp2p1p/2n1p1p1/8/2B2P1q/2NPb1n1/PP4PP/R2Q3K w kq - 0 8',
+    '8/6R1/pp1r3p/6p1/P3R1Pk/1P4P1/7K/8 b - - 0 4',
+  ]
+
+  for (var i = 0; i < checkmates.length; i++) {
+    chess.load(checkmates[i]);
+    s = 'Checkmate Test #' + i + ': ' + checkmates[i] + ' : ';
+    s += (chess.in_checkmate()) ? 'PASSED!' : 'FAILED!';
+    console.innerHTML += s + '<br />';
   }
 
+  var finish = new Date;
+  s = (finish - start) / 1000 
+  console.innerHTML += '--> Checkmate Time: ' + s + ' secs <br /><br />';
+}
+
+function stalemate_unit_tests(console) {
+  var chess = new Chess;
+  var start = new Date;
   var stalemates = [
     '1R6/8/8/8/8/8/7R/k6K b - - 0 1',
     '8/8/5k2/p4p1p/P4K1P/1r6/8/8 w - - 0 2',
@@ -613,21 +655,9 @@ function run_tests() {
     chess.load(stalemates[i]);
     s = 'Stalemate Test #' + i + ': ' + stalemates[i] + ' : ';
     s += (chess.in_stalemate()) ? 'PASSED!' : 'FAILED!';
-    console.innerHTML += s + "<br />";
-  }
-
-  var checkmates = [
-    '8/5r2/4K1q1/4p3/3k4/8/8/8 w - - 0 7',
-    '4r2r/p6p/1pnN2p1/kQp5/3pPq2/3P4/PPP3PP/R5K1 b - - 0 2',
-    'r3k2r/ppp2p1p/2n1p1p1/8/2B2P1q/2NPb1n1/PP4PP/R2Q3K w kq - 0 8',
-    '8/6R1/pp1r3p/6p1/P3R1Pk/1P4P1/7K/8 b - - 0 4',
-  ]
-  for (var i = 0; i < checkmates.length; i++) {
-    chess.load(checkmates[i]);
-    s = 'Checkmate Test #' + i + ': ' + checkmates[i] + ' : ';
-    s += (chess.in_checkmate()) ? 'PASSED!' : 'FAILED!';
-    console.innerHTML += s + "<br />";
+    console.innerHTML += s + '<br />';
   }
   var finish = new Date;
-  console.innerHTML += s + "<br />";
+  s = (finish - start) / 1000 
+  console.innerHTML += '--> Stalemate Time: ' + s + ' secs <br /><br />';
 }
