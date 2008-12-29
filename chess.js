@@ -164,10 +164,9 @@ Chess.prototype.load = function(fen) {
 }
 
 
-Chess.prototype.moves = function() {
+Chess.prototype.moves = function(settings) {
 
   function add_move(board, moves, from, to, flags) {
-
     /* if pawn promotion */
     if (board[from].type == Chess.PAWN && 
        (rank(to) == Chess.RANK_8 || rank(to) == Chess.RANK_1)) {
@@ -195,6 +194,68 @@ Chess.prototype.moves = function() {
 
       moves.push(move);
     }
+  }
+
+  /* convert a move from algebraic coordinates to algebraic notation */
+  function to_string(chess, move) {
+    var output = '';
+
+    if (move.flags.indexOf(Chess.FLAGS.KSIDE_CASTLE) > -1) {
+      output = 'O-O';
+    } else if (move.flags.indexOf(Chess.FLAGS.QSIDE_CASTLE) > -1) {
+      output = 'O-O-O';
+    } else {
+      var moves = chess.moves({legal: false, algebraic: false});
+      var indicator = '';
+
+      for (var i = 0; i < moves.length; i++) {
+        var color = chess.color;
+        if (move.from != moves[i].from && 
+            move.to == moves[i].to &&
+            move.old_piece.type == moves[i].old_piece.type) {
+          chess.make_move(moves[i]);
+
+          if (!chess.king_attacked(color)) {
+            if (rank(move.from) == rank(moves[i].from)) {
+              indicator = algebraic(move.from)[0];
+            } else if (file(move.from) == file(moves[i].from)) {
+              indicator = algebraic(move.from)[1];
+            }
+          }
+          chess.undo_move();
+        }
+      }
+
+      if (move.old_piece.type != Chess.PAWN) {
+        output += move.old_piece.type.toUpperCase() + indicator;
+      }
+
+      if (move.flags.indexOf(Chess.FLAGS.CAPTURE) > -1 &&
+          move.flags.indexOf(Chess.FLAGS.EP_CAPTURE)) {
+        if (move.old_piece.type == Chess.PAWN) {
+          output += algebraic(move.from)[0];
+        }
+        output += 'x';    
+      }
+
+      output += algebraic(move.to);
+
+      if (move.flags.indexOf(Chess.FLAGS.PROMOTION) > -1) {
+        output += '=' + move.new_piece.type.toUpperCase();
+      }
+    }
+
+    chess.make_move(move);
+    if (chess.in_check()) {
+      if (chess.in_checkmate()) {
+        output += '#';
+      } else {
+        output += '+';
+      }
+    }
+    chess.undo_move();
+
+    return output;
   }
 
   var moves = [];
@@ -257,7 +318,7 @@ Chess.prototype.moves = function() {
     }
   }
 
-  /* castling */
+  /* king-side castling */
   if (this.castling[this.turn].indexOf(Chess.FLAGS.KSIDE_CASTLE) > -1) {
     var castling_from = this.kings[this.turn];
     var castling_to = castling_from + 2;
@@ -272,6 +333,7 @@ Chess.prototype.moves = function() {
     }
   }
 
+  /* queen-side castling */
   if (this.castling[this.turn].indexOf(Chess.FLAGS.QSIDE_CASTLE) > -1) {
     var castling_from = this.kings[this.turn];
     var castling_to = castling_from - 2;
@@ -287,7 +349,36 @@ Chess.prototype.moves = function() {
     }
   }
 
-  return moves;
+  /* if no parameters passed in, assume legal w/ algebraic moves */
+  if (typeof(settings) == 'undefined') {
+    settings = {legal: true, algebraic: true};
+  }
+
+  /* add string descriptions of the move, e.g.: Nxf6+, e5, Qd3#, or O-O-O */
+  if (settings.algebraic == true) {
+    for (var i = 0; i < moves.length; i++) {
+      moves[i].move = to_string(this, moves[i]);
+    }
+  }
+
+  /* return all pseudo-legal moves (this includes moves that allow the king 
+   * to be captured
+   */
+  if (settings.legal != null && settings.legal == false) {
+    return moves;
+  }
+
+  /* filter out illegal moves */
+  var legal_moves = [];
+  for (var i = 0; i < moves.length; i++) {
+    this.make_move(moves[i]);
+    if (!this.king_attacked(color)) {
+      legal_moves.push(moves[i]);
+    }
+    this.undo_move();
+  }
+
+  return legal_moves;
 }
 
 Chess.prototype.attacked = function(color, square) {
@@ -339,44 +430,21 @@ Chess.prototype.in_check = function() {
 }
 
 Chess.prototype.in_checkmate = function() {
-  var color = this.turn;
   if (!this.in_check()) {
     return false;
   }
 
-  var moves = this.moves();
-  for (var i = 0; i < moves.length; i++) {
-    this.make_move(moves[i]);
-    if (!this.king_attacked(color)) {
-      this.undo_move();
-      return false;
-    } else {
-      this.undo_move();
-    }
-  }
-
-  return true;
+  var moves = this.moves({legal: true, algebraic: false});
+  return moves.length == 0;
 }
 
 Chess.prototype.in_stalemate = function() {
-  var color = this.turn;
-
   if (this.in_check()) {
     return false;
   }
 
-  var moves = this.moves();
-  for (var i = 0; i < moves.length; i++) {
-    this.make_move(moves[i]);
-    if (!this.king_attacked(color)) {
-      this.undo_move();
-      return false;
-    } else {
-      this.undo_move();
-    }
-  }
-
-  return true;
+  var moves = this.moves({legal: true, algebraic: false});
+  return moves.length == 0;
 }
 
 Chess.prototype.push = function() {
@@ -495,55 +563,6 @@ Chess.prototype.undo_move = function() {
   this.history = old.history;
 }
 
-Chess.prototype.log_board = function() { 
-  s = '';
-  for (i = 0; i < 128; i++) {
-    if (this.board[i] != null) {
-      s += this.board[i].type;
-    } else {
-      s += '-';
-    }
-    if ((i + 1) & 0x88) {
-      console.log(s);
-      s = '';
-      i += 8;
-    }
-  }
-  return s;
-}
-
-Chess.prototype.log_moves = function() {
- var moves = this.moves();
- for (var i = 0; i < moves.length; i++) {
-   console.log(i + ', ' + algebraic(moves[i].from) + '-' + 
-               algebraic(moves[i].to) + '  ' + moves[i].flags);
-  }
-}
-
-Chess.prototype.perft = function(depth) {
-  var moves = this.moves()
-  var nodes = 0;
-  var color = this.turn;
-
-  for (var i = 0; i < moves.length; i++) {
-    this.make_move(moves[i]);
-    if (!this.king_attacked(color)) {
-      if (depth - 1 > 0) {
-        var child_nodes = this.perft(depth - 1);
-        nodes += child_nodes;
-        //console.log(depth + '-' + i + ' ' + algebraic(moves[i].from) + '-' +
-        //            algebraic(moves[i].to) + ', ' +
-        //            moves[i].new_piece.type + ' = ' + child_nodes);
-      } else {
-        nodes++;
-      }
-    }
-    this.undo_move();
-  }
-
-  return nodes;
-}
-
 /******************************************************************************
  * UTILIY FUNCTIONS
  *****************************************************************************/
@@ -572,92 +591,62 @@ function square_num(s) {
 }
 
 /******************************************************************************
- * UNIT TESTS
+ * DEBUGGING UTILITIES
  *****************************************************************************/
-function run_unit_tests() {
-  var start = new Date;
+Chess.prototype.log_board = function() { 
+  var console = document.getElementById('console');
+  var s = '';
+  for (var i = 0; i < 128; i++) {
+    if (this.board[i] != null) {
+      s += (this.board[i].color == Chess.WHITE) ? 
+        this.board[i].type.toUpperCase() : this.board[i].type.toLowerCase();
+    } else {
+      s += '-';
+    }
+    if ((i + 1) & 0x88) {
+      console.innerHTML += s + '<br />';
+      s = '';
+      i += 8;
+    }
+  }
+  return s;
+}
+
+Chess.prototype.log_moves = function(legal) {
   var console = document.getElementById('console');
 
-  if (console == null) {
-    alert('Can\'t locate console.  Aborting.');
-    return
+  if (typeof(legal) == 'undefined') {
+    var legal = true;
   }
-
-  perft_unit_tests(console);
-  checkmate_unit_tests(console);
-  stalemate_unit_tests(console);
-
-  var finish = new Date;
-  s = (finish - start) / 1000;
-  console.innerHTML += 'Total Time: ' + s + ' secs<br />';
+  var moves = this.moves({legal: legal, algebraic: true});
+  for (var i = 0; i < moves.length; i++) {
+    console.innerHTML += '#' + i + ' ' + moves[i].move + ' ' + 
+                         algebraic(moves[i].from) + '-' + 
+                         algebraic(moves[i].to) + '  ' + 
+                         moves[i].flags + '<br />';
+  }
 }
 
-function perft_unit_tests(console) {
-  var chess = new Chess;
-  var start = new Date;
-  var perfts = [
-    {fen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1', 
-      depth: 3, nodes: 97862},
-    {fen: '8/PPP4k/8/8/8/8/4Kppp/8 w - - 0 1',
-      depth: 4, nodes: 89363},
-    {fen: '8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1',
-      depth: 4, nodes: 43238},
-    {fen: 'rnbqkbnr/p3pppp/2p5/1pPp4/3P4/8/PP2PPPP/RNBQKBNR w KQkq b6 0 4',
-      depth: 3, nodes: 23509},
-  ];
+Chess.prototype.perft = function(depth) {
+  var moves = this.moves({legal: false, algebraic: false})
+  var nodes = 0;
+  var color = this.turn;
 
-  var total_nodes = 0;
-  for (var i = 0; i < perfts.length; i++) {
-    chess.load(perfts[i].fen);
-    var nodes = chess.perft(perfts[i].depth);
-    s = 'Perft Test #' + i + ': ' + perfts[i].fen + ' - ' + nodes + ' : ';
-    s += (nodes != perfts[i].nodes) ? 'FAILED!' : 'PASSED!';
-    total_nodes += nodes;
-    console.innerHTML += s + '<br />';
-  }
-  var finish = new Date;
-  s = (finish - start) / 1000 
-  console.innerHTML += '--> Perft Time: ' + s + ' secs ' +
-                       '(' + Math.floor(total_nodes / s) + ' NPS) <br /><br />';
-}
-
-function checkmate_unit_tests(console) {
-  var chess = new Chess;
-  var start = new Date;
-  var checkmates = [
-    '8/5r2/4K1q1/4p3/3k4/8/8/8 w - - 0 7',
-    '4r2r/p6p/1pnN2p1/kQp5/3pPq2/3P4/PPP3PP/R5K1 b - - 0 2',
-    'r3k2r/ppp2p1p/2n1p1p1/8/2B2P1q/2NPb1n1/PP4PP/R2Q3K w kq - 0 8',
-    '8/6R1/pp1r3p/6p1/P3R1Pk/1P4P1/7K/8 b - - 0 4',
-  ]
-
-  for (var i = 0; i < checkmates.length; i++) {
-    chess.load(checkmates[i]);
-    s = 'Checkmate Test #' + i + ': ' + checkmates[i] + ' : ';
-    s += (chess.in_checkmate()) ? 'PASSED!' : 'FAILED!';
-    console.innerHTML += s + '<br />';
+  for (var i = 0; i < moves.length; i++) {
+    this.make_move(moves[i]);
+    if (!this.king_attacked(color)) {
+      if (depth - 1 > 0) {
+        var child_nodes = this.perft(depth - 1);
+        nodes += child_nodes;
+        //console.log(depth + '-' + i + ' ' + algebraic(moves[i].from) + '-' +
+        //            algebraic(moves[i].to) + ', ' +
+        //            moves[i].new_piece.type + ' = ' + child_nodes);
+      } else {
+        nodes++;
+      }
+    }
+    this.undo_move();
   }
 
-  var finish = new Date;
-  s = (finish - start) / 1000 
-  console.innerHTML += '--> Checkmate Time: ' + s + ' secs <br /><br />';
-}
-
-function stalemate_unit_tests(console) {
-  var chess = new Chess;
-  var start = new Date;
-  var stalemates = [
-    '1R6/8/8/8/8/8/7R/k6K b - - 0 1',
-    '8/8/5k2/p4p1p/P4K1P/1r6/8/8 w - - 0 2',
-  ];
-
-  for (var i = 0; i < stalemates.length; i++) {
-    chess.load(stalemates[i]);
-    s = 'Stalemate Test #' + i + ': ' + stalemates[i] + ' : ';
-    s += (chess.in_stalemate()) ? 'PASSED!' : 'FAILED!';
-    console.innerHTML += s + '<br />';
-  }
-  var finish = new Date;
-  s = (finish - start) / 1000 
-  console.innerHTML += '--> Stalemate Time: ' + s + ' secs <br /><br />';
+  return nodes;
 }
