@@ -23,6 +23,7 @@ function run_unit_tests() {
   stalemate_unit_tests();
   algebraic_notation_tests();
   get_and_put_tests();
+  fen_tests();
 
   var finish = new Date;
   var diff = (finish - start) / 1000;
@@ -201,5 +202,28 @@ function get_and_put_tests() {
   var finish = new Date;
   var diff = (finish - start) / 1000;
   log('--> Get/Put Time: ' + diff + ' secs');
+  log('');
+}
+
+function fen_tests() {
+  var chess = new Chess;
+  var start = new Date;
+  var positions = [
+    '8/8/8/8/8/8/8/8 w - - 0 1',
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
+    '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQKBN1 b - - 1 2',
+  ];
+
+  for (var i = 0; i < positions.length; i++) {
+    chess.load(positions[i]);
+    var s = 'FEN Test #' + i + ': ' + positions[i] + ' : ';
+    s += (chess.fen() == positions[i]) ? 'PASSED!' : 'FAILED!';
+    //s += chess.fen();
+    log(s);
+  }
+  var finish = new Date;
+  var diff = (finish - start) / 1000;
+  log('--> FEN Time: ' + diff + ' secs');
   log('');
 }

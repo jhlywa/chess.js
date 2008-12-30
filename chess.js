@@ -28,6 +28,8 @@
 Chess.BLACK = 'b';
 Chess.WHITE = 'w';
 
+Chess.EMPTY = -1;
+
 Chess.PAWN = 'p';
 Chess.KNIGHT = 'n';
 Chess.BISHOP = 'b';
@@ -134,10 +136,10 @@ function Chess(fen) {
 
 Chess.prototype.clear = function() {
   this.board = new Array(128);
-  this.kings = {w: -1, b: -1};
+  this.kings = {w: Chess.EMPTY, b: Chess.EMPTY};
   this.turn = '';
   this.castling = {w: '', b: ''};
-  this.ep_square = -1;
+  this.ep_square = Chess.EMPTY;
   this.half_moves = 0;
   this.move_number = 0;
   this.history = [];
@@ -188,6 +190,53 @@ Chess.prototype.load = function(fen) {
   this.ep_square = (tokens[3] == '-') ? -1 : square_num(tokens[3]);
   this.half_moves = parseInt(tokens[4], 10);
   this.move_number = parseInt(tokens[5], 10);
+}
+
+Chess.prototype.fen = function() {
+
+  var empty = 0;
+  var output = '';
+
+  for (var i = Chess.SQUARES.a8; i <= Chess.SQUARES.h1; i++) {
+    if (this.board[i] == null) {
+      empty++;
+    } else {
+      if (empty > 0) {
+        output += empty;
+        empty = 0;
+      } 
+      var color = this.board[i].color;
+      var piece = this.board[i].type;
+
+      output += (color == Chess.WHITE) ? 
+               piece.toUpperCase() : piece.toLowerCase();
+    }
+
+    if ((i + 1) & 0x88) {
+      if (empty > 0) {
+        output += empty;
+      }
+
+      if (i != Chess.SQUARES.h1) {
+        output += '/';
+      }
+
+      empty = 0;
+      i += 8;
+    }
+  }
+
+  var castling = this.castling.w.toUpperCase() + this.castling.b.toLowerCase();
+  if (castling == '') {
+    castling = '-';
+  }
+
+  var ep_square = (this.ep_square == Chess.EMPTY) ? '-' : algebraic(this.ep_square);
+
+  output += ' ' + this.turn + ' ' + castling + ' ' + ep_square + 
+           ' ' + this.half_moves + ' ' + this.move_number;
+
+  return output;
 }
 
 Chess.prototype.get = function(square) {
@@ -577,7 +626,7 @@ Chess.prototype.make_move = function(move) {
       this.ep_square = move.to + 16;
     }
   } else {
-    this.ep_square = -1;
+    this.ep_square = Chess.EMPTY;
   }
 
   /* reset the 50 move counter if a pawn is moved or a piece is captured */
