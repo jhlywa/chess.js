@@ -22,6 +22,7 @@ function run_unit_tests() {
   checkmate_unit_tests();
   stalemate_unit_tests();
   algebraic_notation_tests();
+  get_and_put_tests();
 
   var finish = new Date;
   var diff = (finish - start) / 1000;
@@ -53,7 +54,7 @@ function perft_unit_tests() {
     log(s);
   }
   var finish = new Date;
-  var diff = (finish - start) / 1000 
+  var diff = (finish - start) / 1000;
 
   log('--> Perft Time: ' + diff + ' secs ' + '(' + Math.floor(total_nodes / diff) + ' NPS)');
   log('');
@@ -77,7 +78,7 @@ function checkmate_unit_tests() {
   }
 
   var finish = new Date;
-  var diff = (finish - start) / 1000 
+  var diff = (finish - start) / 1000;
   log('--> Checkmate Time: ' + diff + ' secs');
   log('');
 }
@@ -97,7 +98,7 @@ function stalemate_unit_tests() {
     log(s);
   }
   var finish = new Date;
-  var diff = (finish - start) / 1000 
+  var diff = (finish - start) / 1000;
   log('--> Stalemate Time: ' + diff + ' secs');
   log('');
 }
@@ -152,7 +153,53 @@ function algebraic_notation_tests() {
   }
 
   var finish = new Date;
-  var diff = (finish - start) / 1000 
+  var diff = (finish - start) / 1000;
   log('--> Algebraic Notation Time: ' + diff + ' secs');
+  log('');
+}
+
+function get_and_put_tests() {
+  var chess = new Chess;
+  var start = new Date;
+  var passed = true;
+  var positions = [
+    {fen: '8/8/8/8/8/8/8/8 w - - 0 1',
+     pieces: {a7: 'P', b7: 'p', c7: 'N', d7: 'n', e7: 'B', f7: 'b', g7: 'R',
+              h7: 'r', a6: 'Q', b6: 'q', c6: 'K', d6: 'k'}},
+  ];
+
+  for (var i = 0; i < positions.length; i++) {
+    passed = true;
+    chess.load(positions[i].fen);
+    var s = 'Get/Put Test #' + i + ' : ';
+
+    /* places the pieces */
+    for (var square in positions[i].pieces) {
+      chess.put(positions[i].pieces[square] + '@' + square);
+    }
+
+    /* iterate over every square to make sure get returns the proper
+     * piece values/color 
+     */
+    for (var square in Chess.SQUARES) {
+      if (!(square in positions[i].pieces)) {
+        if (chess.get(square) != null) {
+          passed = false;
+          break;
+        }
+      } else {
+        if (chess.get(square) != positions[i].pieces[square]) {
+          passed = false;
+          break;
+        }
+      }
+    }
+    s += passed ? 'PASSED!' : 'FAILED!';
+
+    log(s);
+  }
+  var finish = new Date;
+  var diff = (finish - start) / 1000;
+  log('--> Get/Put Time: ' + diff + ' secs');
   log('');
 }

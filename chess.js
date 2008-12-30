@@ -106,23 +106,23 @@ Chess.RANK_7 = 1;
 Chess.RANK_8 = 0;
 
 Chess.SQUARES = {
-  A8:   0, B8:   1, C8:   2, D8:   3, E8:   4, F8:   5, G8:   6, H8:   7,
-  A7:  16, B7:  17, C7:  18, D7:  19, E7:  20, F7:  21, G7:  22, H7:  23,
-  A6:  32, B6:  33, C6:  34, D6:  35, E6:  36, F6:  37, G6:  38, H6:  39,
-  A5:  48, B5:  49, C5:  50, D5:  51, E5:  52, F5:  53, G5:  54, H5:  55,
-  A4:  64, B4:  65, C4:  66, D4:  67, E4:  68, F4:  69, G4:  70, H4:  71,
-  A3:  80, B3:  81, C3:  82, D3:  83, E3:  84, F3:  85, G3:  86, H3:  87,
-  A2:  96, B2:  97, C2:  98, D2:  99, E2: 100, F2: 101, G2: 102, H2: 103,
-  A1: 112, B1: 113, C1: 114, D1: 115, E1: 116, F1: 117, G1: 118, H1: 119
+  a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
+  a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
+  a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,
+  a5:  48, b5:  49, c5:  50, d5:  51, e5:  52, f5:  53, g5:  54, h5:  55,
+  a4:  64, b4:  65, c4:  66, d4:  67, e4:  68, f4:  69, g4:  70, h4:  71,
+  a3:  80, b3:  81, c3:  82, d3:  83, e3:  84, f3:  85, g3:  86, h3:  87,
+  a2:  96, b2:  97, c2:  98, d2:  99, e2: 100, f2: 101, g2: 102, h2: 103,
+  a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
 };
 
 Chess.ROOKS = {
   w: [
-     {square: Chess.SQUARES.A1, flag: Chess.FLAGS.QSIDE_CASTLE},
-     {square: Chess.SQUARES.H1, flag: Chess.FLAGS.KSIDE_CASTLE}],
+     {square: Chess.SQUARES.a1, flag: Chess.FLAGS.QSIDE_CASTLE},
+     {square: Chess.SQUARES.h1, flag: Chess.FLAGS.KSIDE_CASTLE}],
   b: [
-     {square: Chess.SQUARES.A8, flag: Chess.FLAGS.QSIDE_CASTLE},
-     {square: Chess.SQUARES.H8, flag: Chess.FLAGS.KSIDE_CASTLE}],
+     {square: Chess.SQUARES.a8, flag: Chess.FLAGS.QSIDE_CASTLE},
+     {square: Chess.SQUARES.h8, flag: Chess.FLAGS.KSIDE_CASTLE}],
 };
 
 function Chess(fen) {
@@ -150,15 +150,15 @@ Chess.prototype.load = function(fen) {
 
   this.clear();
 
-  for (i = 0; i < position.length; i++) {
-    piece = position.charAt(i);
+  for (var i = 0; i < position.length; i++) {
+    var piece = position.charAt(i);
 
     if (piece == '/') {
       square += 8;
     } else if (is_digit(piece)) {
       square += parseInt(piece, 10); 
     } else {
-      color = (piece < 'a') ? Chess.WHITE : Chess.BLACK;
+      var color = (piece < 'a') ? Chess.WHITE : Chess.BLACK;
       piece = piece.toLowerCase();
       this.board[square] = {type: piece, color: color}; 
 
@@ -190,6 +190,23 @@ Chess.prototype.load = function(fen) {
   this.move_number = parseInt(tokens[5], 10);
 }
 
+Chess.prototype.get = function(square) {
+  var piece = this.board[Chess.SQUARES[square]];
+  return (piece == null) ? null
+          : (piece.color == Chess.WHITE) ?
+             piece.type.toUpperCase() : piece.type.toLowerCase();
+}
+
+Chess.prototype.put = function(piece_square) {
+  var data = piece_square.split('@');
+  var piece = data[0];
+  var square = Chess.SQUARES[data[1]];
+  var color = (piece < 'a') ? Chess.WHITE : Chess.BLACK;
+  this.board[square] = {type: piece, color: color};
+  if (piece.toLowerCase() == Chess.KING) {
+    this.kings[color] = square;
+  }
+}
 
 Chess.prototype.moves = function(settings) {
 
