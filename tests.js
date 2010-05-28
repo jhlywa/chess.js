@@ -141,7 +141,11 @@ function algebraic_notation_tests() {
              'Qf5', 'Qg4', 'Qh5', 'Qg3', 'Qe2', 'Qd1', 'Qe3', 'Qd3', 'Na4',
              'Nb5', 'Ne2', 'Nd1', 'Nb1', 'Nc6', 'Ng4', 'Nd3', 'Nc4', 'd6',
              'O-O', 'O-O-O']},
-  ];
+    {fen: 'k7/8/K7/8/3n3n/5R2/3n4/8 b - - 0 1',
+     moves: ['N2xf3', 'Nhxf3', 'Nd4xf3', 'N2b3', 'Nc4', 'Ne4', 'Nf1', 'Nb1',
+             'Nhf5', 'Ng6', 'Ng2', 'Nb5', 'Nc6', 'Ne6', 'Ndf5', 'Ne2', 'Nc2',
+             'N4b3', 'Kb8']},
+    ];
 
   for (var i = 0; i < positions.length; i++) { 
     var s = 'Algebraic Notation Test #' + i + ': ' + positions[i].fen + ' : ';

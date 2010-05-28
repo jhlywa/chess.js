@@ -298,29 +298,10 @@ Chess.prototype.moves = function(settings) {
     } else if (move.flags.indexOf(Chess.FLAGS.QSIDE_CASTLE) > -1) {
       output = 'O-O-O';
     } else {
-      var moves = chess.moves({legal: false, algebraic: false});
-      var indicator = '';
-
-      for (var i = 0; i < moves.length; i++) {
-        var color = chess.color;
-        if (move.from != moves[i].from && 
-            move.to == moves[i].to &&
-            move.old_piece.type == moves[i].old_piece.type) {
-          chess.make_move(moves[i]);
-
-          if (!chess.king_attacked(color)) {
-            if (rank(move.from) == rank(moves[i].from)) {
-              indicator = algebraic(move.from)[0];
-            } else if (file(move.from) == file(moves[i].from)) {
-              indicator = algebraic(move.from)[1];
-            }
-          }
-          chess.undo_move();
-        }
-      }
+      var disambiguator = chess.get_disambiguator(move);
 
       if (move.old_piece.type != Chess.PAWN) {
-        output += move.old_piece.type.toUpperCase() + indicator;
+        output += move.old_piece.type.toUpperCase() + disambiguator;
       }
 
       if (move.flags.indexOf(Chess.FLAGS.CAPTURE) > -1 ||
@@ -679,6 +660,62 @@ Chess.prototype.undo_move = function() {
   this.history = old.history;
 }
 
+/* this function is used to uniquely identify ambiguous moves */ 
+Chess.prototype.get_disambiguator = function(move) {
+  moves = this.moves({legal: true, algebraic: false});
+
+  var from = move.from;
+  var to = move.to;
+  var piece = move.old_piece;
+
+  var ambiguities = 0;
+  var same_rank = 0;
+  var same_file = 0;
+
+  for (var i = 0; i < moves.length; i++) {
+    var ambig_from = moves[i].from;
+    var ambig_to = moves[i].to;
+    var ambig_piece = moves[i].old_piece;
+
+    /* if a move of the same piece type ends on the same to square, we'll 
+     * need to add a disambiguator to the algebraic notation
+     */
+    if (piece.type == ambig_piece.type && from != ambig_from && to == ambig_to) {
+      ambiguities++;
+
+      if (rank(from) == rank(ambig_from)) { 
+        same_rank++;
+      }
+
+      if (file(from) == file(ambig_from)) { 
+        same_file++;
+      }
+    }
+  }
+
+  if (ambiguities > 0) {
+    /* if there exists a similar moving piece on the same rank and file as
+     * the move in question, use the square as the disambiguator
+     */
+    if (same_rank > 0 && same_file > 0) {
+      return algebraic(from);
+    } 
+    /* if the moving piece rests on the same file, use the rank symbol as the 
+     * disambiguator
+     */
+    else if (same_file > 0) {
+      return algebraic(from).charAt(1);
+    } 
+    /* else use the file symbol */
+    else {
+      return algebraic(from).charAt(0);
+    }
+  }
+
+  return '';
+}
+
+
 /******************************************************************************
  * UTILIY FUNCTIONS
  *****************************************************************************/
@@ -705,6 +742,8 @@ function is_digit(c) {
 function square_num(s) {
   return ((8 - parseInt(s[1], 10)) * 16) + (s.charCodeAt(0) - 97)
 }
+
+
 
 /******************************************************************************
  * DEBUGGING UTILITIES
