@@ -107,6 +107,7 @@ function stalemate_unit_tests() {
 function algebraic_notation_tests() {
   var chess = new Chess;
   var start = new Date;
+  var passed = true;
   var positions = [
     {fen: '7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1', 
      moves: ['Rd8#', 'Re7', 'Rf7', 'Rg7', 'Rh7#', 'R7xd6', 'Rc7', 'Rb7', 'Ra7',
@@ -139,17 +140,16 @@ function algebraic_notation_tests() {
     chess.load(positions[i].fen);
     var moves = chess.moves();
     if (moves.length != positions[i].moves.length) {
-      s += 'FAILED!';
+      passed = false;
     } else {
       for (var j = 0; j < moves.length; j++) {
-        // log(positions[i].moves[j] + ' = ' + moves[j].move); 
-        if (positions[i].moves[j] != moves[j].move) { 
-          s += 'FAILED!';
+        if (positions[i].moves.indexOf(moves[j].move) == -1) {
+          passed = false;
           break; 
         } 
       } 
-      s += 'PASSED!';
     }
+    s += passed ? 'PASSED!' : 'FAILED!';
     log(s);
   }
 
