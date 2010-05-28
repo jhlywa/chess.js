@@ -323,8 +323,8 @@ Chess.prototype.moves = function(settings) {
         output += move.old_piece.type.toUpperCase() + indicator;
       }
 
-      if (move.flags.indexOf(Chess.FLAGS.CAPTURE) > -1 &&
-          move.flags.indexOf(Chess.FLAGS.EP_CAPTURE)) {
+      if (move.flags.indexOf(Chess.FLAGS.CAPTURE) > -1 ||
+          move.flags.indexOf(Chess.FLAGS.EP_CAPTURE) > -1) {
         if (move.old_piece.type == Chess.PAWN) {
           output += algebraic(move.from)[0];
         }
@@ -448,7 +448,7 @@ Chess.prototype.moves = function(settings) {
   }
 
   /* add string descriptions of the move, e.g.: Nxf6+, e5, Qd3#, or O-O-O */
-  if (settings.algebraic == true) {
+  if (settings.algebraic) {
     for (var i = 0; i < moves.length; i++) {
       moves[i].move = to_string(this, moves[i]);
     }
