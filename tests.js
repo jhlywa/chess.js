@@ -24,6 +24,7 @@ function run_unit_tests() {
   algebraic_notation_tests();
   get_and_put_tests();
   fen_tests();
+  make_move_tests();
 
   var finish = new Date;
   var diff = (finish - start) / 1000;
@@ -226,11 +227,50 @@ function fen_tests() {
     chess.load(positions[i]);
     var s = 'FEN Test #' + i + ': ' + positions[i] + ' : ';
     s += (chess.fen() == positions[i]) ? 'PASSED!' : 'FAILED!';
-    //s += chess.fen();
     log(s);
   }
   var finish = new Date;
   var diff = (finish - start) / 1000;
   log('--> FEN Time: ' + diff + ' secs');
+  log('');
+}
+
+function make_move_tests() {
+  var chess = new Chess;
+  var start = new Date;
+  var positions = [
+    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+     legal: true,
+     move: 'e4',
+     next: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'},
+    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+     legal: false,
+     move: 'e5'},
+    {fen: '7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1',
+     legal: true,
+     move: 'Rd8#',
+     next: '3R3k/8/3p2Q1/6Q1/2N1N3/8/8/3R3K b - - 1 1'},
+    {fen: 'rnbqkbnr/pp3ppp/2pp4/4pP2/4P3/8/PPPP2PP/RNBQKBNR w KQkq e6 0 1',
+     legal: true,
+     move: 'fxe6',
+     next: 'rnbqkbnr/pp3ppp/2ppP3/8/4P3/8/PPPP2PP/RNBQKBNR b KQkq - 0 1'}
+  ];
+
+  for (var i = 0; i < positions.length; i++) {
+    chess.load(positions[i].fen);
+    var s = 'Make Move Test #' + i + ': ' + positions[i].fen + 
+            ' (' + positions[i].move + ' ' + positions[i].legal + ') : ';
+    result = chess.make_move(positions[i].move);
+    if (positions[i].legal) {
+      s += (result && chess.fen() == positions[i].next) ? 'PASSED!' : 'FAILED!';
+    } else {
+      s += (!result) ? 'PASSED!' : 'FAILED!';
+    }
+
+    log(s);
+  }
+  var finish = new Date;
+  var diff = (finish - start) / 1000;
+  log('--> Make Move Time: ' + diff + ' secs');
   log('');
 }

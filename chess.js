@@ -554,6 +554,27 @@ Chess.prototype.push = function() {
 }
 
 Chess.prototype.make_move = function(move) {
+
+  /* make_move either takes a move object (higher performance) or a string in
+   * algebraic notation (slower, but more human-friendly)
+   */
+  if (typeof(move) == 'string') {
+    moves = this.moves();
+
+    /* convert the string to a move object */
+    for (i = 0; i < moves.length; i++) {
+      if (move == moves[i].move) {
+        move = moves[i];
+        break;
+      }
+    }
+
+    /* failed to find move */
+    if (i == moves.length) {
+      return false;
+    }
+  }
+
   var opponent_color = swap_color(this.turn);
   this.push();
 
@@ -642,6 +663,8 @@ Chess.prototype.make_move = function(move) {
     this.move_number++;
   }
   this.turn = swap_color(this.turn);
+
+  return true;
 }
 
 Chess.prototype.undo_move = function() {
