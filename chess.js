@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2008, Jeff Hlywa
+ * Copyright (c) 2010, Jeff Hlywa (jhlywa@gmail.com)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
