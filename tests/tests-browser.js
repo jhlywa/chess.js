@@ -155,7 +155,7 @@ function algebraic_notation_tests() {
       passed = false;
     } else {
       for (var j = 0; j < moves.length; j++) {
-        if (positions[i].moves.indexOf(moves[j].move) == -1) {
+        if (positions[i].moves.indexOf(moves[j]) == -1) {
           passed = false;
           break; 
         } 

@@ -293,49 +293,6 @@ var Chess = function(fen) {
       }
     }
 
-    /* convert a move from algebraic coordinates to algebraic notation */
-    function to_string(move) {
-      var output = '';
-
-      if (move.flags.indexOf(FLAGS.KSIDE_CASTLE) > -1) {
-        output = 'O-O';
-      } else if (move.flags.indexOf(FLAGS.QSIDE_CASTLE) > -1) {
-        output = 'O-O-O';
-      } else {
-        var disambiguator = get_disambiguator(move);
-
-        if (move.old_piece.type != PAWN) {
-          output += move.old_piece.type.toUpperCase() + disambiguator;
-        }
-
-        if (move.flags.indexOf(FLAGS.CAPTURE) > -1 ||
-            move.flags.indexOf(FLAGS.EP_CAPTURE) > -1) {
-          if (move.old_piece.type == PAWN) {
-            output += algebraic(move.from)[0];
-          }
-          output += 'x';    
-        }
-
-        output += algebraic(move.to);
-
-        if (move.flags.indexOf(FLAGS.PROMOTION) > -1) {
-          output += '=' + move.new_piece.type.toUpperCase();
-        }
-      }
-
-      make_move(move);
-      if (in_check()) {
-        if (in_checkmate()) {
-          output += '#';
-        } else {
-          output += '+';
-        }
-      }
-      undo_move();
-
-      return output;
-    }
-
     var moves = [];
     var color = turn;
     var opponent_color = swap_color(color);
@@ -429,14 +386,7 @@ var Chess = function(fen) {
 
     /* if no parameters passed in, assume legal w/ algebraic moves */
     if (typeof(settings) == 'undefined') {
-      settings = {legal: true, algebraic: true};
-    }
-
-    /* add string descriptions of the move, e.g.: Nxf6+, e5, Qd3#, or O-O-O */
-    if (settings.algebraic) {
-      for (var i = 0; i < moves.length; i++) {
-        moves[i].move = to_string(moves[i]);
-      }
+      settings = {legal: true};
     }
 
     /* return all pseudo-legal moves (this includes moves that allow the king 
@@ -458,6 +408,51 @@ var Chess = function(fen) {
 
     return legal_moves;
   }
+
+  /* convert a move from 0x88 coordinates to Standard Algebraic Notation (SAN) */
+  function move_to_san(move) {
+    var output = '';
+
+    if (move.flags.indexOf(FLAGS.KSIDE_CASTLE) > -1) {
+      output = 'O-O';
+    } else if (move.flags.indexOf(FLAGS.QSIDE_CASTLE) > -1) {
+      output = 'O-O-O';
+    } else {
+      var disambiguator = get_disambiguator(move);
+
+      if (move.old_piece.type != PAWN) {
+        output += move.old_piece.type.toUpperCase() + disambiguator;
+      }
+
+      if (move.flags.indexOf(FLAGS.CAPTURE) > -1 ||
+          move.flags.indexOf(FLAGS.EP_CAPTURE) > -1) {
+        if (move.old_piece.type == PAWN) {
+          output += algebraic(move.from)[0];
+        }
+        output += 'x';    
+      }
+
+      output += algebraic(move.to);
+
+      if (move.flags.indexOf(FLAGS.PROMOTION) > -1) {
+        output += '=' + move.new_piece.type.toUpperCase();
+      }
+    }
+
+    make_move(move);
+    if (in_check()) {
+      if (in_checkmate()) {
+        output += '#';
+      } else {
+        output += '+';
+      }
+    }
+    undo_move();
+
+    return output;
+  }
+
+
 
   function attacked(color, square) {
     for (var i = 0; i < board.length; i++) {
@@ -499,6 +494,8 @@ var Chess = function(fen) {
     return false;
   }
 
+
+
   function king_attacked(color) {
     return attacked(swap_color(color), kings[color]);
   }
@@ -539,26 +536,6 @@ var Chess = function(fen) {
   }
 
   function make_move(move) {
-    /* make_move either takes a move object (higher performance) or a string in
-     * algebraic notation (slower, but more human-friendly)
-     */
-    if (typeof(move) == 'string') {
-      var moves = generate_moves();
-
-      /* convert the string to a move object */
-      for (i = 0; i < moves.length; i++) {
-        if (move == moves[i].move) {
-          move = moves[i];
-          break;
-        }
-      }
-
-      /* failed to find move */
-      if (i == moves.length) {
-        return false;
-      }
-    }
-
     var opponent_color = swap_color(turn);
     push();
 
@@ -665,7 +642,7 @@ var Chess = function(fen) {
 
   /* this function is used to uniquely identify ambiguous moves */ 
   function get_disambiguator(move) {
-    moves = generate_moves({legal: true, algebraic: false});
+    moves = generate_moves({legal: true});
 
     var from = move.from;
     var to = move.to;
@@ -786,7 +763,7 @@ var Chess = function(fen) {
   }
 
   function perft(depth) {
-    var moves = generate_moves({legal: false, algebraic: false})
+    var moves = generate_moves({legal: false})
     var nodes = 0;
     var color = turn;
 
@@ -815,7 +792,23 @@ var Chess = function(fen) {
     },
 
     moves: function(settings) {
-      return generate_moves(settings);
+      var ugly_moves = generate_moves({legal:true});
+      var moves = [];
+      for (i = 0; i < ugly_moves.length; i++) {
+
+        /* does the user want a full move object, or just SAN */
+        if (settings != undefined && 'verbose' in settings && settings.verbose) {
+          var move = ugly_moves[i];
+          move.san = move_to_san(move);
+          move.to = algebraic(move.to);
+          move.from = algebraic(move.from);
+          moves.push(move);
+        } else {
+          moves.push(move_to_san(ugly_moves[i]));
+        }
+      }
+
+      return moves;
     },
 
     in_check: function() {
@@ -834,14 +827,47 @@ var Chess = function(fen) {
       return generate_fen();
     },
 
-    move: function(move) {
+    move: function(from, to) {
+
+      /* from is either a string in SAN (eg "Nxb7+"), a square (eg "a3") or a
+       * move object
+       */
+
+      var move = null;
+      var moves = generate_moves();
+
+      if (typeof(from) == 'object') {
+        move = from;
+
+        /* if it's a move object, convert to/from coordinates to 0x88 integers */
+        if (typeof(move.from) == 'string') {
+          move.from = square_num(move.from)
+        }
+        if (typeof(from.to) == 'string') {
+          move.to = square_num(move.to)
+        }
+      } else {
+        /* convert the move string to a move object */
+        for (var i = 0; i < moves.length; i++) {
+          if (from == move_to_san(moves[i]) || 
+             (from == algebraic(moves[i].from) && to == algebraic(moves[i].to))) {
+            move = moves[i];
+            break;
+          }
+        }
+      }
+
+      /* failed to find move */
+      if (move == null) {
+        return false;
+      }
+
       return make_move(move);
     },
 
     undo: function() {
       undo_move();
     },
-
 
     clear: function() {
       return clear();
