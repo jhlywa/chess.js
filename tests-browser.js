@@ -10,7 +10,7 @@ function log(text, newline) {
 }
 
 function run_unit_tests() {
-  var start = new Date;
+  var start = new Date();
   var console = document.getElementById('console');
 
   if (console == null) {
@@ -26,15 +26,15 @@ function run_unit_tests() {
   fen_tests();
   make_move_tests();
 
-  var finish = new Date;
+  var finish = new Date();
   var diff = (finish - start) / 1000;
   log('Total Time: ' + diff + ' secs');
 }
 
 
 function perft_unit_tests() {
-  var chess = new Chess;
-  var start = new Date;
+  var chess = new Chess();
+  var start = new Date();
   var perfts = [
     {fen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1', 
       depth: 3, nodes: 97862},
@@ -55,7 +55,7 @@ function perft_unit_tests() {
     total_nodes += nodes;
     log(s);
   }
-  var finish = new Date;
+  var finish = new Date();
   var diff = (finish - start) / 1000;
 
   log('--> Perft Time: ' + diff + ' secs ' + '(' + Math.floor(total_nodes / diff) + ' NPS)');
@@ -63,8 +63,8 @@ function perft_unit_tests() {
 }
 
 function checkmate_unit_tests() {
-  var chess = new Chess;
-  var start = new Date;
+  var chess = new Chess();
+  var start = new Date();
   var checkmates = [
     '8/5r2/4K1q1/4p3/3k4/8/8/8 w - - 0 7',
     '4r2r/p6p/1pnN2p1/kQp5/3pPq2/3P4/PPP3PP/R5K1 b - - 0 2',
@@ -79,15 +79,15 @@ function checkmate_unit_tests() {
     log(s);
   }
 
-  var finish = new Date;
+  var finish = new Date();
   var diff = (finish - start) / 1000;
   log('--> Checkmate Time: ' + diff + ' secs');
   log('');
 }
 
 function stalemate_unit_tests() {
-  var chess = new Chess;
-  var start = new Date;
+  var chess = new Chess();
+  var start = new Date();
   var stalemates = [
     '1R6/8/8/8/8/8/7R/k6K b - - 0 1',
     '8/8/5k2/p4p1p/P4K1P/1r6/8/8 w - - 0 2',
@@ -99,15 +99,15 @@ function stalemate_unit_tests() {
     s += (chess.in_stalemate()) ? 'PASSED!' : 'FAILED!';
     log(s);
   }
-  var finish = new Date;
+  var finish = new Date();
   var diff = (finish - start) / 1000;
   log('--> Stalemate Time: ' + diff + ' secs');
   log('');
 }
 
 function algebraic_notation_tests() {
-  var chess = new Chess;
-  var start = new Date;
+  var chess = new Chess();
+  var start = new Date();
   var passed = true;
   var positions = [
     {fen: '7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1', 
@@ -165,15 +165,15 @@ function algebraic_notation_tests() {
     log(s);
   }
 
-  var finish = new Date;
+  var finish = new Date();
   var diff = (finish - start) / 1000;
   log('--> Algebraic Notation Time: ' + diff + ' secs');
   log('');
 }
 
 function get_and_put_tests() {
-  var chess = new Chess;
-  var start = new Date;
+  var chess = new Chess();
+  var start = new Date();
   var passed = true;
   var positions = [
     {fen: '8/8/8/8/8/8/8/8 w - - 0 1',
@@ -194,7 +194,7 @@ function get_and_put_tests() {
     /* iterate over every square to make sure get returns the proper
      * piece values/color 
      */
-    for (var square in Chess.SQUARES) {
+    for (var square in Chess().SQUARES) {
       if (!(square in positions[i].pieces)) {
         if (chess.get(square) != null) {
           passed = false;
@@ -211,15 +211,15 @@ function get_and_put_tests() {
 
     log(s);
   }
-  var finish = new Date;
+  var finish = new Date();
   var diff = (finish - start) / 1000;
   log('--> Get/Put Time: ' + diff + ' secs');
   log('');
 }
 
 function fen_tests() {
-  var chess = new Chess;
-  var start = new Date;
+  var chess = new Chess();
+  var start = new Date();
   var positions = [
     '8/8/8/8/8/8/8/8 w - - 0 1',
     'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -233,15 +233,15 @@ function fen_tests() {
     s += (chess.fen() == positions[i]) ? 'PASSED!' : 'FAILED!';
     log(s);
   }
-  var finish = new Date;
+  var finish = new Date();
   var diff = (finish - start) / 1000;
   log('--> FEN Time: ' + diff + ' secs');
   log('');
 }
 
 function make_move_tests() {
-  var chess = new Chess;
-  var start = new Date;
+  var chess = new Chess();
+  var start = new Date();
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
      legal: true,
@@ -273,7 +273,7 @@ function make_move_tests() {
 
     log(s);
   }
-  var finish = new Date;
+  var finish = new Date();
   var diff = (finish - start) / 1000;
   log('--> Make Move Time: ' + diff + ' secs');
   log('');
