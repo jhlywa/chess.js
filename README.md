@@ -21,7 +21,6 @@ Using chess.js in node.js is equally easy:
 
     var chess = new cl.Chess();
     ...
-
 ## Example Code
 The code below plays a complete game of chess ... randomly.
 
@@ -38,7 +37,6 @@ The code below plays a complete game of chess ... randomly.
       sys.puts('move: ' + move);
     }
 
----
 
 ## API
 
