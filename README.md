@@ -181,6 +181,14 @@ Returns true or false if the side to move has been checkmated.
     \\ -> true
 
 
+### .in_draw() 
+Returns true or false if the game is drawn.
+
+    var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
+    chess.in_draw();
+    \\ -> true
+
+
 ### .in_stalemate() 
 Returns true or false if the side to move has been stalemated.
 
@@ -190,5 +198,5 @@ Returns true or false if the side to move has been stalemated.
 
 ## TODO
 
-- add draw detection for insufficient material, draw by repetition, and 50-move rule.
+- add draw detection for insufficient material and draw by repetition
 - add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)] output

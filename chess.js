@@ -134,7 +134,7 @@ var Chess = function(fen) {
   var castling = {w: '', b: ''};
   var ep_square = EMPTY;
   var half_moves = 0;
-  var move_number = 0;
+  var move_number = 1;
   var history = [];
 
   /* if the user passes in a fen string, load it, else default to 
@@ -153,7 +153,7 @@ var Chess = function(fen) {
     castling = {w: '', b: ''};
     ep_square = EMPTY;
     half_moves = 0;
-    move_number = 0;
+    move_number = 1;
     history = [];
   }
 
@@ -522,6 +522,10 @@ var Chess = function(fen) {
     return moves.length == 0;
   }
 
+  function in_draw() {
+    return (half_moves >= 100 || in_stalemate());
+  }
+
   function push() {
     history.push({
       board: board.slice(),
@@ -614,7 +618,7 @@ var Chess = function(fen) {
     /* reset the 50 move counter if a pawn is moved or a piece is captured */
     if (move.old_piece.type == PAWN) {
       half_moves = 0;
-    } else if (move.flags.indexOf(FLAGS.CAPTURE) > -1) {
+    } else if (move.flags.indexOf(FLAGS.CAPTURE) > -1 || move.flags.indexOf(FLAGS.EP_CAPTURE) > -1) {
       half_moves = 0;
     } else {
       half_moves++;
@@ -821,6 +825,10 @@ var Chess = function(fen) {
 
     in_stalemate: function() {
       return in_stalemate();
+    },
+
+    in_draw: function() {
+      return in_draw();
     },
 
     fen: function() {
