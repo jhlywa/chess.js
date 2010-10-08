@@ -827,6 +827,10 @@ var Chess = function(fen) {
       return generate_fen();
     },
 
+    turn: function() {
+      return turn;
+    },
+
     move: function(from, to) {
 
       /* from is either a string in SAN (eg "Nxb7+"), a square (eg "a3") or a
