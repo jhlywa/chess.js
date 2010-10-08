@@ -22,7 +22,24 @@ Using chess.js in node.js is equally easy:
     var chess = new cl.Chess();
     ...
 
-  
+## Example Code
+The code below plays a complete game of chess ... randomly.
+
+    var sys = require('sys'),
+        cl =  require('./chess');
+
+    var chess = new cl.Chess();
+
+    while (!chess.in_checkmate() && !chess.in_draw()) {
+      sys.puts('position: ' + chess.fen());
+      var moves = chess.moves();
+      var move = moves[Math.floor(Math.random() * moves.length)];
+      chess.move(move);
+      sys.puts('move: ' + move);
+    }
+
+---
+
 ## API
 
 ### Constructor: Chess([ fen ])
@@ -36,10 +53,12 @@ in [Forsyth-Edwards Notation](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwar
     var chess = new Chess('r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - c3 0 19');
     
 
+
 ### .load(fen)
 The board is cleared and the FEN string is loaded.
 
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+
 
 
 ### .fen
@@ -65,12 +84,14 @@ Returns the current side to move.
     // -> 'b'
 
 
+
 ### .clear
 Clears the board.
 
     chess.clear();
     chess.fen();
     \\ -> '8/8/8/8/8/8/8/8  - - 0 0' <- empty board
+
 
 
 ### .put(piece_square)
@@ -82,6 +103,7 @@ Put a piece on square.  Lowercase pieces are black, uppercase pieces are white.
 
     chess.fen();
     // -> '8/8/8/p7/8/8/8/4Q3  - - 0 0'
+
 
 
 ### .get(square)
@@ -97,6 +119,7 @@ Returns the piece on the square:
     // -> 'Q'
     chess.get('a6');
     // -> null
+
 
 
 ### .move(move, [ to ])
@@ -123,6 +146,7 @@ Standard Algebraic Notation (SAN):
     \\ -> true
 
 
+
 ### .undo()
 Takeback the last half-move:
     
@@ -137,6 +161,7 @@ Takeback the last half-move:
     chess.undo();
     chess.fen();
     \\ -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+
 
 
 ### .moves([ options ])
@@ -165,12 +190,14 @@ The _flags_ field in verbose mode may contain one or more of the following value
 A flag of 'pc' would mean that a pawn captured a piece on the 8th rank and promoted.
 
 
+
 ### .in_check() 
 Returns true or false if the side to move is in check.
 
     var chess = new Chess('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
     chess.in_check();
     \\ -> true
+
 
 
 ### .in_checkmate() 
@@ -181,6 +208,7 @@ Returns true or false if the side to move has been checkmated.
     \\ -> true
 
 
+
 ### .in_draw() 
 Returns true or false if the game is drawn.
 
@@ -189,12 +217,15 @@ Returns true or false if the game is drawn.
     \\ -> true
 
 
+
 ### .in_stalemate() 
 Returns true or false if the side to move has been stalemated.
 
     var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
     chess.in_stalemate();
     \\ -> true
+
+
 
 ## TODO
 
