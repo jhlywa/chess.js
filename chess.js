@@ -583,7 +583,7 @@ var Chess = function(fen) {
       for (var i = 0; i < ROOKS[turn].length; i++) {
         if (move.from == ROOKS[turn][i].square) {
           castling[turn] = 
-            castling[turn].replace(ROOKS[turn][i].flag);
+            castling[turn].replace(ROOKS[turn][i].flag, '');
           break;
         }
       }
@@ -594,7 +594,7 @@ var Chess = function(fen) {
       for (var i = 0; i < ROOKS[opponent_color].length; i++) {
         if (move.to == ROOKS[opponent_color][i].square) {
           castling[opponent_color] = 
-            castling[opponent_color].replace(ROOKS[opponent_color][i].flag);
+            castling[opponent_color].replace(ROOKS[opponent_color][i].flag, '');
           break;
         }
       }
