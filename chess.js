@@ -732,40 +732,6 @@ var Chess = function(fen) {
   /******************************************************************************
    * DEBUGGING UTILITIES
    *****************************************************************************/
-  function log_board() { 
-    var console = document.getElementById('console');
-    var s = '';
-    for (var i = 0; i < 128; i++) {
-      if (board[i] != null) {
-        s += (board[i].color == WHITE) ? 
-          board[i].type.toUpperCase() : board[i].type.toLowerCase();
-      } else {
-        s += '-';
-      }
-      if ((i + 1) & 0x88) {
-        console.innerHTML += s + '<br />';
-        s = '';
-        i += 8;
-      }
-    }
-    return s;
-  }
-
-  function log_moves(legal) {
-    var console = document.getElementById('console');
-
-    if (typeof(legal) == 'undefined') {
-      var legal = true;
-    }
-    var moves = generate_moves({legal: legal, algebraic: true});
-    for (var i = 0; i < moves.length; i++) {
-      console.innerHTML += '#' + i + ' ' + moves[i].move + ' ' + 
-                           algebraic(moves[i].from) + '-' + 
-                           algebraic(moves[i].to) + '  ' + 
-                           moves[i].flags + '<br />';
-    }
-  }
-
   function perft(depth) {
     var moves = generate_moves({legal: false})
     var nodes = 0;
