@@ -509,7 +509,7 @@ var Chess = function(fen) {
       return false;
     }
 
-    var moves = generate_moves({legal: true, algebraic: false});
+    var moves = generate_moves();
     return moves.length == 0;
   }
 
@@ -518,7 +518,7 @@ var Chess = function(fen) {
       return false;
     }
 
-    var moves = generate_moves({legal: true, algebraic: false});
+    var moves = generate_moves();
     return moves.length == 0;
   }
 
@@ -646,7 +646,7 @@ var Chess = function(fen) {
 
   /* this function is used to uniquely identify ambiguous moves */ 
   function get_disambiguator(move) {
-    moves = generate_moves({legal: true});
+    moves = generate_moves();
 
     var from = move.from;
     var to = move.to;
@@ -762,7 +762,7 @@ var Chess = function(fen) {
     },
 
     moves: function(settings) {
-      var ugly_moves = generate_moves({legal:true});
+      var ugly_moves = generate_moves();
       var moves = [];
       for (i = 0; i < ugly_moves.length; i++) {
 
