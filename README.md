@@ -2,8 +2,7 @@
 
 chess.js is a Javascript chess library that is used for chess move generation/validation,
 piece placement/movement, and check/checkmate/stalemate detection - basically everything 
-but the AI.  It uses an [0x88 board representation](http://chessprogramming.wikispaces.com/0x88)
-internally to limit the number of conditionals branches during move generation.
+but the AI (don't worry, it's coming soon!).
 
 Using chess.js in a browser is straight-forward:
     
@@ -17,17 +16,17 @@ Using chess.js in a browser is straight-forward:
 
 Using chess.js in node.js is equally easy:
 
-    var cl = require('/chess.js')
+    var ch = require('/chess.js')
 
-    var chess = new cl.Chess();
+    var chess = new ch.Chess();
     ...
 ## Example Code
 The code below plays a complete game of chess ... randomly.
 
     var sys = require('sys'),
-        cl =  require('./chess');
+        ch =  require('./chess');
 
-    var chess = new cl.Chess();
+    var chess = new ch.Chess();
 
     while (!chess.in_checkmate() && !chess.in_draw()) {
       sys.puts('position: ' + chess.fen());
@@ -59,7 +58,7 @@ The board is cleared and the FEN string is loaded.
 
 
 
-### .fen
+### .fen()
 Returns the FEN string for the current position.
 
     var chess = new Chess();
@@ -70,25 +69,25 @@ Returns the FEN string for the current position.
     chess.move('f4');
 
     chess.fen();
-    \\ -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
+    // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
 
 
 
-### .turn
+### .clear()
+Clears the board.
+
+    chess.clear();
+    chess.fen();
+    // -> '8/8/8/8/8/8/8/8  - - 0 0' <- empty board
+
+
+
+### .turn()
 Returns the current side to move.
 
     chess.load('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1')
     chess.turn()
     // -> 'b'
-
-
-
-### .clear
-Clears the board.
-
-    chess.clear();
-    chess.fen();
-    \\ -> '8/8/8/8/8/8/8/8  - - 0 0' <- empty board
 
 
 
@@ -128,20 +127,20 @@ Standard Algebraic Notation (SAN):
     var chess = new Chess();
 
     chess.move('Nf3') 
-    \\ -> true
+    // -> true
 
     chess.move('nf6') // SAN is case sensitive!!
-    \\ -> false
+    // -> false
 
     chess.move('Nf6')
-    \\ -> true
+    // -> true
 
 .move may also be called with two parameters, a from square and a to square:
 
     var chess = new Chess();
 
     chess.move('g1', 'f3');
-    \\ -> true
+    // -> true
 
 
 
@@ -151,14 +150,14 @@ Takeback the last half-move:
     var chess = new Chess();
 
     chess.fen();
-    \\ -> 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    // -> 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
     chess.move('e4');
     chess.fen();
-    \\ -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+    // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
 
     chess.undo();
     chess.fen();
-    \\ -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+    // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
 
 
 
@@ -167,10 +166,10 @@ Returns a list of all legal moves from the current position.  The function be pa
 
     var chess = new Chess();
     chess.moves();
-    \\ -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4', 'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
+    // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4', 'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
 
     chess.moves({verbose:true});
-    \\ -> [{from: 'a2', to: 'a3', flags: '', new_piece: {type: 'p', color: 'w'}, old_piece: {type: 'p', color: 'w'}, captured_piece: undefined, san: 'a3'},,
+    // -> [{from: 'a2', to: 'a3', flags: '', new_piece: {type: 'p', color: 'w'}, old_piece: {type: 'p', color: 'w'}, captured_piece: undefined, san: 'a3'},,
            {from: 'a2', to: 'a4', flags: 'b', new_piece: {type: 'p', color: 'w'}, old_piece: {type: 'p', color: 'w'}, captured_piece: undefined, san: 'a4'},
            ...
            {from: 'g1', to: 'h3', flags: '', new_piece: {type: 'n', color: 'w'}, old_piece: {type: 'n', color: 'w'}, captured_piece: undefined, san: 'Nh3'},
@@ -194,7 +193,7 @@ Returns true or false if the side to move is in check.
 
     var chess = new Chess('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
     chess.in_check();
-    \\ -> true
+    // -> true
 
 
 
@@ -203,7 +202,7 @@ Returns true or false if the side to move has been checkmated.
 
     var chess = new Chess('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
     chess.in_checkmate();
-    \\ -> true
+    // -> true
 
 
 
@@ -212,7 +211,7 @@ Returns true or false if the game is drawn.
 
     var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
     chess.in_draw();
-    \\ -> true
+    // -> true
 
 
 
@@ -221,11 +220,12 @@ Returns true or false if the side to move has been stalemated.
 
     var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
     chess.in_stalemate();
-    \\ -> true
+    // -> true
 
 
 
 ## TODO
 
 - add draw detection for insufficient material and draw by repetition
-- add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)] output
+- add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)) output
+- add AI (basic alphabeta search w/ primitive position evaluation)
