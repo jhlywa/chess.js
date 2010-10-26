@@ -294,36 +294,36 @@ var Chess = function(fen) {
     }
 
     var moves = [];
-    var color = turn;
-    var opponent_color = swap_color(color);
+    var us = turn;
+    var them = swap_color(us);
     var second_rank = {b: RANK_7, w: RANK_2};
 
     for (var i = 0; i < board.length; i++) {
       piece = board[i];
-      if (piece == null || piece.color != color) {
+      if (piece == null || piece.color != us) {
         continue;
       }
 
       if (piece.type == PAWN) { 
         /* single square, non-capturing */
-        var square = i + PAWN_OFFSETS[color][0]; 
+        var square = i + PAWN_OFFSETS[us][0]; 
         if (board[square] == null) {
             add_move(board, moves, i, square, FLAGS.NORMAL);
 
           /* double square */
-          var square = i + PAWN_OFFSETS[color][1]; 
-          if (second_rank[color] == rank(i) && board[square] == null) {
+          var square = i + PAWN_OFFSETS[us][1]; 
+          if (second_rank[us] == rank(i) && board[square] == null) {
             add_move(board, moves, i, square, FLAGS.BIG_PAWN);
           }
         }
         
         /* pawn captures */
         for (j = 2; j < 4; j++) {
-          var square = i + PAWN_OFFSETS[color][j];
+          var square = i + PAWN_OFFSETS[us][j];
           if (square & 0x88) continue;
 
           if (board[square] != null && 
-              board[square].color == opponent_color) {
+              board[square].color == them) {
               add_move(board, moves, i, square, FLAGS.CAPTURE);
           } else if (square == ep_square) {
               add_move(board, moves, i, ep_square, FLAGS.EP_CAPTURE);
@@ -341,7 +341,7 @@ var Chess = function(fen) {
             if (board[square] == null) {
               add_move(board, moves, i, square, FLAGS.NORMAL);
             } else {
-              if (board[square].color == color) break;
+              if (board[square].color == us) break;
               add_move(board, moves, i, square, FLAGS.CAPTURE);
               break;
             }
@@ -354,32 +354,32 @@ var Chess = function(fen) {
     }
 
     /* king-side castling */
-    if (castling[turn].indexOf(FLAGS.KSIDE_CASTLE) > -1) {
-      var castling_from = kings[turn];
+    if (castling[us].indexOf(FLAGS.KSIDE_CASTLE) > -1) {
+      var castling_from = kings[us];
       var castling_to = castling_from + 2;
 
       if (board[castling_from + 1] == null &&
           board[castling_to]       == null &&
-          !attacked(opponent_color, kings[turn]) &&
-          !attacked(opponent_color, castling_from + 1) &&
-          !attacked(opponent_color, castling_to)) {
-        add_move(board, moves, kings[turn] , castling_to, 
+          !attacked(them, kings[us]) &&
+          !attacked(them, castling_from + 1) &&
+          !attacked(them, castling_to)) {
+        add_move(board, moves, kings[us] , castling_to, 
                  FLAGS.KSIDE_CASTLE);
       }
     }
 
     /* queen-side castling */
-    if (castling[turn].indexOf(FLAGS.QSIDE_CASTLE) > -1) {
-      var castling_from = kings[turn];
+    if (castling[us].indexOf(FLAGS.QSIDE_CASTLE) > -1) {
+      var castling_from = kings[us];
       var castling_to = castling_from - 2;
 
       if (board[castling_from - 1] == null &&
           board[castling_from - 2] == null &&
           board[castling_from - 3] == null &&
-          !attacked(opponent_color, kings[turn]) &&
-          !attacked(opponent_color, castling_from - 1) &&
-          !attacked(opponent_color, castling_to)) {
-        add_move(board, moves, kings[turn], castling_to, 
+          !attacked(them, kings[us]) &&
+          !attacked(them, castling_from - 1) &&
+          !attacked(them, castling_to)) {
+        add_move(board, moves, kings[us], castling_to, 
                  FLAGS.QSIDE_CASTLE);
       }
     }
@@ -400,7 +400,7 @@ var Chess = function(fen) {
     var legal_moves = [];
     for (var i = 0; i < moves.length; i++) {
       make_move(moves[i]);
-      if (!king_attacked(color)) {
+      if (!king_attacked(us)) {
         legal_moves.push(moves[i]);
       }
       undo_move();
@@ -540,7 +540,7 @@ var Chess = function(fen) {
   }
 
   function make_move(move) {
-    var opponent_color = swap_color(turn);
+    var them = swap_color(turn);
     push();
 
     board[move.to] = board[move.from];
@@ -594,11 +594,11 @@ var Chess = function(fen) {
     }
 
     /* turn off castling if we capture a rook */
-    if (castling[opponent_color] != '') {
-      for (var i = 0; i < ROOKS[opponent_color].length; i++) {
-        if (move.to == ROOKS[opponent_color][i].square) {
-          castling[opponent_color] = 
-            castling[opponent_color].replace(ROOKS[opponent_color][i].flag, '');
+    if (castling[them] != '') {
+      for (var i = 0; i < ROOKS[them].length; i++) {
+        if (move.to == ROOKS[them][i].square) {
+          castling[them] = 
+            castling[them].replace(ROOKS[them][i].flag, '');
           break;
         }
       }
