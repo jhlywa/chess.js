@@ -1,5 +1,5 @@
 /* 
- * Copyright (c) 2010, Jeff Hlywa (jhlywa@gmail.com)
+ * Copyright (c) 2011, Jeff Hlywa (jhlywa@gmail.com)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -140,7 +140,7 @@ var Chess = function(fen) {
   /* if the user passes in a fen string, load it, else default to 
    * starting position
    */
-  if (typeof(fen) == 'undefined') {
+  if (typeof fen == 'undefined') {
     load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
   } else {
     load(fen);
@@ -199,7 +199,7 @@ var Chess = function(fen) {
       castling.b += FLAGS.QSIDE_CASTLE;
     }
 
-    ep_square = (tokens[3] == '-') ? -1 : square_num(tokens[3]);
+    ep_square = (tokens[3] == '-') ? EMPTY : SQUARES[tokens[3]];
     half_moves = parseInt(tokens[4], 10);
     move_number = parseInt(tokens[5], 10);
   }
@@ -385,7 +385,7 @@ var Chess = function(fen) {
     }
 
     /* if no parameters passed in, assume legal w/ algebraic moves */
-    if (typeof(settings) == 'undefined') {
+    if (typeof settings == 'undefined') {
       settings = {legal: true};
     }
 
@@ -723,11 +723,6 @@ var Chess = function(fen) {
     return '0123456789'.indexOf(c) != -1
   }
 
-  function square_num(s) {
-    return ((8 - parseInt(s[1], 10)) * 16) + (s.charCodeAt(0) - 97)
-  }
-
-
 
   /******************************************************************************
    * DEBUGGING UTILITIES
@@ -743,9 +738,6 @@ var Chess = function(fen) {
         if (depth - 1 > 0) {
           var child_nodes = perft(depth - 1);
           nodes += child_nodes;
-          //console.log(depth + '-' + i + ' ' + algebraic(moves[i].from) + '-' +
-          //            algebraic(moves[i].to) + ', ' +
-          //            moves[i].new_piece.type + ' = ' + child_nodes);
         } else {
           nodes++;
         }
@@ -756,6 +748,10 @@ var Chess = function(fen) {
     return nodes;
   }
 
+
+  /******************************************************************************
+   * PUBLIC API
+   *****************************************************************************/
   return {
     load: function(fen) {
       return load(fen);
@@ -814,15 +810,15 @@ var Chess = function(fen) {
       var move = null;
       var moves = generate_moves();
 
-      if (typeof(from) == 'object') {
+      if (typeof from == 'object') {
         move = from;
 
         /* if it's a move object, convert to/from coordinates to 0x88 integers */
-        if (typeof(move.from) == 'string') {
-          move.from = square_num(move.from)
+        if (typeof move.from == 'string') {
+          move.from = SQUARES[move.from];
         }
-        if (typeof(from.to) == 'string') {
-          move.to = square_num(move.to)
+        if (typeof from.to == 'string') {
+          move.to = SQUARES[move.to];
         }
       } else {
         /* convert the move string to a move object */
