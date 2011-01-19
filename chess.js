@@ -268,7 +268,7 @@ var Chess = function(fen) {
       if (board[from].type == PAWN && 
          (rank(to) == RANK_8 || rank(to) == RANK_1)) {
           var pieces = [QUEEN, ROOK, BISHOP, KNIGHT];
-          for (var i = 0; i < pieces.length; i++) {
+          for (var i = 0, len = pieces.length; i < len; i++) {
             var promotion = {
               from: from,
               to: to,
@@ -298,7 +298,10 @@ var Chess = function(fen) {
     var them = swap_color(us);
     var second_rank = {b: RANK_7, w: RANK_2};
 
-    for (var i = 0; i < board.length; i++) {
+    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      /* did we run off the end of the board */
+      if (i & 0x88) { i += 7; continue; }
+
       piece = board[i];
       if (piece == null || piece.color != us) {
         continue;
@@ -330,7 +333,7 @@ var Chess = function(fen) {
           }
         }
       } else {
-        for (var j = 0; j < PIECE_OFFSETS[piece.type].length; j++) {
+        for (var j = 0, len = PIECE_OFFSETS[piece.type].length; j < len; j++) {
           var offset = PIECE_OFFSETS[piece.type][j];
           var square = i;
 
@@ -398,7 +401,7 @@ var Chess = function(fen) {
 
     /* filter out illegal moves */
     var legal_moves = [];
-    for (var i = 0; i < moves.length; i++) {
+    for (var i = 0, len = moves.length; i < len; i++) {
       make_move(moves[i]);
       if (!king_attacked(us)) {
         legal_moves.push(moves[i]);
@@ -455,7 +458,8 @@ var Chess = function(fen) {
 
 
   function attacked(color, square) {
-    for (var i = 0; i < board.length; i++) {
+    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      /* did we run off the end of the board */
       if (i & 0x88) { i += 7; continue; }
 
       /* if empty square or wrong color */
@@ -584,7 +588,7 @@ var Chess = function(fen) {
     /* turn off castling if we move a rook */
     if (castling[turn] != '') {
 
-      for (var i = 0; i < ROOKS[turn].length; i++) {
+      for (var i = 0, len = ROOKS[turn].length; i < len; i++) {
         if (move.from == ROOKS[turn][i].square) {
           castling[turn] = 
             castling[turn].replace(ROOKS[turn][i].flag, '');
@@ -595,7 +599,7 @@ var Chess = function(fen) {
 
     /* turn off castling if we capture a rook */
     if (castling[them] != '') {
-      for (var i = 0; i < ROOKS[them].length; i++) {
+      for (var i = 0, len = ROOKS[them].length; i < len; i++) {
         if (move.to == ROOKS[them][i].square) {
           castling[them] = 
             castling[them].replace(ROOKS[them][i].flag, '');
@@ -656,7 +660,7 @@ var Chess = function(fen) {
     var same_rank = 0;
     var same_file = 0;
 
-    for (var i = 0; i < moves.length; i++) {
+    for (var i = 0, len = moves.length; i < len; i++) {
       var ambig_from = moves[i].from;
       var ambig_to = moves[i].to;
       var ambig_piece = moves[i].old_piece;
@@ -732,7 +736,7 @@ var Chess = function(fen) {
     var nodes = 0;
     var color = turn;
 
-    for (var i = 0; i < moves.length; i++) {
+    for (var i = 0, len = moves.length; i < len; i++) {
       make_move(moves[i]);
       if (!king_attacked(color)) {
         if (depth - 1 > 0) {
@@ -760,7 +764,7 @@ var Chess = function(fen) {
     moves: function(settings) {
       var ugly_moves = generate_moves();
       var moves = [];
-      for (i = 0; i < ugly_moves.length; i++) {
+      for (var i = 0, len = ugly_moves.length; i < len; i++) {
 
         /* does the user want a full move object, or just SAN */
         if (settings != undefined && 'verbose' in settings && settings.verbose) {
@@ -822,7 +826,7 @@ var Chess = function(fen) {
         }
       } else {
         /* convert the move string to a move object */
-        for (var i = 0; i < moves.length; i++) {
+        for (var i = 0, len = moves.length; i < len; i++) {
           if (from == move_to_san(moves[i]) || 
              (from == algebraic(moves[i].from) && to == algebraic(moves[i].to))) {
             move = moves[i];
