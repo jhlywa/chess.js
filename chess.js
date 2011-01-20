@@ -794,7 +794,7 @@ var Chess = function(fen) {
       /* The internal representation of a chess move is in 0x88 format, and
        * not meant to be human-readable.  The code below converts the 0x88
        * square coordinates to algebraic coordinates.  It also prunes an
-       * unnecessary move keys resulting for a verbose call.
+       * unnecessary move keys resulting from a verbose call.
        */
 
       var ugly_moves = generate_moves();
@@ -803,11 +803,16 @@ var Chess = function(fen) {
       for (var i = 0, len = ugly_moves.length; i < len; i++) {
 
         /* does the user want a full move object (most likely not), or just SAN */
-        if (settings != undefined && 'verbose' in settings && settings.verbose) {
+        if (typeof settings != 'undefined' && 'verbose' in settings && settings.verbose) {
           var move = ugly_moves[i];
           move.san = move_to_san(move);
           move.to = algebraic(move.to);
           move.from = algebraic(move.from);
+
+          /* non-capturing moves should have no captured_piece key */
+          if (move.captured_piece == undefined) {
+            delete move.captured_piece;
+          }
 
           moves.push(move);
         } else {
@@ -853,12 +858,12 @@ var Chess = function(fen) {
        *
        * .move('a2', 'a3')  <- where both 'from' and 'to' are algebraic coordinates
        *
-       * .move({from: 'h7', <- where the 'from' is a move object (rarely called in this manner)
-       *        to: 'h6', 
-       *        flags: 'n', 
-       *        new_piece: { type: 'p', color: 'b' },
-       *        old_piece: { type: 'p', color: 'b' }, 
-       *        san: 'h6' })
+       * .move({ from: 'h7', <- where the 'from' is a move object (rarely called in this manner)
+       *         to: 'h6', 
+       *         flags: 'n', 
+       *         new_piece: { type: 'p', color: 'b' },
+       *         old_piece: { type: 'p', color: 'b' }, 
+       *         san: 'h6' })
        */
       var move = null;
       var moves = generate_moves();

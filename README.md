@@ -194,11 +194,15 @@ Returns a list of all legal moves from the current position.  The function be pa
     // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4', 'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
 
     chess.moves({verbose:true});
-    // -> [{from: 'a2', to: 'a3', flags: '', new_piece: {type: 'p', color: 'w'}, old_piece: {type: 'p', color: 'w'}, captured_piece: undefined, san: 'a3'},,
-           {from: 'a2', to: 'a4', flags: 'b', new_piece: {type: 'p', color: 'w'}, old_piece: {type: 'p', color: 'w'}, captured_piece: undefined, san: 'a4'},
+    // -> [{ from: 'a2', 
+             to: 'a3', 
+             flags: '', 
+             new_piece: { type: 'p', color: 'w' }, 
+             old_piece: { type: 'p', color: 'w' },
+             # a captured_piece key is included when flags contains the substring 'c'
+             san: 'a3' },
            ...
-           {from: 'g1', to: 'h3', flags: '', new_piece: {type: 'n', color: 'w'}, old_piece: {type: 'n', color: 'w'}, captured_piece: undefined, san: 'Nh3'},
-           }]
+           ]
 
 The _flags_ field in verbose mode may contain one or more of the following values:
 
