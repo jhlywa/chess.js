@@ -734,7 +734,7 @@ var Chess = function(fen) {
 
 
   /******************************************************************************
-   * UTILIY FUNCTIONS
+   * UTILITY FUNCTIONS
    *****************************************************************************/
   function rank(i) {
     return i >> 4;
@@ -791,16 +791,24 @@ var Chess = function(fen) {
     },
 
     moves: function(settings) {
+      /* The internal representation of a chess move is in 0x88 format, and
+       * not meant to be human-readable.  The code below converts the 0x88
+       * square coordinates to algebraic coordinates.  It also prunes an
+       * unnecessary move keys resulting for a verbose call.
+       */
+
       var ugly_moves = generate_moves();
       var moves = [];
+
       for (var i = 0, len = ugly_moves.length; i < len; i++) {
 
-        /* does the user want a full move object, or just SAN */
+        /* does the user want a full move object (most likely not), or just SAN */
         if (settings != undefined && 'verbose' in settings && settings.verbose) {
           var move = ugly_moves[i];
           move.san = move_to_san(move);
           move.to = algebraic(move.to);
           move.from = algebraic(move.from);
+
           moves.push(move);
         } else {
           moves.push(move_to_san(ugly_moves[i]));
@@ -839,11 +847,19 @@ var Chess = function(fen) {
     },
 
     move: function(from, to) {
-
-      /* from is either a string in SAN (eg "Nxb7+"), a square (eg "a3") or a
-       * move object
+      /* The move function can be called with in the following parameters:
+       *
+       * .move('Nxb7')      <- where 'from' is a case-sensitive SAN string
+       *
+       * .move('a2', 'a3')  <- where both 'from' and 'to' are algebraic coordinates
+       *
+       * .move({from: 'h7', <- where the 'from' is a move object (rarely called in this manner)
+       *        to: 'h6', 
+       *        flags: 'n', 
+       *        new_piece: { type: 'p', color: 'b' },
+       *        old_piece: { type: 'p', color: 'b' }, 
+       *        san: 'h6' })
        */
-
       var move = null;
       var moves = generate_moves();
 
