@@ -103,7 +103,7 @@ Clears the board.
 
     chess.clear();
     chess.fen();
-    // -> '8/8/8/8/8/8/8/8  - - 0 0' <- empty board
+    // -> '8/8/8/8/8/8/8/8  - - 0 1' <- empty board
 
 
 
@@ -191,7 +191,8 @@ Returns a list of all legal moves from the current position.  The function be pa
 
     var chess = new Chess();
     chess.moves();
-    // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4', 'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
+    // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4',
+           'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
 
     chess.moves({verbose:true});
     // -> [{ from: 'a2', 
@@ -199,7 +200,7 @@ Returns a list of all legal moves from the current position.  The function be pa
              flags: '', 
              new_piece: { type: 'p', color: 'w' }, 
              old_piece: { type: 'p', color: 'w' },
-             # a captured_piece key is included when flags contains the substring 'c'
+             # a captured_piece key is included when the flags key contains the substring 'c'
              san: 'a3' },
            ...
            ]
