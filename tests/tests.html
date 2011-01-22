@@ -3,12 +3,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <script type="text/javascript" src="../chess.js"></script>
-    <script type="text/javascript" src="tests-browser.js"></script>
+    <script type="text/javascript" src="tests.js"></script>
   </head>
   <body>
     <input type="button" value="Run Tests" onclick="run_unit_tests();" />
-    <input type="reset" onclick="document.getElementById('console').innerHTML = '';"/>
-    (This usually takes about 30 seconds to run, so you can ignore any 'script timeout' warnings)
+    <input type="reset" onclick="document.location.reload();"/>
+    (This make take up to 20 seconds to run (on slower browser), so you may ignore any 'script timeout' warnings)
     <hr />
     <tt id="console">
 

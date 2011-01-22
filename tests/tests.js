@@ -1,12 +1,30 @@
-var sys = require('sys'),
-     cl = require('../chess');
 
-function log(text) {
-  sys.puts(text);  
+var is_node = true;
+
+try {
+  is_node = typeof process == 'object'
+} catch (e) {
+  is_node = false;
+}
+
+if (is_node) { 
+  var sys = require('sys'),
+       ch = require('../chess');
+
+  var log = sys.puts;
+  var Chess = ch.Chess;
+} else {
+  var log = function(text, newline) {
+    var console = document.getElementById('console');
+    console.innerHTML += text;
+    if (typeof newline  == 'undefined' || newline == true) {
+      console.innerHTML += '<br />';
+    }
+  }
 }
 
 function perft_unit_tests() {
-  var chess = new cl.Chess();
+  var chess = new Chess();
   var start = new Date;
   var perfts = [
     {fen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1', 
@@ -36,7 +54,7 @@ function perft_unit_tests() {
 }
 
 function checkmate_unit_tests() {
-  var chess = new cl.Chess();
+  var chess = new Chess();
   var start = new Date;
   var checkmates = [
     '8/5r2/4K1q1/4p3/3k4/8/8/8 w - - 0 7',
@@ -59,7 +77,7 @@ function checkmate_unit_tests() {
 }
 
 function stalemate_unit_tests() {
-  var chess = new cl.Chess();
+  var chess = new Chess();
   var start = new Date;
   var stalemates = [
     '1R6/8/8/8/8/8/7R/k6K b - - 0 1',
@@ -79,7 +97,7 @@ function stalemate_unit_tests() {
 }
 
 function algebraic_notation_tests() {
-  var chess = new cl.Chess();
+  var chess = new Chess();
   var start = new Date;
   var passed = true;
   var positions = [
@@ -145,7 +163,7 @@ function algebraic_notation_tests() {
 }
 
 function get_and_put_tests() {
-  var chess = new cl.Chess();
+  var chess = new Chess();
   var start = new Date;
   var passed = true;
   var positions = [
@@ -215,7 +233,7 @@ function get_and_put_tests() {
 }
 
 function fen_tests() {
-  var chess = new cl.Chess();
+  var chess = new Chess();
   var start = new Date;
   var passed = true;
   var positions = [
@@ -249,7 +267,7 @@ function fen_tests() {
 }
 
 function make_move_tests() {
-  var chess = new cl.Chess();
+  var chess = new Chess();
   var start = new Date;
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -291,6 +309,15 @@ function make_move_tests() {
 function run_unit_tests() {
   var start = new Date;
 
+  if (!is_node) {
+    var console = document.getElementById('console');
+
+    if (console == null) {
+      alert('Can\'t locate console.  Aborting.');
+      return
+    }
+  }
+
   perft_unit_tests();
   checkmate_unit_tests();
   stalemate_unit_tests();
@@ -304,4 +331,7 @@ function run_unit_tests() {
   log('Total Time: ' + diff + ' secs');
 }
 
-run_unit_tests();
+if (is_node) {
+  run_unit_tests();
+}
+
