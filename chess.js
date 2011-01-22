@@ -172,14 +172,7 @@ var Chess = function(fen) {
       } else if (is_digit(piece)) {
         square += parseInt(piece, 10); 
       } else {
-        var color = (piece < 'a') ? WHITE : BLACK;
-        piece = piece.toLowerCase();
-        board[square] = {type: piece, color: color}; 
-
-        if (piece == KING) {
-          kings[color] = square;
-        }
-
+        put(piece + '@' + algebraic(square));
         square++;
       }
     }
@@ -255,7 +248,7 @@ var Chess = function(fen) {
     var piece = data[0];
     var square = SQUARES[data[1]];
     var color = (piece < 'a') ? WHITE : BLACK;
-    board[square] = {type: piece, color: color};
+    board[square] = {type: piece.toLowerCase(), color: color};
     if (piece.toLowerCase() == KING) {
       kings[color] = square;
     }
