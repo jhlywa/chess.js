@@ -52,9 +52,14 @@ in [Forsyth-Edwards Notation](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwar
 
 
 ### .load(fen)
-The board is cleared and the FEN string is loaded.
+The board is cleared and the FEN string is loaded.  Returns true if position was
+successfully loaded, otherwise false.
 
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+    // -> true
+    
+    chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+    // -> false, bad piece X
 
 
 
@@ -117,14 +122,24 @@ Returns the current side to move.
 
 
 ### .put(piece_square)
-Put a piece on square.  Lowercase pieces are black, uppercase pieces are white.
+Put a piece on square using the format piece@square (e.g. 'p@a5').  Lowercase
+pieces are black, uppercase pieces are white.  Returns true if piece was
+successfully placed, otherwise false.
 
     chess.clear();
+
     chess.put('p@a5');  // put a black pawn on a5
+    // -> true
     chess.put('Q@e1');  // put a white queen on e1
+    // -> true
+    chess.put('X@e1');  // bad piece
+    // -> false
+    chess.put('n@p1');  // bad square
+    // -> false
 
     chess.fen();
     // -> '8/8/8/p7/8/8/8/4Q3  - - 0 0'
+
 
 
 
@@ -208,7 +223,7 @@ Returns a list of all legal moves from the current position.  The function be pa
 The _flags_ field in verbose mode may contain one or more of the following values:
 
 - 'b' - a pawn push of two squares
-- 'e' - a en passant capture
+- 'e' - an en passant capture
 - 'c' - a standard capture
 - 'p' - a promotion 
 - 'k' - kingside castling

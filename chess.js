@@ -39,6 +39,8 @@ var Chess = function(fen) {
   var QUEEN = 'q';
   var KING = 'k';
 
+  var SYMBOLS = 'pnbrqkPNBRQK';
+
   var PAWN_OFFSETS = {
     b: [16, 32, 17, 15],
     w: [-16, -32, -17, -15],
@@ -161,11 +163,17 @@ var Chess = function(fen) {
     var tokens = fen.split(' ');
     var position = tokens[0];
     var square = 0;
+    var valid = SYMBOLS + '12345678/';
 
     clear();
 
     for (var i = 0; i < position.length; i++) {
       var piece = position.charAt(i);
+
+      /* make sure the FEN contains valid data */
+      if (valid.indexOf(piece) == -1) {
+        return false;
+      }
 
       if (piece == '/') {
         square += 8;
@@ -175,6 +183,11 @@ var Chess = function(fen) {
         put(piece + '@' + algebraic(square));
         square++;
       }
+    }
+
+    /* incomplete FEN string */
+    if (square <= SQUARES.h1) {
+      return false;
     }
 
     turn = tokens[1];
@@ -195,6 +208,8 @@ var Chess = function(fen) {
     ep_square = (tokens[3] == '-') ? EMPTY : SQUARES[tokens[3]];
     half_moves = parseInt(tokens[4], 10);
     move_number = parseInt(tokens[5], 10);
+
+    return true;
   }
 
   function generate_fen() {
@@ -244,14 +259,29 @@ var Chess = function(fen) {
   }
 
   function put(piece_square) {
-    var data = piece_square.split('@');
-    var piece = data[0];
-    var square = SQUARES[data[1]];
+    /* 'k@e4' => black king @ e4
+     * 'P@a7' => white pawn @ a7
+     */
+    if (piece_square.indexOf('@') == -1) {
+      return false;
+    }
+
+    var tokens = piece_square.split('@');
+    var piece = tokens[0];
+    var square = SQUARES[tokens[1]];
     var color = (piece < 'a') ? WHITE : BLACK;
+    piece = piece.toLowerCase();
+
+    if (SYMBOLS.indexOf(piece) == -1 || typeof square == 'undefined') { 
+      return false;
+    }
+
     board[square] = {type: piece.toLowerCase(), color: color};
     if (piece.toLowerCase() == KING) {
       kings[color] = square;
     }
+
+    return true;
   }
 
   function generate_moves(settings) {

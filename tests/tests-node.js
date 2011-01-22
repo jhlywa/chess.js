@@ -151,17 +151,24 @@ function get_and_put_tests() {
   var positions = [
     {fen: '8/8/8/8/8/8/8/8 w - - 0 1',
      pieces: {a7: 'P', b7: 'p', c7: 'N', d7: 'n', e7: 'B', f7: 'b', g7: 'R',
-              h7: 'r', a6: 'Q', b6: 'q', c6: 'K', d6: 'k'}},
+              h7: 'r', a6: 'Q', b6: 'q', c6: 'K', d6: 'k'},
+     should_pass: true},
+    {fen: '8/8/8/8/8/8/8/8 w - - 0 1',
+     pieces: {a7: 'Z'},               // bad piece
+     should_pass: false},
+    {fen: '8/8/8/8/8/8/8/8 w - - 0 1',
+     pieces: {j4: 'p'},               // bad square
+     should_pass: false},
   ];
 
   for (var i = 0; i < positions.length; i++) {
     passed = true;
     chess.load(positions[i].fen);
-    var s = 'Get/Put Test #' + i + ' : ';
+    var s = 'Get/Put Test #' + i + ' (' + positions[i].should_pass + '): ';
 
     /* places the pieces */
     for (var square in positions[i].pieces) {
-      chess.put(positions[i].pieces[square] + '@' + square);
+      passed = chess.put(positions[i].pieces[square] + '@' + square);
     }
 
     /* iterate over every square to make sure get returns the proper
@@ -191,6 +198,12 @@ function get_and_put_tests() {
         }
       }
     }
+
+    /* some tests should fail, so make sure we're supposed to pass/fail each
+     * test
+     */
+    passed = (passed == positions[i].should_pass);
+
     s += passed ? 'PASSED!' : 'FAILED!';
 
     log(s);
@@ -204,17 +217,29 @@ function get_and_put_tests() {
 function fen_tests() {
   var chess = new cl.Chess();
   var start = new Date;
+  var passed = true;
   var positions = [
-    '8/8/8/8/8/8/8/8 w - - 0 1',
-    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-    'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
-    '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQKBN1 b - - 1 2',
+    {fen: '8/8/8/8/8/8/8/8 w - - 0 1', should_pass: true},
+    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', should_pass: true},
+    {fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1', should_pass: true},
+    {fen: '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQKBN1 b - - 1 2', should_pass: true},
+
+    /* incomplete FEN string */
+    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBN w KQkq - 0 1', should_pass: false},
+
+    /* bad digit (9)*/
+    {fen: 'rnbqkbnr/pppppppp/9/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', should_pass: false},
+
+    /* bad piece (X)*/
+    {fen: '1nbqkbn1/pppp1ppX/8/4p3/4P3/8/PPPP1PPP/1NBQKBN1 b - - 1 2', should_pass: false},
   ];
 
   for (var i = 0; i < positions.length; i++) {
-    chess.load(positions[i]);
-    var s = 'FEN Test #' + i + ': ' + positions[i] + ' : ';
-    s += (chess.fen() == positions[i]) ? 'PASSED!' : 'FAILED!';
+    passed = true;
+    chess.load(positions[i].fen);
+    var s = 'FEN Test #' + i + ': ' + positions[i].fen + ' (' + positions[i].should_pass + '): ';
+    passed = (chess.fen() == positions[i].fen == positions[i].should_pass);
+    s += (passed) ? 'PASSED!' : 'FAILED!';
     log(s);
   }
   var finish = new Date;
