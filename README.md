@@ -28,7 +28,7 @@ The code below plays a complete game of chess ... randomly.
 
     var chess = new ch.Chess();
 
-    while (!chess.in_checkmate() && !chess.in_draw()) {
+    while (!chess.gameover()) {
       sys.puts('position: ' + chess.fen());
       var moves = chess.moves();
       var move = moves[Math.floor(Math.random() * moves.length)];
@@ -277,7 +277,7 @@ Returns true or false if the side to move has been checkmated.
 ### .in_draw() 
 Returns true or false if the game is drawn.
 
-    var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
+    var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
     chess.in_draw();
     // -> true
 
@@ -286,9 +286,27 @@ Returns true or false if the game is drawn.
 ### .in_stalemate() 
 Returns true or false if the side to move has been stalemated.
 
-    var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
+    var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
     chess.in_stalemate();
     // -> true
+
+
+
+### .gameover() 
+Returns true or false if the game has ended (either via checkmate, stalemate,
+or 50-move rule). 
+
+    var chess = new Chess();
+    chess.gameover();
+    // -> false
+
+    chess.load('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
+    chess.gameover();
+    // -> true (stalemate)
+
+    chess.load('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
+    chess.gameover();
+    // -> true (checkmate)
 
 
 

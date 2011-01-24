@@ -888,6 +888,10 @@ var Chess = function(fen) {
       return in_draw();
     },
 
+    gameover: function() {
+      return in_draw() || in_checkmate();
+    },
+
     fen: function() {
       return generate_fen();
     },
