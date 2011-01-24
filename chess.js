@@ -863,9 +863,7 @@ var Chess = function(fen) {
 
         /* does the user want a full move object (most likely not), or just SAN */
         if (typeof settings != 'undefined' && 'verbose' in settings && settings.verbose) {
-          var move = make_pretty(ugly_moves[i]);
-    
-          moves.push(move);
+          moves.push(make_pretty(ugly_moves[i]));
         } else {
           moves.push(move_to_san(ugly_moves[i]));
         }
