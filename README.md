@@ -160,27 +160,50 @@ Returns the piece on the square:
 
 
 ### .move(move, [ to ])
-Attempts to make a move on the board,  returning true if the move was legal, otherwise
-false.  The .move function can be called in two ways, the first with a move in 
-Standard Algebraic Notation (SAN):
+Attempts to make a move on the board, returning a move object if the move was
+legal, otherwise null.  The .move function can be called in three ways, the
+first with a move in Standard Algebraic Notation (SAN):
 
     var chess = new Chess();
 
     chess.move('Nf3') 
-    // -> true
+    // -> { from: 'g1', to: 'f3', flags: 'n', 
+    //      new_piece: { type: 'n', color: 'w' }, 
+    //      old_piece: { type: 'n', color: 'w' },
+    //      san: 'Nf3' }
 
     chess.move('nf6') // SAN is case sensitive!!
-    // -> false
+    // -> null
 
     chess.move('Nf6')
-    // -> true
+    // -> { from: 'g8', to: 'f6', flags: 'n', 
+    //      new_piece: { type: 'n', color: 'w' }, 
+    //      old_piece: { type: 'n', color: 'w' },
+    //      san: 'Nf6' }
 
-.move may also be called with two parameters, a from square and a to square:
+.move() may also be called with two parameters, a 'from' square and a 'to' square:
 
     var chess = new Chess();
 
-    chess.move('g1', 'f3');
-    // -> true
+    chess.move('e2', 'e4');
+    // -> { from: 'e2', to: 'e4', flags: 'b',
+    //      new_piece: { type: 'p', color: 'w' },
+    //      old_piece: { type: 'p', color: 'w' },
+    //      san: 'e4' }
+
+Finally, .move() may be called with a move object (no move validation is
+performed when calling .move() in this manner):
+
+    var chess = new Chess();
+
+    chess.move({ from: 'd2', to: 'd4', flags: 'b',
+                 new_piece: { type: 'p', color: 'w' },
+                 old_piece: { type: 'p', color: 'w' },
+                 san: 'd4' });
+    // -> { from: 'd2', to: 'd4', flags: 'b',
+    //      new_piece: { type: 'p', color: 'w' },
+    //      old_piece: { type: 'p', color: 'w' },
+    //      san: 'd4' }
 
 
 
@@ -209,7 +232,7 @@ Returns a list of all legal moves from the current position.  The function be pa
     // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4',
            'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
 
-    chess.moves({verbose:true});
+    chess.moves({ verbose: true });
     // -> [{ from: 'a2', 
              to: 'a3', 
              flags: '', 

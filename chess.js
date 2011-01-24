@@ -655,8 +655,6 @@ var Chess = function(fen) {
       move_number++;
     }
     turn = swap_color(turn);
-
-    return true;
   }
 
   function undo_move() {
@@ -801,6 +799,20 @@ var Chess = function(fen) {
     return move;
   }
 
+  function clone(obj) {
+    var dupe = (obj instanceof Array) ? [] : {};
+
+    for (var property in obj) {
+      if (typeof property == 'object') {
+        dupe[property] = clone(obj[property]);
+      } else {
+        dupe[property] = obj[property];
+      }
+    }
+
+    return dupe;
+  }
+
 
   /******************************************************************************
    * DEBUGGING UTILITIES
@@ -919,11 +931,18 @@ var Chess = function(fen) {
       }
 
       /* failed to find move */
-      if (move == null) {
-        return false;
+      if (!move) {
+        return move;
       }
 
-      return make_move(move);
+      /* need to make a copy of move because we can generate SAN after the
+       * move is made
+       */
+      var pretty_move = make_pretty(clone(move));
+
+      make_move(move);
+
+      return pretty_move;
     },
 
     undo: function() {
