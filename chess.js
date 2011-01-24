@@ -659,6 +659,8 @@ var Chess = function(fen) {
 
   function undo_move() {
     old = history.pop();
+    if (old == null) { return; }
+
     board = old.board;
     kings = old.kings;
     turn = old.turn;
