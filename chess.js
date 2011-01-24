@@ -779,6 +779,28 @@ var Chess = function(fen) {
     return '0123456789'.indexOf(c) != -1
   }
 
+  /* ugly = internal 0x88 move object */
+  function make_ugly(move) {
+    move.from = SQUARES[move.from];
+    move.to = SQUARES[move.to];
+
+    return move;
+  }
+
+  /* pretty = external move object */
+  function make_pretty(move) {
+    move.san = move_to_san(move);
+    move.to = algebraic(move.to);
+    move.from = algebraic(move.from);
+
+    /* non-capturing moves should have no captured_piece key */
+    if (move.captured_piece == undefined) {
+      delete move.captured_piece;
+    }
+
+    return move;
+  }
+
 
   /******************************************************************************
    * DEBUGGING UTILITIES
@@ -827,16 +849,8 @@ var Chess = function(fen) {
 
         /* does the user want a full move object (most likely not), or just SAN */
         if (typeof settings != 'undefined' && 'verbose' in settings && settings.verbose) {
-          var move = ugly_moves[i];
-          move.san = move_to_san(move);
-          move.to = algebraic(move.to);
-          move.from = algebraic(move.from);
-
-          /* non-capturing moves should have no captured_piece key */
-          if (move.captured_piece == undefined) {
-            delete move.captured_piece;
-          }
-
+          var move = make_pretty(ugly_moves[i]);
+    
           moves.push(move);
         } else {
           moves.push(move_to_san(ugly_moves[i]));
@@ -892,15 +906,7 @@ var Chess = function(fen) {
       var moves = generate_moves();
 
       if (typeof from == 'object') {
-        move = from;
-
-        /* if it's a move object, convert to/from coordinates to 0x88 integers */
-        if (typeof move.from == 'string') {
-          move.from = SQUARES[move.from];
-        }
-        if (typeof from.to == 'string') {
-          move.to = SQUARES[move.to];
-        }
+        move = make_ugly(from);
       } else {
         /* convert the move string to a move object */
         for (var i = 0, len = moves.length; i < len; i++) {
