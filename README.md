@@ -2,7 +2,7 @@
 
 chess.js is a Javascript chess library that is used for chess move generation/validation,
 piece placement/movement, and check/checkmate/stalemate detection - basically everything 
-but the AI (don't worry, it's coming soon!).
+but the AI (don't worry, it's coming soon).
 
 Using chess.js in a browser is straight-forward:
     
@@ -294,6 +294,9 @@ Returns true or false if the side to move has been stalemated.
 
 ## TODO
 
+- add an optional promotion parameter to the move(from, to) method
+- publicly expose constants (e.g. WHITE, BLACK, FLAGS SQUARES, etc...)
+- undo move on board, instead of just pop()'ing a copy
 - add draw detection for insufficient material and draw by repetition
 - add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)) output
-- add AI (basic alphabeta search w/ primitive position evaluation)
+- add AI (basic alpha-beta search w/ primitive position evaluation)
