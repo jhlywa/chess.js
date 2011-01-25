@@ -841,10 +841,30 @@ var Chess = function(fen) {
   }
 
 
-  /******************************************************************************
-   * PUBLIC API
-   *****************************************************************************/
   return {
+    /***************************************************************************
+     * PUBLIC CONSTANTS (is there a better way to do this?)
+     **************************************************************************/
+    WHITE: WHITE,
+    BLACK: BLACK,
+    PAWN: PAWN,
+    KNIGHT: KNIGHT,
+    BISHOP: BISHOP,
+    ROOK: ROOK,
+    QUEEN: QUEEN,
+    KING: KING,
+    SQUARES: (function() {
+                var keys = [];
+                for (var square in SQUARES) {
+                  keys.push(square);
+                }
+                return keys;
+              })(),
+    FLAGS: FLAGS,
+
+    /***************************************************************************
+     * PUBLIC API
+     **************************************************************************/
     load: function(fen) {
       return load(fen);
     },

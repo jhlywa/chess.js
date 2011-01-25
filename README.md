@@ -313,7 +313,6 @@ or 50-move rule).
 ## TODO
 
 - add an optional promotion parameter to the move(from, to) method
-- publicly expose constants (e.g. WHITE, BLACK, FLAGS SQUARES, etc...)
 - undo move on board, instead of just pop()'ing a copy
 - add draw detection for insufficient material and draw by repetition
 - add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)) output
