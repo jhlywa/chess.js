@@ -908,7 +908,7 @@ var Chess = function(fen) {
       return in_draw();
     },
 
-    gameover: function() {
+    game_over: function() {
       return in_draw() || in_checkmate();
     },
 
