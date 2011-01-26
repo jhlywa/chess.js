@@ -989,6 +989,14 @@ var Chess = function(fen) {
       return perft(depth);
     },
 
+    square_color: function(square) {
+      if (square in SQUARES) {
+        var sq_0x88 = SQUARES[square];
+        return ((rank(sq_0x88) + file(sq_0x88)) % 2 == 0) ? 'light' : 'dark';
+      }
+
+      return null;
+    },
 
   }
 }
