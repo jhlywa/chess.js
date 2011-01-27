@@ -166,30 +166,25 @@ a string in Standard Algebraic Notation (SAN):
 
     var chess = new Chess();
 
-    chess.move('Nf3') 
-    // -> { from: 'g1', to: 'f3', flags: 'n', 
-    //      new_piece: { type: 'n', color: 'w' }, 
-    //      old_piece: { type: 'n', color: 'w' },
-    //      san: 'Nf3' }
+    chess.move('e4') 
+    // -> { color: 'w', from: 'e2', to: 'e4',
+    //      flags: 'b', piece: 'p', san: 'e2' }
 
     chess.move('nf6') // SAN is case sensitive!!
     // -> null
 
     chess.move('Nf6')
-    // -> { from: 'g8', to: 'f6', flags: 'n', 
-    //      new_piece: { type: 'n', color: 'w' }, 
-    //      old_piece: { type: 'n', color: 'w' },
-    //      san: 'Nf6' }
+    // -> { color: 'b', from: 'g8', to: 'f6',
+    //      flags: 'n', piece: 'n', san: 'Nf6' }
 
-Or by passing .move() a move object parameter:
+Or by passing .move() a move object (only the 'to', 'from', and when necessary
+'promotion', fields are needed):
 
     var chess = new Chess();
 
-    chess.move({from: 'e2', to: 'e4'});
-    // -> { from: 'e2', to: 'e4', flags: 'b',
-    //      new_piece: { type: 'p', color: 'w' },
-    //      old_piece: { type: 'p', color: 'w' },
-    //      san: 'e4' }
+    chess.move({from: 'g2', to: 'g3'});
+    // -> { color: 'w', from: 'g2', to: 'g3',
+    //      flags: 'n', piece: 'p', san: 'g3' }
 
 
 
@@ -219,15 +214,14 @@ Returns a list of all legal moves from the current position.  The function be pa
            'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
 
     chess.moves({ verbose: true });
-    // -> [{ from: 'a2', 
-             to: 'a3', 
-             flags: '', 
-             new_piece: { type: 'p', color: 'w' }, 
-             old_piece: { type: 'p', color: 'w' },
-             # a captured_piece key is included when the flags key contains the substring 'c'
-             san: 'a3' },
+    // -> [{ color: 'w', from: 'a2', to: 'a3', 
+             flags: 'n', piece: 'p', san 'a3' },
+             # a captured key is included when the move is a capture
            ...
            ]
+
+The _piece_, _captured_, and _promotion_ fields contain the lowercase
+representation of the applicable piece.
 
 The _flags_ field in verbose mode may contain one or more of the following values:
 

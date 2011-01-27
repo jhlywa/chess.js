@@ -293,24 +293,32 @@ var Chess = function(fen) {
           var pieces = [QUEEN, ROOK, BISHOP, KNIGHT];
           for (var i = 0, len = pieces.length; i < len; i++) {
             var promotion = {
+              color: turn,
               from: from,
               to: to,
               flags: flags + FLAGS.PROMOTION,
-              new_piece: {type: pieces[i], color: board[from].color},
-              old_piece: board[from],
-              captured_piece: board[to],
+              promotion: pieces[i],
+              piece: board[from].type,
             };
+
+            /* add the captured piece */
+            if (board[to]) {
+              promotion.captured = board[to].type;
+            }
             moves.push(promotion);
           }
       } else {
         var move = {
+          color: turn,
           from: from,
           to: to,
           flags: flags,
-          new_piece: board[from],
-          old_piece: board[from],
-          captured_piece: board[to],
+          piece: board[from].type,
         };
+
+        if (board[to]) {
+          move.captured = board[to].type;
+        }
 
         moves.push(move);
       }
@@ -322,10 +330,12 @@ var Chess = function(fen) {
     var second_rank = {b: RANK_7, w: RANK_2};
 
     for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      var sys = require('sys');
+      //sys.puts(i);
       /* did we run off the end of the board */
       if (i & 0x88) { i += 7; continue; }
 
-      piece = board[i];
+      var piece = board[i];
       if (piece == null || piece.color != us) {
         continue;
       }
@@ -446,13 +456,13 @@ var Chess = function(fen) {
     } else {
       var disambiguator = get_disambiguator(move);
 
-      if (move.old_piece.type != PAWN) {
-        output += move.old_piece.type.toUpperCase() + disambiguator;
+      if (move.piece != PAWN) {
+        output += move.piece.toUpperCase() + disambiguator;
       }
 
       if (move.flags.indexOf(FLAGS.CAPTURE) > -1 ||
           move.flags.indexOf(FLAGS.EP_CAPTURE) > -1) {
-        if (move.old_piece.type == PAWN) {
+        if (move.piece == PAWN) {
           output += algebraic(move.from)[0];
         }
         output += 'x';    
@@ -461,7 +471,7 @@ var Chess = function(fen) {
       output += algebraic(move.to);
 
       if (move.flags.indexOf(FLAGS.PROMOTION) > -1) {
-        output += '=' + move.new_piece.type.toUpperCase();
+        output += '=' + move.promotion.toUpperCase();
       }
     }
 
@@ -567,7 +577,8 @@ var Chess = function(fen) {
   }
 
   function make_move(move) {
-    var them = swap_color(turn);
+    var us = turn;
+    var them = swap_color(us);
     push();
 
     board[move.to] = board[move.from];
@@ -584,7 +595,7 @@ var Chess = function(fen) {
 
     /* if pawn promotion, replace with new piece */
     if (move.flags.indexOf(FLAGS.PROMOTION) > -1) {
-      board[move.to] = move.new_piece;
+      board[move.to] = {type: move.promotion, color: us};
     }
 
     /* if we moved the king */
@@ -643,7 +654,7 @@ var Chess = function(fen) {
     }
 
     /* reset the 50 move counter if a pawn is moved or a piece is captured */
-    if (move.old_piece.type == PAWN) {
+    if (move.piece == PAWN) {
       half_moves = 0;
     } else if (move.flags.indexOf(FLAGS.CAPTURE) > -1 || move.flags.indexOf(FLAGS.EP_CAPTURE) > -1) {
       half_moves = 0;
@@ -677,7 +688,7 @@ var Chess = function(fen) {
 
     var from = move.from;
     var to = move.to;
-    var piece = move.old_piece;
+    var piece = move.piece;
 
     var ambiguities = 0;
     var same_rank = 0;
@@ -686,12 +697,12 @@ var Chess = function(fen) {
     for (var i = 0, len = moves.length; i < len; i++) {
       var ambig_from = moves[i].from;
       var ambig_to = moves[i].to;
-      var ambig_piece = moves[i].old_piece;
+      var ambig_piece = moves[i].piece;
 
       /* if a move of the same piece type ends on the same to square, we'll 
        * need to add a disambiguator to the algebraic notation
        */
-      if (piece.type == ambig_piece.type && from != ambig_from && to == ambig_to) {
+      if (piece == ambig_piece && from != ambig_from && to == ambig_to) {
         ambiguities++;
 
         if (rank(from) == rank(ambig_from)) { 
@@ -792,11 +803,6 @@ var Chess = function(fen) {
     move.san = move_to_san(move);
     move.to = algebraic(move.to);
     move.from = algebraic(move.from);
-
-    /* non-capturing moves should have no captured_piece key */
-    if (move.captured_piece == undefined) {
-      delete move.captured_piece;
-    }
 
     return move;
   }
@@ -927,16 +933,15 @@ var Chess = function(fen) {
     move: function(move) {
       /* The move function can be called with in the following parameters:
        *
-       * .move('Nxb7')      <- where 'from' is a case-sensitive SAN string
+       * .move('Nxb7')      <- where 'move' is a case-sensitive SAN string
        *
-       * .move('a2', 'a3')  <- where both 'from' and 'to' are algebraic coordinates
-       *
-       * .move({ from: 'h7', <- where the 'from' is a move object (rarely called in this manner)
-       *         to: 'h6', 
-       *         flags: 'n', 
-       *         new_piece: { type: 'p', color: 'b' },
-       *         old_piece: { type: 'p', color: 'b' }, 
-       *         san: 'h6' })
+       * .move({ from: 'h7', <- where the 'move' is a move object (only from and
+       *                        to fields are required)
+       *         to: 'h8', 
+       *         flags: 'p', 
+       *         promotion: 'q',
+       *         piece: 'p',
+       *         san: 'h8Q' })
        */
       var move_obj = null;
       var moves = generate_moves();
