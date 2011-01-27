@@ -330,8 +330,6 @@ var Chess = function(fen) {
     var second_rank = {b: RANK_7, w: RANK_2};
 
     for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
-      var sys = require('sys');
-      //sys.puts(i);
       /* did we run off the end of the board */
       if (i & 0x88) { i += 7; continue; }
 
