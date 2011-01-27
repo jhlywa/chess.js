@@ -102,6 +102,16 @@ var Chess = function(fen) {
     QSIDE_CASTLE: 'q'
   };
 
+  var BITS = {
+    NORMAL: 1,
+    CAPTURE: 2,
+    BIG_PAWN: 4,
+    EP_CAPTURE: 8,
+    PROMOTION: 16,
+    KSIDE_CASTLE: 32,
+    QSIDE_CASTLE: 64,
+  };
+
   var RANK_1 = 7;
   var RANK_2 = 6;
   var RANK_3 = 5;
@@ -123,17 +133,17 @@ var Chess = function(fen) {
   };
 
   var ROOKS = {
-    w: [{square: SQUARES.a1, flag: FLAGS.QSIDE_CASTLE},
-        {square: SQUARES.h1, flag: FLAGS.KSIDE_CASTLE}],
-    b: [{square: SQUARES.a8, flag: FLAGS.QSIDE_CASTLE},
-        {square: SQUARES.h8, flag: FLAGS.KSIDE_CASTLE}],
+    w: [{square: SQUARES.a1, flag: BITS.QSIDE_CASTLE},
+        {square: SQUARES.h1, flag: BITS.KSIDE_CASTLE}],
+    b: [{square: SQUARES.a8, flag: BITS.QSIDE_CASTLE},
+        {square: SQUARES.h8, flag: BITS.KSIDE_CASTLE}],
   };
 
 
   var board = new Array(128);
   var kings = {w: EMPTY, b: EMPTY};
   var turn = '';
-  var castling = {w: '', b: ''};
+  var castling = {w: 0, b: 0};
   var ep_square = EMPTY;
   var half_moves = 0;
   var move_number = 1;
@@ -193,16 +203,16 @@ var Chess = function(fen) {
     turn = tokens[1];
 
     if (tokens[2].indexOf('K') > -1) {
-      castling.w += FLAGS.KSIDE_CASTLE;
+      castling.w |= BITS.KSIDE_CASTLE;
     }
     if (tokens[2].indexOf('Q') > -1) {
-      castling.w += FLAGS.QSIDE_CASTLE;
+      castling.w |= BITS.QSIDE_CASTLE;
     }
     if (tokens[2].indexOf('k') > -1) {
-      castling.b += FLAGS.KSIDE_CASTLE;
+      castling.b |= BITS.KSIDE_CASTLE;
     }
     if (tokens[2].indexOf('q') > -1) {
-      castling.b += FLAGS.QSIDE_CASTLE;
+      castling.b |= BITS.QSIDE_CASTLE;
     }
 
     ep_square = (tokens[3] == '-') ? EMPTY : SQUARES[tokens[3]];
@@ -245,7 +255,14 @@ var Chess = function(fen) {
       }
     }
 
-    var cflags = castling.w.toUpperCase() + castling.b.toLowerCase() || '-';
+    var cflags = '';
+    if (castling[WHITE] & BITS.KSIDE_CASTLE) { cflags += 'K'; }
+    if (castling[WHITE] & BITS.QSIDE_CASTLE) { cflags += 'Q'; }
+    if (castling[BLACK] & BITS.KSIDE_CASTLE) { cflags += 'k'; }
+    if (castling[BLACK] & BITS.QSIDE_CASTLE) { cflags += 'q'; }
+
+    /* do we have an empty castling flag? */
+    cflags = cflags || '-';
     var epflags = (ep_square == EMPTY) ? '-' : algebraic(ep_square);
 
     return [fen, turn, cflags, epflags, half_moves, move_number].join(' ')
@@ -296,7 +313,7 @@ var Chess = function(fen) {
               color: turn,
               from: from,
               to: to,
-              flags: flags + FLAGS.PROMOTION,
+              flags: flags | BITS.PROMOTION,
               promotion: pieces[i],
               piece: board[from].type,
             };
@@ -342,12 +359,12 @@ var Chess = function(fen) {
         /* single square, non-capturing */
         var square = i + PAWN_OFFSETS[us][0]; 
         if (board[square] == null) {
-            add_move(board, moves, i, square, FLAGS.NORMAL);
+            add_move(board, moves, i, square, BITS.NORMAL);
 
           /* double square */
           var square = i + PAWN_OFFSETS[us][1]; 
           if (second_rank[us] == rank(i) && board[square] == null) {
-            add_move(board, moves, i, square, FLAGS.BIG_PAWN);
+            add_move(board, moves, i, square, BITS.BIG_PAWN);
           }
         }
         
@@ -358,9 +375,9 @@ var Chess = function(fen) {
 
           if (board[square] != null && 
               board[square].color == them) {
-              add_move(board, moves, i, square, FLAGS.CAPTURE);
+              add_move(board, moves, i, square, BITS.CAPTURE);
           } else if (square == ep_square) {
-              add_move(board, moves, i, ep_square, FLAGS.EP_CAPTURE);
+              add_move(board, moves, i, ep_square, BITS.EP_CAPTURE);
           }
         }
       } else {
@@ -373,10 +390,10 @@ var Chess = function(fen) {
             if (square & 0x88) break;
 
             if (board[square] == null) {
-              add_move(board, moves, i, square, FLAGS.NORMAL);
+              add_move(board, moves, i, square, BITS.NORMAL);
             } else {
               if (board[square].color == us) break;
-              add_move(board, moves, i, square, FLAGS.CAPTURE);
+              add_move(board, moves, i, square, BITS.CAPTURE);
               break;
             }
 
@@ -388,7 +405,7 @@ var Chess = function(fen) {
     }
 
     /* king-side castling */
-    if (castling[us].indexOf(FLAGS.KSIDE_CASTLE) > -1) {
+    if (castling[us] & BITS.KSIDE_CASTLE) {
       var castling_from = kings[us];
       var castling_to = castling_from + 2;
 
@@ -398,12 +415,12 @@ var Chess = function(fen) {
           !attacked(them, castling_from + 1) &&
           !attacked(them, castling_to)) {
         add_move(board, moves, kings[us] , castling_to, 
-                 FLAGS.KSIDE_CASTLE);
+                 BITS.KSIDE_CASTLE);
       }
     }
 
     /* queen-side castling */
-    if (castling[us].indexOf(FLAGS.QSIDE_CASTLE) > -1) {
+    if (castling[us] & BITS.QSIDE_CASTLE) {
       var castling_from = kings[us];
       var castling_to = castling_from - 2;
 
@@ -414,7 +431,7 @@ var Chess = function(fen) {
           !attacked(them, castling_from - 1) &&
           !attacked(them, castling_to)) {
         add_move(board, moves, kings[us], castling_to, 
-                 FLAGS.QSIDE_CASTLE);
+                 BITS.QSIDE_CASTLE);
       }
     }
 
@@ -447,9 +464,9 @@ var Chess = function(fen) {
   function move_to_san(move) {
     var output = '';
 
-    if (move.flags.indexOf(FLAGS.KSIDE_CASTLE) > -1) {
+    if (move.flags & BITS.KSIDE_CASTLE) {
       output = 'O-O';
-    } else if (move.flags.indexOf(FLAGS.QSIDE_CASTLE) > -1) {
+    } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O';
     } else {
       var disambiguator = get_disambiguator(move);
@@ -458,8 +475,7 @@ var Chess = function(fen) {
         output += move.piece.toUpperCase() + disambiguator;
       }
 
-      if (move.flags.indexOf(FLAGS.CAPTURE) > -1 ||
-          move.flags.indexOf(FLAGS.EP_CAPTURE) > -1) {
+      if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
         if (move.piece == PAWN) {
           output += algebraic(move.from)[0];
         }
@@ -468,7 +484,7 @@ var Chess = function(fen) {
 
       output += algebraic(move.to);
 
-      if (move.flags.indexOf(FLAGS.PROMOTION) > -1) {
+      if (move.flags & BITS.PROMOTION) {
         output += '=' + move.promotion.toUpperCase();
       }
     }
@@ -583,7 +599,7 @@ var Chess = function(fen) {
     board[move.from] = null;
 
     /* if ep capture, remove the captured pawn */
-    if (move.flags.indexOf(FLAGS.EP_CAPTURE) > -1) {
+    if (move.flags & BITS.EP_CAPTURE) {
       if (turn == 'b') {
         board[move.to - 16] = null;
       } else {
@@ -592,7 +608,7 @@ var Chess = function(fen) {
     }
 
     /* if pawn promotion, replace with new piece */
-    if (move.flags.indexOf(FLAGS.PROMOTION) > -1) {
+    if (move.flags & BITS.PROMOTION) {
       board[move.to] = {type: move.promotion, color: us};
     }
 
@@ -601,12 +617,12 @@ var Chess = function(fen) {
       kings[board[move.to].color] = move.to;
       
       /* if we castled, move the rook next to the king */
-      if (move.flags.indexOf(FLAGS.KSIDE_CASTLE) > -1) {
+      if (move.flags & BITS.KSIDE_CASTLE) {
         var castling_to = move.to - 1;
         var castling_from = move.to + 1;
         board[castling_to] = board[castling_from];
         board[castling_from] = null;
-      } else if (move.flags.indexOf(FLAGS.QSIDE_CASTLE) > -1) {
+      } else if (move.flags & BITS.QSIDE_CASTLE) {
         var castling_to = move.to + 1;
         var castling_from = move.to - 2;
         board[castling_to] = board[castling_from];
@@ -623,7 +639,7 @@ var Chess = function(fen) {
       for (var i = 0, len = ROOKS[turn].length; i < len; i++) {
         if (move.from == ROOKS[turn][i].square) {
           castling[turn] = 
-            castling[turn].replace(ROOKS[turn][i].flag, '');
+            castling[turn] ^= ROOKS[turn][i].flag;
           break;
         }
       }
@@ -634,14 +650,14 @@ var Chess = function(fen) {
       for (var i = 0, len = ROOKS[them].length; i < len; i++) {
         if (move.to == ROOKS[them][i].square) {
           castling[them] = 
-            castling[them].replace(ROOKS[them][i].flag, '');
+            castling[them] ^= ROOKS[them][i].flag;
           break;
         }
       }
     }
 
     /* if big pawn move, update the en passant square */
-    if (move.flags.indexOf(FLAGS.BIG_PAWN) > -1) {
+    if (move.flags & BITS.BIG_PAWN) {
       if (turn == 'b') {
         ep_square = move.to - 16;
       } else { 
@@ -654,7 +670,7 @@ var Chess = function(fen) {
     /* reset the 50 move counter if a pawn is moved or a piece is captured */
     if (move.piece == PAWN) {
       half_moves = 0;
-    } else if (move.flags.indexOf(FLAGS.CAPTURE) > -1 || move.flags.indexOf(FLAGS.EP_CAPTURE) > -1) {
+    } else if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
       half_moves = 0;
     } else {
       half_moves++;
@@ -801,6 +817,15 @@ var Chess = function(fen) {
     move.san = move_to_san(move);
     move.to = algebraic(move.to);
     move.from = algebraic(move.from);
+
+    var flags = '';
+
+    for (var flag in BITS) {
+      if (BITS[flag] & move.flags) {
+        flags += FLAGS[flag];
+      }
+    }
+    move.flags = flags;
 
     return move;
   }
