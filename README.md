@@ -306,7 +306,6 @@ Returns the color of the square ('light' or 'dark').
 
 ## TODO
 
-- add an optional promotion parameter to the move(from, to) method
 - undo move on board, instead of just pop()'ing a copy
 - add draw detection for insufficient material and draw by repetition
 - add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)) output

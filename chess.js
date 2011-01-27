@@ -935,13 +935,10 @@ var Chess = function(fen) {
        *
        * .move('Nxb7')      <- where 'move' is a case-sensitive SAN string
        *
-       * .move({ from: 'h7', <- where the 'move' is a move object (only from and
-       *                        to fields are required)
-       *         to: 'h8', 
-       *         flags: 'p', 
+       * .move({ from: 'h7', <- where the 'move' is a move object (additional
+       *         to :'h8',      fields are ignored)
        *         promotion: 'q',
-       *         piece: 'p',
-       *         san: 'h8Q' })
+       *      })
        */
       var move_obj = null;
       var moves = generate_moves();
@@ -958,7 +955,9 @@ var Chess = function(fen) {
         /* convert the move string to a move object */
         for (var i = 0, len = moves.length; i < len; i++) {
           if (move.from == algebraic(moves[i].from) && 
-              move.to == algebraic(moves[i].to)) {
+              move.to == algebraic(moves[i].to) &&
+              (!('promotion' in moves[i]) ||
+              move.promotion == moves[i].promotion)) {
             move_obj = moves[i];
             break;
           }
