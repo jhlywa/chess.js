@@ -577,30 +577,29 @@ var Chess = function(fen) {
     return (half_moves >= 100 || in_stalemate());
   }
 
-  function push() {
+  function push(move) {
     history.push({
-      board: board.slice(),
+      move: move,
       kings: {b: kings.b, w: kings.w},
       turn: turn,
       castling: {b: castling.b, w: castling.w},
       ep_square: ep_square,
       half_moves: half_moves,
       move_number: move_number,
-      history: history.slice()
     });
   }
 
   function make_move(move) {
     var us = turn;
     var them = swap_color(us);
-    push();
+    push(move);
 
     board[move.to] = board[move.from];
     board[move.from] = null;
 
     /* if ep capture, remove the captured pawn */
     if (move.flags & BITS.EP_CAPTURE) {
-      if (turn == 'b') {
+      if (turn == BLACK) {
         board[move.to - 16] = null;
       } else {
         board[move.to + 16] = null;
@@ -683,17 +682,50 @@ var Chess = function(fen) {
   }
 
   function undo_move() {
-    old = history.pop();
+    var old = history.pop();
     if (old == null) { return; }
 
-    board = old.board;
+    move = old.move;
     kings = old.kings;
     turn = old.turn;
     castling = old.castling;
     ep_square = old.ep_square;
     half_moves = old.half_moves;
     move_number = old.move_number;
-    history = old.history;
+
+    var us = turn;
+    var them = swap_color(turn);
+
+    board[move.from] = board[move.to];
+    board[move.from].type = move.piece  // to undo any promotions
+    board[move.to] = null;
+
+    if (move.flags & BITS.CAPTURE) {
+      board[move.to] = {type: move.captured, color: them};
+    } else if (move.flags & BITS.EP_CAPTURE) {
+      var index;
+      if (us == BLACK) {
+        index = move.to - 16;
+      } else {
+        index = move.to + 16;
+      }
+      board[index] = {type: PAWN, color: them};
+    }
+
+
+    if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+      var castling_to, castling_from;
+      if (move.flags & BITS.KSIDE_CASTLE) {
+        castling_to = move.to + 1;
+        castling_from = move.to - 1;
+      } else if (move.flags & BITS.QSIDE_CASTLE) {
+        castling_to = move.to - 2;
+        castling_from = move.to + 1;
+      }
+
+      board[castling_to] = board[castling_from];
+      board[castling_from] = null;
+    }
   }
 
   /* this function is used to uniquely identify ambiguous moves */ 
