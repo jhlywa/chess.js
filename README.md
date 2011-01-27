@@ -159,10 +159,10 @@ Returns the piece on the square:
 
 
 
-### .move(move, [ to ])
+### .move(move)
 Attempts to make a move on the board, returning a move object if the move was
-legal, otherwise null.  The .move function can be called in three ways, the
-first with a move in Standard Algebraic Notation (SAN):
+legal, otherwise null.  The .move function can be called two ways, by passing
+a string in Standard Algebraic Notation (SAN):
 
     var chess = new Chess();
 
@@ -181,29 +181,15 @@ first with a move in Standard Algebraic Notation (SAN):
     //      old_piece: { type: 'n', color: 'w' },
     //      san: 'Nf6' }
 
-.move() may also be called with two parameters, a 'from' square and a 'to' square:
+Or by passing .move() a move object parameter:
 
     var chess = new Chess();
 
-    chess.move('e2', 'e4');
+    chess.move({from: 'e2', to: 'e4'});
     // -> { from: 'e2', to: 'e4', flags: 'b',
     //      new_piece: { type: 'p', color: 'w' },
     //      old_piece: { type: 'p', color: 'w' },
     //      san: 'e4' }
-
-Finally, .move() may be called with a move object (no move validation is
-performed when calling .move() in this manner):
-
-    var chess = new Chess();
-
-    chess.move({ from: 'd2', to: 'd4', flags: 'b',
-                 new_piece: { type: 'p', color: 'w' },
-                 old_piece: { type: 'p', color: 'w' },
-                 san: 'd4' });
-    // -> { from: 'd2', to: 'd4', flags: 'b',
-    //      new_piece: { type: 'p', color: 'w' },
-    //      old_piece: { type: 'p', color: 'w' },
-    //      san: 'd4' }
 
 
 

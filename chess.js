@@ -924,7 +924,7 @@ var Chess = function(fen) {
       return turn;
     },
 
-    move: function(from, to) {
+    move: function(move) {
       /* The move function can be called with in the following parameters:
        *
        * .move('Nxb7')      <- where 'from' is a case-sensitive SAN string
@@ -938,33 +938,39 @@ var Chess = function(fen) {
        *         old_piece: { type: 'p', color: 'b' }, 
        *         san: 'h6' })
        */
-      var move = null;
+      var move_obj = null;
       var moves = generate_moves();
 
-      if (typeof from == 'object') {
-        move = make_ugly(from);
-      } else {
+      if (typeof move == 'string') {
         /* convert the move string to a move object */
         for (var i = 0, len = moves.length; i < len; i++) {
-          if (from == move_to_san(moves[i]) || 
-             (from == algebraic(moves[i].from) && to == algebraic(moves[i].to))) {
-            move = moves[i];
+          if (move == move_to_san(moves[i])) {
+            move_obj = moves[i];
             break;
           }
         }
-      }
+      } else if (typeof move == 'object') {
+        /* convert the move string to a move object */
+        for (var i = 0, len = moves.length; i < len; i++) {
+          if (move.from == algebraic(moves[i].from) && 
+              move.to == algebraic(moves[i].to)) {
+            move_obj = moves[i];
+            break;
+          }
+        }
+      } 
 
       /* failed to find move */
-      if (!move) {
-        return move;
+      if (!move_obj) {
+        return null;
       }
 
-      /* need to make a copy of move because we can generate SAN after the
+      /* need to make a copy of move because we can't generate SAN after the
        * move is made
        */
-      var pretty_move = make_pretty(clone(move));
+      var pretty_move = make_pretty(clone(move_obj));
 
-      make_move(move);
+      make_move(move_obj);
 
       return pretty_move;
     },
