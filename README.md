@@ -226,6 +226,7 @@ representation of the applicable piece.
 
 The _flags_ field in verbose mode may contain one or more of the following values:
 
+- 'n' - a non-capture
 - 'b' - a pawn push of two squares
 - 'e' - an en passant capture
 - 'c' - a standard capture
@@ -306,6 +307,7 @@ Returns the color of the square ('light' or 'dark').
 
 ## TODO
 
+- flags should really be a bit-field instead of a string
 - undo move on board, instead of just pop()'ing a copy
 - add draw detection for insufficient material and draw by repetition
 - add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)) output
