@@ -297,14 +297,14 @@ or 50-move rule).
 
 
 ### .square_color(square)
-Returns the square color ('light' or 'dark') of the argument.
+Returns the color of the square ('light' or 'dark').
 
     var chess = Chess();
     chess.square_color('h1')
     // -> 'light'
     chess.square_color('a7')
     // -> 'dark'
-    chess.square_color('this is not a square')
+    chess.square_color('bogus square')
     // -> null
 
 
