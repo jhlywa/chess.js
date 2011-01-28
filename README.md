@@ -159,6 +159,22 @@ Returns the piece on the square:
 
 
 
+### .remove(square)
+Remove and return the piece on _square_.
+
+    chess.clear();
+    chess.put('p@a5');  // put a black pawn on a5
+    chess.put('Q@e1');  // put a white queen on e1
+
+    chess.remove('a5');
+    // -> 'p'
+    chess.remove('e1');
+    // -> 'Q'
+    chess.remove('e1');
+    // -> null
+
+
+
 ### .move(move)
 Attempts to make a move on the board, returning a move object if the move was
 legal, otherwise null.  The .move function can be called two ways, by passing

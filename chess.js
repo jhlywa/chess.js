@@ -301,6 +301,17 @@ var Chess = function(fen) {
     return true;
   }
 
+  function remove(square) {
+    var piece = get(square);
+    var color = (piece < 'a') ? WHITE : BLACK;
+    board[SQUARES[square]] = null;
+    if (piece && piece.toLowerCase() == KING) {
+      kings[color] = EMPTY;
+    }
+
+    return piece;
+  }
+
   function generate_moves(settings) {
 
     function add_move(board, moves, from, to, flags) {
@@ -1048,6 +1059,10 @@ var Chess = function(fen) {
 
     get: function(square) {
       return get(square);
+    },
+
+    remove: function(square) {
+      return remove(square);
     },
 
     perft: function(depth) {
