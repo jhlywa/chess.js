@@ -926,9 +926,14 @@ var Chess = function(fen) {
     QUEEN: QUEEN,
     KING: KING,
     SQUARES: (function() {
+                /* from the ECMA-262 spec (section 12.6.4):
+                 * "The mechanics of enumerating the properties ... is implementation dependent" 
+                 * so: for (var sq in SQUARES) { keys.push(sq); } is kinda iffy.
+                 */
                 var keys = [];
-                for (var square in SQUARES) {
-                  keys.push(square);
+                for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+                  if (i & 0x88) { i += 7; continue; }
+                  keys.push(algebraic(i));
                 }
                 return keys;
               })(),
