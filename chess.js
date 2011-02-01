@@ -576,12 +576,8 @@ var Chess = function(fen) {
   }
 
   function in_stalemate() {
-    if (in_check()) {
-      return false;
-    }
-
     var moves = generate_moves();
-    return moves.length == 0;
+    return moves.length == 0 && !in_check();
   }
 
   function in_draw() {
