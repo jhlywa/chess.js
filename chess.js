@@ -169,6 +169,11 @@ var Chess = function(fen) {
     history = [];
   }
 
+  function reset() {
+    clear();
+    load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+  }
+
   function load(fen) {
     var tokens = fen.split(' ');
     var position = tokens[0];
@@ -995,6 +1000,10 @@ var Chess = function(fen) {
      **************************************************************************/
     load: function(fen) {
       return load(fen);
+    },
+
+    reset: function() {
+      return reset();
     },
 
     moves: function(settings) {

@@ -55,11 +55,17 @@ in [Forsyth-Edwards Notation](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwar
 The board is cleared and the FEN string is loaded.  Returns true if position was
 successfully loaded, otherwise false.
 
+    var chess = new Chess();
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
     // -> true
     
     chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
     // -> false, bad piece X
+
+
+
+### .reset()
+The reset the board to the initial starting position.
 
 
 
