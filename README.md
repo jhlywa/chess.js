@@ -274,7 +274,7 @@ Returns true or false if the side to move has been checkmated.
 
 
 ### .in_draw() 
-Returns true or false if the game is drawn.
+Returns true or false if the game is drawn (50-move rule or insufficient material).
 
     var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
     chess.in_draw();
@@ -291,9 +291,18 @@ Returns true or false if the side to move has been stalemated.
 
 
 
+### .insufficient_material() 
+Returns true if the game is drawn due to insufficient material (K vs. K,
+K vs. KB, or K vs. KN); otherwise false.
+
+    var chess = new Chess('k7/8/n7/8/8/8/8/7K b - - 0 1');
+    chess.insufficient_material()
+    // -> true
+
+
+
 ### .game_over() 
-Returns true or false if the game has ended (either via checkmate, stalemate,
-or 50-move rule). 
+Returns true or false if the game has ended via checkmate, stalemate, or draw.
 
     var chess = new Chess();
     chess.game_over();

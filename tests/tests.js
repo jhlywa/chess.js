@@ -96,6 +96,34 @@ function stalemate_unit_tests() {
   log('');
 }
 
+function insufficient_material_unit_test() {
+  var chess = new Chess();
+  var start = new Date;
+  var positions = [
+    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', draw: false},
+    {fen: '8/8/8/8/8/8/8/k6K w - - 0 1', draw: true},
+    {fen: '8/2p5/8/8/8/8/8/k6K w - - 0 1', draw: false},
+    {fen: '8/2N5/8/8/8/8/8/k6K w - - 0 1', draw: true},
+    {fen: '8/2b5/8/8/8/8/8/k6K w - - 0 1', draw: true},
+  ];
+
+  for (var i = 0; i < positions.length; i++) {
+    chess.load(positions[i].fen);
+    var s = 'Insufficient Material Test #' + i + ': ' + positions[i].fen + ' : ';
+    if (positions[i].draw) {
+      s += (chess.insufficient_material() && chess.in_draw()) ? 'PASSED!' : 'FAILED!';
+    } else {
+      s += (!chess.insufficient_material() && !chess.in_draw()) ? 'PASSED!' : 'FAILED!';
+    }
+
+    log(s);
+  }
+  var finish = new Date;
+  var diff = (finish - start) / 1000;
+  log('--> Insufficient Material Time: ' + diff + ' secs');
+  log('');
+}
+
 function algebraic_notation_tests() {
   var chess = new Chess();
   var start = new Date;
@@ -311,6 +339,7 @@ function run_unit_tests() {
   perft_unit_tests();
   checkmate_unit_tests();
   stalemate_unit_tests();
+  insufficient_material_unit_test();
   algebraic_notation_tests();
   get_and_put_tests();
   fen_tests();

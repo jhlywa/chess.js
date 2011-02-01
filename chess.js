@@ -574,8 +574,30 @@ var Chess = function(fen) {
     return !in_check() && generate_moves().length == 0
   }
 
-  function in_draw() {
-    return (half_moves >= 100 || in_stalemate());
+  function insufficient_material() {
+    var pieces = {};
+    var num_pieces = 0;
+
+    for (var i = SQUARES.a8; i<= SQUARES.h1; i++) {
+      if (i & 0x88) { i += 7; continue; }
+
+      var piece = board[i];
+      if (piece) {
+        pieces[piece.type] = (piece.type in pieces) ? pieces[piece.type] + 1 : 1;
+        num_pieces++;
+      }
+    }
+  
+    /* k vs. k */
+    if (num_pieces == 2) { return true; }
+
+    /* k vs. kn .... or .... k vs. kb */
+    else if (num_pieces == 3 && (pieces[BISHOP] == 1 ||
+                                 pieces[KNIGHT] == 1)) { return true; }
+
+    /* TODO: kb vs. kb where both bishops are on the same color */
+
+    return false;
   }
 
   function push(move) {
@@ -974,7 +996,13 @@ var Chess = function(fen) {
     },
 
     in_draw: function() {
-      return in_draw();
+      return half_moves >= 100 || 
+             in_stalemate() || 
+             insufficient_material();
+    },
+
+    insufficient_material: function() {
+      return insufficient_material();
     },
 
     game_over: function() {
