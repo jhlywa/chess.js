@@ -690,7 +690,7 @@ var Chess = function(fen) {
 
   function undo_move() {
     var old = history.pop();
-    if (old == null) { return; }
+    if (old == null) { return null; }
 
     move = old.move;
     kings = old.kings;
@@ -733,6 +733,8 @@ var Chess = function(fen) {
       board[castling_to] = board[castling_from];
       board[castling_from] = null;
     }
+
+    return move;
   }
 
   /* this function is used to uniquely identify ambiguous moves */ 
@@ -1047,7 +1049,8 @@ var Chess = function(fen) {
     },
 
     undo: function() {
-      undo_move();
+      var move = undo_move();
+      return (move) ? make_pretty(move) : null;
     },
 
     clear: function() {

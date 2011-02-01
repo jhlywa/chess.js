@@ -183,15 +183,13 @@ a string in Standard Algebraic Notation (SAN):
     var chess = new Chess();
 
     chess.move('e4') 
-    // -> { color: 'w', from: 'e2', to: 'e4',
-    //      flags: 'b', piece: 'p', san: 'e2' }
+    // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e2' }
 
     chess.move('nf6') // SAN is case sensitive!!
     // -> null
 
     chess.move('Nf6')
-    // -> { color: 'b', from: 'g8', to: 'f6',
-    //      flags: 'n', piece: 'n', san: 'Nf6' }
+    // -> { color: 'b', from: 'g8', to: 'f6', flags: 'n', piece: 'n', san: 'Nf6' }
 
 Or by passing .move() a move object (only the 'to', 'from', and when necessary
 'promotion', fields are needed):
@@ -199,13 +197,12 @@ Or by passing .move() a move object (only the 'to', 'from', and when necessary
     var chess = new Chess();
 
     chess.move({from: 'g2', to: 'g3'});
-    // -> { color: 'w', from: 'g2', to: 'g3',
-    //      flags: 'n', piece: 'p', san: 'g3' }
+    // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
 
 
 
 ### .undo()
-Takeback the last half-move:
+Takeback the last half-move, returning a move object if successful, otherwise null.
     
     var chess = new Chess();
 
@@ -216,8 +213,11 @@ Takeback the last half-move:
     // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
 
     chess.undo();
+    // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
     chess.fen();
     // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+    chess.undo();
+    // -> null
 
 
 
@@ -231,9 +231,10 @@ Returns a list of all legal moves from the current position.  The function be pa
 
     chess.moves({ verbose: true });
     // -> [{ color: 'w', from: 'a2', to: 'a3', 
-             flags: 'n', piece: 'p', san 'a3' },
-             # a captured key is included when the move is a capture
-             # a promotion key is included when the move is a promotion
+             flags: 'n', piece: 'p', san 'a3'
+             # a captured: key is included when the move is a capture
+             # a promotion: key is included when the move is a promotion
+           },
            ...
            ]
 
