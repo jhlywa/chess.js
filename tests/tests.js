@@ -124,6 +124,44 @@ function insufficient_material_unit_test() {
   log('');
 }
 
+function threefold_repetition_unit_test() {
+  var chess = new Chess();
+  var start = new Date;
+  var positions = [
+    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', 
+     moves: ['Nf3', 'Nf6', 'Ng1', 'Ng8', 'Nf3', 'Nf6', 'Ng1', 'Ng8']},
+
+    /* Fischer - Petrosian, Buenos Aires, 1971 */
+    {fen: '8/pp3p1k/2p2q1p/3r1P2/5R2/7P/P1P1QP2/7K b - - 2 30',
+     moves: ['Qe5', 'Qh5', 'Qf6', 'Qe2', 'Re5', 'Qd3', 'Rd5', 'Qe2']},
+  ];
+
+  for (var i = 0; i < positions.length; i++) {
+    chess.load(positions[i].fen);
+    var s = 'Threefold Repetition Test #' + i + ': ' + positions[i].fen + ' : ';
+    var passed = true;
+    for (var j = 0; j < positions[i].moves.length; j++) {
+      if (chess.in_threefold_repetition()) {
+        passed = false;
+        break;
+      }
+      chess.move(positions[i].moves[j]);
+    }
+
+    if (!passed) {
+      s += 'FAILED!'; 
+    } else {
+      s += (chess.in_threefold_repetition() && chess.in_draw()) ? 'PASSED!' : 'FAILED!';
+    }
+
+    log(s);
+  }
+  var finish = new Date;
+  var diff = (finish - start) / 1000;
+  log('--> Threefold Repetition Time: ' + diff + ' secs');
+  log('');
+}
+
 function algebraic_notation_tests() {
   var chess = new Chess();
   var start = new Date;
@@ -340,6 +378,7 @@ function run_unit_tests() {
   checkmate_unit_tests();
   stalemate_unit_tests();
   insufficient_material_unit_test();
+  threefold_repetition_unit_test();
   algebraic_notation_tests();
   get_and_put_tests();
   fen_tests();

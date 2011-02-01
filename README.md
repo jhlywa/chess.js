@@ -291,6 +291,28 @@ Returns true or false if the side to move has been stalemated.
 
 
 
+### .in_threefold_repetition() 
+Returns true or false if the current board position has occurred three or more
+times.
+
+    var chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    // -> true
+    // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 1st time
+    chess.in_threefold_repetition();
+    // -> false
+
+    chess.move('Nf3'); chess.move('Nf6') chess.move('Ng1'); chess.move('Ng8');
+    // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 2nd time
+    chess.in_threefold_repetition();
+    // -> false
+
+    chess.move('Nf3'); chess.move('Nf6') chess.move('Ng1'); chess.move('Ng8');
+    // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 3rd time
+    chess.in_threefold_repetition();
+    // -> true
+
+
+
 ### .insufficient_material() 
 Returns true if the game is drawn due to insufficient material (K vs. K,
 K vs. KB, or K vs. KN); otherwise false.
