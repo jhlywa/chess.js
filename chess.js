@@ -567,17 +567,11 @@ var Chess = function(fen) {
   }
 
   function in_checkmate() {
-    if (!in_check()) {
-      return false;
-    }
-
-    var moves = generate_moves();
-    return moves.length == 0;
+    return in_check() && generate_moves().length == 0
   }
 
   function in_stalemate() {
-    var moves = generate_moves();
-    return moves.length == 0 && !in_check();
+    return !in_check() && generate_moves().length == 0
   }
 
   function in_draw() {
