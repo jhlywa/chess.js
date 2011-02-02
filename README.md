@@ -367,7 +367,6 @@ Returns the color of the square ('light' or 'dark').
 
 ## TODO
 
-- add draw detection for insufficient material and draw by repetition
 - add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)) output
 - add AI (basic alpha-beta search w/ primitive position evaluation)
 - refactor get/put/remove methods (should we keep input sanitation at lowest level?)
