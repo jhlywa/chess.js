@@ -65,7 +65,7 @@ successfully loaded, otherwise false.
 
 
 ### .reset()
-The reset the board to the initial starting position.
+Reset the board to the initial starting position.
 
 
 
