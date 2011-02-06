@@ -228,31 +228,40 @@ function algebraic_notation_tests() {
   log('');
 }
 
-function get_and_put_tests() {
+function get_put_remove_tests() {
   var chess = new Chess();
   var start = new Date;
   var passed = true;
   var positions = [
-    {fen: '8/8/8/8/8/8/8/8 w - - 0 1',
-     pieces: {a7: 'P', b7: 'p', c7: 'N', d7: 'n', e7: 'B', f7: 'b', g7: 'R',
-              h7: 'r', a6: 'Q', b6: 'q', c6: 'K', d6: 'k'},
+    {pieces: {a7: {type: chess.PAWN, color: chess.WHITE},
+              b7: {type: chess.PAWN, color: chess.BLACK},
+              c7: {type: chess.KNIGHT, color: chess.WHITE},
+              d7: {type: chess.KNIGHT, color: chess.BLACK},
+              e7: {type: chess.BISHOP, color: chess.WHITE},
+              f7: {type: chess.BISHOP, color: chess.BLACK},
+              g7: {type: chess.ROOK, color: chess.WHITE},
+              h7: {type: chess.ROOK, color: chess.BLACK},
+              a6: {type: chess.QUEEN, color: chess.WHITE},
+              b6: {type: chess.QUEEN, color: chess.BLACK},
+              a4: {type: chess.KING, color: chess.WHITE},
+              h4: {type: chess.KING, color: chess.BLACK}},
      should_pass: true},
-    {fen: '8/8/8/8/8/8/8/8 w - - 0 1',
-     pieces: {a7: 'Z'},               // bad piece
+
+    {pieces: {a7: {type: 'z', color: chess.WHTIE}}, // bad piece
      should_pass: false},
-    {fen: '8/8/8/8/8/8/8/8 w - - 0 1',
-     pieces: {j4: 'p'},               // bad square
+
+    {pieces: {j4: {type: chess.PAWN, color: chess.WHTIE}}, // bad square
      should_pass: false},
   ];
 
   for (var i = 0; i < positions.length; i++) {
     passed = true;
-    chess.load(positions[i].fen);
+    chess.clear();
     var s = 'Get/Put Test #' + i + ' (' + positions[i].should_pass + '): ';
 
     /* places the pieces */
     for (var square in positions[i].pieces) {
-      passed = chess.put(positions[i].pieces[square] + '@' + square);
+      passed &= chess.put(positions[i].pieces[square], square);
     }
 
     /* iterate over every square to make sure get returns the proper
@@ -261,17 +270,42 @@ function get_and_put_tests() {
     for (var j = 0; j < chess.SQUARES.length; j++) {
       var square = chess.SQUARES[j];
       if (!(square in positions[i].pieces)) {
-        if (chess.get(square) != null) {
+        if (chess.get(square)) {
           passed = false;
           break;
         }
       } else {
-        if (chess.get(square) != positions[i].pieces[square]) {
+        var piece = chess.get(square);
+        if (!(piece &&
+            piece.type == positions[i].pieces[square].type &&
+            piece.color == positions[i].pieces[square].color)) {
           passed = false;
           break;
         }
       }
     }
+
+    if (passed) {
+      /* remove the pieces */
+      for (var j = 0; j < chess.SQUARES.length; j++) {
+        var square = chess.SQUARES[j];
+        var piece = chess.remove(square);
+        if ((!(square in positions[i].pieces)) && piece) {
+          passed = false;
+          break;
+        }
+
+        if (piece &&
+           (positions[i].pieces[square].type != piece.type ||
+            positions[i].pieces[square].color != piece.color)) {
+          passed = false;
+          break;
+        }
+      }
+    }
+
+    /* finally, check for an empty board */
+    passed = passed && (chess.fen() == '8/8/8/8/8/8/8/8 w - - 0 1');
 
     /* some tests should fail, so make sure we're supposed to pass/fail each
      * test
@@ -380,7 +414,7 @@ function run_unit_tests() {
   insufficient_material_unit_test();
   threefold_repetition_unit_test();
   algebraic_notation_tests();
-  get_and_put_tests();
+  get_put_remove_tests();
   fen_tests();
   make_move_tests();
 

@@ -114,7 +114,7 @@ Clears the board.
 
     chess.clear();
     chess.fen();
-    // -> '8/8/8/8/8/8/8/8  - - 0 1' <- empty board
+    // -> '8/8/8/8/8/8/8/8 w - - 0 1' <- empty board
 
 
 
@@ -127,25 +127,20 @@ Returns the current side to move.
 
 
 
-### .put(piece_square)
-Put a piece on square using the format piece@square (e.g. 'p@a5').  Lowercase
-pieces are black, uppercase pieces are white.  Returns true if piece was
-successfully placed, otherwise false.
+### .put(piece, square)
+Place a piece on square where piece is an object with the form
+{ type: ..., color: ... }.  Returns true if piece was successfully placed,
+otherwise false.
 
     chess.clear();
 
-    chess.put('p@a5');  // put a black pawn on a5
+    chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
     // -> true
-    chess.put('Q@e1');  // put a white queen on e1
+    chess.put({ type: 'k', color: 'w' }, 'h1') // shorthand
     // -> true
-    chess.put('X@e1');  // bad piece
-    // -> false
-    chess.put('n@p1');  // bad square
-    // -> false
 
     chess.fen();
-    // -> '8/8/8/p7/8/8/8/4Q3  - - 0 0'
-
+    // -> '8/8/8/p7/8/8/8/7K w - - 0 0'
 
 
 
@@ -153,13 +148,10 @@ successfully placed, otherwise false.
 Returns the piece on the square:
 
     chess.clear();
-    chess.put('p@a5');  // put a black pawn on a5
-    chess.put('Q@e1');  // put a white queen on e1
+    chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
 
     chess.get('a5');
-    // -> 'p'
-    chess.get('e1');
-    // -> 'Q'
+    // -> { type: 'p', color: 'b' },
     chess.get('a6');
     // -> null
 
@@ -169,13 +161,13 @@ Returns the piece on the square:
 Remove and return the piece on _square_.
 
     chess.clear();
-    chess.put('p@a5');  // put a black pawn on a5
-    chess.put('Q@e1');  // put a white queen on e1
+    chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
+    chess.put({ type: chess.KING, color: chess.WHITE }, 'h1') // put a white king on h1
 
     chess.remove('a5');
-    // -> 'p'
-    chess.remove('e1');
-    // -> 'Q'
+    // -> { type: 'p', color: 'b' },
+    chess.remove('h1');
+    // -> { type: 'k', color: 'w' },
     chess.remove('e1');
     // -> null
 
@@ -369,4 +361,3 @@ Returns the color of the square ('light' or 'dark').
 
 - add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)) output
 - add AI (basic alpha-beta search w/ primitive position evaluation)
-- refactor get/put/remove methods (should we keep input sanitation at lowest level?)

@@ -43,7 +43,7 @@ var Chess = function(fen) {
 
   var PAWN_OFFSETS = {
     b: [16, 32, 17, 15],
-    w: [-16, -32, -17, -15],
+    w: [-16, -32, -17, -15]
   };
 
   var PIECE_OFFSETS = {
@@ -51,8 +51,8 @@ var Chess = function(fen) {
     b: [-17, -15,  17,  15], 
     r: [-16,   1,  16,  -1], 
     q: [-17, -16, -15,   1,  17, 16, 15,  -1], 
-    k: [-17, -16, -15,   1,  17, 16, 15,  -1],
-  }
+    k: [-17, -16, -15,   1,  17, 16, 15,  -1]
+  };
 
   var ATTACKS = [
     20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20, 0,
@@ -90,7 +90,7 @@ var Chess = function(fen) {
     -15,  0,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,  0,-17
   ];
 
-  var SHIFTS = { p: 0, n: 1, b: 2, r: 3, q: 4, k: 5 }
+  var SHIFTS = { p: 0, n: 1, b: 2, r: 3, q: 4, k: 5 };
 
   var FLAGS = {
     NORMAL: 'n',
@@ -136,13 +136,13 @@ var Chess = function(fen) {
     w: [{square: SQUARES.a1, flag: BITS.QSIDE_CASTLE},
         {square: SQUARES.h1, flag: BITS.KSIDE_CASTLE}],
     b: [{square: SQUARES.a8, flag: BITS.QSIDE_CASTLE},
-        {square: SQUARES.h8, flag: BITS.KSIDE_CASTLE}],
+        {square: SQUARES.h8, flag: BITS.KSIDE_CASTLE}]
   };
 
 
   var board = new Array(128);
   var kings = {w: EMPTY, b: EMPTY};
-  var turn = '';
+  var turn = WHITE;
   var castling = {w: 0, b: 0};
   var ep_square = EMPTY;
   var half_moves = 0;
@@ -161,7 +161,7 @@ var Chess = function(fen) {
   function clear() {
     board = new Array(128);
     kings = {w: EMPTY, b: EMPTY};
-    turn = '';
+    turn = WHITE;
     castling = {w: '', b: ''};
     ep_square = EMPTY;
     half_moves = 0;
@@ -195,7 +195,8 @@ var Chess = function(fen) {
       } else if (is_digit(piece)) {
         square += parseInt(piece, 10); 
       } else {
-        put(piece + '@' + algebraic(square));
+        var color = (piece < 'a') ? WHITE : BLACK;
+        put({type: piece.toLowerCase(), color: color}, algebraic(square));
         square++;
       }
     }
@@ -275,32 +276,29 @@ var Chess = function(fen) {
 
   function get(square) {
     var piece = board[SQUARES[square]];
-    return (piece == null) ? null
-            : (piece.color == WHITE) ?
-               piece.type.toUpperCase() : piece.type.toLowerCase();
+    return (piece) ? {type: piece.type, color: piece.color} : null;
   }
 
-  function put(piece_square) {
-    /* 'k@e4' => black king @ e4
-     * 'P@a7' => white pawn @ a7
-     */
-    if (piece_square.indexOf('@') == -1) {
+  function put(piece, square) {
+    /* check for valid piece object */
+    if (!('type' in piece && 'color' in piece)) {
       return false;
     }
 
-    var tokens = piece_square.split('@');
-    var piece = tokens[0];
-    var square = SQUARES[tokens[1]];
-    var color = (piece < 'a') ? WHITE : BLACK;
-    piece = piece.toLowerCase();
-
-    if (SYMBOLS.indexOf(piece) == -1 || typeof square == 'undefined') { 
+    /* check for piece */
+    if (SYMBOLS.indexOf(piece.type.toLowerCase()) == -1) {
       return false;
     }
 
-    board[square] = {type: piece.toLowerCase(), color: color};
-    if (piece.toLowerCase() == KING) {
-      kings[color] = square;
+    /* check for valid square */
+    if (!(square in SQUARES)) {
+      return false;
+    }
+
+    var sq = SQUARES[square];
+    board[sq] = {type: piece.type, color: piece.color};
+    if (piece.type == KING) {
+      kings[piece.color] = sq;
     }
 
     return true;
@@ -308,10 +306,9 @@ var Chess = function(fen) {
 
   function remove(square) {
     var piece = get(square);
-    var color = (piece < 'a') ? WHITE : BLACK;
     board[SQUARES[square]] = null;
-    if (piece && piece.toLowerCase() == KING) {
-      kings[color] = EMPTY;
+    if (piece && piece.type == KING) {
+      kings[piece.color] = EMPTY;
     }
 
     return piece;
@@ -1134,8 +1131,8 @@ var Chess = function(fen) {
       return clear();
     },
 
-    put: function(piece_square) {
-      return put(piece_square);
+    put: function(piece, square) {
+      return put(piece, square);
     },
 
     get: function(square) {
