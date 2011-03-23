@@ -109,7 +109,7 @@ var Chess = function(fen) {
     EP_CAPTURE: 8,
     PROMOTION: 16,
     KSIDE_CASTLE: 32,
-    QSIDE_CASTLE: 64,
+    QSIDE_CASTLE: 64
   };
 
   var RANK_1 = 7;
@@ -328,7 +328,7 @@ var Chess = function(fen) {
               to: to,
               flags: flags | BITS.PROMOTION,
               promotion: pieces[i],
-              piece: board[from].type,
+              piece: board[from].type
             };
 
             /* add the captured piece */
@@ -343,7 +343,7 @@ var Chess = function(fen) {
           from: from,
           to: to,
           flags: flags,
-          piece: board[from].type,
+          piece: board[from].type
         };
 
         if (board[to]) {
@@ -647,7 +647,7 @@ var Chess = function(fen) {
       castling: {b: castling.b, w: castling.w},
       ep_square: ep_square,
       half_moves: half_moves,
-      move_number: move_number,
+      move_number: move_number
     });
   }
 
@@ -888,8 +888,9 @@ var Chess = function(fen) {
     return i & 15;
   }
 
-  function algebraic(i) {
-    return 'abcdefgh'[file(i)] + '87654321'[rank(i)];
+  function algebraic(i){
+    var f = file(i), r = rank(i);
+    return 'abcdefgh'.substring(f,f+1) + '87654321'.substring(r,r+1);
   }
 
   function swap_color(c) {
@@ -1154,7 +1155,7 @@ var Chess = function(fen) {
       }
 
       return null;
-    },
+    }
 
   }
 }
