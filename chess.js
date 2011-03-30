@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (c) 2011, Jeff Hlywa (jhlywa@gmail.com)
  * All rights reserved.
  *
@@ -47,10 +47,10 @@ var Chess = function(fen) {
   };
 
   var PIECE_OFFSETS = {
-    n: [-18, -33, -31, -14,  18, 33, 31,  14], 
-    b: [-17, -15,  17,  15], 
-    r: [-16,   1,  16,  -1], 
-    q: [-17, -16, -15,   1,  17, 16, 15,  -1], 
+    n: [-18, -33, -31, -14,  18, 33, 31,  14],
+    b: [-17, -15,  17,  15],
+    r: [-16,   1,  16,  -1],
+    q: [-17, -16, -15,   1,  17, 16, 15,  -1],
     k: [-17, -16, -15,   1,  17, 16, 15,  -1]
   };
 
@@ -139,7 +139,6 @@ var Chess = function(fen) {
         {square: SQUARES.h8, flag: BITS.KSIDE_CASTLE}]
   };
 
-
   var board = new Array(128);
   var kings = {w: EMPTY, b: EMPTY};
   var turn = WHITE;
@@ -149,7 +148,7 @@ var Chess = function(fen) {
   var move_number = 1;
   var history = [];
 
-  /* if the user passes in a fen string, load it, else default to 
+  /* if the user passes in a fen string, load it, else default to
    * starting position
    */
   if (typeof fen == 'undefined') {
@@ -193,7 +192,7 @@ var Chess = function(fen) {
       if (piece == '/') {
         square += 8;
       } else if (is_digit(piece)) {
-        square += parseInt(piece, 10); 
+        square += parseInt(piece, 10);
       } else {
         var color = (piece < 'a') ? WHITE : BLACK;
         put({type: piece.toLowerCase(), color: color}, algebraic(square));
@@ -239,11 +238,11 @@ var Chess = function(fen) {
         if (empty > 0) {
           fen += empty;
           empty = 0;
-        } 
+        }
         var color = board[i].color;
         var piece = board[i].type;
 
-        fen += (color == WHITE) ? 
+        fen += (color == WHITE) ?
                  piece.toUpperCase() : piece.toLowerCase();
       }
 
@@ -318,7 +317,7 @@ var Chess = function(fen) {
 
     function add_move(board, moves, from, to, flags) {
       /* if pawn promotion */
-      if (board[from].type == PAWN && 
+      if (board[from].type == PAWN &&
          (rank(to) == RANK_8 || rank(to) == RANK_1)) {
           var pieces = [QUEEN, ROOK, BISHOP, KNIGHT];
           for (var i = 0, len = pieces.length; i < len; i++) {
@@ -368,25 +367,25 @@ var Chess = function(fen) {
         continue;
       }
 
-      if (piece.type == PAWN) { 
+      if (piece.type == PAWN) {
         /* single square, non-capturing */
-        var square = i + PAWN_OFFSETS[us][0]; 
+        var square = i + PAWN_OFFSETS[us][0];
         if (board[square] == null) {
             add_move(board, moves, i, square, BITS.NORMAL);
 
           /* double square */
-          var square = i + PAWN_OFFSETS[us][1]; 
+          var square = i + PAWN_OFFSETS[us][1];
           if (second_rank[us] == rank(i) && board[square] == null) {
             add_move(board, moves, i, square, BITS.BIG_PAWN);
           }
         }
-        
+
         /* pawn captures */
         for (j = 2; j < 4; j++) {
           var square = i + PAWN_OFFSETS[us][j];
           if (square & 0x88) continue;
 
-          if (board[square] != null && 
+          if (board[square] != null &&
               board[square].color == them) {
               add_move(board, moves, i, square, BITS.CAPTURE);
           } else if (square == ep_square) {
@@ -427,7 +426,7 @@ var Chess = function(fen) {
           !attacked(them, kings[us]) &&
           !attacked(them, castling_from + 1) &&
           !attacked(them, castling_to)) {
-        add_move(board, moves, kings[us] , castling_to, 
+        add_move(board, moves, kings[us] , castling_to,
                  BITS.KSIDE_CASTLE);
       }
     }
@@ -443,7 +442,7 @@ var Chess = function(fen) {
           !attacked(them, kings[us]) &&
           !attacked(them, castling_from - 1) &&
           !attacked(them, castling_to)) {
-        add_move(board, moves, kings[us], castling_to, 
+        add_move(board, moves, kings[us], castling_to,
                  BITS.QSIDE_CASTLE);
       }
     }
@@ -453,7 +452,7 @@ var Chess = function(fen) {
       settings = {legal: true};
     }
 
-    /* return all pseudo-legal moves (this includes moves that allow the king 
+    /* return all pseudo-legal moves (this includes moves that allow the king
      * to be captured
      */
     if (settings.legal != null && settings.legal == false) {
@@ -492,7 +491,7 @@ var Chess = function(fen) {
         if (move.piece == PAWN) {
           output += algebraic(move.from)[0];
         }
-        output += 'x';    
+        output += 'x';
       }
 
       output += algebraic(move.to);
@@ -515,8 +514,6 @@ var Chess = function(fen) {
     return output;
   }
 
-
-
   function attacked(color, square) {
     for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
       /* did we run off the end of the board */
@@ -528,16 +525,16 @@ var Chess = function(fen) {
       var piece = board[i];
       var difference = i - square;
       var index = difference + 119;
-    
+
       if (ATTACKS[index] & (1 << SHIFTS[piece.type])) {
         if (piece.type == PAWN) {
           if (difference > 0) {
             if (piece.color == WHITE) return true;
           } else {
             if (piece.color == BLACK) return true;
-          }                 
-          continue; 
-        }       
+          }
+          continue;
+        }
 
         /* if the piece is a knight or a king */
         if (piece.type == 'n' || piece.type == 'k') return true;
@@ -546,8 +543,8 @@ var Chess = function(fen) {
         var j = i + offset;
 
         var blocked = false;
-        while (j != square) {           
-          if (board[j] != null) { blocked = true; break; }   
+        while (j != square) {
+          if (board[j] != null) { blocked = true; break; }
           j += offset;
         }
 
@@ -557,8 +554,6 @@ var Chess = function(fen) {
 
     return false;
   }
-
-
 
   function king_attacked(color) {
     return attacked(swap_color(color), kings[color]);
@@ -589,7 +584,7 @@ var Chess = function(fen) {
         num_pieces++;
       }
     }
-  
+
     /* k vs. k */
     if (num_pieces == 2) { return true; }
 
@@ -619,13 +614,13 @@ var Chess = function(fen) {
     }
 
     while (true) {
-      /* remove the last two fields in the FEN string, they're not needed 
+      /* remove the last two fields in the FEN string, they're not needed
        * when checking for draw by rep */
       var fen = generate_fen().split(' ').slice(0,4).join(' ');
 
       /* has the position occurred three or move times */
       positions[fen] = (fen in positions) ? positions[fen] + 1 : 1;
-      if (positions[fen] >= 3) { 
+      if (positions[fen] >= 3) {
         repetition = true;
       }
 
@@ -637,7 +632,6 @@ var Chess = function(fen) {
 
     return repetition;
   }
-    
 
   function push(move) {
     history.push({
@@ -676,7 +670,7 @@ var Chess = function(fen) {
     /* if we moved the king */
     if (board[move.to].type == KING) {
       kings[board[move.to].color] = move.to;
-      
+
       /* if we castled, move the rook next to the king */
       if (move.flags & BITS.KSIDE_CASTLE) {
         var castling_to = move.to - 1;
@@ -689,7 +683,7 @@ var Chess = function(fen) {
         board[castling_to] = board[castling_from];
         board[castling_from] = null;
       }
-        
+
       /* turn off castling */
       castling[turn] = '';
     }
@@ -699,7 +693,7 @@ var Chess = function(fen) {
 
       for (var i = 0, len = ROOKS[turn].length; i < len; i++) {
         if (move.from == ROOKS[turn][i].square) {
-          castling[turn] = 
+          castling[turn] =
             castling[turn] ^= ROOKS[turn][i].flag;
           break;
         }
@@ -710,7 +704,7 @@ var Chess = function(fen) {
     if (castling[them] != '') {
       for (var i = 0, len = ROOKS[them].length; i < len; i++) {
         if (move.to == ROOKS[them][i].square) {
-          castling[them] = 
+          castling[them] =
             castling[them] ^= ROOKS[them][i].flag;
           break;
         }
@@ -721,7 +715,7 @@ var Chess = function(fen) {
     if (move.flags & BITS.BIG_PAWN) {
       if (turn == 'b') {
         ep_square = move.to - 16;
-      } else { 
+      } else {
         ep_square = move.to + 16;
       }
     } else {
@@ -792,7 +786,7 @@ var Chess = function(fen) {
     return move;
   }
 
-  /* this function is used to uniquely identify ambiguous moves */ 
+  /* this function is used to uniquely identify ambiguous moves */
   function get_disambiguator(move) {
     moves = generate_moves();
 
@@ -809,17 +803,17 @@ var Chess = function(fen) {
       var ambig_to = moves[i].to;
       var ambig_piece = moves[i].piece;
 
-      /* if a move of the same piece type ends on the same to square, we'll 
+      /* if a move of the same piece type ends on the same to square, we'll
        * need to add a disambiguator to the algebraic notation
        */
       if (piece == ambig_piece && from != ambig_from && to == ambig_to) {
         ambiguities++;
 
-        if (rank(from) == rank(ambig_from)) { 
+        if (rank(from) == rank(ambig_from)) {
           same_rank++;
         }
 
-        if (file(from) == file(ambig_from)) { 
+        if (file(from) == file(ambig_from)) {
           same_file++;
         }
       }
@@ -831,13 +825,13 @@ var Chess = function(fen) {
        */
       if (same_rank > 0 && same_file > 0) {
         return algebraic(from);
-      } 
-      /* if the moving piece rests on the same file, use the rank symbol as the 
+      }
+      /* if the moving piece rests on the same file, use the rank symbol as the
        * disambiguator
        */
       else if (same_file > 0) {
         return algebraic(from).charAt(1);
-      } 
+      }
       /* else use the file symbol */
       else {
         return algebraic(from).charAt(0);
@@ -875,7 +869,6 @@ var Chess = function(fen) {
 
     return s;
   }
-
 
   /******************************************************************************
    * UTILITY FUNCTIONS
@@ -941,7 +934,6 @@ var Chess = function(fen) {
     return dupe;
   }
 
-
   /******************************************************************************
    * DEBUGGING UTILITIES
    *****************************************************************************/
@@ -966,7 +958,6 @@ var Chess = function(fen) {
     return nodes;
   }
 
-
   return {
     /***************************************************************************
      * PUBLIC CONSTANTS (is there a better way to do this?)
@@ -981,8 +972,10 @@ var Chess = function(fen) {
     KING: KING,
     SQUARES: (function() {
                 /* from the ECMA-262 spec (section 12.6.4):
-                 * "The mechanics of enumerating the properties ... is implementation dependent" 
-                 * so: for (var sq in SQUARES) { keys.push(sq); } is kinda iffy.
+                 * "The mechanics of enumerating the properties ... is
+                 * implementation dependent"
+                 * so: for (var sq in SQUARES) { keys.push(sq); } might not be
+                 * ordered correctly
                  */
                 var keys = [];
                 for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
@@ -1040,8 +1033,8 @@ var Chess = function(fen) {
     },
 
     in_draw: function() {
-      return half_moves >= 100 || 
-             in_stalemate() || 
+      return half_moves >= 100 ||
+             in_stalemate() ||
              insufficient_material() ||
              in_threefold_repetition();
     },
@@ -1055,9 +1048,9 @@ var Chess = function(fen) {
     },
 
     game_over: function() {
-      return half_moves >= 100 || 
+      return half_moves >= 100 ||
              in_checkmate() ||
-             in_stalemate() || 
+             in_stalemate() ||
              insufficient_material() ||
              in_threefold_repetition();
     },
@@ -1098,7 +1091,7 @@ var Chess = function(fen) {
       } else if (typeof move == 'object') {
         /* convert the move string to a move object */
         for (var i = 0, len = moves.length; i < len; i++) {
-          if (move.from == algebraic(moves[i].from) && 
+          if (move.from == algebraic(moves[i].from) &&
               move.to == algebraic(moves[i].to) &&
               (!('promotion' in moves[i]) ||
               move.promotion == moves[i].promotion)) {
@@ -1106,7 +1099,7 @@ var Chess = function(fen) {
             break;
           }
         }
-      } 
+      }
 
       /* failed to find move */
       if (!move_obj) {
