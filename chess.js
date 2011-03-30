@@ -894,16 +894,9 @@ var Chess = function(fen) {
     return '0123456789'.indexOf(c) != -1
   }
 
-  /* ugly = internal 0x88 move object */
-  function make_ugly(move) {
-    move.from = SQUARES[move.from];
-    move.to = SQUARES[move.to];
-
-    return move;
-  }
-
   /* pretty = external move object */
-  function make_pretty(move) {
+  function make_pretty(ugly_move) {
+    var move = clone(ugly_move);
     move.san = move_to_san(move);
     move.to = algebraic(move.to);
     move.from = algebraic(move.from);
@@ -1109,7 +1102,7 @@ var Chess = function(fen) {
       /* need to make a copy of move because we can't generate SAN after the
        * move is made
        */
-      var pretty_move = make_pretty(clone(move_obj));
+      var pretty_move = make_pretty(move_obj);
 
       make_move(move_obj);
 
