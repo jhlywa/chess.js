@@ -272,6 +272,30 @@ var Chess = function(fen) {
 
     return [fen, turn, cflags, epflags, half_moves, move_number].join(' ')
   }
+	
+  // using the specification from http://www.chessclub.com/help/PGN-spec
+  function generate_pgn() {
+    var i = 0;
+    var result = [];
+    var currentMove;
+    var currentMoveNumber = 1;
+    
+    // pop all of history onto reversedHistory
+    var reversedHistory = [];
+    while (history.length > 0) {
+      reversedHistory.push(undo_move());
+    }
+    
+    while(reversedHistory.length > 0) {
+      history.length % 2 === 0 ? result.push(currentMoveNumber++ + ".") : null;
+      currentMove = reversedHistory.pop();
+      result.push(move_to_san(currentMove));
+      make_move(currentMove);
+    }
+    
+    // history should be back to what is was before we started generating pgn
+    return result.join(" ");
+  }
 
   function get(square) {
     var piece = board[SQUARES[square]];
@@ -1050,6 +1074,10 @@ var Chess = function(fen) {
 
     fen: function() {
       return generate_fen();
+    },
+		
+    pgn: function() {
+      return generate_pgn();
     },
 
     ascii: function() {
