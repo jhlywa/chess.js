@@ -83,7 +83,7 @@ Returns the FEN string for the current position.
     // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
 
 ### .info()
-Allows header information to be added to PGN output. Any number key/values
+Allows header information to be added to PGN output. Any number of key/values
 can be passed to .info(). See .pgn() for example.
 
 ### .pgn(options)
