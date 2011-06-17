@@ -82,6 +82,23 @@ Returns the FEN string for the current position.
     chess.fen();
     // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
 
+### .info()
+Allows header information to be added to PGN output. Any number key/values
+can be passed to .info(). See .pgn() for example.
+
+### .pgn(options)
+Returns the game in PGN format. Options is an object that can include
+max width and/or a newline character.
+
+    var chess = new Chess();
+    chess.info("White", "Plunky", "Black", "Plinkie");
+    chess.move('e4');
+    chess.move('e5');
+    chess.move('Nc3');
+    chess.move('Nc6');
+
+    chess.pgn({max_width:5, newline_char:"<br />"});
+    // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
 
 
 ### .ascii()
@@ -359,5 +376,5 @@ Returns the color of the square ('light' or 'dark').
 
 ## TODO
 
-- add method to generate PGN ([Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation)) output
+- add method to input PGN
 - add AI (basic alpha-beta search w/ primitive position evaluation)
