@@ -147,6 +147,7 @@ var Chess = function(fen) {
   var half_moves = 0;
   var move_number = 1;
   var history = [];
+  var info = {};		// holds PGN header information.
 
   /* if the user passes in a fen string, load it, else default to
    * starting position
@@ -166,6 +167,7 @@ var Chess = function(fen) {
     half_moves = 0;
     move_number = 1;
     history = [];
+    info = {};
   }
 
   function reset() {
@@ -274,27 +276,71 @@ var Chess = function(fen) {
   }
 	
   // using the specification from http://www.chessclub.com/help/PGN-spec
-  function generate_pgn() {
-    var i = 0;
+  // options_obj can contain the maxium width and a newline character
+  // example for html usage: options_obj = {max_width:72, newline_char:"<br />"}
+  function generate_pgn(options_obj) {
     var result = [];
-    var currentMove;
-    var currentMoveNumber = 1;
+    var move_strings = [];
+    var move_string = "";
+    var current_move_number = 1;
+    var newline_char = (typeof options_obj === "object" && typeof options_obj.newline_char === "string") ? options_obj.newline_char : "\n";
+    var max_width = (typeof options_obj === "object" && typeof options_obj.max_width === "number") ? options_obj.max_width : 0;
+    var current_width = 0;
+
+    // add the PGN header information
+    for (var i in info) {
+      result.push("[" + i + " \"" + info[i] + "\"]" + newline_char);
+    }
+    result.push(newline_char);
     
     // pop all of history onto reversedHistory
-    var reversedHistory = [];
+    var reversed_history = [];
     while (history.length > 0) {
-      reversedHistory.push(undo_move());
+      reversed_history.push(undo_move());
     }
     
-    while(reversedHistory.length > 0) {
-      history.length % 2 === 0 ? result.push(currentMoveNumber++ + ".") : null;
-      currentMove = reversedHistory.pop();
-      result.push(move_to_san(currentMove));
-      make_move(currentMove);
+    // fill the array of move_strings. Example of a move_string: "3. e3 e6"
+    while(reversed_history.length > 0) {
+      if (history.length % 2 === 0) {
+        move_string.length ? move_strings.push(move_string) : null;
+        move_string = current_move_number + ".";
+        current_move_number++;
+      }
+      var current_move = reversed_history.pop();
+      move_string = move_string + " " + move_to_san(current_move);
+      make_move(current_move);
     }
+    move_string.length ? move_strings.push(move_string) : null;
     
     // history should be back to what is was before we started generating pgn
-    return result.join(" ");
+    
+    // join together move_strings
+    if (max_width === 0) {
+      return result.join("") + move_strings.join(" ");
+    }
+    
+    for (var i = 0; i < move_strings.length; i++) {
+      if (current_width + move_strings[i].length > max_width && i !== 0) {
+        result.push(newline_char);
+        current_width = 0;
+      } else if (i !== 0) {
+        result.push(" ");
+        current_width++;
+      }
+      result.push(move_strings[i]);
+      current_width += move_strings[i].length;
+    }
+    return result.join("");
+  }
+
+  // ex. set_info('White', 'Jeff Hlywa', 'Black', 'Steve Bragg')
+  function set_info(args) {
+    for (var i = 0; i < args.length; i += 2) {
+      if (typeof args[i] === "string" && typeof args[i + 1] === "string") {
+        info[args[i]] = args[i + 1];
+      }
+    }
+    return info;
   }
 
   function get(square) {
@@ -1076,8 +1122,14 @@ var Chess = function(fen) {
       return generate_fen();
     },
 		
-    pgn: function() {
-      return generate_pgn();
+    // options_obj can contain width and a newline character
+    // example for html usage: options_obj = {max_width:72, newline_char:"<br />"}
+    pgn: function(options_obj) {
+      return generate_pgn(options_obj);
+    },
+
+    info: function() {
+      return set_info(arguments);
     },
 
     ascii: function() {
@@ -1177,3 +1229,4 @@ var Chess = function(fen) {
 /* export Chess object if using node or any other CommonJS compatible
  * environment */
 if (typeof exports != 'undefined') exports.Chess = Chess;
+
