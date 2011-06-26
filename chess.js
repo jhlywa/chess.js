@@ -40,6 +40,8 @@ var Chess = function(fen) {
   var KING = 'k';
 
   var SYMBOLS = 'pnbrqkPNBRQK';
+  
+  var DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
   var PAWN_OFFSETS = {
     b: [16, 32, 17, 15],
@@ -153,7 +155,7 @@ var Chess = function(fen) {
    * starting position
    */
   if (typeof fen == 'undefined') {
-    load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    load(DEFAULT_POSITION);
   } else {
     load(fen);
   }
@@ -168,11 +170,12 @@ var Chess = function(fen) {
     move_number = 1;
     history = [];
     info = {};
+    update_setup();
   }
 
   function reset() {
     clear();
-    load('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+    load(DEFAULT_POSITION);
   }
 
   function load(fen) {
@@ -225,6 +228,8 @@ var Chess = function(fen) {
     ep_square = (tokens[3] == '-') ? EMPTY : SQUARES[tokens[3]];
     half_moves = parseInt(tokens[4], 10);
     move_number = parseInt(tokens[5], 10);
+    
+    update_setup();
 
     return true;
   }
@@ -286,12 +291,17 @@ var Chess = function(fen) {
     var newline_char = (typeof options_obj === "object" && typeof options_obj.newline_char === "string") ? options_obj.newline_char : "\n";
     var max_width = (typeof options_obj === "object" && typeof options_obj.max_width === "number") ? options_obj.max_width : 0;
     var current_width = 0;
+    var info_exists = false;
 
     // add the PGN header information
     for (var i in info) {
       result.push("[" + i + " \"" + info[i] + "\"]" + newline_char);
+      info_exists = true;
     }
-    result.push(newline_char);
+    
+    if (info_exists && history.length) {
+      result.push(newline_char);
+    }
     
     // pop all of history onto reversedHistory
     var reversed_history = [];
@@ -301,12 +311,15 @@ var Chess = function(fen) {
     
     // fill the array of move_strings. Example of a move_string: "3. e3 e6"
     while(reversed_history.length > 0) {
-      if (history.length % 2 === 0) {
-        move_string.length ? move_strings.push(move_string) : null;
-        move_string = current_move_number + ".";
-        current_move_number++;
-      }
       var current_move = reversed_history.pop();
+      if (current_move.color === 'w') {
+        move_string.length ? move_strings.push(move_string) : null;   // done making the last move_string
+        move_string = current_move_number + '.';
+        current_move_number++;
+      } else if (current_move.color === 'b' && current_move_number === 1) {
+        move_string = '1. ...';
+        current_move_number++;
+      } 
       move_string = move_string + " " + move_to_san(current_move);
       make_move(current_move);
     }
@@ -342,6 +355,23 @@ var Chess = function(fen) {
     }
     return info;
   }
+  
+  // called when the initial board setup is changed with put() or remove()'
+  // modifies the SetUp and FEN properties of the info variable
+  // if the FEN is equal to the default position, the SetUp and FEN are deleted
+  // the setup is only updated if history.length is zero, ie moves haven't been made.
+  function update_setup() {
+    var fen = generate_fen();
+    if (history.length === 0) {
+      if (fen !== DEFAULT_POSITION) {
+        info["SetUp"] = generate_fen();
+        info["FEN"] = '1';
+      } else {
+        delete info["SetUp"];
+        delete info["FEN"];
+      }
+    }
+  }
 
   function get(square) {
     var piece = board[SQUARES[square]];
@@ -369,6 +399,8 @@ var Chess = function(fen) {
     if (piece.type == KING) {
       kings[piece.color] = sq;
     }
+    
+    update_setup();
 
     return true;
   }
@@ -379,6 +411,8 @@ var Chess = function(fen) {
     if (piece && piece.type == KING) {
       kings[piece.color] = EMPTY;
     }
+    
+    update_setup();
 
     return piece;
   }
