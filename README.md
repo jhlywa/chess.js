@@ -2,7 +2,7 @@
 
 chess.js is a Javascript chess library that is used for chess move generation/validation,
 piece placement/movement, and check/checkmate/stalemate detection - basically everything 
-but the AI (don't worry, it's coming soon).
+but the AI.
 
 Using chess.js in a browser is straight-forward:
     
@@ -368,6 +368,18 @@ Returns the color of the square ('light' or 'dark').
 
 
 
+## CONTRIBUTORS
+
+Special thanks to the following developers for their patches and contributions:
+- [Steve Bragg](https://github.com/2sb18)
+- [E. Azer Koçulu](https://github.com/azer)
+
+Musical support provided by:
+- [The Grateful Dead](http://www.youtube.com/watch?v=YLzUme1gN8c)
+- [Umphrey's McGee](http://www.youtube.com/watch?v=jh-1fFWkSdw)
+
+
+
 ## BUGS
 
 - the en passant square and castling flags aren't adjusted when using the put/remove functions (workaround: use .load() instead)
@@ -378,3 +390,5 @@ Returns the color of the square ('light' or 'dark').
 
 - add method to input PGN
 - add AI (basic alpha-beta search w/ primitive position evaluation)
+- add jQuery chessboard widget
+- investigate the use of piece lists (this may shave a few cycles off generate_moves() and attacked())
