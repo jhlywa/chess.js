@@ -371,10 +371,12 @@ Returns the color of the square ('light' or 'dark').
 ## CONTRIBUTORS
 
 Special thanks to the following developers for their patches and contributions:
+
 - [Steve Bragg](https://github.com/2sb18)
 - [E. Azer Koçulu](https://github.com/azer)
 
 Musical support provided by:
+
 - [The Grateful Dead](http://www.youtube.com/watch?v=YLzUme1gN8c)
 - [Umphrey's McGee](http://www.youtube.com/watch?v=jh-1fFWkSdw)
 
