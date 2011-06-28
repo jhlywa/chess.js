@@ -40,7 +40,7 @@ var Chess = function(fen) {
   var KING = 'k';
 
   var SYMBOLS = 'pnbrqkPNBRQK';
-  
+
   var DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
   var PAWN_OFFSETS = {
@@ -149,7 +149,7 @@ var Chess = function(fen) {
   var half_moves = 0;
   var move_number = 1;
   var history = [];
-  var info = {};		// holds PGN header information.
+  var info = {};                // holds PGN header information.
 
   /* if the user passes in a fen string, load it, else default to
    * starting position
@@ -228,7 +228,7 @@ var Chess = function(fen) {
     ep_square = (tokens[3] == '-') ? EMPTY : SQUARES[tokens[3]];
     half_moves = parseInt(tokens[4], 10);
     move_number = parseInt(tokens[5], 10);
-    
+
     update_setup();
 
     return true;
@@ -279,7 +279,7 @@ var Chess = function(fen) {
 
     return [fen, turn, cflags, epflags, half_moves, move_number].join(' ')
   }
-	
+
   // using the specification from http://www.chessclub.com/help/PGN-spec
   // options_obj can contain the maxium width and a newline character
   // example for html usage: options_obj = {max_width:72, newline_char:"<br />"}
@@ -298,17 +298,17 @@ var Chess = function(fen) {
       result.push("[" + i + " \"" + info[i] + "\"]" + newline_char);
       info_exists = true;
     }
-    
+
     if (info_exists && history.length) {
       result.push(newline_char);
     }
-    
+
     // pop all of history onto reversedHistory
     var reversed_history = [];
     while (history.length > 0) {
       reversed_history.push(undo_move());
     }
-    
+
     // fill the array of move_strings. Example of a move_string: "3. e3 e6"
     while(reversed_history.length > 0) {
       var current_move = reversed_history.pop();
@@ -319,19 +319,19 @@ var Chess = function(fen) {
       } else if (current_move.color === 'b' && current_move_number === 1) {
         move_string = '1. ...';
         current_move_number++;
-      } 
+      }
       move_string = move_string + " " + move_to_san(current_move);
       make_move(current_move);
     }
     move_string.length ? move_strings.push(move_string) : null;
-    
+
     // history should be back to what is was before we started generating pgn
-    
+
     // join together move_strings
     if (max_width === 0) {
       return result.join("") + move_strings.join(" ");
     }
-    
+
     for (var i = 0; i < move_strings.length; i++) {
       if (current_width + move_strings[i].length > max_width && i !== 0) {
         result.push(newline_char);
@@ -355,7 +355,7 @@ var Chess = function(fen) {
     }
     return info;
   }
-  
+
   // called when the initial board setup is changed with put() or remove()'
   // modifies the SetUp and FEN properties of the info variable
   // if the FEN is equal to the default position, the SetUp and FEN are deleted
@@ -399,7 +399,7 @@ var Chess = function(fen) {
     if (piece.type == KING) {
       kings[piece.color] = sq;
     }
-    
+
     update_setup();
 
     return true;
@@ -411,7 +411,7 @@ var Chess = function(fen) {
     if (piece && piece.type == KING) {
       kings[piece.color] = EMPTY;
     }
-    
+
     update_setup();
 
     return piece;
@@ -1155,7 +1155,7 @@ var Chess = function(fen) {
     fen: function() {
       return generate_fen();
     },
-		
+
     // options_obj can contain width and a newline character
     // example for html usage: options_obj = {max_width:72, newline_char:"<br />"}
     pgn: function(options_obj) {

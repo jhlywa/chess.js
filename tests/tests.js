@@ -359,7 +359,7 @@ function fen_tests() {
 function pgn_tests() {
   var start = new Date;
   var passed = true;
-	var error_message;
+  var error_message;
   var positions = [
     {moves: ['d4', 'd5', 'Nf3', 'Nc6', 'e3', 'e6', 'Bb5', 'g5', 'O-O', 'Qf6', 'Nc3',
              'Bd7', 'Bxc6', 'Bxc6', 'Re1', 'O-O-O', 'a4', 'Bb4', 'a5', 'b5', 'axb6', 
@@ -399,16 +399,16 @@ function pgn_tests() {
      starting_position: 'r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 1',
      fen: 'r1bqk1nr/ppp2ppp/2np4/b3p3/2BPP3/2P2N2/P4PPP/RNBQ1RK1 b kq d3 0 3'}
     ];
+
   for (var i = 0; i < positions.length; i++) {
     var chess = ("starting_position" in positions[i]) ? new Chess(positions[i].starting_position) : new Chess();
-    // var chess = (positions.starting_position !== undefined) ? new Chess(positions.starting_position) : new Chess();
     passed = true;
-		error_message = "";
+    error_message = "";
     for (var j = 0; j < positions[i].moves.length; j++) {
-			if (chess.move(positions[i].moves[j]) === null) {
-				error_message = "move() did not accept " + positions[i].moves[j] + " : ";
-				break;
-			}
+      if (chess.move(positions[i].moves[j]) === null) {
+        error_message = "move() did not accept " + positions[i].moves[j] + " : ";
+        break;
+      }
     }
     var s = 'PGN Test #' + i + ': ' + error_message;
     chess.info.apply(null, positions[i].info);
