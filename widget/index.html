@@ -1,0 +1,71 @@
+<html>
+<head>
+  <link rel="stylesheet" href="css/chess.css" type="text/css" />
+  <script type="text/javascript" src="../chess.js"></script>
+  <script type="text/javascript" src="jquery-1.6.1.min.js"></script>
+  <script type="text/javascript" src="jquery-ui-1.8.14.custom.min.js"></script>
+  <script type="text/javascript" src="jquery.chess.js"></script>
+  <script type="text/javascript">
+
+    $(document).ready(function() {
+
+      $('#board').chess({
+        /* castling test */
+        fen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1', 
+
+        /* promotion test */
+        // fen: '8/PPP4k/8/8/8/8/4Kppp/8 w - - 0 1',
+        highlight: true,
+        size: 64,
+        flip: false,
+      });
+
+      $('#flip').click(function() {
+        $('#board').chess('flip');
+      });
+
+      $('#size_up').click(function() {
+        var size = $('#board').chess('option', 'size') + 2;
+        if (size <= 64) {
+          $('#board').chess('option', 'size', size);
+        }
+      });
+
+      $('#size_down').click(function() {
+        var size = $('#board').chess('option', 'size') - 2;
+        if (size >= 10) {
+          $('#board').chess('option', 'size', size);
+        }
+      });
+
+      $('#move').click(function() {
+        var chess = $('#board').chess('option', 'chess');
+        var moves = chess.moves();
+        if (moves.length) {
+          var move = moves[Math.floor(Math.random() * moves.length)];
+          $('#board').chess('move', move);
+        }
+      });
+
+      $('#theme').change(function() {
+          $('#board').chess('theme', $(this).val());
+      });
+    });
+  </script>
+</head>
+<body>
+  <p>
+    <input id='flip' type='button' value='Flip' />
+    <input id='size_down' type='button' value='Size --' />
+    <input id='size_up' type='button' value='Size ++' />
+    <input id='move' type='button' value='random move' />
+    theme:
+    <select id='theme'>
+      <option value="alpha" selected>alpha</option>
+      <option value="uscf">uscf</option>
+      <option value="merida">merida</option>
+    </select>
+  </p>
+  <div id="board"></div>
+</body>
+</html>
