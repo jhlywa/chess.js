@@ -178,13 +178,107 @@ var Chess = function(fen) {
     load(DEFAULT_POSITION);
   }
 
-  function load(fen) {
+  function validate_fen(fen, return_type) {
+    /* return_type IN ["boolean", "integer"] */
+    
+    function get_return(ret) {
+      switch(return_type) {
+        case "integer":
+          return ret;
+        break;
+        case "boolean":
+        default:
+          if (ret === 0)
+            return true;
+          return false;
+        break;
+      }
+    }
+    
+    function isInteger(val) {
+      if (isNaN(val))
+        return false;
+      if (val != parseInt(val))
+        return false;
+      return true;
+    }
+    
+    /* 1st criterion: 6 space-seperated groups? */
+    var tokens = fen.split(" ");
+    if (tokens.length != 6)
+      return get_return(1);
+
+    /* 2nd criterion: 6th group is an integer value? */
+    if (!isInteger(tokens[5]))
+      return get_return(2);
+
+    /* 3nd criterion: 6th group is positive? */
+    if (parseInt(tokens[5]) < 1)
+      return get_return(3);
+
+    /* 4th criterion: 5th group is an integer value? */ 
+    if (!isInteger(tokens[4]))
+      return get_return(4);
+
+    /* 5th criterion: 5th group is not negative? */
+    if (parseInt(tokens[4]) < 0)
+      return get_return(5);
+
+    /* 6th criterion: 4th group is a valid e.p.-string? */
+    if (!/^(-|[abcdefgh][36])$/.test(tokens[3]))
+      return get_return(6);
+
+    /* 7th criterion: 3th group is a valid castle-string? */
+    if( !/^(KQ?k?q?|Qk?q?|kq?|q|-)$/.test(tokens[2]))
+      return get_return(7);
+
+    /* 8th criterion: 2nd group is "w" (white) or "b" (black)? */
+    if (!/^(w|b)$/.test(tokens[1]))
+      return get_return(8);
+
+    /* 9th criterion: 1st group contains 8 rows? */
+    var rows = tokens[0].split("/");
+    if (rows.length != 8)
+      return get_return(9);
+
+    /* 10th criterion: every row is valid? */
+    for(var i = 0; i < rows.length; i++) {
+      /* check for right sum of fields AND not two numbers in succession */
+      var sumFields = 0;
+      var previousWasNumber = false;
+      for(var k = 0; k < rows[i].length; k++) {
+        if (isInteger(rows[i][k])) {
+          if (previousWasNumber === true) {
+            return get_return(10);
+          }
+          sumFields += parseInt(rows[i][k]);
+          previousWasNumber = true;
+        } else {
+          if (!/^[prnbqkPRNBQK]$/.test(rows[i][k])) {
+            return get_return(10);
+          }
+          sumFields += 1;
+          previousWasNumber = false;	
+        }
+      }
+      if (sumFields > 8) {
+        return get_return(10);
+      }
+    }
+    
+    return get_return(0); 	// everything's okay!
+  }
+
+  function load(fen, validate_before) {
     var tokens = fen.split(' ');
     var position = tokens[0];
     var square = 0;
     var valid = SYMBOLS + '12345678/';
 
     clear();
+    
+    if (validate_before === true && validate_fen(fen) === false)
+    	return false;
 
     for (var i = 0; i < position.length; i++) {
       var piece = position.charAt(i);
@@ -1086,8 +1180,8 @@ var Chess = function(fen) {
     /***************************************************************************
      * PUBLIC API
      **************************************************************************/
-    load: function(fen) {
-      return load(fen);
+    load: function(fen, validate_before) {
+      return load(fen, validate_before);
     },
 
     reset: function() {
@@ -1154,6 +1248,10 @@ var Chess = function(fen) {
 
     fen: function() {
       return generate_fen();
+    },
+    
+    validate_fen: function(fen, return_type) {
+      return validate_fen(fen, return_type);
     },
 
     // options_obj can contain width and a newline character
