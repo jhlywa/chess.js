@@ -42,6 +42,8 @@ var Chess = function(fen) {
   var SYMBOLS = 'pnbrqkPNBRQK';
 
   var DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  
+  var POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'];
 
   var PAWN_OFFSETS = {
     b: [16, 32, 17, 15],
@@ -159,6 +161,14 @@ var Chess = function(fen) {
   } else {
     load(fen);
   }
+  
+  
+  /* helper functions */
+  function trim(str) {
+    return str.replace(/^\s+|\s+$/g,"");
+  }
+  /* end of helper functions */
+  
 
   function clear() {
     board = new Array(128);
@@ -178,9 +188,9 @@ var Chess = function(fen) {
     load(DEFAULT_POSITION);
   }
 
+
   function validate_fen(fen, return_type) {
     /* return_type IN ["boolean", "integer"] */
-    
     function get_return(ret) {
       switch(return_type) {
         case "integer":
@@ -450,6 +460,83 @@ var Chess = function(fen) {
     return info;
   }
 
+  function parse_pgn_info(pgn_info, options_obj) {
+    var newline_char = (typeof options_obj === "object" && typeof options_obj.newline_char === "string") ? options_obj.newline_char : "\n";
+    
+    var info_obj = {};
+    
+    var infos = pgn_info.split(newline_char);
+    var key = '';
+    var value = '';
+    for (var i = 0; i < infos.length; i++) {
+      key = infos[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1');
+      value = infos[i].replace(/^\[[A-Za-z]+\s"(.*)"\]$/, '$1');
+      info_obj[key] = value;
+    }
+    
+    return info_obj;
+  }
+ 
+  function load_pgn(pgn, options_obj) {
+  	 function mask(str) {
+  	   return str.replace(/\n/g, '\\n');
+  	 }
+  	 
+  	 function get_move_obj(move) {
+  	   return move_from_san(trim(move.replace(/^\d+\.(.+)$/, '$1')));
+  	 }
+
+    var newline_char = (typeof options_obj === "object" && typeof options_obj.newline_char === "string") ? options_obj.newline_char : "\n";
+  	 
+  	 var regex = new RegExp('^(\\[(.|'+mask(newline_char)+')*\\])(\\s)*1\.('+mask(newline_char)+'|.)*$', 'g');
+  	 var info_string = pgn.replace(regex, '$1');	// get info part of the PGN file
+  	 if (info_string[0] !== '[') {
+  	   // no info part given, begins with moves
+  	   info_string = '';
+  	 }
+
+    reset();
+  	 
+  	 // parse PGN infos
+  	 var infos = parse_pgn_info(info_string, options_obj);
+  	 for (var key in infos) {
+  	 	set_info([key, infos[key]]);
+  	 }
+  	 
+  	 var move_string = trim(pgn.replace(info_string, '').replace(newline_char, ' ')); 	// delete info part to get the moves
+  	 move_string = move_string.replace(/\{[^}]*\}/g, ''); 	// delete comments
+  	
+    var moves = move_string.split(new RegExp('['+mask(newline_char)+'|\\s]'));	// get array of moves
+    moves = moves.join(",").replace(/,,+/g, ',').split(","); 	// delete empty entries
+    var curr_move = '';
+    
+    for (var half_move = 0; half_move < moves.length-1; half_move++) {	// pass the very last move as it could be the result
+      curr_move = get_move_obj(moves[half_move]);
+      
+      if (curr_move === null) {
+        // move not possible! (don't clear the board to examine to show the latest valid position)
+        // clear();
+        return false;
+      } else {
+        make_move(curr_move);
+      }
+    }
+    
+    // examine last move
+    curr_move = moves[moves.length-1];
+    if (POSSIBLE_RESULTS.indexOf(curr_move) > -1) {
+      if (typeof info.Result === 'undefined')
+        set_info(["Result", curr_move]);
+    }
+    else {
+      curr_move = get_move_obj(curr_move);
+      if (curr_move === null)
+        return false;
+    }
+
+    return true;
+  }
+
   // called when the initial board setup is changed with put() or remove()'
   // modifies the SetUp and FEN properties of the info variable
   // if the FEN is equal to the default position, the SetUp and FEN are deleted
@@ -711,6 +798,18 @@ var Chess = function(fen) {
 
     return output;
   }
+  
+  /* convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates */
+  function move_from_san(move) {
+    var moves = generate_moves();
+    for (var i = 0, len = moves.length; i < len; i++) {
+      if (move == move_to_san(moves[i])) {
+        return moves[i];
+      }
+    }
+    return null;
+  }
+  	
 
   function attacked(color, square) {
     for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
@@ -1259,6 +1358,10 @@ var Chess = function(fen) {
     pgn: function(options_obj) {
       return generate_pgn(options_obj);
     },
+    
+    load_pgn: function(pgn, options) {
+    	return load_pgn(pgn, options);
+    },
 
     info: function() {
       return set_info(arguments);
@@ -1287,12 +1390,7 @@ var Chess = function(fen) {
 
       if (typeof move == 'string') {
         /* convert the move string to a move object */
-        for (var i = 0, len = moves.length; i < len; i++) {
-          if (move == move_to_san(moves[i])) {
-            move_obj = moves[i];
-            break;
-          }
-        }
+        move_obj = move_from_san(move);
       } else if (typeof move == 'object') {
         /* convert the move string to a move object */
         for (var i = 0, len = moves.length; i < len; i++) {
