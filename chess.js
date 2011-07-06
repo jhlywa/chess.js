@@ -483,7 +483,7 @@ var Chess = function(fen) {
   	 }
   	 
   	 function get_move_obj(move) {
-  	   return move_from_san(trim(move.replace(/^\d+\.(.+)$/, '$1')));
+  	   return move_from_san(trim(move.replace(/^\d+\.\d{0,1}(.+)$/, '$1')));
   	 }
 
     var newline_char = (typeof options_obj === "object" && typeof options_obj.newline_char === "string") ? options_obj.newline_char : "\n";
@@ -505,7 +505,8 @@ var Chess = function(fen) {
   	 
   	 var move_string = trim(pgn.replace(info_string, '').replace(newline_char, ' ')); 	// delete info part to get the moves
   	 move_string = move_string.replace(/\{[^}]*\}/g, ''); 	// delete comments
-  	
+  	 move_string = move_string.replace(/(\d\.)\s([A-Za-z])/g, '$1$2');
+  	 
     var moves = move_string.split(new RegExp('['+mask(newline_char)+'|\\s]'));	// get array of moves
     moves = moves.join(",").replace(/,,+/g, ',').split(","); 	// delete empty entries
     var curr_move = '';
@@ -515,7 +516,7 @@ var Chess = function(fen) {
       
       if (curr_move === null) {
         // move not possible! (don't clear the board to examine to show the latest valid position)
-        // clear();
+        // reset();
         return false;
       } else {
         make_move(curr_move);
@@ -532,6 +533,8 @@ var Chess = function(fen) {
       curr_move = get_move_obj(curr_move);
       if (curr_move === null)
         return false;
+      else
+        make_move(curr_move);
     }
 
     return true;
