@@ -845,7 +845,7 @@ var Chess = function(fen) {
     var old = history.pop();
     if (old == null) { return null; }
 
-    move = old.move;
+    var move = old.move;
     kings = old.kings;
     turn = old.turn;
     castling = old.castling;
@@ -892,7 +892,7 @@ var Chess = function(fen) {
 
   /* this function is used to uniquely identify ambiguous moves */
   function get_disambiguator(move) {
-    moves = generate_moves();
+    var moves = generate_moves();
 
     var from = move.from;
     var to = move.to;

@@ -449,7 +449,7 @@ function make_move_tests() {
     chess.load(positions[i].fen);
     var s = 'Make Move Test #' + i + ': ' + positions[i].fen + 
             ' (' + positions[i].move + ' ' + positions[i].legal + ') : ';
-    result = chess.move(positions[i].move);
+    var result = chess.move(positions[i].move);
     if (positions[i].legal) {
       s += (result && chess.fen() == positions[i].next) ? 'PASSED!' : 'FAILED!';
     } else {
