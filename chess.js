@@ -42,6 +42,8 @@ var Chess = function(fen) {
   var SYMBOLS = 'pnbrqkPNBRQK';
 
   var DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  
+  var POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'];
 
   var PAWN_OFFSETS = {
     b: [16, 32, 17, 15],
@@ -159,6 +161,14 @@ var Chess = function(fen) {
   } else {
     load(fen);
   }
+  
+  
+  /* helper functions */
+  function trim(str) {
+    return str.replace(/^\s+|\s+$/g,"");
+  }
+  /* end of helper functions */
+  
 
   function clear() {
     board = new Array(128);
@@ -178,13 +188,107 @@ var Chess = function(fen) {
     load(DEFAULT_POSITION);
   }
 
-  function load(fen) {
+
+  function validate_fen(fen, return_type) {
+    /* return_type IN ["boolean", "integer"] */
+    function get_return(ret) {
+      switch(return_type) {
+        case "integer":
+          return ret;
+        break;
+        case "boolean":
+        default:
+          if (ret === 0)
+            return true;
+          return false;
+        break;
+      }
+    }
+    
+    function isInteger(val) {
+      if (isNaN(val))
+        return false;
+      if (val != parseInt(val))
+        return false;
+      return true;
+    }
+    
+    /* 1st criterion: 6 space-seperated groups? */
+    var tokens = fen.split(" ");
+    if (tokens.length != 6)
+      return get_return(1);
+
+    /* 2nd criterion: 6th group is an integer value? */
+    if (!isInteger(tokens[5]))
+      return get_return(2);
+
+    /* 3nd criterion: 6th group is positive? */
+    if (parseInt(tokens[5]) < 1)
+      return get_return(3);
+
+    /* 4th criterion: 5th group is an integer value? */ 
+    if (!isInteger(tokens[4]))
+      return get_return(4);
+
+    /* 5th criterion: 5th group is not negative? */
+    if (parseInt(tokens[4]) < 0)
+      return get_return(5);
+
+    /* 6th criterion: 4th group is a valid e.p.-string? */
+    if (!/^(-|[abcdefgh][36])$/.test(tokens[3]))
+      return get_return(6);
+
+    /* 7th criterion: 3th group is a valid castle-string? */
+    if( !/^(KQ?k?q?|Qk?q?|kq?|q|-)$/.test(tokens[2]))
+      return get_return(7);
+
+    /* 8th criterion: 2nd group is "w" (white) or "b" (black)? */
+    if (!/^(w|b)$/.test(tokens[1]))
+      return get_return(8);
+
+    /* 9th criterion: 1st group contains 8 rows? */
+    var rows = tokens[0].split("/");
+    if (rows.length != 8)
+      return get_return(9);
+
+    /* 10th criterion: every row is valid? */
+    for(var i = 0; i < rows.length; i++) {
+      /* check for right sum of fields AND not two numbers in succession */
+      var sumFields = 0;
+      var previousWasNumber = false;
+      for(var k = 0; k < rows[i].length; k++) {
+        if (isInteger(rows[i][k])) {
+          if (previousWasNumber === true) {
+            return get_return(10);
+          }
+          sumFields += parseInt(rows[i][k]);
+          previousWasNumber = true;
+        } else {
+          if (!/^[prnbqkPRNBQK]$/.test(rows[i][k])) {
+            return get_return(10);
+          }
+          sumFields += 1;
+          previousWasNumber = false;	
+        }
+      }
+      if (sumFields > 8) {
+        return get_return(10);
+      }
+    }
+    
+    return get_return(0); 	// everything's okay!
+  }
+
+  function load(fen, validate_before) {
     var tokens = fen.split(' ');
     var position = tokens[0];
     var square = 0;
     var valid = SYMBOLS + '12345678/';
 
     clear();
+    
+    if (validate_before === true && validate_fen(fen) === false)
+    	return false;
 
     for (var i = 0; i < position.length; i++) {
       var piece = position.charAt(i);
@@ -354,6 +458,86 @@ var Chess = function(fen) {
       }
     }
     return info;
+  }
+
+  function parse_pgn_info(pgn_info, options_obj) {
+    var newline_char = (typeof options_obj === "object" && typeof options_obj.newline_char === "string") ? options_obj.newline_char : "\n";
+    
+    var info_obj = {};
+    
+    var infos = pgn_info.split(newline_char);
+    var key = '';
+    var value = '';
+    for (var i = 0; i < infos.length; i++) {
+      key = infos[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1');
+      value = infos[i].replace(/^\[[A-Za-z]+\s"(.*)"\]$/, '$1');
+      info_obj[key] = value;
+    }
+    
+    return info_obj;
+  }
+ 
+  function load_pgn(pgn, options_obj) {
+  	 function mask(str) {
+  	   return str.replace(/\n/g, '\\n');
+  	 }
+  	 
+  	 function get_move_obj(move) {
+  	   return move_from_san(trim(move.replace(/^\d+\.\d{0,1}(.+)$/, '$1')));
+  	 }
+
+    var newline_char = (typeof options_obj === "object" && typeof options_obj.newline_char === "string") ? options_obj.newline_char : "\n";
+  	 
+  	 var regex = new RegExp('^(\\[(.|'+mask(newline_char)+')*\\])(\\s)*1\.('+mask(newline_char)+'|.)*$', 'g');
+  	 var info_string = pgn.replace(regex, '$1');	// get info part of the PGN file
+  	 if (info_string[0] !== '[') {
+  	   // no info part given, begins with moves
+  	   info_string = '';
+  	 }
+
+    reset();
+  	 
+  	 // parse PGN infos
+  	 var infos = parse_pgn_info(info_string, options_obj);
+  	 for (var key in infos) {
+  	 	set_info([key, infos[key]]);
+  	 }
+  	 
+  	 var move_string = trim(pgn.replace(info_string, '').replace(newline_char, ' ')); 	// delete info part to get the moves
+  	 move_string = move_string.replace(/\{[^}]*\}/g, ''); 	// delete comments
+  	 move_string = move_string.replace(/(\d\.)\s([A-Za-z])/g, '$1$2');
+  	 
+    var moves = move_string.split(new RegExp('['+mask(newline_char)+'|\\s]'));	// get array of moves
+    moves = moves.join(",").replace(/,,+/g, ',').split(","); 	// delete empty entries
+    var curr_move = '';
+    
+    for (var half_move = 0; half_move < moves.length-1; half_move++) {	// pass the very last move as it could be the result
+      curr_move = get_move_obj(moves[half_move]);
+      
+      if (curr_move === null) {
+        // move not possible! (don't clear the board to examine to show the latest valid position)
+        // reset();
+        return false;
+      } else {
+        make_move(curr_move);
+      }
+    }
+    
+    // examine last move
+    curr_move = moves[moves.length-1];
+    if (POSSIBLE_RESULTS.indexOf(curr_move) > -1) {
+      if (typeof info.Result === 'undefined')
+        set_info(["Result", curr_move]);
+    }
+    else {
+      curr_move = get_move_obj(curr_move);
+      if (curr_move === null)
+        return false;
+      else
+        make_move(curr_move);
+    }
+
+    return true;
   }
 
   // called when the initial board setup is changed with put() or remove()'
@@ -617,6 +801,18 @@ var Chess = function(fen) {
 
     return output;
   }
+  
+  /* convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates */
+  function move_from_san(move) {
+    var moves = generate_moves();
+    for (var i = 0, len = moves.length; i < len; i++) {
+      if (move == move_to_san(moves[i])) {
+        return moves[i];
+      }
+    }
+    return null;
+  }
+  	
 
   function attacked(color, square) {
     for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
@@ -1086,8 +1282,8 @@ var Chess = function(fen) {
     /***************************************************************************
      * PUBLIC API
      **************************************************************************/
-    load: function(fen) {
-      return load(fen);
+    load: function(fen, validate_before) {
+      return load(fen, validate_before);
     },
 
     reset: function() {
@@ -1155,11 +1351,19 @@ var Chess = function(fen) {
     fen: function() {
       return generate_fen();
     },
+    
+    validate_fen: function(fen, return_type) {
+      return validate_fen(fen, return_type);
+    },
 
     // options_obj can contain width and a newline character
     // example for html usage: options_obj = {max_width:72, newline_char:"<br />"}
     pgn: function(options_obj) {
       return generate_pgn(options_obj);
+    },
+    
+    load_pgn: function(pgn, options) {
+    	return load_pgn(pgn, options);
     },
 
     info: function() {
@@ -1189,12 +1393,7 @@ var Chess = function(fen) {
 
       if (typeof move == 'string') {
         /* convert the move string to a move object */
-        for (var i = 0, len = moves.length; i < len; i++) {
-          if (move == move_to_san(moves[i])) {
-            move_obj = moves[i];
-            break;
-          }
-        }
+        move_obj = move_from_san(move);
       } else if (typeof move == 'object') {
         /* convert the move string to a move object */
         for (var i = 0, len = moves.length; i < len; i++) {
