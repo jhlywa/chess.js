@@ -48,8 +48,6 @@ in [Forsyth-Edwards Notation](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwar
 
     // pass in a FEN string to load a particular position
     var chess = new Chess('r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - c3 0 19');
-    
-
 
 ### .load(fen)
 The board is cleared and the FEN string is loaded.  Returns true if position was
@@ -62,12 +60,20 @@ successfully loaded, otherwise false.
     chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
     // -> false, bad piece X
 
+### .validate_fen(fen):
+Returns a validation object specifying validity or the errors found within the
+FEN string.
 
+    chess.validate_fen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25');
+    // -> {valid: true, error_number: 0,
+    //     error: 'No errors.'}
+
+    chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+    // -> {valid: false, error_number: 9,
+    //     error: '1st field (piece positions) is invalid [invalid piece].'}
 
 ### .reset()
 Reset the board to the initial starting position.
-
-
 
 ### .fen()
 Returns the FEN string for the current position.
@@ -100,7 +106,6 @@ max width and/or a newline character.
     chess.pgn({max_width:5, newline_char:"<br />"});
     // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
 
-
 ### .ascii()
 Returns a string containing an ASCII diagram of the current position.
 
@@ -124,8 +129,6 @@ Returns a string containing an ASCII diagram of the current position.
     //        +------------------------+
     //          a  b  c  d  e  f  g  h'
 
-
-
 ### .clear()
 Clears the board.
 
@@ -133,16 +136,12 @@ Clears the board.
     chess.fen();
     // -> '8/8/8/8/8/8/8/8 w - - 0 1' <- empty board
 
-
-
 ### .turn()
 Returns the current side to move.
 
     chess.load('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1')
     chess.turn()
     // -> 'b'
-
-
 
 ### .put(piece, square)
 Place a piece on square where piece is an object with the form
@@ -159,8 +158,6 @@ otherwise false.
     chess.fen();
     // -> '8/8/8/p7/8/8/8/7K w - - 0 0'
 
-
-
 ### .get(square)
 Returns the piece on the square:
 
@@ -171,8 +168,6 @@ Returns the piece on the square:
     // -> { type: 'p', color: 'b' },
     chess.get('a6');
     // -> null
-
-
 
 ### .remove(square)
 Remove and return the piece on _square_.
@@ -187,8 +182,6 @@ Remove and return the piece on _square_.
     // -> { type: 'k', color: 'w' },
     chess.remove('e1');
     // -> null
-
-
 
 ### .move(move)
 Attempts to make a move on the board, returning a move object if the move was
@@ -214,8 +207,6 @@ Or by passing .move() a move object (only the 'to', 'from', and when necessary
     chess.move({from: 'g2', to: 'g3'});
     // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
 
-
-
 ### .undo()
 Takeback the last half-move, returning a move object if successful, otherwise null.
     
@@ -233,8 +224,6 @@ Takeback the last half-move, returning a move object if successful, otherwise nu
     // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
     chess.undo();
     // -> null
-
-
 
 ### .moves([ options ])
 Returns a list of all legal moves from the current position.  The function be passed a options hash which controls the verbosity of the return values (this may change in the future).
@@ -268,16 +257,12 @@ The _flags_ field in verbose mode may contain one or more of the following value
 
 A flag of 'pc' would mean that a pawn captured a piece on the 8th rank and promoted.
 
-
-
 ### .in_check() 
 Returns true or false if the side to move is in check.
 
     var chess = new Chess('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
     chess.in_check();
     // -> true
-
-
 
 ### .in_checkmate() 
 Returns true or false if the side to move has been checkmated.
@@ -286,8 +271,6 @@ Returns true or false if the side to move has been checkmated.
     chess.in_checkmate();
     // -> true
 
-
-
 ### .in_draw() 
 Returns true or false if the game is drawn (50-move rule or insufficient material).
 
@@ -295,16 +278,12 @@ Returns true or false if the game is drawn (50-move rule or insufficient materia
     chess.in_draw();
     // -> true
 
-
-
 ### .in_stalemate() 
 Returns true or false if the side to move has been stalemated.
 
     var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
     chess.in_stalemate();
     // -> true
-
-
 
 ### .in_threefold_repetition() 
 Returns true or false if the current board position has occurred three or more
@@ -326,8 +305,6 @@ times.
     chess.in_threefold_repetition();
     // -> true
 
-
-
 ### .insufficient_material() 
 Returns true if the game is drawn due to insufficient material (K vs. K,
 K vs. KB, or K vs. KN); otherwise false.
@@ -335,8 +312,6 @@ K vs. KB, or K vs. KN); otherwise false.
     var chess = new Chess('k7/8/n7/8/8/8/8/7K b - - 0 1');
     chess.insufficient_material()
     // -> true
-
-
 
 ### .game_over() 
 Returns true or false if the game has ended via checkmate, stalemate, or draw.
@@ -352,8 +327,6 @@ Returns true or false if the game has ended via checkmate, stalemate, or draw.
     chess.load('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
     chess.game_over();
     // -> true (checkmate)
-
-
 
 ### .square_color(square)
 Returns the color of the square ('light' or 'dark').
@@ -374,6 +347,7 @@ Special thanks to the following developers for their patches and contributions:
 
 - [Steve Bragg](https://github.com/2sb18)
 - [E. Azer Koçulu](https://github.com/azer)
+- [Falco Nogatz](https://github.com/fnogatz)
 
 Musical support provided by:
 
