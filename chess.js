@@ -1276,7 +1276,7 @@ var Chess = function(fen) {
           }
         }
       } else if (typeof move == 'object') {
-        /* convert the move string to a move object */
+        /* convert the pretty move object to an ugly move object */
         for (var i = 0, len = moves.length; i < len; i++) {
           if (move.from == algebraic(moves[i].from) &&
               move.to == algebraic(moves[i].to) &&
@@ -1335,6 +1335,28 @@ var Chess = function(fen) {
       }
 
       return null;
+    },
+
+    history: function(options) {
+      var reversed_history = [];
+      var move_history = [];
+      var verbose = (typeof options != 'undefined' && 'verbose' in options && options.verbose);
+
+      while (history.length > 0) {
+        reversed_history.push(undo_move());
+      }
+
+      while (reversed_history.length > 0) {
+        var move = reversed_history.pop();
+        if (verbose) {
+          move_history.push(make_pretty(move));
+        } else {
+          move_history.push(move_to_san(move));
+        }
+        make_move(move);
+      }
+
+      return move_history;
     }
 
   }
@@ -1343,4 +1365,3 @@ var Chess = function(fen) {
 /* export Chess object if using node or any other CommonJS compatible
  * environment */
 if (typeof exports != 'undefined') exports.Chess = Chess;
-

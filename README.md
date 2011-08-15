@@ -106,6 +106,26 @@ max width and/or a newline character.
     chess.pgn({max_width:5, newline_char:"<br />"});
     // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
 
+### .history(options)
+Returns a list containing the moves of the current game.  Options is an optional
+object which may contain a verbose flag.  See .move() for a description of the
+verbose move object.
+
+    var chess = new Chess();
+    chess.move('e4');
+    chess.move('e5');
+    chess.move('f4');
+    chess.move('exf4');
+    
+    chess.history();
+    // -> ['e4', 'e5', 'f4', 'exf4']
+
+    chess.history({verbose:true});
+    // -> [{color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4'},
+    //     {color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5'},
+    //     {color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4'},
+    //     {color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4'}]
+
 ### .ascii()
 Returns a string containing an ASCII diagram of the current position.
 
