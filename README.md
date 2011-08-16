@@ -49,83 +49,6 @@ in [Forsyth-Edwards Notation](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwar
     // pass in a FEN string to load a particular position
     var chess = new Chess('r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - c3 0 19');
 
-### .load(fen)
-The board is cleared and the FEN string is loaded.  Returns true if position was
-successfully loaded, otherwise false.
-
-    var chess = new Chess();
-    chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
-    // -> true
-    
-    chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
-    // -> false, bad piece X
-
-### .validate_fen(fen):
-Returns a validation object specifying validity or the errors found within the
-FEN string.
-
-    chess.validate_fen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25');
-    // -> {valid: true, error_number: 0,
-    //     error: 'No errors.'}
-
-    chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
-    // -> {valid: false, error_number: 9,
-    //     error: '1st field (piece positions) is invalid [invalid piece].'}
-
-### .reset()
-Reset the board to the initial starting position.
-
-### .fen()
-Returns the FEN string for the current position.
-
-    var chess = new Chess();
-
-    // make some moves
-    chess.move('e4');
-    chess.move('e5');
-    chess.move('f4');
-
-    chess.fen();
-    // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
-
-### .info()
-Allows header information to be added to PGN output. Any number of key/values
-can be passed to .info(). See .pgn() for example.
-
-### .pgn(options)
-Returns the game in PGN format. Options is an object that can include
-max width and/or a newline character.
-
-    var chess = new Chess();
-    chess.info("White", "Plunky", "Black", "Plinkie");
-    chess.move('e4');
-    chess.move('e5');
-    chess.move('Nc3');
-    chess.move('Nc6');
-
-    chess.pgn({max_width:5, newline_char:"<br />"});
-    // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
-
-### .history(options)
-Returns a list containing the moves of the current game.  Options is an optional
-object which may contain a verbose flag.  See .move() for a description of the
-verbose move object.
-
-    var chess = new Chess();
-    chess.move('e4');
-    chess.move('e5');
-    chess.move('f4');
-    chess.move('exf4');
-    
-    chess.history();
-    // -> ['e4', 'e5', 'f4', 'exf4']
-
-    chess.history({verbose:true});
-    // -> [{color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4'},
-    //     {color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5'},
-    //     {color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4'},
-    //     {color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4'}]
-
 ### .ascii()
 Returns a string containing an ASCII diagram of the current position.
 
@@ -156,27 +79,33 @@ Clears the board.
     chess.fen();
     // -> '8/8/8/8/8/8/8/8 w - - 0 1' <- empty board
 
-### .turn()
-Returns the current side to move.
+### .fen()
+Returns the FEN string for the current position.
 
-    chess.load('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1')
-    chess.turn()
-    // -> 'b'
+    var chess = new Chess();
 
-### .put(piece, square)
-Place a piece on square where piece is an object with the form
-{ type: ..., color: ... }.  Returns true if piece was successfully placed,
-otherwise false.
-
-    chess.clear();
-
-    chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
-    // -> true
-    chess.put({ type: 'k', color: 'w' }, 'h1') // shorthand
-    // -> true
+    // make some moves
+    chess.move('e4');
+    chess.move('e5');
+    chess.move('f4');
 
     chess.fen();
-    // -> '8/8/8/p7/8/8/8/7K w - - 0 0'
+    // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
+
+### .game_over() 
+Returns true or false if the game has ended via checkmate, stalemate, or draw.
+
+    var chess = new Chess();
+    chess.game_over();
+    // -> false
+
+    chess.load('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
+    chess.game_over();
+    // -> true (stalemate)
+
+    chess.load('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
+    chess.game_over();
+    // -> true (checkmate)
 
 ### .get(square)
 Returns the piece on the square:
@@ -189,93 +118,25 @@ Returns the piece on the square:
     chess.get('a6');
     // -> null
 
-### .remove(square)
-Remove and return the piece on _square_.
-
-    chess.clear();
-    chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
-    chess.put({ type: chess.KING, color: chess.WHITE }, 'h1') // put a white king on h1
-
-    chess.remove('a5');
-    // -> { type: 'p', color: 'b' },
-    chess.remove('h1');
-    // -> { type: 'k', color: 'w' },
-    chess.remove('e1');
-    // -> null
-
-### .move(move)
-Attempts to make a move on the board, returning a move object if the move was
-legal, otherwise null.  The .move function can be called two ways, by passing
-a string in Standard Algebraic Notation (SAN):
+### .history(options)
+Returns a list containing the moves of the current game.  Options is an optional
+object which may contain a verbose flag.  See .moves() for a description of the
+verbose move fields.
 
     var chess = new Chess();
-
-    chess.move('e4') 
-    // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e2' }
-
-    chess.move('nf6') // SAN is case sensitive!!
-    // -> null
-
-    chess.move('Nf6')
-    // -> { color: 'b', from: 'g8', to: 'f6', flags: 'n', piece: 'n', san: 'Nf6' }
-
-Or by passing .move() a move object (only the 'to', 'from', and when necessary
-'promotion', fields are needed):
-
-    var chess = new Chess();
-
-    chess.move({from: 'g2', to: 'g3'});
-    // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
-
-### .undo()
-Takeback the last half-move, returning a move object if successful, otherwise null.
-    
-    var chess = new Chess();
-
-    chess.fen();
-    // -> 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
     chess.move('e4');
-    chess.fen();
-    // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+    chess.move('e5');
+    chess.move('f4');
+    chess.move('exf4');
+    
+    chess.history();
+    // -> ['e4', 'e5', 'f4', 'exf4']
 
-    chess.undo();
-    // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
-    chess.fen();
-    // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
-    chess.undo();
-    // -> null
-
-### .moves([ options ])
-Returns a list of all legal moves from the current position.  The function be passed a options hash which controls the verbosity of the return values (this may change in the future).
-
-    var chess = new Chess();
-    chess.moves();
-    // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4',
-           'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
-
-    chess.moves({ verbose: true });
-    // -> [{ color: 'w', from: 'a2', to: 'a3', 
-             flags: 'n', piece: 'p', san 'a3'
-             # a captured: key is included when the move is a capture
-             # a promotion: key is included when the move is a promotion
-           },
-           ...
-           ]
-
-The _piece_, _captured_, and _promotion_ fields contain the lowercase
-representation of the applicable piece.
-
-The _flags_ field in verbose mode may contain one or more of the following values:
-
-- 'n' - a non-capture
-- 'b' - a pawn push of two squares
-- 'e' - an en passant capture
-- 'c' - a standard capture
-- 'p' - a promotion 
-- 'k' - kingside castling
-- 'q' - queenside castling
-
-A flag of 'pc' would mean that a pawn captured a piece on the 8th rank and promoted.
+    chess.history({ verbose:true });
+    // -> [{ color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' },
+    //     { color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5' },
+    //     { color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' },
+    //     { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }]
 
 ### .in_check() 
 Returns true or false if the side to move is in check.
@@ -325,6 +186,10 @@ times.
     chess.in_threefold_repetition();
     // -> true
 
+### .info()
+Allows header information to be added to PGN output. Any number of key/values
+can be passed to .info(). See .pgn() for example.
+
 ### .insufficient_material() 
 Returns true if the game is drawn due to insufficient material (K vs. K,
 K vs. KB, or K vs. KN); otherwise false.
@@ -333,20 +198,118 @@ K vs. KB, or K vs. KN); otherwise false.
     chess.insufficient_material()
     // -> true
 
-### .game_over() 
-Returns true or false if the game has ended via checkmate, stalemate, or draw.
+### .load(fen)
+The board is cleared and the FEN string is loaded.  Returns true if position was
+successfully loaded, otherwise false.
 
     var chess = new Chess();
-    chess.game_over();
-    // -> false
+    chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+    // -> true
+    
+    chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+    // -> false, bad piece X
 
-    chess.load('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
-    chess.game_over();
-    // -> true (stalemate)
+### .move(move)
+Attempts to make a move on the board, returning a move object if the move was
+legal, otherwise null.  The .move function can be called two ways, by passing
+a string in Standard Algebraic Notation (SAN):
 
-    chess.load('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
-    chess.game_over();
-    // -> true (checkmate)
+    var chess = new Chess();
+
+    chess.move('e4') 
+    // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e2' }
+
+    chess.move('nf6') // SAN is case sensitive!!
+    // -> null
+
+    chess.move('Nf6')
+    // -> { color: 'b', from: 'g8', to: 'f6', flags: 'n', piece: 'n', san: 'Nf6' }
+
+Or by passing .move() a move object (only the 'to', 'from', and when necessary
+'promotion', fields are needed):
+
+    var chess = new Chess();
+
+    chess.move({ from: 'g2', to: 'g3' });
+    // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
+
+### .moves([ options ])
+Returns a list of all legal moves from the current position.  The function be passed a options hash which controls the verbosity of the return values (this may change in the future).
+
+    var chess = new Chess();
+    chess.moves();
+    // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4',
+           'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
+
+    chess.moves({ verbose: true });
+    // -> [{ color: 'w', from: 'a2', to: 'a3', 
+             flags: 'n', piece: 'p', san 'a3'
+             # a captured: key is included when the move is a capture
+             # a promotion: key is included when the move is a promotion
+           },
+           ...
+           ]
+
+The _piece_, _captured_, and _promotion_ fields contain the lowercase
+representation of the applicable piece.
+
+The _flags_ field in verbose mode may contain one or more of the following values:
+
+- 'n' - a non-capture
+- 'b' - a pawn push of two squares
+- 'e' - an en passant capture
+- 'c' - a standard capture
+- 'p' - a promotion 
+- 'k' - kingside castling
+- 'q' - queenside castling
+
+A flag of 'pc' would mean that a pawn captured a piece on the 8th rank and promoted.
+
+### .pgn(options)
+Returns the game in PGN format. Options is an object that can include
+max width and/or a newline character.
+
+    var chess = new Chess();
+    chess.info("White", "Plunky", "Black", "Plinkie");
+    chess.move('e4');
+    chess.move('e5');
+    chess.move('Nc3');
+    chess.move('Nc6');
+
+    chess.pgn({ max_width:5, newline_char:"<br />" });
+    // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
+
+### .put(piece, square)
+Place a piece on square where piece is an object with the form
+{ type: ..., color: ... }.  Returns true if piece was successfully placed,
+otherwise false.
+
+    chess.clear();
+
+    chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
+    // -> true
+    chess.put({ type: 'k', color: 'w' }, 'h1') // shorthand
+    // -> true
+
+    chess.fen();
+    // -> '8/8/8/p7/8/8/8/7K w - - 0 0'
+
+### .remove(square)
+Remove and return the piece on _square_.
+
+    chess.clear();
+    chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
+    chess.put({ type: chess.KING, color: chess.WHITE }, 'h1') // put a white king on h1
+
+    chess.remove('a5');
+    // -> { type: 'p', color: 'b' },
+    chess.remove('h1');
+    // -> { type: 'k', color: 'w' },
+    chess.remove('e1');
+    // -> null
+
+### .reset()
+Reset the board to the initial starting position.
 
 ### .square_color(square)
 Returns the color of the square ('light' or 'dark').
@@ -358,6 +321,42 @@ Returns the color of the square ('light' or 'dark').
     // -> 'dark'
     chess.square_color('bogus square')
     // -> null
+
+### .turn()
+Returns the current side to move.
+
+    chess.load('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1')
+    chess.turn()
+    // -> 'b'
+
+### .undo()
+Takeback the last half-move, returning a move object if successful, otherwise null.
+    
+    var chess = new Chess();
+
+    chess.fen();
+    // -> 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    chess.move('e4');
+    chess.fen();
+    // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+
+    chess.undo();
+    // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
+    chess.fen();
+    // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+    chess.undo();
+    // -> null
+
+### .validate_fen(fen):
+Returns a validation object specifying validity or the errors found within the
+FEN string.
+
+    chess.validate_fen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25');
+    // -> { valid: true, error_number: 0, error: 'No errors.' }
+
+    chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+    // -> { valid: false, error_number: 9,
+    //     error: '1st field (piece positions) is invalid [invalid piece].' }
 
 
 
