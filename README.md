@@ -1,7 +1,7 @@
 # chess.js
 
 chess.js is a Javascript chess library that is used for chess move generation/validation,
-piece placement/movement, and check/checkmate/stalemate detection - basically everything 
+piece placement/movement, and check/checkmate/stalemate detection - basically everything
 but the AI.
 
 Using chess.js in a browser is straight-forward:
@@ -118,9 +118,9 @@ Returns the piece on the square:
     chess.get('a6');
     // -> null
 
-### .history(options)
+### .history([ options ])
 Returns a list containing the moves of the current game.  Options is an optional
-object which may contain a 'verbose' flag.  See .moves() for a description of the
+parameter which may contain a 'verbose' flag.  See .moves() for a description of the
 verbose move fields.
 
     var chess = new Chess();
@@ -132,7 +132,7 @@ verbose move fields.
     chess.history();
     // -> ['e4', 'e5', 'f4', 'exf4']
 
-    chess.history({ verbose:true });
+    chess.history({ verbose: true });
     // -> [{ color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' },
     //     { color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5' },
     //     { color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' },
@@ -219,7 +219,7 @@ successfully loaded, otherwise false.
 ### .load_pgn(pgn, [ options ])
 Load the moves of a game stored in 
 [Portal Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
-Options is a optional object that contains a 'newline_char' denoting the line
+Options is a optional parameter that contains a 'newline_char' denoting the line
 delimiter (the default delimiter is '\n').  Returns true if the PGN was parsed
 successfully, otherwise false.
 
@@ -319,17 +319,17 @@ The _flags_ field in verbose mode may contain one or more of the following value
 A flag of 'pc' would mean that a pawn captured a piece on the 8th rank and promoted.
 
 ### .pgn([ options ])
-Returns the game in PGN format. Options is an optional object that can include
-max width and/or a newline character.
+Returns the game in PGN format. Options is an optional parameter which may include
+max width and/or a newline character settings.
 
     var chess = new Chess();
-    chess.info("White", "Plunky", "Black", "Plinkie");
+    chess.info('White', 'Plunky', 'Black', 'Plinkie');
     chess.move('e4');
     chess.move('e5');
     chess.move('Nc3');
     chess.move('Nc6');
 
-    chess.pgn({ max_width:5, newline_char:"<br />" });
+    chess.pgn({ max_width: 5, newline_char: '<br />' });
     // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
 
 ### .put(piece, square)
