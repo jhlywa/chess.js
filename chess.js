@@ -23,7 +23,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- *---------------------------------------------------------------------------*/
+ *----------------------------------------------------------------------------*/
 
 var Chess = function(fen) {
 
@@ -149,7 +149,7 @@ var Chess = function(fen) {
   var half_moves = 0;
   var move_number = 1;
   var history = [];
-  var info = {};                // holds PGN header information.
+  var info = {};
 
   /* if the user passes in a fen string, load it, else default to
    * starting position
@@ -170,7 +170,7 @@ var Chess = function(fen) {
     move_number = 1;
     history = [];
     info = {};
-    update_setup();
+    update_setup(generate_fen());
   }
 
   function reset() {
@@ -223,7 +223,7 @@ var Chess = function(fen) {
     half_moves = parseInt(tokens[4], 10);
     move_number = parseInt(tokens[5], 10);
 
-    update_setup();
+    update_setup(generate_fen());
 
     return true;
   }
@@ -356,96 +356,21 @@ var Chess = function(fen) {
     return [fen, turn, cflags, epflags, half_moves, move_number].join(' ')
   }
 
-  // using the specification from http://www.chessclub.com/help/PGN-spec
-  // options_obj can contain the maxium width and a newline character
-  // example for html usage: options_obj = {max_width:72, newline_char:"<br />"}
-  function generate_pgn(options_obj) {
-    var result = [];
-    var move_strings = [];
-    var move_string = "";
-    var current_move_number = 1;
-    var newline_char = (typeof options_obj === "object" && typeof options_obj.newline_char === "string") ? options_obj.newline_char : "\n";
-    var max_width = (typeof options_obj === "object" && typeof options_obj.max_width === "number") ? options_obj.max_width : 0;
-    var current_width = 0;
-    var info_exists = false;
+  /* called when the initial board setup is changed with put() or remove().
+   * modifies the SetUp and FEN properties of the info object.  if the FEN is
+   * equal to the default position, the SetUp and FEN are deleted
+   * the setup is only updated if history.length is zero, ie moves haven't been
+   * made.
+   */
+  function update_setup(fen) {
+    if (history.length > 0) return;
 
-    // add the PGN header information
-    for (var i in info) {
-      result.push("[" + i + " \"" + info[i] + "\"]" + newline_char);
-      info_exists = true;
-    }
-
-    if (info_exists && history.length) {
-      result.push(newline_char);
-    }
-
-    // pop all of history onto reversedHistory
-    var reversed_history = [];
-    while (history.length > 0) {
-      reversed_history.push(undo_move());
-    }
-
-    // fill the array of move_strings. Example of a move_string: "3. e3 e6"
-    while(reversed_history.length > 0) {
-      var current_move = reversed_history.pop();
-      if (current_move.color === 'w') {
-        move_string.length ? move_strings.push(move_string) : null;   // done making the last move_string
-        move_string = current_move_number + '.';
-        current_move_number++;
-      } else if (current_move.color === 'b' && current_move_number === 1) {
-        move_string = '1. ...';
-        current_move_number++;
-      }
-      move_string = move_string + " " + move_to_san(current_move);
-      make_move(current_move);
-    }
-    move_string.length ? move_strings.push(move_string) : null;
-
-    // history should be back to what is was before we started generating pgn
-
-    // join together move_strings
-    if (max_width === 0) {
-      return result.join("") + move_strings.join(" ");
-    }
-
-    for (var i = 0; i < move_strings.length; i++) {
-      if (current_width + move_strings[i].length > max_width && i !== 0) {
-        result.push(newline_char);
-        current_width = 0;
-      } else if (i !== 0) {
-        result.push(" ");
-        current_width++;
-      }
-      result.push(move_strings[i]);
-      current_width += move_strings[i].length;
-    }
-    return result.join("");
-  }
-
-  // ex. set_info('White', 'Jeff Hlywa', 'Black', 'Steve Bragg')
-  function set_info(args) {
-    for (var i = 0; i < args.length; i += 2) {
-      if (typeof args[i] === "string" && typeof args[i + 1] === "string") {
-        info[args[i]] = args[i + 1];
-      }
-    }
-    return info;
-  }
-
-  // called when the initial board setup is changed with put() or remove()'
-  // modifies the SetUp and FEN properties of the info variable
-  // if the FEN is equal to the default position, the SetUp and FEN are deleted
-  // the setup is only updated if history.length is zero, ie moves haven't been made.
-  function update_setup() {
-    var fen = generate_fen();
-    if (history.length === 0) {
-      if (fen !== DEFAULT_POSITION) {
-        info["SetUp"] = generate_fen();
-        info["FEN"] = '1';
-      } else {
-        delete info["SetUp"];
-        delete info["FEN"];
-      }
+    if (fen != DEFAULT_POSITION) {
+      info["SetUp"] = fen;
+      info["FEN"] = '1';
+    } else {
+      delete info["SetUp"];
+      delete info["FEN"];
     }
   }
 
@@ -476,7 +401,7 @@ var Chess = function(fen) {
       kings[piece.color] = sq;
     }
 
-    update_setup();
+    update_setup(generate_fen());
 
     return true;
   }
@@ -488,7 +413,7 @@ var Chess = function(fen) {
       kings[piece.color] = EMPTY;
     }
 
-    update_setup();
+    update_setup(generate_fen());
 
     return piece;
   }
@@ -652,7 +577,9 @@ var Chess = function(fen) {
     return legal_moves;
   }
 
-  /* convert a move from 0x88 coordinates to Standard Algebraic Notation (SAN) */
+  /* convert a move from 0x88 coordinates to Standard Algebraic Notation 
+   * (SAN)
+   */
   function move_to_san(move) {
     var output = '';
 
@@ -760,7 +687,8 @@ var Chess = function(fen) {
 
       var piece = board[i];
       if (piece) {
-        pieces[piece.type] = (piece.type in pieces) ? pieces[piece.type] + 1 : 1;
+        pieces[piece.type] = (piece.type in pieces) ? 
+                              pieces[piece.type] + 1 : 1;
         num_pieces++;
       }
     }
@@ -1035,7 +963,8 @@ var Chess = function(fen) {
       } else {
         var piece = board[i].type;
         var color = board[i].color;
-        var symbol = (color == WHITE) ? piece.toUpperCase() : piece.toLowerCase();
+        var symbol = (color == WHITE) ? 
+                     piece.toUpperCase() : piece.toLowerCase();
         s += ' ' + symbol + ' ';
       }
 
@@ -1050,9 +979,9 @@ var Chess = function(fen) {
     return s;
   }
 
-  /******************************************************************************
+  /*****************************************************************************
    * UTILITY FUNCTIONS
-   *****************************************************************************/
+   ****************************************************************************/
   function rank(i) {
     return i >> 4;
   }
@@ -1107,9 +1036,9 @@ var Chess = function(fen) {
     return dupe;
   }
 
-  /******************************************************************************
+  /*****************************************************************************
    * DEBUGGING UTILITIES
-   *****************************************************************************/
+   ****************************************************************************/
   function perft(depth) {
     var moves = generate_moves({legal: false})
     var nodes = 0;
@@ -1170,7 +1099,7 @@ var Chess = function(fen) {
       return reset();
     },
 
-    moves: function(settings) {
+    moves: function(options) {
       /* The internal representation of a chess move is in 0x88 format, and
        * not meant to be human-readable.  The code below converts the 0x88
        * square coordinates to algebraic coordinates.  It also prunes an
@@ -1182,8 +1111,11 @@ var Chess = function(fen) {
 
       for (var i = 0, len = ugly_moves.length; i < len; i++) {
 
-        /* does the user want a full move object (most likely not), or just SAN */
-        if (typeof settings != 'undefined' && 'verbose' in settings && settings.verbose) {
+        /* does the user want a full move object (most likely not), or just 
+         * SAN
+         */
+        if (typeof options != 'undefined' && 'verbose' in options && 
+            options.verbose) {
           moves.push(make_pretty(ugly_moves[i]));
         } else {
           moves.push(move_to_san(ugly_moves[i]));
@@ -1236,14 +1168,100 @@ var Chess = function(fen) {
       return generate_fen();
     },
 
-    // options_obj can contain width and a newline character
-    // example for html usage: options_obj = {max_width:72, newline_char:"<br />"}
-    pgn: function(options_obj) {
-      return generate_pgn(options_obj);
+    pgn: function(options) {
+      /* using the specification from http://www.chessclub.com/help/PGN-spec
+       * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })
+       */
+      var newline = (typeof options == "object" &&
+                     typeof options.newline_char == "string") ? 
+                     options.newline_char : "\n";
+      var max_width = (typeof options == "object" &&
+                       typeof options.max_width == "number") ?
+                       options.max_width : 0;
+      var result = [];
+      var info_exists = false;
+
+      /* add the PGN header information */
+      for (var i in info) {
+        /* TODO: order of enumerated properties in info object is not
+         * guaranteed, see ECMA-262 spec (section 12.6.4) 
+         */
+        result.push("[" + i + " \"" + info[i] + "\"]" + newline);
+        info_exists = true;
+      }
+
+      if (info_exists && history.length) {
+        result.push(newline);
+      }
+
+      /* pop all of history onto reversed_history */
+      var reversed_history = [];
+      while (history.length > 0) {
+        reversed_history.push(undo_move());
+      }
+
+      var moves = [];
+      var move_string = "";
+      var pgn_move_number = 1;
+
+      /* build the list of moves.  a move_string looks like: "3. e3 e6" */
+      while (reversed_history.length > 0) {
+        var move = reversed_history.pop();
+
+        /* if the position started with black to move, start PGN with 1. ... */
+        if (pgn_move_number == 1 && move.color == 'b') {
+          move_string = '1. ...';
+          pgn_move_number++;
+        } else if (move.color == 'w') {
+          /* store the previous generated move_string if we have one */
+          if (move_string.length) {
+            moves.push(move_string);
+          }
+          move_string = pgn_move_number + '.';
+          pgn_move_number++;
+        }       
+
+        move_string = move_string + " " + move_to_san(move);
+        make_move(move);
+      }
+
+      /* are there any other leftover moves? */
+      if (move_string.length) {
+        moves.push(move_string);
+      }
+
+      /* history should be back to what is was before we started generating PGN,
+       * so join together moves
+       */
+      if (max_width == 0) {
+        return result.join("") + moves.join(" ");
+      }
+
+      /* wrap the PGN output at max_width */
+      var current_width = 0;
+      for (var i = 0; i < moves.length; i++) {
+        if (current_width + moves[i].length > max_width && i != 0) {
+          result.push(newline);
+          current_width = 0;
+        } else if (i != 0) {
+          result.push(" ");
+          current_width++;
+        }
+        result.push(moves[i]);
+        current_width += moves[i].length;
+      }
+
+      return result.join("");
     },
 
     info: function() {
-      return set_info(arguments);
+      for (var i = 0; i < arguments.length; i += 2) {
+        if (typeof arguments[i] == "string" && 
+            typeof arguments[i + 1] == "string") {
+          info[arguments[i]] = arguments[i + 1];
+        }
+      }
+      return info;
     },
 
     ascii: function() {
@@ -1340,7 +1358,8 @@ var Chess = function(fen) {
     history: function(options) {
       var reversed_history = [];
       var move_history = [];
-      var verbose = (typeof options != 'undefined' && 'verbose' in options && options.verbose);
+      var verbose = (typeof options != 'undefined' && 'verbose' in options &&
+                     options.verbose);
 
       while (history.length > 0) {
         reversed_history.push(undo_move());
