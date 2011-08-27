@@ -43,6 +43,8 @@ var Chess = function(fen) {
 
   var DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
+  var POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'];
+
   var PAWN_OFFSETS = {
     b: [16, 32, 17, 15],
     w: [-16, -32, -17, -15]
@@ -174,7 +176,6 @@ var Chess = function(fen) {
   }
 
   function reset() {
-    clear();
     load(DEFAULT_POSITION);
   }
 
@@ -354,6 +355,16 @@ var Chess = function(fen) {
     var epflags = (ep_square == EMPTY) ? '-' : algebraic(ep_square);
 
     return [fen, turn, cflags, epflags, half_moves, move_number].join(' ')
+  }
+
+  function set_header(args) {
+    for (var i = 0; i < args.length; i += 2) {
+      if (typeof args[i] == "string" && 
+          typeof args[i + 1] == "string") {
+        header[args[i]] = args[i + 1];
+      }
+    }
+    return header;
   }
 
   /* called when the initial board setup is changed with put() or remove().
@@ -1036,6 +1047,10 @@ var Chess = function(fen) {
     return dupe;
   }
 
+  function trim(str) {
+    return str.replace(/^\s+|\s+$/g, '');
+  }
+
   /*****************************************************************************
    * DEBUGGING UTILITIES
    ****************************************************************************/
@@ -1230,6 +1245,11 @@ var Chess = function(fen) {
         moves.push(move_string);
       }
 
+      /* is there a result? */
+      if (typeof header.Result != 'undefined') {
+        moves.push(header.Result);
+      }
+
       /* history should be back to what is was before we started generating PGN,
        * so join together moves
        */
@@ -1240,7 +1260,14 @@ var Chess = function(fen) {
       /* wrap the PGN output at max_width */
       var current_width = 0;
       for (var i = 0; i < moves.length; i++) {
+        /* if the current move will push past max_width */
         if (current_width + moves[i].length > max_width && i != 0) {
+
+          /* don't end the line with whitespace */
+          if (result[result.length - 1] == " ") { 
+            result.pop();
+          }
+
           result.push(newline);
           current_width = 0;
         } else if (i != 0) {
@@ -1254,14 +1281,129 @@ var Chess = function(fen) {
       return result.join("");
     },
 
-    header: function() {
-      for (var i = 0; i < arguments.length; i += 2) {
-        if (typeof arguments[i] == "string" && 
-            typeof arguments[i + 1] == "string") {
-          header[arguments[i]] = arguments[i + 1];
+    load_pgn: function(pgn, options) {
+      function mask(str) {
+        return str.replace(/\n/g, '\\n');
+      }
+
+      /* convert a move from Standard Algebraic Notation (SAN) to 0x88
+       * coordinates
+      */
+      function move_from_san(move) {
+        var moves = generate_moves();
+        for (var i = 0, len = moves.length; i < len; i++) {
+          if (move == move_to_san(moves[i])) {
+            return moves[i];
+          }
+        }
+        return null;
+      }
+
+      function get_move_obj(move) {
+        return move_from_san(trim(move));
+      }
+
+      function has_keys(object) {
+        var has_keys = false;
+        for (var key in object) {
+          has_keys = true;
+        }
+        return has_keys;
+      }
+        
+      function parse_pgn_header(header, options) {
+        var newline_char = (typeof options == 'object' && 
+                            typeof options.newline_char == 'string') ? 
+                            options.newline_char : '\n';
+        var header_obj = {};
+        var headers = header.split(newline_char);
+        var key = '';
+        var value = '';
+
+        for (var i = 0; i < headers.length; i++) {
+          key = headers[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1');
+          value = headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\]$/, '$1');
+          if (trim(key).length > 0) {
+            header_obj[key] = value;
+          }
+        }
+     
+        return header_obj;
+      }
+
+      var newline_char = (typeof options == 'object' &&
+                          typeof options.newline_char == 'string') ? 
+                          options.newline_char : '\n';
+        var regex = new RegExp('^(\\[(.|' + mask(newline_char) + ')*\\])' +
+                               '(' + mask(newline_char) + ')*' +
+                               '1\.(' + mask(newline_char) + '|.)*$', 'g');
+
+      /* get header part of the PGN file */
+      var header_string = pgn.replace(regex, '$1');
+
+      /* no info part given, begins with moves */
+      if (header_string[0] != '[') {
+        header_string = '';
+      }
+ 
+     reset();
+      
+      /* parse PGN header */
+      var headers = parse_pgn_header(header_string, options);
+      for (var key in headers) {
+        set_header([key, headers[key]]);
+      }
+      
+      /* delete header to get the moves */
+      var ms = pgn.replace(header_string, '').replace(new RegExp(mask(newline_char), 'g'), ' ');
+
+      /* delete comments */
+      ms = ms.replace(/(\{[^}]+\})+?/g, '');
+      
+      /* delete move numbers */
+      ms = ms.replace(/\d+\./g, '');
+
+
+      /* trim and get array of moves */
+      var moves = trim(ms).split(new RegExp(/\s+/));
+
+      /* delete empty entries */
+      moves = moves.join(",").replace(/,,+/g, ',').split(",");
+      var move = '';
+
+      for (var half_move = 0; half_move < moves.length - 1; half_move++) {
+        move = get_move_obj(moves[half_move]);
+        
+        /* move not possible! (don't clear the board to examine to show the
+         * latest valid position)
+         */
+        if (move == null) {
+          return false;
+        } else {
+          make_move(move);
         }
       }
-      return header;
+      
+      /* examine last move */
+      move = moves[moves.length - 1];
+      if (POSSIBLE_RESULTS.indexOf(move) > -1) {
+        if (has_keys(header) && typeof header.Result == 'undefined') {
+          set_header(['Result', move]);
+        }
+      }
+      else {
+        move = get_move_obj(move);
+        if (move == null) {
+          return false;
+        } else {
+          make_move(move);
+        }
+      }
+      return true;
+    },
+
+    header: function() {
+      return set_header(arguments);
     },
 
     ascii: function() {

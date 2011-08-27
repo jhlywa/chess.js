@@ -120,7 +120,7 @@ Returns the piece on the square:
 
 ### .history(options)
 Returns a list containing the moves of the current game.  Options is an optional
-object which may contain a verbose flag.  See .moves() for a description of the
+object which may contain a 'verbose' flag.  See .moves() for a description of the
 verbose move fields.
 
     var chess = new Chess();
@@ -186,9 +186,16 @@ times.
     chess.in_threefold_repetition();
     // -> true
 
-### .info()
-Allows header information to be added to PGN output. Any number of key/values
-can be passed to .info(). See .pgn() for example.
+### .header()
+Allows header information to be added to PGN output. Any number of key/value
+pairs can be passed to .header().
+
+    chess.header('White', 'Robert James Fischer');
+    chess.header('Black', 'Mikhail Tal');
+
+    // or
+
+    chess.header('White', 'Morphy', 'Black', 'Anderssen', 'Date', '1858-??-??');
 
 ### .insufficient_material() 
 Returns true if the game is drawn due to insufficient material (K vs. K,
@@ -208,6 +215,52 @@ successfully loaded, otherwise false.
     
     chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
     // -> false, bad piece X
+
+### .load_pgn(pgn, [ options ])
+Load the moves of a game stored in 
+[Portal Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
+Options is a optional object that contains a 'newline_char' denoting the line
+delimiter (the default delimiter is '\n').  Returns true if the PGN was parsed
+successfully, otherwise false.
+
+    var chess = new Chess();
+    pgn = ['[Event "Casual Game"]',
+           '[Site "Berlin GER"]',
+           '[Date "1852.??.??"]',
+           '[EventDate "?"]',
+           '[Round "?"]',
+           '[Result "1-0"]',
+           '[White "Adolf Anderssen"]',
+           '[Black "Jean Dufresne"]',
+           '[ECO "C52"]',
+           '[WhiteElo "?"]',
+           '[BlackElo "?"]',
+           '[PlyCount "47"]',
+           '',
+           '1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5 4.b4 Bxb4 5.c3 Ba5 6.d4 exd4 7.O-O',
+           'd3 8.Qb3 Qf6 9.e5 Qg6 10.Re1 Nge7 11.Ba3 b5 12.Qxb5 Rb8 13.Qa4',
+           'Bb6 14.Nbd2 Bb7 15.Ne4 Qf5 16.Bxd3 Qh5 17.Nf6+ gxf6 18.exf6',
+           'Rg8 19.Rad1 Qxf3 20.Rxe7+ Nxe7 21.Qxd7+ Kxd7 22.Bf5+ Ke8',
+           '23.Bd7+ Kf8 24.Bxe7# 1-0'];
+
+    chess.load_pgn(pgn.join('\n'));
+    // -> true
+
+    chess.fen()
+    // -> 1r3kr1/pbpBBp1p/1b3P2/8/8/2P2q2/P4PPP/3R2K1 b - - 0 24
+
+    chess.ascii() 
+    // -> '  +------------------------+
+    //     8 | .  r  .  .  .  k  r  . |
+    //     7 | p  b  p  B  B  p  .  p |
+    //     6 | .  b  .  .  .  P  .  . |
+    //     5 | .  .  .  .  .  .  .  . |
+    //     4 | .  .  .  .  .  .  .  . |
+    //     3 | .  .  P  .  .  q  .  . |
+    //     2 | P  .  .  .  .  P  P  P |
+    //     1 | .  .  .  R  .  .  K  . |
+    //       +------------------------+
+    //         a  b  c  d  e  f  g  h'
 
 ### .move(move)
 Attempts to make a move on the board, returning a move object if the move was
@@ -265,8 +318,8 @@ The _flags_ field in verbose mode may contain one or more of the following value
 
 A flag of 'pc' would mean that a pawn captured a piece on the 8th rank and promoted.
 
-### .pgn(options)
-Returns the game in PGN format. Options is an object that can include
+### .pgn([ options ])
+Returns the game in PGN format. Options is an optional object that can include
 max width and/or a newline character.
 
     var chess = new Chess();

@@ -385,7 +385,7 @@ function pgn_tests() {
      header: ["Event", "Reykjavik WCh", "Site", "Reykjavik WCh", "Date", "1972.01.07", "EventDate", "?", "Round", "6", "Result", "1-0",
             "White", "Robert James Fischer", "Black", "Boris Spassky", "ECO", "D59", "WhiteElo", "?", "BlackElo", "?", "PlyCount", "81"],
      max_width:65,
-     pgn: '[Event "Reykjavik WCh"]\n[Site "Reykjavik WCh"]\n[Date "1972.01.07"]\n[EventDate "?"]\n[Round "6"]\n[Result "1-0"]\n[White "Robert James Fischer"]\n[Black "Boris Spassky"]\n[ECO "D59"]\n[WhiteElo "?"]\n[BlackElo "?"]\n[PlyCount "81"]\n\n1. c4 e6 2. Nf3 d5 3. d4 Nf6 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6\n7. Bh4 b6 8. cxd5 Nxd5 9. Bxe7 Qxe7 10. Nxd5 exd5 11. Rc1 Be6\n12. Qa4 c5 13. Qa3 Rc8 14. Bb5 a6 15. dxc5 bxc5 16. O-O Ra7\n17. Be2 Nd7 18. Nd4 Qf8 19. Nxe6 fxe6 20. e4 d4 21. f4 Qe7\n22. e5 Rb8 23. Bc4 Kh8 24. Qh3 Nf8 25. b3 a5 26. f5 exf5\n27. Rxf5 Nh7 28. Rcf1 Qd8 29. Qg3 Re7 30. h4 Rbb7 31. e6 Rbc7\n32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8\n37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4',
+     pgn: '[Event "Reykjavik WCh"]\n[Site "Reykjavik WCh"]\n[Date "1972.01.07"]\n[EventDate "?"]\n[Round "6"]\n[Result "1-0"]\n[White "Robert James Fischer"]\n[Black "Boris Spassky"]\n[ECO "D59"]\n[WhiteElo "?"]\n[BlackElo "?"]\n[PlyCount "81"]\n\n1. c4 e6 2. Nf3 d5 3. d4 Nf6 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6\n7. Bh4 b6 8. cxd5 Nxd5 9. Bxe7 Qxe7 10. Nxd5 exd5 11. Rc1 Be6\n12. Qa4 c5 13. Qa3 Rc8 14. Bb5 a6 15. dxc5 bxc5 16. O-O Ra7\n17. Be2 Nd7 18. Nd4 Qf8 19. Nxe6 fxe6 20. e4 d4 21. f4 Qe7\n22. e5 Rb8 23. Bc4 Kh8 24. Qh3 Nf8 25. b3 a5 26. f5 exf5\n27. Rxf5 Nh7 28. Rcf1 Qd8 29. Qg3 Re7 30. h4 Rbb7 31. e6 Rbc7\n32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8\n37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0',
      fen: '4q2k/2r1r3/4PR1p/p1p5/P1Bp1Q1P/1P6/6P1/6K1 b - - 4 41'},
     {moves: ['f3', 'e5', 'g4', 'Qh4#'],     // testing max_width being small and having no comments
      header: [],
@@ -608,6 +608,93 @@ function validate_fen_tests() {
 
 }
 
+function load_pgn_tests() {
+  var chess = new Chess();
+  var start = new Date;
+  var tests = [
+     {pgn: [
+       '[Event "Reykjavik WCh"]',
+       '[Site "Reykjavik WCh"]',
+       '[Date "1972.01.07"]',
+       '[EventDate "?"]',
+       '[Round "6"]',
+       '[Result "1-0"]',
+       '[White "Robert James Fischer"]',
+       '[Black "Boris Spassky"]',
+       '[ECO "D59"]',
+       '[WhiteElo "?"]',
+       '[BlackElo "?"]',
+       '[PlyCount "81"]',
+       '',
+       '1. c4 e6 2. Nf3 d5 3. d4 Nf6 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6',
+       '7. Bh4 b6 8. cxd5 Nxd5 9. Bxe7 Qxe7 10. Nxd5 exd5 11. Rc1 Be6',
+       '12. Qa4 c5 13. Qa3 Rc8 14. Bb5 a6 15. dxc5 bxc5 16. O-O Ra7',
+       '17. Be2 Nd7 18. Nd4 Qf8 19. Nxe6 fxe6 20. e4 d4 21. f4 Qe7',
+       '22. e5 Rb8 23. Bc4 Kh8 24. Qh3 Nf8 25. b3 a5 26. f5 exf5',
+       '27. Rxf5 Nh7 28. Rcf1 Qd8 29. Qg3 Re7 30. h4 Rbb7 31. e6 Rbc7',
+       '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8',
+       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0']
+      },
+    {fen: '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17',
+     pgn: [
+      '[Event "Paris"]',
+      '[Site "Paris"]',
+      '[Date "1858.??.??"]',
+      '[EventDate "?"]',
+      '[Round "?"]',
+      '[Result "1-0"]',
+      '[White "Paul Morphy"]',
+      '[Black "Duke Karl / Count Isouard"]',
+      '[ECO "C41"]',
+      '[WhiteElo "?"]',
+      '[BlackElo "?"]',
+      '[PlyCount "33"]',
+      '',
+      '1.e4 e5 2.Nf3 d6 3.d4 Bg4 {This is a weak move',
+      'already.--Fischer} 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Bc4 Nf6 7.Qb3 Qe7',
+      '8.Nc3 c6 9.Bg5 {Black is in what\'s like a zugzwang position',
+      'here. He can\'t develop the [Queen\'s] knight because the pawn',
+      'is hanging, the bishop is blocked because of the',
+      'Queen.--Fischer} b5 10.Nxb5 cxb5 11.Bxb5+ Nbd7 12.O-O-O Rd8',
+      '13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8# 1-0']},
+    {pgn: [
+      '1. e4 e5 2. f4 exf4 3. Nf3 g5 4. h4 g4 5. Ne5 Nf6 6. Nxg4 Nxe4',
+      '7. d3 Ng3 8. Bxf4 Nxh1 9. Qe2+ Qe7 10. Nf6+ Kd8 11. Bxc7+ Kxc7',
+      '12. Nd5+ Kd8 13. Nxe7 Bxe7 14. Qg4 d6 15. Qf4 Rg8 16. Qxf7 Bxh4+',
+      '17. Kd2 Re8 18. Na3 Na6 19. Qh5 Bf6 20. Qxh1 Bxb2 21. Qh4+ Kd7',
+      '22. Rb1 Bxa3 23. Qa4+']},
+  ];
+
+  var newline_chars = ['\n', '<br />', '\n\r', 'BLAH'];
+
+  for (var i = 0; i < tests.length; i++) {
+    for (var j = 0; j < newline_chars.length; j++) {
+      var newline = newline_chars[j];
+      var s = 'load pgn test #' + i + String.fromCharCode(97 + j) + ': ';
+      var result = chess.load_pgn(tests[i].pgn.join(newline), { newline_char: newline });
+      
+      /* some PGN's tests contain comments which are stripped during parsing,
+       * so we'll need compare the results of the load against a FEN string
+       * (instead of the reconstructed PGN [e.g. tests[i].pgn.join(newline)])
+       */
+      if ('fen' in tests[i]) {
+        s += (result && chess.fen() == tests[i].fen) ? 'PASSED!' : 'FAILED';
+      } else {
+        s += (result && chess.pgn({ max_width: 65, newline_char: newline }) == 
+              tests[i].pgn.join(newline)) ? 'PASSED!' : 'FAILED!';
+      }
+      log(s);
+    }
+  }
+
+  var finish = new Date;
+  var diff = (finish - start) / 1000;
+  log('--> validate fen time: ' + diff + ' secs');
+  log('');
+}
+
+
+
 function history_tests() {
   var chess = new Chess();
   var start = new Date;
@@ -773,6 +860,7 @@ function run_unit_tests() {
   get_put_remove_tests();
   fen_tests();
   pgn_tests();
+  load_pgn_tests();
   make_move_tests();
   validate_fen_tests();
   history_tests();
