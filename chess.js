@@ -149,7 +149,7 @@ var Chess = function(fen) {
   var half_moves = 0;
   var move_number = 1;
   var history = [];
-  var info = {};
+  var header = {};
 
   /* if the user passes in a fen string, load it, else default to
    * starting position
@@ -169,7 +169,7 @@ var Chess = function(fen) {
     half_moves = 0;
     move_number = 1;
     history = [];
-    info = {};
+    header = {};
     update_setup(generate_fen());
   }
 
@@ -357,7 +357,7 @@ var Chess = function(fen) {
   }
 
   /* called when the initial board setup is changed with put() or remove().
-   * modifies the SetUp and FEN properties of the info object.  if the FEN is
+   * modifies the SetUp and FEN properties of the header object.  if the FEN is
    * equal to the default position, the SetUp and FEN are deleted
    * the setup is only updated if history.length is zero, ie moves haven't been
    * made.
@@ -366,11 +366,11 @@ var Chess = function(fen) {
     if (history.length > 0) return;
 
     if (fen != DEFAULT_POSITION) {
-      info["SetUp"] = fen;
-      info["FEN"] = '1';
+      header["SetUp"] = fen;
+      header["FEN"] = '1';
     } else {
-      delete info["SetUp"];
-      delete info["FEN"];
+      delete header["SetUp"];
+      delete header["FEN"];
     }
   }
 
@@ -1179,18 +1179,18 @@ var Chess = function(fen) {
                        typeof options.max_width == "number") ?
                        options.max_width : 0;
       var result = [];
-      var info_exists = false;
+      var header_exists = false;
 
-      /* add the PGN header information */
-      for (var i in info) {
-        /* TODO: order of enumerated properties in info object is not
+      /* add the PGN header headerrmation */
+      for (var i in header) {
+        /* TODO: order of enumerated properties in header object is not
          * guaranteed, see ECMA-262 spec (section 12.6.4) 
          */
-        result.push("[" + i + " \"" + info[i] + "\"]" + newline);
-        info_exists = true;
+        result.push("[" + i + " \"" + header[i] + "\"]" + newline);
+        header_exists = true;
       }
 
-      if (info_exists && history.length) {
+      if (header_exists && history.length) {
         result.push(newline);
       }
 
@@ -1254,14 +1254,14 @@ var Chess = function(fen) {
       return result.join("");
     },
 
-    info: function() {
+    header: function() {
       for (var i = 0; i < arguments.length; i += 2) {
         if (typeof arguments[i] == "string" && 
             typeof arguments[i + 1] == "string") {
-          info[arguments[i]] = arguments[i + 1];
+          header[arguments[i]] = arguments[i + 1];
         }
       }
-      return info;
+      return header;
     },
 
     ascii: function() {
