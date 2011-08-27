@@ -436,7 +436,6 @@ Musical support provided by:
 
 ## TODO
 
-- add method to input PGN
 - add AI (basic alpha-beta search w/ primitive position evaluation)
 - add jQuery chessboard widget
 - investigate the use of piece lists (this may shave a few cycles off generate_moves() and attacked())
