@@ -3,6 +3,6 @@
   "version":"0.1",
   "description":"A Javascript chess library for chess move generation/validation, piece placement/movement, and check/checkmate/draw detection",
   "author":"Jeff Hlywa <jhlywa@gmail.com>",
-  "keywords":["functional","fp"],
+  "keywords":["chess"],
   "main":"chess.js"
 }
