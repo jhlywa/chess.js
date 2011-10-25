@@ -9,7 +9,7 @@
     "Falco Nogatz (https://https://github.com/fnogatz)"
   ],
   "keywords": ["chess"],
-  "main": "chess.js"
+  "main": "chess.js",
 
   "repository" : {
     "type" : "git",
