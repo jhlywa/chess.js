@@ -476,11 +476,12 @@ var Chess = function(fen) {
     var squares_to_test={};
   	if(settings){
   		if(settings.target){
-  			//squares_to_test=[SQUARES[settings.target]];
   			squares_to_test[settings.target]=SQUARES[settings.target];
   		}
   	}else{
   		squares_to_test=SQUARES;
+		settings={};
+		settings.target="";  		
   	}
     for (var j in squares_to_test) {
       /* did we run off the end of the board */
@@ -542,7 +543,7 @@ var Chess = function(fen) {
     }
 
     /* king-side castling */
-    if (castling[us] & BITS.KSIDE_CASTLE) {
+    if (((castling[us] & BITS.KSIDE_CASTLE)&&(settings.target===""))||(kings[us]===squares_to_test[settings.target])) {
       var castling_from = kings[us];
       var castling_to = castling_from + 2;
 
@@ -557,7 +558,7 @@ var Chess = function(fen) {
     }
 
     /* queen-side castling */
-    if (castling[us] & BITS.QSIDE_CASTLE) {
+    if (((castling[us] & BITS.QSIDE_CASTLE)&&(settings.target===""))||(kings[us]===squares_to_test[settings.target])) {
       var castling_from = kings[us];
       var castling_to = castling_from - 2;
 
