@@ -474,15 +474,14 @@ var Chess = function(fen) {
     var them = swap_color(us);
     var second_rank = {b: RANK_7, w: RANK_2};
     var squares_to_test={};
-  	if(settings){
-  		if(settings.target){
-  			squares_to_test[settings.target]=SQUARES[settings.target];
-  		}
-  	}else{
-  		squares_to_test=SQUARES;
-		settings={};
-		settings.target="";  		
-  	}
+    
+    if(typeof settings !=="undefined" && typeof settings.target !=="undefined"){
+    	squares_to_test[settings.target]=SQUARES[settings.target];
+    }else{
+	squares_to_test=SQUARES;
+	settings={};
+	settings.target="";		
+    }
     for (var j in squares_to_test) {
       /* did we run off the end of the board */
       var i=squares_to_test[j];
@@ -1132,7 +1131,7 @@ var Chess = function(fen) {
        */
 
       var ugly_moves;
-	    if(typeof options != 'undefined' || typeof options.target==="undefined"){
+      if((typeof options === 'undefined')||(typeof options.target==="undefined")){
         ugly_moves = generate_moves();
       }else{
         ugly_moves = generate_moves({target:options.target});
