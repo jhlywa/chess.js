@@ -429,43 +429,37 @@ var Chess = function(fen) {
     return piece;
   }
 
-  function generate_moves(settings) {
+  function build_move(board, from, to, flags, promotion) {
+    var move = {
+      color: turn,
+      from: from,
+      to: to,
+      flags: flags,
+      piece: board[from].type
+    };
 
+    if (promotion) {
+      move.flags |= BITS.PROMOTION;
+      move.promotion = promotion;
+    }
+
+    if (board[to]) {
+      move.captured = board[to].type;
+    }
+    return move;
+  }
+
+  function generate_moves(settings) {
     function add_move(board, moves, from, to, flags) {
       /* if pawn promotion */
       if (board[from].type == PAWN &&
          (rank(to) == RANK_8 || rank(to) == RANK_1)) {
           var pieces = [QUEEN, ROOK, BISHOP, KNIGHT];
           for (var i = 0, len = pieces.length; i < len; i++) {
-            var promotion = {
-              color: turn,
-              from: from,
-              to: to,
-              flags: flags | BITS.PROMOTION,
-              promotion: pieces[i],
-              piece: board[from].type
-            };
-
-            /* add the captured piece */
-            if (board[to]) {
-              promotion.captured = board[to].type;
-            }
-            moves.push(promotion);
+            moves.push(build_move(board, from, to, flags, pieces[i]))
           }
       } else {
-        var move = {
-          color: turn,
-          from: from,
-          to: to,
-          flags: flags,
-          piece: board[from].type
-        };
-
-        if (board[to]) {
-          move.captured = board[to].type;
-        }
-
-        moves.push(move);
+       moves.push(build_move(board, from, to, flags));
       }
     }
 
@@ -1290,13 +1284,90 @@ var Chess = function(fen) {
        * coordinates
       */
       function move_from_san(move) {
-        var moves = generate_moves();
-        for (var i = 0, len = moves.length; i < len; i++) {
-          if (move == move_to_san(moves[i])) {
-            return moves[i];
+        var to, from, flags = BITS.NORMAL, promotion;
+        var parse = move.match(/^([NBKRQ])?([abcdefgh12345678][12345678]?)?(x)?([abcdefgh][12345678])(=[NBRQ])?/);
+        if (move.slice(0, 5) == 'O-O-O') {
+          from = kings[turn];
+          to = from - 2;
+          flags = BITS.QSIDE_CASTLE;
+        } else if (move.slice(0, 3) == 'O-O') {
+          from = kings[turn];
+          to = from + 2;
+          flags = BITS.KSIDE_CASTLE;
+        } else if (parse && parse[1]) {
+          // regular moves
+          var piece = parse[1].toLowerCase();
+          if (parse[3]) {
+            // capture
+            flags = BITS.CAPTURE;
+          }
+          to = SQUARES[parse[4]];
+          for (var j = 0, len = PIECE_OFFSETS[piece].length; j < len; j++) {
+            var offset = PIECE_OFFSETS[piece][j];
+            var square = to;
+
+            while (true) {
+              square += offset;
+              if (square & 0x88) break;
+
+              var b = board[square];
+              if (b) {
+                if (b.color == turn && b.type == piece && (!parse[2] || algebraic(square).indexOf(parse[2]) >= 0)) {
+                  from = square;
+                }
+                break;
+              }
+
+              /* break, if knight or king */
+              if (piece == 'n' || piece == 'k') break;
+            }
+          }
+        } else if (parse) {
+          // pawn move
+          if (parse[3]) {
+            // capture
+            to = SQUARES[parse[4]];
+            for (j = 2; j < 4; j++) {
+              var square = to - PAWN_OFFSETS[turn][j];
+              if (square & 0x88) continue;
+
+              if (board[square] != null &&
+                  board[square].color == turn &&
+                  algebraic(square)[0] == parse[2]) {
+                from = square;
+              }
+            }
+            if (board[to]) {
+              flags = BITS.CAPTURE;
+            } else {
+              flags = BITS.EP_CAPTURE;
+            }
+          } else {
+            // normal move
+            to = SQUARES[move.slice(0,2)]
+            var c = to - PAWN_OFFSETS[turn][0],
+                b = board[c];
+            if (b && b.type == PAWN && b.color == turn) {
+              from = c;
+            } else {
+              c = to - PAWN_OFFSETS[turn][1];
+              b = board[c];
+              if (b && b.type == PAWN && b.color == turn) {
+                from = c;
+                flags = BITS.BIG_PAWN;
+              }
+            }
+          }
+          // promotion?
+          if (parse[5]) {
+            promotion = parse[5][1].toLowerCase();
           }
         }
-        return null;
+        if (from >=0 && to >=0 && flags) {
+          return build_move(board, from, to, flags, promotion)
+        } else if (move.length > 0) {
+          /* alert(move); // error in PGN, or in parsing. */
+        }
       }
 
       function get_move_obj(move) {
