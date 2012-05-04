@@ -420,6 +420,7 @@ Special thanks to the following developers for their patches and contributions:
 - [Steve Bragg](https://github.com/2sb18)
 - [E. Azer Koçulu](https://github.com/azer)
 - [Falco Nogatz](https://github.com/fnogatz)
+- [Stiff](https://github.com/stiff)
 
 Musical support provided by:
 

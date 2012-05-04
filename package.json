@@ -6,7 +6,8 @@
   "contributors": [
     "Steve Bragg (https://github.com/2sb18)",
     "E. Azer Koçulu (https://github.com/azer)",
-    "Falco Nogatz (https://github.com/fnogatz)"
+    "Falco Nogatz (https://github.com/fnogatz)",
+    "Stiff (https://github.com/stiff)"
   ],
   "keywords": ["chess"],
   "main": "chess.js",
