@@ -8,10 +8,10 @@ try {
 }
 
 if (is_node) { 
-  var sys = require('sys'),
+  var util = require('util'),
        ch = require('../chess');
 
-  var log = sys.puts;
+  var log = util.puts;
   var Chess = ch.Chess;
 } else {
   var log = function(text, newline) {

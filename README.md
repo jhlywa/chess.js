@@ -23,17 +23,17 @@ Using chess.js in node.js is equally easy:
 ## Example Code
 The code below plays a complete game of chess ... randomly.
 
-    var sys = require('sys'),
+    var util = require('util'),
         ch =  require('./chess');
 
     var chess = new ch.Chess();
 
     while (!chess.game_over()) {
-      sys.puts('position: ' + chess.fen());
+      util.puts('position: ' + chess.fen());
       var moves = chess.moves();
       var move = moves[Math.floor(Math.random() * moves.length)];
       chess.move(move);
-      sys.puts('move: ' + move);
+      util.puts('move: ' + move);
     }
 
 
