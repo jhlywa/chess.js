@@ -24,7 +24,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  *----------------------------------------------------------------------------*/
-
 var Chess = function(fen) {
 
   var BLACK = 'b';
@@ -44,6 +43,9 @@ var Chess = function(fen) {
   var DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
   var POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'];
+
+  var GAME_STANDARD = 0;
+  var GAME_960 = 1;
 
   var PAWN_OFFSETS = {
     b: [16, 32, 17, 15],
@@ -152,6 +154,7 @@ var Chess = function(fen) {
   var move_number = 1;
   var history = [];
   var header = {};
+  var game_type = GAME_STANDARD;
 
   /* if the user passes in a fen string, load it, else default to
    * starting position
@@ -172,6 +175,14 @@ var Chess = function(fen) {
     move_number = 1;
     history = [];
     header = {};
+
+    ROOKS = {
+      w: [{square: SQUARES.a1, flag: BITS.QSIDE_CASTLE},
+          {square: SQUARES.h1, flag: BITS.KSIDE_CASTLE}],
+      b: [{square: SQUARES.a8, flag: BITS.QSIDE_CASTLE},
+          {square: SQUARES.h8, flag: BITS.KSIDE_CASTLE}]
+    };
+
     update_setup(generate_fen());
   }
 
@@ -191,22 +202,7 @@ var Chess = function(fen) {
 
     clear();
 
-    for (var i = 0; i < position.length; i++) {
-      var piece = position.charAt(i);
-
-      if (piece == '/') {
-        square += 8;
-      } else if (is_digit(piece)) {
-        square += parseInt(piece, 10);
-      } else {
-        var color = (piece < 'a') ? WHITE : BLACK;
-        put({type: piece.toLowerCase(), color: color}, algebraic(square));
-        square++;
-      }
-    }
-
-    turn = tokens[1];
-
+    /* parse castling flags */
     if (tokens[2].indexOf('K') > -1) {
       castling.w |= BITS.KSIDE_CASTLE;
     }
@@ -219,6 +215,34 @@ var Chess = function(fen) {
     if (tokens[2].indexOf('q') > -1) {
       castling.b |= BITS.QSIDE_CASTLE;
     }
+
+
+    /* parse FEN position */
+    for (var i = 0; i < position.length; i++) {
+      var piece = position.charAt(i);
+
+      if (piece == '/') {
+        square += 8;
+      } else if (is_digit(piece)) {
+        square += parseInt(piece, 10);
+      } else {
+        var color = (piece < 'a') ? WHITE : BLACK;
+        put({type: piece.toLowerCase(), color: color}, algebraic(square));
+
+        /* keep track of the rook squares for 960 castling */
+        if (board[square].type == ROOK && game_type == GAME_960) {
+          if (castling[color] & BITS.QSIDE_CASTLE && kings[color] == EMPTY) {
+            ROOKS[color][0] = {square: square, flag: BITS.QSIDE_CASTLE};
+          }
+          if (castling[color] & BITS.KSIDE_CASTLE && kings[color] != EMPTY) {
+            ROOKS[color][1] = {square: square, flag: BITS.KSIDE_CASTLE};
+          }
+        }
+        square++;
+      }
+    }
+
+    turn = tokens[1];
 
     ep_square = (tokens[3] == '-') ? EMPTY : SQUARES[tokens[3]];
     half_moves = parseInt(tokens[4], 10);
@@ -526,18 +550,68 @@ var Chess = function(fen) {
       }
     }
 
-    /* king-side castling */
+    /* king-side castling (STANDARD) */
     if (castling[us] & BITS.KSIDE_CASTLE) {
-      var castling_from = kings[us];
-      var castling_to = castling_from + 2;
+      if (game_type == GAME_STANDARD) {
+        var castling_from = kings[us];
+        var castling_to = castling_from + 2;
 
-      if (board[castling_from + 1] == null &&
-          board[castling_to]       == null &&
-          !attacked(them, kings[us]) &&
-          !attacked(them, castling_from + 1) &&
-          !attacked(them, castling_to)) {
-        add_move(board, moves, kings[us] , castling_to,
-                 BITS.KSIDE_CASTLE);
+        if (board[castling_from + 1] == null &&
+            board[castling_to]       == null &&
+            !attacked(them, kings[us]) &&
+            !attacked(them, castling_from + 1) &&
+            !attacked(them, castling_to)) {
+              add_move(board, moves, kings[us] , castling_to,
+                  BITS.KSIDE_CASTLE);
+            }
+      } else {
+        /* king-side castling (CHESS 960) */
+        var king_from = kings[us];
+        var king_to = us ? SQUARES.g1 : SQUARES.g8;
+        var rook_from = ROOKS[us][1].square;
+        var rook_to = us ? SQUARES.f1 : SQUARES.f8;
+
+        /* is there a clear shot between the king-side rook and its castling_to
+         * square (ignoring the friendly)?
+         */
+        var rook_unimpeded = true;
+        if (rook_from == rook_to) {
+          rook_unimpeded = false;
+        } else {
+          var delta = (rook_from - rook_to > 0) ? -1 : 1;
+          for (var i = rook_from + delta; i != rook_to; i += delta) {
+            if (board[i] && i != kings[us]) {
+              rook_unimpeded = false;
+              break;
+            }
+          }
+        }
+
+        /* is there a clear shot between the king and its castling_to square
+         * (ignoring the friendly king-side rook)?
+         */
+        var king_unimpeded = true;
+        var checked = false;
+        if (king_from == king_to) {
+          king_unimpeded = false;
+          checked = attacked(them, king_to);
+        } else {
+          var delta = (king_from - king_to > 0) ? -1 : 1;
+          for (var i = king_from + delta; i != king_to; i += delta) {
+            if (board[i] && i != ROOKS[us][1].square) {
+              king_unimpeded = false;
+              break;
+            }
+            if (attacked(them, i)) {
+              checked = true;
+              break;
+            }
+          }
+        }
+
+        if (rook_unimpeded && king_unimpeded && !checked) {
+          add_move(board, moves, kings[us] , king_to, BITS.KSIDE_CASTLE);
+        }
       }
     }
 
@@ -545,15 +619,62 @@ var Chess = function(fen) {
     if (castling[us] & BITS.QSIDE_CASTLE) {
       var castling_from = kings[us];
       var castling_to = castling_from - 2;
+      if (game_type == GAME_STANDARD) {
 
-      if (board[castling_from - 1] == null &&
-          board[castling_from - 2] == null &&
-          board[castling_from - 3] == null &&
-          !attacked(them, kings[us]) &&
-          !attacked(them, castling_from - 1) &&
-          !attacked(them, castling_to)) {
-        add_move(board, moves, kings[us], castling_to,
-                 BITS.QSIDE_CASTLE);
+        if (board[castling_from - 1] == null &&
+            board[castling_from - 2] == null &&
+            board[castling_from - 3] == null &&
+            !attacked(them, kings[us]) &&
+            !attacked(them, castling_from - 1) &&
+            !attacked(them, castling_to)) {
+              add_move(board, moves, kings[us], castling_to,
+                       BITS.QSIDE_CASTLE);
+            }
+      } else {
+        /* queen-side castling (CHESS 960) */
+        var king_from = kings[us];
+        var king_to = (us == 'w') ? SQUARES.c1 : SQUARES.c8;
+        var rook_from = ROOKS[us][0].square;
+        var rook_to = (us == 'w') ? SQUARES.d1 : SQUARES.d8;
+
+        /* is there a clear shot between the queen-side rook and its castling_to
+         * square (ignoring the friendly king)?
+         */
+        var rook_unimpeded = true;
+        if (rook_from != rook_to) {
+          var delta = (rook_from - rook_to > 0) ? -1 : 1;
+          for (var i = rook_from + delta; i != rook_to; i += delta) {
+            if (board[i] && i != kings[us]) {
+              rook_unimpeded = false;
+              break;
+            }
+          }
+        }
+
+        /* is there a clear shot between the king and its castling_to square
+         * (ignoring the friendly queen-side rook)?
+         */
+        var king_unimpeded = true;
+        var checked = false;
+        if (king_from == king_to) {
+          checked = attacked(them, king_to);
+        } else {
+          var delta = (king_from - king_to > 0) ? -1 : 1;
+          for (var i = king_from + delta; i != king_to; i += delta) {
+            if (board[i] && i != ROOKS[us][0].square) {
+              king_unimpeded = false;
+              break;
+            }
+            if (attacked(them, i)) {
+              checked = true;
+              break;
+            }
+          }
+        }
+
+        if (rook_unimpeded && king_unimpeded && !checked) {
+          add_move(board, moves, kings[us] , king_to, BITS.QSIDE_CASTLE);
+        }
       }
     }
 
@@ -763,8 +884,11 @@ var Chess = function(fen) {
     var them = swap_color(us);
     push(move);
 
-    board[move.to] = board[move.from];
-    board[move.from] = null;
+    /* 960 castling hack */
+    if (move.to != move.from) {
+      board[move.to] = board[move.from];
+      board[move.from] = null;
+    }
 
     /* if ep capture, remove the captured pawn */
     if (move.flags & BITS.EP_CAPTURE) {
@@ -786,15 +910,19 @@ var Chess = function(fen) {
 
       /* if we castled, move the rook next to the king */
       if (move.flags & BITS.KSIDE_CASTLE) {
-        var castling_to = move.to - 1;
-        var castling_from = move.to + 1;
-        board[castling_to] = board[castling_from];
-        board[castling_from] = null;
+        var rook_to = (us == 'w') ? SQUARES.f1 : SQUARES.f8;
+        var rook_from = ROOKS[us][1].square;
+        board[rook_to] = {type: ROOK, color: us};
+        if (rook_to != rook_from && board[rook_from].type == ROOK) { 
+          board[rook_from] = null;
+        }
       } else if (move.flags & BITS.QSIDE_CASTLE) {
-        var castling_to = move.to + 1;
-        var castling_from = move.to - 2;
-        board[castling_to] = board[castling_from];
-        board[castling_from] = null;
+        var rook_to = (us == 'w') ? SQUARES.d1 : SQUARES.d8;
+        var rook_from = ROOKS[us][0].square;
+        board[rook_to] = {type: ROOK, color: us};
+        if (rook_to != rook_from && board[rook_from].type == ROOK) { 
+          board[rook_from] = null;
+        }
       }
 
       /* turn off castling */
@@ -865,9 +993,12 @@ var Chess = function(fen) {
     var us = turn;
     var them = swap_color(turn);
 
-    board[move.from] = board[move.to];
-    board[move.from].type = move.piece  // to undo any promotions
-    board[move.to] = null;
+    /* 960 castling hack */
+    if (move.to != move.from) {
+      board[move.from] = board[move.to];
+      board[move.from].type = move.piece  // to undo any promotions
+      board[move.to] = null;
+    }
 
     if (move.flags & BITS.CAPTURE) {
       board[move.to] = {type: move.captured, color: them};
@@ -883,17 +1014,20 @@ var Chess = function(fen) {
 
 
     if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-      var castling_to, castling_from;
+      var rook_to, rook_from;
       if (move.flags & BITS.KSIDE_CASTLE) {
-        castling_to = move.to + 1;
-        castling_from = move.to - 1;
+        rook_to = ROOKS[us][1].square;
+        rook_from = (us == 'w') ? SQUARES.f1 : SQUARES.f8;
       } else if (move.flags & BITS.QSIDE_CASTLE) {
-        castling_to = move.to - 2;
-        castling_from = move.to + 1;
+        rook_to = ROOKS[us][0].square;
+        rook_from = (us == 'w') ? SQUARES.d1 : SQUARES.d8;
       }
+      board[rook_to] = {type: ROOK, color: us};
 
-      board[castling_to] = board[castling_from];
-      board[castling_from] = null;
+      /* be sure rook_from isn't the king (in 960) */
+      if (rook_to != rook_from && board[rook_from].type == ROOK) {
+        board[rook_from] = null;
+      }
     }
 
     return move;
@@ -1288,11 +1422,11 @@ var Chess = function(fen) {
         var parse = move.match(/^([NBKRQ])?([abcdefgh12345678][12345678]?)?(x)?([abcdefgh][12345678])(=[NBRQ])?/);
         if (move.slice(0, 5) == 'O-O-O') {
           from = kings[turn];
-          to = from - 2;
+          to = (turn == 'w') ? SQUARES.c1 : SQUARES.c8;
           flags = BITS.QSIDE_CASTLE;
         } else if (move.slice(0, 3) == 'O-O') {
           from = kings[turn];
-          to = from + 2;
+          to = (turn == 'w') ? SQUARES.g1 : SQUARES.g8;
           flags = BITS.KSIDE_CASTLE;
         } else if (parse && parse[1]) {
           // regular moves
@@ -1423,6 +1557,15 @@ var Chess = function(fen) {
       var headers = parse_pgn_header(header_string, options);
       for (var key in headers) {
         set_header([key, headers[key]]);
+        if (key.toLowerCase() == 'variant' &&
+            headers[key].toLowerCase() == 'chess960') {
+            game_type = GAME_960;
+        }
+      }
+
+      /* load the FEN header if provided */
+      if ('FEN' in headers) {
+        load(headers['FEN']);
       }
       
       /* delete header to get the moves */
