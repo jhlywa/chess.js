@@ -421,6 +421,7 @@ Special thanks to the following developers for their patches and contributions:
 - [E. Azer Koçulu](https://github.com/azer)
 - [Falco Nogatz](https://github.com/fnogatz)
 - [Stiff](https://github.com/stiff)
+- [Linmiao Xu](https://github.com/linrock)
 
 Musical support provided by:
 
