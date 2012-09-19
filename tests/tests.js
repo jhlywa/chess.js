@@ -1,10 +1,23 @@
 
 var is_node = true;
+var num_passed = 0;
+var num_failed = 0;
 
 try {
   is_node = typeof process == 'object'
 } catch (e) {
   is_node = false;
+}
+
+function assert(condition, error) {
+  if (condition) {
+    num_passed += 1;
+  } else {
+    num_failed += 1;
+  }
+  return condition ? 'PASSED!'
+                   : typeof error == 'undefined' ? 'FAILED!'
+                                                 : 'FAILED! (' + error + ')';
 }
 
 if (is_node) { 
@@ -42,7 +55,7 @@ function perft_unit_tests() {
     chess.load(perfts[i].fen);
     var nodes = chess.perft(perfts[i].depth);
     var s = 'Perft Test #' + i + ': ' + perfts[i].fen + ' - ' + nodes + ' : ';
-    s += (nodes != perfts[i].nodes) ? 'FAILED!' : 'PASSED!';
+    s += assert(nodes == perfts[i].nodes);
     total_nodes += nodes;
     log(s);
   }
@@ -66,7 +79,7 @@ function checkmate_unit_tests() {
   for (var i = 0; i < checkmates.length; i++) {
     chess.load(checkmates[i]);
     var s = 'Checkmate Test #' + i + ': ' + checkmates[i] + ' : ';
-    s += (chess.in_checkmate()) ? 'PASSED!' : 'FAILED!';
+    s += assert(chess.in_checkmate());
     log(s);
   }
 
@@ -87,7 +100,7 @@ function stalemate_unit_tests() {
   for (var i = 0; i < stalemates.length; i++) {
     chess.load(stalemates[i]);
     var s = 'Stalemate Test #' + i + ': ' + stalemates[i] + ' : ';
-    s += (chess.in_stalemate()) ? 'PASSED!' : 'FAILED!';
+    s += assert(chess.in_stalemate());
     log(s);
   }
   var finish = new Date;
@@ -113,9 +126,9 @@ function insufficient_material_unit_test() {
     chess.load(positions[i].fen);
     var s = 'Insufficient Material Test #' + i + ': ' + positions[i].fen + ' : ';
     if (positions[i].draw) {
-      s += (chess.insufficient_material() && chess.in_draw()) ? 'PASSED!' : 'FAILED!';
+      s += assert(chess.insufficient_material() && chess.in_draw());
     } else {
-      s += (!chess.insufficient_material() && !chess.in_draw()) ? 'PASSED!' : 'FAILED!';
+      s += assert(!chess.insufficient_material() && !chess.in_draw());
     }
 
     log(s);
@@ -149,13 +162,7 @@ function threefold_repetition_unit_test() {
       }
       chess.move(positions[i].moves[j]);
     }
-
-    if (!passed) {
-      s += 'FAILED!'; 
-    } else {
-      s += (chess.in_threefold_repetition() && chess.in_draw()) ? 'PASSED!' : 'FAILED!';
-    }
-
+    s += assert(passed && chess.in_threefold_repetition() && chess.in_draw());
     log(s);
   }
   var finish = new Date;
@@ -220,7 +227,7 @@ function algebraic_notation_tests() {
         } 
       } 
     }
-    s += passed ? 'PASSED!' : 'FAILED!';
+    s += assert(passed);
     log(s);
   }
 
@@ -314,7 +321,7 @@ function get_put_remove_tests() {
      */
     passed = (passed == positions[i].should_pass);
 
-    s += passed ? 'PASSED!' : 'FAILED!';
+    s += assert(passed);
 
     log(s);
   }
@@ -349,7 +356,7 @@ function fen_tests() {
     chess.load(positions[i].fen);
     var s = 'FEN Test #' + i + ': ' + positions[i].fen + ' (' + positions[i].should_pass + '): ';
     passed = (chess.fen() == positions[i].fen == positions[i].should_pass);
-    s += (passed) ? 'PASSED!' : 'FAILED!';
+    s += assert(passed);
     log(s);
   }
   var finish = new Date;
@@ -417,7 +424,7 @@ function pgn_tests() {
     var pgn = chess.pgn({max_width:positions[i].max_width, newline_char:positions[i].newline_char});
     var fen = chess.fen();
     passed = pgn === positions[i].pgn && fen === positions[i].fen;
-    s += (passed) ? 'PASSED!' : 'FAILED!';
+    s += assert(passed);
     log(s);
   }
   var finish = new Date;
@@ -453,9 +460,9 @@ function make_move_tests() {
             ' (' + positions[i].move + ' ' + positions[i].legal + ') : ';
     var result = chess.move(positions[i].move);
     if (positions[i].legal) {
-      s += (result && chess.fen() == positions[i].next) ? 'PASSED!' : 'FAILED!';
+      s += assert(result && chess.fen() == positions[i].next);
     } else {
-      s += (!result) ? 'PASSED!' : 'FAILED!';
+      s += assert(!result);
     }
 
     log(s);
@@ -598,8 +605,7 @@ function validate_fen_tests() {
     var s = 'validate fen test #' + i + ': ' + positions[i].fen + 
             ' (valid: ' + (positions[i].error_number  == 0) + ') : ';
     var result = chess.validate_fen(positions[i].fen);
-    s += (result.error_number == positions[i].error_number) ? 
-      'PASSED!' : 'FAILED! (' + result.error_number + ')';
+    s += assert(result.error_number == positions[i].error_number, result.error_number);
     log(s);
   }
   var finish = new Date;
@@ -680,10 +686,10 @@ function load_pgn_tests() {
        * (instead of the reconstructed PGN [e.g. tests[i].pgn.join(newline)])
        */
       if ('fen' in tests[i]) {
-        s += (result && chess.fen() == tests[i].fen) ? 'PASSED!' : 'FAILED';
+        s += assert(result && chess.fen() == tests[i].fen);
       } else {
-        s += (result && chess.pgn({ max_width: 65, newline_char: newline }) == 
-              tests[i].pgn.join(newline)) ? 'PASSED!' : 'FAILED!';
+        s += assert(result && chess.pgn({ max_width: 65, newline_char: newline }) ==
+                    tests[i].pgn.join(newline));
       }
       log(s);
     }
@@ -830,7 +836,7 @@ function history_tests() {
       }
     }
 
-    s += passed ?  'PASSED!' : 'FAILED!';
+    s += assert(passed);
     log(s);
   }
   var finish = new Date;
@@ -870,6 +876,7 @@ function run_unit_tests() {
   var finish = new Date;
   var diff = (finish - start) / 1000;
   log('Total Time: ' + diff + ' secs');
+  log('Ran ' + (num_passed + num_failed) + ' tests - ' + num_failed + ' failed');
 }
 
 if (is_node) {
