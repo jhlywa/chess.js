@@ -685,7 +685,7 @@ var Chess = function(fen) {
 
   function insufficient_material() {
     var pieces = {};
-    var bishops = {w: -1, b: -2};
+    var bishops = [];
     var num_pieces = 0;
     var sq_color = 0;
 
@@ -698,7 +698,7 @@ var Chess = function(fen) {
         pieces[piece.type] = (piece.type in pieces) ? 
                               pieces[piece.type] + 1 : 1;
         if (piece.type == BISHOP) {
-          bishops[piece.color] = sq_color;
+          bishops.push(sq_color);
         }
         num_pieces++;
       }
@@ -711,13 +711,15 @@ var Chess = function(fen) {
     else if (num_pieces == 3 && (pieces[BISHOP] == 1 ||
                                  pieces[KNIGHT] == 1)) { return true; }
 
-    /* kb vs. kb where both bishops are on the same color */
-    else if (num_pieces == 4 && pieces[BISHOP] == 2 &&
-                                bishops.w == bishops.b) { return true; }
-
-    /* TODO: general case of kb vs. kb where any number of bishops are
-     * all on the same color
-     */
+    /* kb vs. kb where any number of bishops are all on the same color */
+    else if (num_pieces == pieces[BISHOP] + 2) {
+      var sum = 0;
+      var len = bishops.length;
+      for (var i = 0; i < len; i++) {
+        sum += bishops[i];
+      }
+      if (sum == 0 || sum == len) { return true; }
+    }
 
     return false;
   }
