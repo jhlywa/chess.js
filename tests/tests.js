@@ -622,7 +622,7 @@ function load_pgn_tests() {
   var chess = new Chess();
   var start = new Date;
   var tests = [
-     {pgn: [
+    {pgn: [
        '[Event "Reykjavik WCh"]',
        '[Site "Reykjavik WCh"]',
        '[Date "1972.01.07"]',
@@ -643,8 +643,8 @@ function load_pgn_tests() {
        '22. e5 Rb8 23. Bc4 Kh8 24. Qh3 Nf8 25. b3 a5 26. f5 exf5',
        '27. Rxf5 Nh7 28. Rcf1 Qd8 29. Qg3 Re7 30. h4 Rbb7 31. e6 Rbc7',
        '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8',
-       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0']
-      },
+       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0'],
+     result: true},
     {fen: '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17',
      pgn: [
       '[Event "Paris"]',
@@ -666,18 +666,24 @@ function load_pgn_tests() {
       'here. He can\'t develop the [Queen\'s] knight because the pawn',
       'is hanging, the bishop is blocked because of the',
       'Queen.--Fischer} b5 10.Nxb5 cxb5 11.Bxb5+ Nbd7 12.O-O-O Rd8',
-      '13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8# 1-0']},
+      '13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8# 1-0'],
+     result: true},
     {pgn: [
       '1. e4 e5 2. f4 exf4 3. Nf3 g5 4. h4 g4 5. Ne5 Nf6 6. Nxg4 Nxe4',
       '7. d3 Ng3 8. Bxf4 Nxh1 9. Qe2+ Qe7 10. Nf6+ Kd8 11. Bxc7+ Kxc7',
       '12. Nd5+ Kd8 13. Nxe7 Bxe7 14. Qg4 d6 15. Qf4 Rg8 16. Qxf7 Bxh4+',
       '17. Kd2 Re8 18. Na3 Na6 19. Qh5 Bf6 20. Qxh1 Bxb2 21. Qh4+ Kd7',
-      '22. Rb1 Bxa3 23. Qa4+']},
+      '22. Rb1 Bxa3 23. Qa4+'],
+     result: true},
+    {pgn: [
+      '1. e4 Qxd7 1/2-1/2'],
+     result: false},
   ];
 
   var newline_chars = ['\n', '<br />', '\n\r', 'BLAH'];
 
   for (var i = 0; i < tests.length; i++) {
+    var expected_result = tests[i].result;
     for (var j = 0; j < newline_chars.length; j++) {
       var newline = newline_chars[j];
       var s = 'load pgn test #' + i + String.fromCharCode(97 + j) + ': ';
@@ -688,9 +694,9 @@ function load_pgn_tests() {
        * (instead of the reconstructed PGN [e.g. tests[i].pgn.join(newline)])
        */
       if ('fen' in tests[i]) {
-        s += assert(result && chess.fen() == tests[i].fen);
+        s += assert(result === expected_result && chess.fen() == tests[i].fen);
       } else {
-        s += assert(result && chess.pgn({ max_width: 65, newline_char: newline }) ==
+        s += assert(result === expected_result && chess.pgn({ max_width: 65, newline_char: newline }) ==
                     tests[i].pgn.join(newline));
       }
       log(s);
@@ -699,7 +705,7 @@ function load_pgn_tests() {
 
   var finish = new Date;
   var diff = (finish - start) / 1000;
-  log('--> validate fen time: ' + diff + ' secs');
+  log('--> load PGN time: ' + diff + ' secs');
   log('');
 }
 
