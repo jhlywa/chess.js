@@ -467,9 +467,18 @@ var Chess = function(fen) {
     var us = turn;
     var them = swap_color(us);
     var second_rank = {b: RANK_7, w: RANK_2};
-
-    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+    var squares_to_test={};
+    
+    if(typeof settings !=="undefined" && typeof settings.target !=="undefined"){
+    	squares_to_test[settings.target]=SQUARES[settings.target];
+    }else{
+	squares_to_test=SQUARES;
+	settings={};
+	settings.target="";		
+    }
+    for (var j in squares_to_test) {
       /* did we run off the end of the board */
+      var i=squares_to_test[j];
       if (i & 0x88) { i += 7; continue; }
 
       var piece = board[i];
@@ -527,7 +536,7 @@ var Chess = function(fen) {
     }
 
     /* king-side castling */
-    if (castling[us] & BITS.KSIDE_CASTLE) {
+    if (((castling[us] & BITS.KSIDE_CASTLE)&&(settings.target===""))||(kings[us]===squares_to_test[settings.target])) {
       var castling_from = kings[us];
       var castling_to = castling_from + 2;
 
@@ -542,7 +551,7 @@ var Chess = function(fen) {
     }
 
     /* queen-side castling */
-    if (castling[us] & BITS.QSIDE_CASTLE) {
+    if (((castling[us] & BITS.QSIDE_CASTLE)&&(settings.target===""))||(kings[us]===squares_to_test[settings.target])) {
       var castling_from = kings[us];
       var castling_to = castling_from - 2;
 
@@ -1129,7 +1138,12 @@ var Chess = function(fen) {
        * unnecessary move keys resulting from a verbose call.
        */
 
-      var ugly_moves = generate_moves();
+      var ugly_moves;
+      if((typeof options === 'undefined')||(typeof options.target==="undefined")){
+        ugly_moves = generate_moves();
+      }else{
+        ugly_moves = generate_moves({target:options.target});
+      }
       var moves = [];
 
       for (var i = 0, len = ugly_moves.length; i < len; i++) {
