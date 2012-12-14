@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/jhlywa/chess.js.png)](http://travis-ci.org/jhlywa/chess.js)
 # chess.js
 
 chess.js is a Javascript chess library that is used for chess move generation/validation,
