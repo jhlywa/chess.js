@@ -36,6 +36,11 @@ The code below plays a complete game of chess ... randomly.
       util.puts('move: ' + move);
     }
 
+chess.js is used in the projects below:
+
+- [3D Hartwig Chess Set](http://codepen.io/juliangarnier/fulldetails/BsIih) @juliangarnier
+- [Chess in Javascript](http://thingsilearned.com/2012/11/22/javascript-chess-game/) @davefowler
+- [Multiplayer Chess](http://multiplayerchess.com/) @azer
 
 ## API
 
@@ -426,6 +431,7 @@ Special thanks to the following developers for their patches and contributions:
 - [Steve Bragg](https://github.com/2sb18)
 - [E. Azer Koçulu](https://github.com/azer)
 - [Falco Nogatz](https://github.com/fnogatz)
+- [jdponomarev](https://github.com/jdponomarev)
 - [Stiff](https://github.com/stiff)
 - [Linmiao Xu](https://github.com/linrock)
 
@@ -438,12 +444,19 @@ Musical support provided by:
 
 ## BUGS
 
-- the en passant square and castling flags aren't adjusted when using the put/remove functions (workaround: use .load() instead)
+- The en passant square and castling flags aren't adjusted when using the put/remove functions (workaround: use .load() instead)
 
 
 
 ## TODO
 
-- add AI (basic alpha-beta search w/ primitive position evaluation)
-- add jQuery chessboard widget
-- investigate the use of piece lists (this may shave a few cycles off generate_moves() and attacked())
+- Standardize testing framework.  The current testing framework is homegrown
+  and is getting difficult to maintain.  I'm interested in a framework that can
+  be run from both the browser and command line (via node.js).
+- Add AI (basic alpha-beta search w/ primitive position evaluation).  The AI
+  should probably be internal to the underlying Chess() object to take full
+  advantage of 0x88 move generation.
+- Add jQuery chessboard widget.  (see widget branch for prototype)
+- Investigate the use of piece lists (this may shave a few cycles off
+  generate_moves() and attacked())
+
