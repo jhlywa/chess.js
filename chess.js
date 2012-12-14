@@ -449,7 +449,7 @@ var Chess = function(fen) {
     return move;
   }
 
-  function generate_moves(settings) {
+  function generate_moves(options) {
     function add_move(board, moves, from, to, flags) {
       /* if pawn promotion */
       if (board[from].type == PAWN &&
@@ -468,7 +468,24 @@ var Chess = function(fen) {
     var them = swap_color(us);
     var second_rank = {b: RANK_7, w: RANK_2};
 
-    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+    var first_sq = SQUARES.a8;
+    var last_sq = SQUARES.h1;
+
+    /* do we want legal moves? */
+    var legal = (typeof options != 'undefined' && 'legal' in options) ?
+                options.legal : true;
+
+    /* are we generating moves for a single square? */
+    if (typeof options != 'undefined' && 'square' in options) {
+      if (options.square in SQUARES) {
+        first_sq = last_sq = SQUARES[options.square];
+      } else {
+        /* invalid square */
+        return [];
+      }
+    }
+
+    for (var i = first_sq; i <= last_sq; i++) {
       /* did we run off the end of the board */
       if (i & 0x88) { i += 7; continue; }
 
@@ -557,15 +574,10 @@ var Chess = function(fen) {
       }
     }
 
-    /* if no parameters passed in, assume legal w/ algebraic moves */
-    if (typeof settings == 'undefined') {
-      settings = {legal: true};
-    }
-
     /* return all pseudo-legal moves (this includes moves that allow the king
-     * to be captured
+     * to be captured)
      */
-    if (settings.legal != null && settings.legal == false) {
+    if (!legal) {
       return moves;
     }
 
@@ -1129,7 +1141,7 @@ var Chess = function(fen) {
        * unnecessary move keys resulting from a verbose call.
        */
 
-      var ugly_moves = generate_moves();
+      var ugly_moves = generate_moves(options);
       var moves = [];
 
       for (var i = 0, len = ugly_moves.length; i < len; i++) {

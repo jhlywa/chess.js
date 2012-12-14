@@ -16,7 +16,7 @@ Using chess.js in a browser is straight-forward:
 
 Using chess.js in node.js is equally easy:
 
-    var ch = require('/chess.js')
+    var ch = require('./chess.js')
 
     var chess = new ch.Chess();
     ...
@@ -287,12 +287,18 @@ Or by passing .move() a move object (only the 'to', 'from', and when necessary
     // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
 
 ### .moves([ options ])
-Returns a list of all legal moves from the current position.  The function be passed a options hash which controls the verbosity of the return values (this may change in the future).
+Returns a list of legals moves from the current position.  The function takes an optional parameter which controls the single-square move generation and verbosity.
 
     var chess = new Chess();
     chess.moves();
     // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4',
            'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
+
+    chess.moves({square: 'e2'});
+    // -> ['e3', 'e4']
+
+    chess.moves({square: 'e9'}); // invalid square
+    // -> []
 
     chess.moves({ verbose: true });
     // -> [{ color: 'w', from: 'a2', to: 'a3', 
