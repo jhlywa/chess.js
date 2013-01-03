@@ -446,11 +446,7 @@ var Chess = function(fen) {
     if (board[to]) {
       move.captured = board[to].type;
     } else if (flags & BITS.EP_CAPTURE) {
-      if (turn == BLACK) {
-        move.captured = board[move.to - 16].type;
-      } else {
-        move.captured = board[move.to + 16].type;
-      }
+        move.captured = PAWN;
     }
     return move;
   }
