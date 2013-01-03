@@ -445,6 +445,8 @@ var Chess = function(fen) {
 
     if (board[to]) {
       move.captured = board[to].type;
+    } else if (flags & BITS.EP_CAPTURE) {
+        move.captured = PAWN;
     }
     return move;
   }
