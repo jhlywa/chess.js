@@ -1,44 +1,21 @@
-
-var is_node = true;
-var num_passed = 0;
-var num_failed = 0;
-
-try {
-  is_node = typeof process == 'object'
-} catch (e) {
-  is_node = false;
+if (typeof require != "undefined") {
+  var chai = require('chai');
+  var Chess = require('../chess').Chess;
 }
+var assert = chai.assert;
 
-function assert(condition, error) {
-  if (condition) {
-    num_passed += 1;
-  } else {
-    num_failed += 1;
-  }
-  return condition ? 'PASSED!'
-                   : typeof error == 'undefined' ? 'FAILED!'
-                                                 : 'FAILED! (' + error + ')';
-}
 
-if (is_node) { 
-  var util = require('util'),
-       ch = require('../chess');
-
-  var log = util.puts;
-  var Chess = ch.Chess;
-} else {
-  var log = function(text, newline) {
-    var console = document.getElementById('console');
-    console.innerHTML += text;
-    if (typeof newline  == 'undefined' || newline == true) {
-      console.innerHTML += '<br />';
+if (!Array.prototype.forEach) {
+  Array.prototype.forEach = function(fn, scope) {
+    for(var i = 0, len = this.length; i < len; ++i) {
+      fn.call(scope, this[i], i, this);
     }
   }
 }
 
-function perft_unit_tests() {
-  var chess = new Chess();
-  var start = new Date;
+
+suite("Perft", function() {
+
   var perfts = [
     {fen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1', 
       depth: 3, nodes: 97862},
@@ -50,25 +27,22 @@ function perft_unit_tests() {
       depth: 3, nodes: 23509},
   ];
 
-  var total_nodes = 0;
-  for (var i = 0; i < perfts.length; i++) {
-    chess.load(perfts[i].fen);
-    var nodes = chess.perft(perfts[i].depth);
-    var s = 'Perft Test #' + i + ': ' + perfts[i].fen + ' - ' + nodes + ' : ';
-    s += assert(nodes == perfts[i].nodes);
-    total_nodes += nodes;
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
+  perfts.forEach(function(perft) {
+    var chess = new Chess();
+    chess.load(perft.fen);
 
-  log('--> Perft Time: ' + diff + ' secs ' + '(' + Math.floor(total_nodes / diff) + ' NPS)');
-  log('');
-}
+    test(perft.fen, function() {
+      var nodes = chess.perft(perft.depth);
+      assert(nodes == perft.nodes);
+    });
 
-function single_square_move_generation_tests() {
-  var chess = new Chess();
-  var start = new Date;
+  });
+
+});
+
+
+suite("Single Square Move Generation", function() {
+
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
       square: 'e2', verbose: false, moves: ['e3', 'e4']},
@@ -95,78 +69,79 @@ function single_square_move_generation_tests() {
 
   ];
 
-  for (var i = 0; i < positions.length; i++) {
-    chess.load(positions[i].fen);
-    var moves = chess.moves({square: positions[i].square, verbose: positions[i].verbose});
-    var s = 'Single Square Move Generation Test #' + i + ': ' + positions[i].fen + ' ' + positions[i].square + ' : ';
+  positions.forEach(function(position) {
+    var chess = new Chess();
+    chess.load(position.fen);
+    
+    test(position.fen + ' ' + position.square, function() {
 
-    var passed = positions[i].moves.length == moves.length;
+      var moves = chess.moves({square: position.square, verbose: position.verbose});
+      var passed = position.moves.length == moves.length;
 
-    for (var j = 0; j < moves.length; j++) {
-      if (!positions[i].verbose) {
-        passed = passed && moves[j] == positions[i].moves[j];
-      } else {
-        for (var k in moves[j]) {
-          passed = passed && moves[j][k] == positions[i].moves[j][k];
+      for (var j = 0; j < moves.length; j++) {
+        if (!position.verbose) {
+          passed = passed && moves[j] == position.moves[j];
+        } else {
+          for (var k in moves[j]) {
+            passed = passed && moves[j][k] == position.moves[j][k];
+          }
         }
       }
-    }
-    s += assert(passed);
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
+      assert(passed);
 
-  log('--> Single Square Move Generation  Time: ' + diff + ' secs ');
-  log('');
-}
+    });
 
-function checkmate_unit_tests() {
+  });
+
+});
+
+
+
+
+suite("Checkmate", function() {
+
   var chess = new Chess();
-  var start = new Date;
   var checkmates = [
     '8/5r2/4K1q1/4p3/3k4/8/8/8 w - - 0 7',
     '4r2r/p6p/1pnN2p1/kQp5/3pPq2/3P4/PPP3PP/R5K1 b - - 0 2',
     'r3k2r/ppp2p1p/2n1p1p1/8/2B2P1q/2NPb1n1/PP4PP/R2Q3K w kq - 0 8',
-    '8/6R1/pp1r3p/6p1/P3R1Pk/1P4P1/7K/8 b - - 0 4',
-  ]
+    '8/6R1/pp1r3p/6p1/P3R1Pk/1P4P1/7K/8 b - - 0 4'
+  ];
 
-  for (var i = 0; i < checkmates.length; i++) {
-    chess.load(checkmates[i]);
-    var s = 'Checkmate Test #' + i + ': ' + checkmates[i] + ' : ';
-    s += assert(chess.in_checkmate());
-    log(s);
-  }
+  checkmates.forEach(function(checkmate) {
+    chess.load(checkmate);
 
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> Checkmate Time: ' + diff + ' secs');
-  log('');
-}
+    test(checkmate, function() {
+      assert(chess.in_checkmate());
+    });
+  });
 
-function stalemate_unit_tests() {
-  var chess = new Chess();
-  var start = new Date;
+});
+
+
+
+suite("Stalemate", function() {
+
   var stalemates = [
     '1R6/8/8/8/8/8/7R/k6K b - - 0 1',
     '8/8/5k2/p4p1p/P4K1P/1r6/8/8 w - - 0 2',
   ];
 
-  for (var i = 0; i < stalemates.length; i++) {
-    chess.load(stalemates[i]);
-    var s = 'Stalemate Test #' + i + ': ' + stalemates[i] + ' : ';
-    s += assert(chess.in_stalemate());
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> Stalemate Time: ' + diff + ' secs');
-  log('');
-}
+  stalemates.forEach(function(stalemate) {
+    var chess = new Chess();
+    chess.load(stalemate);
 
-function insufficient_material_unit_test() {
-  var chess = new Chess();
-  var start = new Date;
+    test(stalemate, function() {
+      assert(chess.in_stalemate())
+    });
+
+  });
+
+});
+
+
+suite("Insufficient Material", function() {
+
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', draw: false},
     {fen: '8/8/8/8/8/8/8/k6K w - - 0 1', draw: true},
@@ -179,26 +154,25 @@ function insufficient_material_unit_test() {
     {fen: '8/bB2b1B1/1b1B1b1B/8/8/8/8/1k5K w - - 0 1', draw: false}
   ];
 
-  for (var i = 0; i < positions.length; i++) {
-    chess.load(positions[i].fen);
-    var s = 'Insufficient Material Test #' + i + ': ' + positions[i].fen + ' : ';
-    if (positions[i].draw) {
-      s += assert(chess.insufficient_material() && chess.in_draw());
-    } else {
-      s += assert(!chess.insufficient_material() && !chess.in_draw());
-    }
+  positions.forEach(function(position) {
+    var chess = new Chess();
+    chess.load(position.fen);
 
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> Insufficient Material Time: ' + diff + ' secs');
-  log('');
-}
+    test(position.fen, function() {
+      if (position.draw) {
+        assert(chess.insufficient_material() && chess.in_draw());
+      } else {
+        assert(!chess.insufficient_material() && !chess.in_draw());
+      }
+    });
 
-function threefold_repetition_unit_test() {
-  var chess = new Chess();
-  var start = new Date;
+  });
+
+});
+
+
+suite("Threefold Repetition", function() {
+  
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', 
      moves: ['Nf3', 'Nf6', 'Ng1', 'Ng8', 'Nf3', 'Nf6', 'Ng1', 'Ng8']},
@@ -208,30 +182,32 @@ function threefold_repetition_unit_test() {
      moves: ['Qe5', 'Qh5', 'Qf6', 'Qe2', 'Re5', 'Qd3', 'Rd5', 'Qe2']},
   ];
 
-  for (var i = 0; i < positions.length; i++) {
-    chess.load(positions[i].fen);
-    var s = 'Threefold Repetition Test #' + i + ': ' + positions[i].fen + ' : ';
-    var passed = true;
-    for (var j = 0; j < positions[i].moves.length; j++) {
-      if (chess.in_threefold_repetition()) {
-        passed = false;
-        break;
-      }
-      chess.move(positions[i].moves[j]);
-    }
-    s += assert(passed && chess.in_threefold_repetition() && chess.in_draw());
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> Threefold Repetition Time: ' + diff + ' secs');
-  log('');
-}
+  positions.forEach(function(position) {
+    var chess = new Chess();
+    chess.load(position.fen);
 
-function algebraic_notation_tests() {
-  var chess = new Chess();
-  var start = new Date;
-  var passed = true;
+    test(position.fen, function() {
+
+      var passed = true;
+      for (var j = 0; j < position.moves.length; j++) {
+        if (chess.in_threefold_repetition()) {
+          passed = false;
+          break;
+        }
+        chess.move(position.moves[j]);
+      }
+
+      assert(passed && chess.in_threefold_repetition() && chess.in_draw());
+
+    });
+
+  });
+
+});
+
+
+suite("Algebraic Notation", function() {
+
   var positions = [
     {fen: '7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1', 
      moves: ['Rd8#', 'Re7', 'Rf7', 'Rg7', 'Rh7#', 'R7xd6', 'Rc7', 'Rb7', 'Ra7',
@@ -268,35 +244,36 @@ function algebraic_notation_tests() {
      moves: ['N2xf3', 'Nhxf3', 'Nd4xf3', 'N2b3', 'Nc4', 'Ne4', 'Nf1', 'Nb1',
              'Nhf5', 'Ng6', 'Ng2', 'Nb5', 'Nc6', 'Ne6', 'Ndf5', 'Ne2', 'Nc2',
              'N4b3', 'Kb8']},
-    ];
+  ];
 
-  for (var i = 0; i < positions.length; i++) { 
-    var s = 'Algebraic Notation Test #' + i + ': ' + positions[i].fen + ' : ';
-    chess.load(positions[i].fen);
-    var moves = chess.moves();
-    if (moves.length != positions[i].moves.length) {
-      passed = false;
-    } else {
-      for (var j = 0; j < moves.length; j++) {
-        if (positions[i].moves.indexOf(moves[j]) == -1) {
-          passed = false;
-          break; 
+  positions.forEach(function(position) {
+    var chess = new Chess();
+    var passed = true;
+    chess.load(position.fen);
+
+    test(position.fen, function() {
+      var moves = chess.moves();
+      if (moves.length != position.moves.length) {
+        passed = false;
+      } else {
+        for (var j = 0; j < moves.length; j++) {
+          if (position.moves.indexOf(moves[j]) == -1) {
+            passed = false;
+            break; 
+          } 
         } 
-      } 
-    }
-    s += assert(passed);
-    log(s);
-  }
+      }
+      assert(passed);
+    });
 
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> Algebraic Notation Time: ' + diff + ' secs');
-  log('');
-}
+  });
 
-function get_put_remove_tests() {
+});
+
+
+suite("Get/Put/Remove", function() {
+
   var chess = new Chess();
-  var start = new Date;
   var passed = true;
   var positions = [
     {pieces: {a7: {type: chess.PAWN, color: chess.WHITE},
@@ -320,78 +297,76 @@ function get_put_remove_tests() {
      should_pass: false},
   ];
 
-  for (var i = 0; i < positions.length; i++) {
+  positions.forEach(function(position) {
+
     passed = true;
     chess.clear();
-    var s = 'Get/Put Test #' + i + ' (' + positions[i].should_pass + '): ';
 
-    /* places the pieces */
-    for (var square in positions[i].pieces) {
-      passed &= chess.put(positions[i].pieces[square], square);
-    }
+    test("position should pass - " + position.should_pass, function() {
 
-    /* iterate over every square to make sure get returns the proper
-     * piece values/color 
-     */
-    for (var j = 0; j < chess.SQUARES.length; j++) {
-      var square = chess.SQUARES[j];
-      if (!(square in positions[i].pieces)) {
-        if (chess.get(square)) {
-          passed = false;
-          break;
-        }
-      } else {
-        var piece = chess.get(square);
-        if (!(piece &&
-            piece.type == positions[i].pieces[square].type &&
-            piece.color == positions[i].pieces[square].color)) {
-          passed = false;
-          break;
-        }
+      /* places the pieces */
+      for (var square in position.pieces) {
+        passed &= chess.put(position.pieces[square], square);
       }
-    }
 
-    if (passed) {
-      /* remove the pieces */
+      /* iterate over every square to make sure get returns the proper
+       * piece values/color 
+       */
       for (var j = 0; j < chess.SQUARES.length; j++) {
         var square = chess.SQUARES[j];
-        var piece = chess.remove(square);
-        if ((!(square in positions[i].pieces)) && piece) {
-          passed = false;
-          break;
-        }
-
-        if (piece &&
-           (positions[i].pieces[square].type != piece.type ||
-            positions[i].pieces[square].color != piece.color)) {
-          passed = false;
-          break;
+        if (!(square in position.pieces)) {
+          if (chess.get(square)) {
+            passed = false;
+            break;
+          }
+        } else {
+          var piece = chess.get(square);
+          if (!(piece &&
+              piece.type == position.pieces[square].type &&
+              piece.color == position.pieces[square].color)) {
+            passed = false;
+            break;
+          }
         }
       }
-    }
 
-    /* finally, check for an empty board */
-    passed = passed && (chess.fen() == '8/8/8/8/8/8/8/8 w - - 0 1');
+      if (passed) {
+        /* remove the pieces */
+        for (var j = 0; j < chess.SQUARES.length; j++) {
+          var square = chess.SQUARES[j];
+          var piece = chess.remove(square);
+          if ((!(square in position.pieces)) && piece) {
+            passed = false;
+            break;
+          }
 
-    /* some tests should fail, so make sure we're supposed to pass/fail each
-     * test
-     */
-    passed = (passed == positions[i].should_pass);
+          if (piece &&
+             (position.pieces[square].type != piece.type ||
+              position.pieces[square].color != piece.color)) {
+            passed = false;
+            break;
+          }
+        }
+      }
 
-    s += assert(passed);
+      /* finally, check for an empty board */
+      passed = passed && (chess.fen() == '8/8/8/8/8/8/8/8 w - - 0 1');
 
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> Get/Put Time: ' + diff + ' secs');
-  log('');
-}
+      /* some tests should fail, so make sure we're supposed to pass/fail each
+       * test
+       */
+      passed = (passed == position.should_pass);
 
-function fen_tests() {
-  var chess = new Chess();
-  var start = new Date;
-  var passed = true;
+      assert(passed);
+    });
+
+  });
+
+});
+
+
+suite("FEN", function() {
+
   var positions = [
     {fen: '8/8/8/8/8/8/8/8 w - - 0 1', should_pass: true},
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', should_pass: true},
@@ -408,22 +383,21 @@ function fen_tests() {
     {fen: '1nbqkbn1/pppp1ppX/8/4p3/4P3/8/PPPP1PPP/1NBQKBN1 b - - 1 2', should_pass: false},
   ];
 
-  for (var i = 0; i < positions.length; i++) {
-    passed = true;
-    chess.load(positions[i].fen);
-    var s = 'FEN Test #' + i + ': ' + positions[i].fen + ' (' + positions[i].should_pass + '): ';
-    passed = (chess.fen() == positions[i].fen == positions[i].should_pass);
-    s += assert(passed);
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> FEN Time: ' + diff + ' secs');
-  log('');
-}
+  positions.forEach(function(position) {
+    var chess = new Chess();
 
-function pgn_tests() {
-  var start = new Date;
+    test(position.fen + ' (' + position.should_pass + ')', function() {
+      chess.load(position.fen);
+      assert(chess.fen() == position.fen == position.should_pass);
+    });
+
+  });
+
+});
+
+
+suite("PGN", function() {
+  
   var passed = true;
   var error_message;
   var positions = [
@@ -466,33 +440,119 @@ function pgn_tests() {
      fen: 'r1bqk1nr/ppp2ppp/2np4/b3p3/2BPP3/2P2N2/P4PPP/RNBQ1RK1 b kq d3 0 3'}
     ];
 
-  for (var i = 0; i < positions.length; i++) {
-    var chess = ("starting_position" in positions[i]) ? new Chess(positions[i].starting_position) : new Chess();
-    passed = true;
-    error_message = "";
-    for (var j = 0; j < positions[i].moves.length; j++) {
-      if (chess.move(positions[i].moves[j]) === null) {
-        error_message = "move() did not accept " + positions[i].moves[j] + " : ";
-        break;
+  positions.forEach(function(position, i) {
+
+    test(i, function() {
+      var chess = ("starting_position" in position) ? new Chess(position.starting_position) : new Chess();
+      passed = true;
+      error_message = "";
+      for (var j = 0; j < position.moves.length; j++) {
+        if (chess.move(position.moves[j]) === null) {
+          error_message = "move() did not accept " + position.moves[j] + " : ";
+          break;
+        }
       }
-    }
-    var s = 'PGN Test #' + i + ': ' + error_message;
-    chess.header.apply(null, positions[i].header);
-    var pgn = chess.pgn({max_width:positions[i].max_width, newline_char:positions[i].newline_char});
-    var fen = chess.fen();
-    passed = pgn === positions[i].pgn && fen === positions[i].fen;
-    s += assert(passed);
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish-start) / 1000;
-  log('--> PGN Time: ' + diff + ' secs');
-  log('');
-}
-      
-function make_move_tests() {
+
+      chess.header.apply(null, position.header);
+      var pgn = chess.pgn({max_width:position.max_width, newline_char:position.newline_char});
+      var fen = chess.fen();
+      passed = pgn === position.pgn && fen === position.fen;
+      assert(passed && error_message.length == 0);
+    });
+
+  });
+
+});
+
+
+suite("Load PGN", function() {
+
   var chess = new Chess();
-  var start = new Date;
+  var tests = [
+     {pgn: [
+       '[Event "Reykjavik WCh"]',
+       '[Site "Reykjavik WCh"]',
+       '[Date "1972.01.07"]',
+       '[EventDate "?"]',
+       '[Round "6"]',
+       '[Result "1-0"]',
+       '[White "Robert James Fischer"]',
+       '[Black "Boris Spassky"]',
+       '[ECO "D59"]',
+       '[WhiteElo "?"]',
+       '[BlackElo "?"]',
+       '[PlyCount "81"]',
+       '',
+       '1. c4 e6 2. Nf3 d5 3. d4 Nf6 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6',
+       '7. Bh4 b6 8. cxd5 Nxd5 9. Bxe7 Qxe7 10. Nxd5 exd5 11. Rc1 Be6',
+       '12. Qa4 c5 13. Qa3 Rc8 14. Bb5 a6 15. dxc5 bxc5 16. O-O Ra7',
+       '17. Be2 Nd7 18. Nd4 Qf8 19. Nxe6 fxe6 20. e4 d4 21. f4 Qe7',
+       '22. e5 Rb8 23. Bc4 Kh8 24. Qh3 Nf8 25. b3 a5 26. f5 exf5',
+       '27. Rxf5 Nh7 28. Rcf1 Qd8 29. Qg3 Re7 30. h4 Rbb7 31. e6 Rbc7',
+       '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8',
+       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0']
+      },
+    {fen: '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17',
+     pgn: [
+      '[Event "Paris"]',
+      '[Site "Paris"]',
+      '[Date "1858.??.??"]',
+      '[EventDate "?"]',
+      '[Round "?"]',
+      '[Result "1-0"]',
+      '[White "Paul Morphy"]',
+      '[Black "Duke Karl / Count Isouard"]',
+      '[ECO "C41"]',
+      '[WhiteElo "?"]',
+      '[BlackElo "?"]',
+      '[PlyCount "33"]',
+      '',
+      '1.e4 e5 2.Nf3 d6 3.d4 Bg4 {This is a weak move',
+      'already.--Fischer} 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Bc4 Nf6 7.Qb3 Qe7',
+      '8.Nc3 c6 9.Bg5 {Black is in what\'s like a zugzwang position',
+      'here. He can\'t develop the [Queen\'s] knight because the pawn',
+      'is hanging, the bishop is blocked because of the',
+      'Queen.--Fischer} b5 10.Nxb5 cxb5 11.Bxb5+ Nbd7 12.O-O-O Rd8',
+      '13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8# 1-0']},
+    {pgn: [
+      '1. e4 e5 2. f4 exf4 3. Nf3 g5 4. h4 g4 5. Ne5 Nf6 6. Nxg4 Nxe4',
+      '7. d3 Ng3 8. Bxf4 Nxh1 9. Qe2+ Qe7 10. Nf6+ Kd8 11. Bxc7+ Kxc7',
+      '12. Nd5+ Kd8 13. Nxe7 Bxe7 14. Qg4 d6 15. Qf4 Rg8 16. Qxf7 Bxh4+',
+      '17. Kd2 Re8 18. Na3 Na6 19. Qh5 Bf6 20. Qxh1 Bxb2 21. Qh4+ Kd7',
+      '22. Rb1 Bxa3 23. Qa4+']},
+  ];
+
+  var newline_chars = ['\n', '<br />', '\n\r', 'BLAH'];
+
+  tests.forEach(function(t, i) {
+
+    newline_chars.forEach(function(newline, j) {
+
+      test(i + String.fromCharCode(97 + j), function() {
+
+        var result = chess.load_pgn(t.pgn.join(newline), { newline_char: newline });
+        
+        /* some PGN's tests contain comments which are stripped during parsing,
+         * so we'll need compare the results of the load against a FEN string
+         * (instead of the reconstructed PGN [e.g. test.pgn.join(newline)])
+         */
+        if ('fen' in t) {
+          assert(result && chess.fen() == t.fen);
+        } else {
+          assert(result && chess.pgn({ max_width: 65, newline_char: newline }) ==
+                 t.pgn.join(newline));
+        }
+      });
+
+    });
+
+  });
+
+});
+
+
+suite("Make Move", function() {
+
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
      legal: true,
@@ -511,28 +571,27 @@ function make_move_tests() {
      next: 'rnbqkbnr/pp3ppp/2ppP3/8/4P3/8/PPPP2PP/RNBQKBNR b KQkq - 0 1'}
   ];
 
-  for (var i = 0; i < positions.length; i++) {
-    chess.load(positions[i].fen);
-    var s = 'make move test #' + i + ': ' + positions[i].fen + 
-            ' (' + positions[i].move + ' ' + positions[i].legal + ') : ';
-    var result = chess.move(positions[i].move);
-    if (positions[i].legal) {
-      s += assert(result && chess.fen() == positions[i].next);
-    } else {
-      s += assert(!result);
-    }
+  positions.forEach(function(position) {
+    var chess = new Chess();
+    chess.load(position.fen);
 
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> make move time: ' + diff + ' secs');
-  log('');
-}
+    test(position.fen + ' (' + position.move + ' ' + position.legal + ')', function() {
+      var result = chess.move(position.move);
+      if (position.legal) {
+        assert(result && chess.fen() == position.next);
+      } else {
+        assert(!result);
+      }
+    });
 
-function validate_fen_tests() {
+  });
+
+});
+
+
+suite("Validate FEN", function() {
+
   var chess = new Chess();
-  var start = new Date;
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNRw KQkq - 0 1',   error_number: 1},
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 x',  error_number: 2},
@@ -658,111 +717,21 @@ function validate_fen_tests() {
     {fen: '3r1r2/3P2pk/1p1R3p/1Bp2p2/6q1/4Q3/PP3P1P/7K w - - 4 30', error_number: 0},
   ];
 
-  for (var i = 0; i < positions.length; i++) {
-    var s = 'validate fen test #' + i + ': ' + positions[i].fen + 
-            ' (valid: ' + (positions[i].error_number  == 0) + ') : ';
-    var result = chess.validate_fen(positions[i].fen);
-    s += assert(result.error_number == positions[i].error_number, result.error_number);
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> validate fen time: ' + diff + ' secs');
-  log('');
+  positions.forEach(function(position) {
+
+    test(position.fen + ' (valid: ' + (position.error_number  == 0) + ')', function() {
+      var result = chess.validate_fen(position.fen);
+      assert(result.error_number == position.error_number, result.error_number);
+    });
+
+  });
+
+});
 
 
-}
+suite("History", function() {
 
-function load_pgn_tests() {
   var chess = new Chess();
-  var start = new Date;
-  var tests = [
-     {pgn: [
-       '[Event "Reykjavik WCh"]',
-       '[Site "Reykjavik WCh"]',
-       '[Date "1972.01.07"]',
-       '[EventDate "?"]',
-       '[Round "6"]',
-       '[Result "1-0"]',
-       '[White "Robert James Fischer"]',
-       '[Black "Boris Spassky"]',
-       '[ECO "D59"]',
-       '[WhiteElo "?"]',
-       '[BlackElo "?"]',
-       '[PlyCount "81"]',
-       '',
-       '1. c4 e6 2. Nf3 d5 3. d4 Nf6 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6',
-       '7. Bh4 b6 8. cxd5 Nxd5 9. Bxe7 Qxe7 10. Nxd5 exd5 11. Rc1 Be6',
-       '12. Qa4 c5 13. Qa3 Rc8 14. Bb5 a6 15. dxc5 bxc5 16. O-O Ra7',
-       '17. Be2 Nd7 18. Nd4 Qf8 19. Nxe6 fxe6 20. e4 d4 21. f4 Qe7',
-       '22. e5 Rb8 23. Bc4 Kh8 24. Qh3 Nf8 25. b3 a5 26. f5 exf5',
-       '27. Rxf5 Nh7 28. Rcf1 Qd8 29. Qg3 Re7 30. h4 Rbb7 31. e6 Rbc7',
-       '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8',
-       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0']
-      },
-    {fen: '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17',
-     pgn: [
-      '[Event "Paris"]',
-      '[Site "Paris"]',
-      '[Date "1858.??.??"]',
-      '[EventDate "?"]',
-      '[Round "?"]',
-      '[Result "1-0"]',
-      '[White "Paul Morphy"]',
-      '[Black "Duke Karl / Count Isouard"]',
-      '[ECO "C41"]',
-      '[WhiteElo "?"]',
-      '[BlackElo "?"]',
-      '[PlyCount "33"]',
-      '',
-      '1.e4 e5 2.Nf3 d6 3.d4 Bg4 {This is a weak move',
-      'already.--Fischer} 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Bc4 Nf6 7.Qb3 Qe7',
-      '8.Nc3 c6 9.Bg5 {Black is in what\'s like a zugzwang position',
-      'here. He can\'t develop the [Queen\'s] knight because the pawn',
-      'is hanging, the bishop is blocked because of the',
-      'Queen.--Fischer} b5 10.Nxb5 cxb5 11.Bxb5+ Nbd7 12.O-O-O Rd8',
-      '13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8# 1-0']},
-    {pgn: [
-      '1. e4 e5 2. f4 exf4 3. Nf3 g5 4. h4 g4 5. Ne5 Nf6 6. Nxg4 Nxe4',
-      '7. d3 Ng3 8. Bxf4 Nxh1 9. Qe2+ Qe7 10. Nf6+ Kd8 11. Bxc7+ Kxc7',
-      '12. Nd5+ Kd8 13. Nxe7 Bxe7 14. Qg4 d6 15. Qf4 Rg8 16. Qxf7 Bxh4+',
-      '17. Kd2 Re8 18. Na3 Na6 19. Qh5 Bf6 20. Qxh1 Bxb2 21. Qh4+ Kd7',
-      '22. Rb1 Bxa3 23. Qa4+']},
-  ];
-
-  var newline_chars = ['\n', '<br />', '\n\r', 'BLAH'];
-
-  for (var i = 0; i < tests.length; i++) {
-    for (var j = 0; j < newline_chars.length; j++) {
-      var newline = newline_chars[j];
-      var s = 'load pgn test #' + i + String.fromCharCode(97 + j) + ': ';
-      var result = chess.load_pgn(tests[i].pgn.join(newline), { newline_char: newline });
-      
-      /* some PGN's tests contain comments which are stripped during parsing,
-       * so we'll need compare the results of the load against a FEN string
-       * (instead of the reconstructed PGN [e.g. tests[i].pgn.join(newline)])
-       */
-      if ('fen' in tests[i]) {
-        s += assert(result && chess.fen() == tests[i].fen);
-      } else {
-        s += assert(result && chess.pgn({ max_width: 65, newline_char: newline }) ==
-                    tests[i].pgn.join(newline));
-      }
-      log(s);
-    }
-  }
-
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> validate fen time: ' + diff + ' secs');
-  log('');
-}
-
-
-
-function history_tests() {
-  var chess = new Chess();
-  var start = new Date;
   var tests = [
      {verbose: false,
       fen: '4q2k/2r1r3/4PR1p/p1p5/P1Bp1Q1P/1P6/6P1/6K1 b - - 4 41',
@@ -861,83 +830,42 @@ function history_tests() {
       fen: '4q2k/2r1r3/4PR1p/p1p5/P1Bp1Q1P/1P6/6P1/6K1 b - - 4 41'}
   ];
 
-  for (var i = 0; i < tests.length; i++) {
+  tests.forEach(function(t, i) {
     var passed = true;
-    var s = 'history test #' + i + ': ';
-    chess.reset();
 
-    for (var j = 0; j < tests[i].moves.length; j++) {
-      chess.move(tests[i].moves[j])
-    }
-    
-    var history = chess.history({verbose: tests[i].verbose});
-    if (tests[i].fen != chess.fen()) {
-      passed = false;
-    } else if (history.length != tests[i].moves.length) {
-      passed = false;
-    } else {
-      for (var j = 0; j < tests[i].moves.length; j++) {
-        if (!tests[i].verbose) {
-          if (history[j] != tests[i].moves[j]) {
-            passed = false;
-            break;
-          }
-        } else {
-          for (var key in history[j]) {
-            if (history[j][key] != tests[i].moves[j][key]) {
+    test(i, function() {
+      chess.reset();
+
+      for (var j = 0; j < t.moves.length; j++) {
+        chess.move(t.moves[j])
+      }
+      
+      var history = chess.history({verbose: t.verbose});
+      if (t.fen != chess.fen()) {
+        passed = false;
+      } else if (history.length != t.moves.length) {
+        passed = false;
+      } else {
+        for (var j = 0; j < t.moves.length; j++) {
+          if (!t.verbose) {
+            if (history[j] != t.moves[j]) {
               passed = false;
               break;
+            }
+          } else {
+            for (var key in history[j]) {
+              if (history[j][key] != t.moves[j][key]) {
+                passed = false;
+                break;
+              }
             }
           }
         }
       }
-    }
+      assert(passed);
+    });
 
-    s += assert(passed);
-    log(s);
-  }
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('--> history test time: ' + diff + ' secs');
-  log('');
+  });
 
-}
-
-
-function run_unit_tests() {
-  var start = new Date;
-
-  if (!is_node) {
-    var console = document.getElementById('console');
-
-    if (console == null) {
-      alert('Can\'t locate console.  Aborting.');
-      return
-    }
-  }
-
-  perft_unit_tests();
-  single_square_move_generation_tests();
-  checkmate_unit_tests();
-  stalemate_unit_tests();
-  insufficient_material_unit_test();
-  threefold_repetition_unit_test();
-  algebraic_notation_tests();
-  get_put_remove_tests();
-  fen_tests();
-  pgn_tests();
-  load_pgn_tests();
-  make_move_tests();
-  validate_fen_tests();
-  history_tests();
-
-  var finish = new Date;
-  var diff = (finish - start) / 1000;
-  log('Total Time: ' + diff + ' secs');
-  log('Ran ' + (num_passed + num_failed) + ' tests - ' + num_failed + ' failed');
-}
-
-if (is_node) {
-  run_unit_tests();
-}
+});
 
