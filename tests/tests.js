@@ -508,7 +508,13 @@ function make_move_tests() {
     {fen: 'rnbqkbnr/pp3ppp/2pp4/4pP2/4P3/8/PPPP2PP/RNBQKBNR w KQkq e6 0 1',
      legal: true,
      move: 'fxe6',
-     next: 'rnbqkbnr/pp3ppp/2ppP3/8/4P3/8/PPPP2PP/RNBQKBNR b KQkq - 0 1'}
+     next: 'rnbqkbnr/pp3ppp/2ppP3/8/4P3/8/PPPP2PP/RNBQKBNR b KQkq - 0 1',
+     captured: 'p'},
+    {fen: 'rnbqkbnr/pppp2pp/8/4p3/4Pp2/2PP4/PP3PPP/RNBQKBNR b KQkq e3 0 1',
+     legal: true,
+     move: 'fxe3',
+     next: 'rnbqkbnr/pppp2pp/8/4p3/8/2PPp3/PP3PPP/RNBQKBNR w KQkq - 0 2',
+     captured: 'p'}
   ];
 
   for (var i = 0; i < positions.length; i++) {
@@ -517,7 +523,8 @@ function make_move_tests() {
             ' (' + positions[i].move + ' ' + positions[i].legal + ') : ';
     var result = chess.move(positions[i].move);
     if (positions[i].legal) {
-      s += assert(result && chess.fen() == positions[i].next);
+      s += assert(result && chess.fen() == positions[i].next &&
+                  result.captured == positions[i].captured);
     } else {
       s += assert(!result);
     }
