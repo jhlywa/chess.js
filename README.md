@@ -14,7 +14,7 @@ Using chess.js in a browser is straight-forward:
 
     </script>
 
-Using chess.js in node.js is equally easy:
+Using chess.js in node.js is equally as easy:
 
     var ch = require('./chess.js')
 
@@ -38,9 +38,9 @@ The code below plays a complete game of chess ... randomly.
 
 chess.js is used in the projects below:
 
-- [3D Hartwig Chess Set](http://codepen.io/juliangarnier/fulldetails/BsIih) @juliangarnier
-- [Chess in Javascript](http://thingsilearned.com/2012/11/22/javascript-chess-game/) @davefowler
-- [Multiplayer Chess](http://multiplayerchess.com/) @azer
+- [3D Hartwig Chess Set](http://codepen.io/juliangarnier/fulldetails/BsIih)
+- [Chess in Javascript](http://thingsilearned.com/2012/11/22/javascript-chess-game/)
+- [Multiplayer Chess](http://multiplayerchess.com/)
 
 ## API
 
@@ -426,12 +426,14 @@ FEN string.
 
 ## CONTRIBUTORS
 
-Special thanks to the following developers for their patches and contributions:
+Special thanks to the following developers for their patches and contributions 
+(alphabetically):
 
 - [Steve Bragg](https://github.com/2sb18)
 - [E. Azer Koçulu](https://github.com/azer)
 - [Falco Nogatz](https://github.com/fnogatz)
 - [jdponomarev](https://github.com/jdponomarev)
+- [Raminder Singh](https://github.com/imor)
 - [Stiff](https://github.com/stiff)
 - [Linmiao Xu](https://github.com/linrock)
 
@@ -450,9 +452,6 @@ Musical support provided by:
 
 ## TODO
 
-- Standardize testing framework.  The current testing framework is homegrown
-  and is getting difficult to maintain.  I'm interested in a framework that can
-  be run from both the browser and command line (via node.js).
 - Add AI (basic alpha-beta search w/ primitive position evaluation).  The AI
   should probably be internal to the underlying Chess() object to take full
   advantage of 0x88 move generation.
