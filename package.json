@@ -15,5 +15,9 @@
   "repository" : {
     "type" : "git",
     "url" : "http://github.com/jhlywa/chess.js.git"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "chai": "*"
   }
 }
