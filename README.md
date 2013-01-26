@@ -334,7 +334,7 @@ Returns the game in PGN format. Options is an optional parameter which may inclu
 max width and/or a newline character settings.
 
     var chess = new Chess();
-    chess.info('White', 'Plunky', 'Black', 'Plinkie');
+    chess.header('White', 'Plunky', 'Black', 'Plinkie');
     chess.move('e4');
     chess.move('e5');
     chess.move('Nc3');
