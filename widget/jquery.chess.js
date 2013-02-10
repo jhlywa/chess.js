@@ -126,7 +126,7 @@
         }
       });
       
-      $('.square').droppable({
+      $("[id^='"+widget.options.id+"-']").droppable({
         accept: '.piece',
         hoverClass: 'hover',
 
@@ -225,6 +225,7 @@
       
       var to = $('#' + options.id + '-' + move.to);
       var selector = '#' + options.id + '-' + move.from;
+      console.log(selector);
       var piece = $(selector).children().first();
       var size = piece.height();
       var position = piece.position();
