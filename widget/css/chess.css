@@ -1,9 +1,40 @@
+
+.hover {
+  box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  -webkit-box-sizing:border-box;  
+  border: 2px dashed blue;
+  background-color: blue;
+}
+
+.click_move_from{
+  box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  -webkit-box-sizing:border-box;  
+  border: 2px dashed blue; 
+}
+
+.last_move_from{
+  box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  -webkit-box-sizing:border-box;  
+  border: 2px dashed blue; 
+  }
+
+.last_move_to{
+  box-sizing:border-box;
+  -moz-box-sizing:border-box;
+  -webkit-box-sizing:border-box;  
+  border: 2px dashed blue;
+}
+
 .chessboard-container { display: inline; }
 .chessboard-container .light { background-color: #e2caa9; }
 .chessboard-container .dark  { background-color: #7e6751; }
 .chessboard-container .square { float: left; }
 .chessboard-container .piece { width: 100%; height: 100%; }
 .chessboard-container .draggable { cursor: pointer; }
+
 .chessboard-container .droppable { background: #aaf; }
 
 .chessboard-container .sq10 .square { width: 10px; height: 10px; }
