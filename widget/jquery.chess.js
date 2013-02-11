@@ -37,7 +37,11 @@
       /* TODO: highlight_last_move: true */
 
       /* TODO: mode: 'playback', 'game' */
-      /* TODO: movement: 'draggable', 'clickable', 'none' */
+      draggable: true,
+      clickable: true,
+      
+      last_move: {},
+      move_callback: function(){},
 
       /* internal flag to keep the user from clicking move while a piece
       *  is animating
@@ -50,16 +54,120 @@
       this.element.addClass('chessboard-container');
       this.options.chess = Chess(this.options.fen);
       this.options.id = this.element.attr('id');
-      this.element.html(this._render_board());
+      this._render_board();
+    },
+    
+    _post_render_options: function(){
+      if (this.options.draggable){
+        this._draggable(this);
+      }
+      if (this.options.clickable){
+        this._clickable(this);
+      }
+      if (this.options.highlight){
+        this._highlight_last();
+      }
+    },
+    
+    _highlight_last: function(){
+      if (this.options.last_move){
+        $('#'+this.options.id + '-' + this.options.last_move.from).addClass('last_move_from');
+        $('#'+this.options.id + '-' + this.options.last_move.to).addClass('last_move_to');
+      }
+    },
+    
+    _clickable: function(widget) {
+      $("[id^='"+widget.options.id+"-']").click(function(){
+        var chess =  widget.options.chess;
+
+        // If there's no previous click_move_from set, and chess.get returns
+        // null, the user clicked an empty square.  Do nothing and return.
+        if (! widget.click_move_from && chess.get($(this).data('square')) == null){
+          return;
+        }
+        
+        // If the clicked square matches the current turn color and click_move
+        // from isn't set, set it and return
+        if (!widget.click_move_from && chess.get($(this).data('square'))['color'] == chess.turn()){
+          widget.click_move_from = $(this).data('square');
+          $(this).addClass('click_move_from');
+          return;
+        }
+
+        // if move_from is set, and the user clicks the same square, unset it
+        if (widget.click_move_from == $(this).data('square')){
+          widget.click_move_from = undefined;
+          $(this).removeClass('click_move_from');
+          
+          return;
+        }
+
+        // If we got this far, execute move
+        widget.move({
+          from: widget.click_move_from,
+          to: $(this).data('square'),
+          promotion: 'q'
+        });
+        
+        // reset click_move_from
+        widget.click_move_from = undefined;
+      });
+    },
+
+    _draggable: function(widget) {
+      $("[data-game="+this.options.id+"]").each(function() {
+        turn =  widget.options.chess.turn();
+        piece_color = widget.options.chess.get($(this).parent().data('square'))['color'];
+        
+        if ( piece_color == turn){
+          $(this).draggable();
+        }
+      });
+      
+      $("[id^='"+widget.options.id+"-']").droppable({
+        accept: '.piece',
+        hoverClass: 'hover',
+
+        // Player has dropped a piece
+        drop: function(event, ui) {
+          widget.move({
+            from: $(ui.draggable).parent().data('square'),
+            to: $(this).data('square'),
+            promotion: 'q'
+          });
+        },
+      });      
     },
 
     _render_piece: function(piece, square) {
       var selector = '#' + this.options.id + '-' + square;
-      return this._format("<div class='piece {0} {1}'></div>", 
-                          piece.color + piece.type, this.options.theme.piece);
-    }, 
+      return this._format("<div class='piece {0} {1}' data-game='{2}'></div>", 
+                          piece.color + piece.type, this.options.theme.piece, this.options.id);
+    },
+    
+    load_fen: function(new_fen) {
+      this.options.chess = Chess(new_fen);
+      this.options.fen = new_fen;
 
-    _render_board: function() {
+      this._render_board();
+    },
+    
+    _render_board: function(){
+      this.element.html(this._render_board_html());
+      this.options.busy = false;
+      
+      if (this.options.draggable){
+        this._draggable(this);
+      }
+      if (this.options.clickable){
+        this._clickable(this);
+      }
+      if (this.options.highlight){
+        this._highlight_last();
+      }
+    },
+
+    _render_board_html: function() {
       var o = [];
 
       var flip = this.options.flip;
@@ -73,8 +181,8 @@
         var square = squares[i]; 
         var square_color = this.options.theme[chess.square_color(square)];
 
-        o.push(this._format("<div id='{0}-{1}' class='square {2}'>",
-                            this.options.id, square, square_color));
+        o.push(this._format("<div id='{0}-{1}' data-square='{3}' class='square {2}'>",
+                            this.options.id, square, square_color, square));
 
         /* place the piece if we have one */
         var piece = chess.get(square);
@@ -88,29 +196,40 @@
         if ((flip && square[0] == 'a') || (!flip && square[0] == 'h')) {
           o.push("<div style='clear: both;'></div>");
         }
-
       }
+      
       o.push('</div>');
-
       return o.join('\n');
     },
 
     flip: function() {
       this.options.flip = (this.options.flip) ? false : true;
-      this.element.html(this._render_board());
+      this._render_board();
     },
 
-    /* TODO: allow for an optional callback that gets run after the move */
     move: function(move) {
+      var widget = this;
       var options = this.options;
       if (options.busy) {
         return;
       }
       options.busy = true;
 
-
-      var move = options.chess.move(move);
+      var move = this.options.chess.move(move);
+      
+      // if the move is invalid, reset
+      if ( move == null){
+        this._render_board();
+        options.busy = false;
+        
+        return;
+      }
+      
+      this.options.last_move.to = move.to;
+      this.options.last_move.from = move.from;
+      
       var to = $('#' + options.id + '-' + move.to);
+      
       var selector = '#' + options.id + '-' + move.from;
       var piece = $(selector).children().first();
       var size = piece.height();
@@ -131,10 +250,9 @@
         left: position.left,
         zindex: -1,
         }).animate({
-          left: to.offset().left, top: to.offset().top}, 
+          left: to.position().left, top: to.position().top},
           400,
           'swing',
-
           /* this function is run when the piece is finished moving */
           function() {
             /* if move is a capture */
@@ -162,11 +280,13 @@
               $('#' + rook_from).children().remove().appendTo('#' + rook_to);
             }
 
-            /* TODO: handle en passant */
+            // rerender board html 
+            widget._render_board();
 
-
-          $(this).css({zindex: 1});
-          options.busy = false;
+            $(this).css({zindex: 1});
+            options.busy = false;
+            
+            widget.options.move_callback();
         });
     },
 
