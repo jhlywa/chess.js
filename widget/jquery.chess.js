@@ -120,9 +120,7 @@
         piece_color = widget.options.chess.get($(this).parent().data('square'))['color'];
         
         if ( piece_color == turn){
-          $(this).draggable({
-            stack: 'div',
-          });
+          $(this).draggable();
         }
       });
       
@@ -145,6 +143,13 @@
       var selector = '#' + this.options.id + '-' + square;
       return this._format("<div class='piece {0} {1}' data-game='{2}'></div>", 
                           piece.color + piece.type, this.options.theme.piece, this.options.id);
+    },
+    
+    load_fen: function(new_fen) {
+      this.options.chess = Chess(new_fen);
+      this.options.fen = new_fen;
+
+      this._render_board();
     },
     
     _render_board: function(){
@@ -191,7 +196,6 @@
         if ((flip && square[0] == 'a') || (!flip && square[0] == 'h')) {
           o.push("<div style='clear: both;'></div>");
         }
-
       }
       
       o.push('</div>');
@@ -203,7 +207,6 @@
       this._render_board();
     },
 
-    /* TODO: allow for an optional callback that gets run after the move */
     move: function(move) {
       var widget = this;
       var options = this.options;
@@ -217,6 +220,8 @@
       // if the move is invalid, reset
       if ( move == null){
         this._render_board();
+        options.busy = false;
+        
         return;
       }
       
@@ -224,8 +229,8 @@
       this.options.last_move.from = move.from;
       
       var to = $('#' + options.id + '-' + move.to);
+      
       var selector = '#' + options.id + '-' + move.from;
-      console.log(selector);
       var piece = $(selector).children().first();
       var size = piece.height();
       var position = piece.position();
@@ -245,10 +250,9 @@
         left: position.left,
         zindex: -1,
         }).animate({
-          left: to.offset().left, top: to.offset().top}, 
+          left: to.position().left, top: to.position().top},
           400,
           'swing',
-
           /* this function is run when the piece is finished moving */
           function() {
             /* if move is a capture */
@@ -276,8 +280,6 @@
               $('#' + rook_from).children().remove().appendTo('#' + rook_to);
             }
 
-            /* TODO: handle en passant */
-            
             // rerender board html 
             widget._render_board();
 
