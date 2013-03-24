@@ -306,7 +306,7 @@ var Chess = function(fen) {
         return {valid: false, error_number: 10, error: errors[10]};
       }
     }
-    
+
     /* everything's okay! */
     return {valid: true, error_number: 0, error: errors[0]};
   }
@@ -359,7 +359,7 @@ var Chess = function(fen) {
 
   function set_header(args) {
     for (var i = 0; i < args.length; i += 2) {
-      if (typeof args[i] == "string" && 
+      if (typeof args[i] == "string" &&
           typeof args[i + 1] == "string") {
         header[args[i]] = args[i + 1];
       }
@@ -596,7 +596,7 @@ var Chess = function(fen) {
     return legal_moves;
   }
 
-  /* convert a move from 0x88 coordinates to Standard Algebraic Notation 
+  /* convert a move from 0x88 coordinates to Standard Algebraic Notation
    * (SAN)
    */
   function move_to_san(move) {
@@ -709,7 +709,7 @@ var Chess = function(fen) {
 
       var piece = board[i];
       if (piece) {
-        pieces[piece.type] = (piece.type in pieces) ? 
+        pieces[piece.type] = (piece.type in pieces) ?
                               pieces[piece.type] + 1 : 1;
         if (piece.type == BISHOP) {
           bishops.push(sq_color);
@@ -996,7 +996,7 @@ var Chess = function(fen) {
       } else {
         var piece = board[i].type;
         var color = board[i].color;
-        var symbol = (color == WHITE) ? 
+        var symbol = (color == WHITE) ?
                      piece.toUpperCase() : piece.toLowerCase();
         s += ' ' + symbol + ' ';
       }
@@ -1148,10 +1148,10 @@ var Chess = function(fen) {
 
       for (var i = 0, len = ugly_moves.length; i < len; i++) {
 
-        /* does the user want a full move object (most likely not), or just 
+        /* does the user want a full move object (most likely not), or just
          * SAN
          */
-        if (typeof options != 'undefined' && 'verbose' in options && 
+        if (typeof options != 'undefined' && 'verbose' in options &&
             options.verbose) {
           moves.push(make_pretty(ugly_moves[i]));
         } else {
@@ -1210,7 +1210,7 @@ var Chess = function(fen) {
        * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })
        */
       var newline = (typeof options == "object" &&
-                     typeof options.newline_char == "string") ? 
+                     typeof options.newline_char == "string") ?
                      options.newline_char : "\n";
       var max_width = (typeof options == "object" &&
                        typeof options.max_width == "number") ?
@@ -1221,7 +1221,7 @@ var Chess = function(fen) {
       /* add the PGN header headerrmation */
       for (var i in header) {
         /* TODO: order of enumerated properties in header object is not
-         * guaranteed, see ECMA-262 spec (section 12.6.4) 
+         * guaranteed, see ECMA-262 spec (section 12.6.4)
          */
         result.push("[" + i + " \"" + header[i] + "\"]" + newline);
         header_exists = true;
@@ -1256,7 +1256,7 @@ var Chess = function(fen) {
           }
           move_string = pgn_move_number + '.';
           pgn_move_number++;
-        }       
+        }
 
         move_string = move_string + " " + move_to_san(move);
         make_move(move);
@@ -1286,7 +1286,7 @@ var Chess = function(fen) {
         if (current_width + moves[i].length > max_width && i != 0) {
 
           /* don't end the line with whitespace */
-          if (result[result.length - 1] == " ") { 
+          if (result[result.length - 1] == " ") {
             result.pop();
           }
 
@@ -1409,10 +1409,10 @@ var Chess = function(fen) {
         }
         return has_keys;
       }
-        
+
       function parse_pgn_header(header, options) {
-        var newline_char = (typeof options == 'object' && 
-                            typeof options.newline_char == 'string') ? 
+        var newline_char = (typeof options == 'object' &&
+                            typeof options.newline_char == 'string') ?
                             options.newline_char : '\n';
         var header_obj = {};
         var headers = header.split(newline_char);
@@ -1426,12 +1426,12 @@ var Chess = function(fen) {
             header_obj[key] = value;
           }
         }
-     
+
         return header_obj;
       }
 
       var newline_char = (typeof options == 'object' &&
-                          typeof options.newline_char == 'string') ? 
+                          typeof options.newline_char == 'string') ?
                           options.newline_char : '\n';
         var regex = new RegExp('^(\\[(.|' + mask(newline_char) + ')*\\])' +
                                '(' + mask(newline_char) + ')*' +
@@ -1444,21 +1444,21 @@ var Chess = function(fen) {
       if (header_string[0] != '[') {
         header_string = '';
       }
- 
+
      reset();
-      
+
       /* parse PGN header */
       var headers = parse_pgn_header(header_string, options);
       for (var key in headers) {
         set_header([key, headers[key]]);
       }
-      
+
       /* delete header to get the moves */
       var ms = pgn.replace(header_string, '').replace(new RegExp(mask(newline_char), 'g'), ' ');
 
       /* delete comments */
       ms = ms.replace(/(\{[^}]+\})+?/g, '');
-      
+
       /* delete move numbers */
       ms = ms.replace(/\d+\./g, '');
 
@@ -1472,7 +1472,7 @@ var Chess = function(fen) {
 
       for (var half_move = 0; half_move < moves.length - 1; half_move++) {
         move = get_move_obj(moves[half_move]);
-        
+
         /* move not possible! (don't clear the board to examine to show the
          * latest valid position)
          */
@@ -1482,7 +1482,7 @@ var Chess = function(fen) {
           make_move(move);
         }
       }
-      
+
       /* examine last move */
       move = moves[moves.length - 1];
       if (POSSIBLE_RESULTS.indexOf(move) > -1) {

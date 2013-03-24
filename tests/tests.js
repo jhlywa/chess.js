@@ -17,7 +17,7 @@ if (!Array.prototype.forEach) {
 suite("Perft", function() {
 
   var perfts = [
-    {fen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1', 
+    {fen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1',
       depth: 3, nodes: 97862},
     {fen: '8/PPP4k/8/8/8/8/4Kppp/8 w - - 0 1',
       depth: 4, nodes: 89363},
@@ -59,8 +59,8 @@ suite("Single Square Move Generation", function() {
     {fen: '8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1',
       square: 'a3', verbose: false, moves: []},  // trapped king
     {fen: '8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1',
-      square: 'd2', verbose: true, 
-      moves: 
+      square: 'd2', verbose: true,
+      moves:
         [{color:'b', from:'d2', to:'d1', flags:'np', piece:'p', promotion:'q', san:'d1=Q'},
          {color:'b', from:'d2', to:'d1', flags:'np', piece:'p', promotion:'r', san:'d1=R'},
          {color:'b', from:'d2', to:'d1', flags:'np', piece:'p', promotion:'b', san:'d1=B'},
@@ -72,7 +72,7 @@ suite("Single Square Move Generation", function() {
   positions.forEach(function(position) {
     var chess = new Chess();
     chess.load(position.fen);
-    
+
     test(position.fen + ' ' + position.square, function() {
 
       var moves = chess.moves({square: position.square, verbose: position.verbose});
@@ -172,9 +172,9 @@ suite("Insufficient Material", function() {
 
 
 suite("Threefold Repetition", function() {
-  
+
   var positions = [
-    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', 
+    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
      moves: ['Nf3', 'Nf6', 'Ng1', 'Ng8', 'Nf3', 'Nf6', 'Ng1', 'Ng8']},
 
     /* Fischer - Petrosian, Buenos Aires, 1971 */
@@ -209,7 +209,7 @@ suite("Threefold Repetition", function() {
 suite("Algebraic Notation", function() {
 
   var positions = [
-    {fen: '7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1', 
+    {fen: '7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1',
      moves: ['Rd8#', 'Re7', 'Rf7', 'Rg7', 'Rh7#', 'R7xd6', 'Rc7', 'Rb7', 'Ra7',
              'Qf7', 'Qe8#', 'Qg7#', 'Qg8#', 'Qh7#', 'Q6h6#', 'Q6h5#', 'Q6f5',
              'Q6f6#', 'Qe6', 'Qxd6', 'Q5f6#', 'Qe7', 'Qd8#', 'Q5h6#', 'Q5h5#',
@@ -221,7 +221,7 @@ suite("Algebraic Notation", function() {
     {fen: '1r3k2/P1P5/8/8/8/8/8/R3K2R w KQ - 0 1',
      moves: ['a8=Q', 'a8=R', 'a8=B', 'a8=N', 'axb8=Q+', 'axb8=R+', 'axb8=B',
              'axb8=N', 'c8=Q+', 'c8=R+', 'c8=B', 'c8=N', 'cxb8=Q+', 'cxb8=R+',
-             'cxb8=B', 'cxb8=N', 'Ra2', 'Ra3', 'Ra4', 'Ra5', 'Ra6', 'Rb1', 
+             'cxb8=B', 'cxb8=N', 'Ra2', 'Ra3', 'Ra4', 'Ra5', 'Ra6', 'Rb1',
              'Rc1', 'Rd1', 'Kd2', 'Ke2', 'Kf2', 'Kf1', 'Kd1', 'Rh2', 'Rh3',
              'Rh4', 'Rh5', 'Rh6', 'Rh7', 'Rh8+', 'Rg1', 'Rf1+', 'O-O+',
              'O-O-O']},
@@ -259,9 +259,9 @@ suite("Algebraic Notation", function() {
         for (var j = 0; j < moves.length; j++) {
           if (position.moves.indexOf(moves[j]) == -1) {
             passed = false;
-            break; 
-          } 
-        } 
+            break;
+          }
+        }
       }
       assert(passed);
     });
@@ -310,7 +310,7 @@ suite("Get/Put/Remove", function() {
       }
 
       /* iterate over every square to make sure get returns the proper
-       * piece values/color 
+       * piece values/color
        */
       for (var j = 0; j < chess.SQUARES.length; j++) {
         var square = chess.SQUARES[j];
@@ -397,17 +397,17 @@ suite("FEN", function() {
 
 
 suite("PGN", function() {
-  
+
   var passed = true;
   var error_message;
   var positions = [
     {moves: ['d4', 'd5', 'Nf3', 'Nc6', 'e3', 'e6', 'Bb5', 'g5', 'O-O', 'Qf6', 'Nc3',
-             'Bd7', 'Bxc6', 'Bxc6', 'Re1', 'O-O-O', 'a4', 'Bb4', 'a5', 'b5', 'axb6', 
-             'axb6', 'Ra8+', 'Kd7', 'Ne5+', 'Kd6', 'Rxd8+', 'Qxd8', 'Nxf7+', 'Ke7', 
-             'Nxd5+', 'Qxd5', 'c3', 'Kxf7', 'Qf3+', 'Qxf3', 'gxf3', 'Bxf3', 'cxb4', 
-             'e5', 'dxe5', 'Ke6', 'b3', 'Kxe5', 'Bb2+', 'Ke4', 'Bxh8', 'Nf6', 'Bxf6', 
-             'h5', 'Bxg5', 'Bg2', 'Kxg2', 'Kf5', 'Bh4', 'Kg4', 'Bg3', 'Kf5', 'e4+', 
-             'Kg4', 'e5', 'h4', 'Bxh4', 'Kxh4', 'e6', 'c5', 'bxc5', 'bxc5', 'e7', 'c4', 
+             'Bd7', 'Bxc6', 'Bxc6', 'Re1', 'O-O-O', 'a4', 'Bb4', 'a5', 'b5', 'axb6',
+             'axb6', 'Ra8+', 'Kd7', 'Ne5+', 'Kd6', 'Rxd8+', 'Qxd8', 'Nxf7+', 'Ke7',
+             'Nxd5+', 'Qxd5', 'c3', 'Kxf7', 'Qf3+', 'Qxf3', 'gxf3', 'Bxf3', 'cxb4',
+             'e5', 'dxe5', 'Ke6', 'b3', 'Kxe5', 'Bb2+', 'Ke4', 'Bxh8', 'Nf6', 'Bxf6',
+             'h5', 'Bxg5', 'Bg2', 'Kxg2', 'Kf5', 'Bh4', 'Kg4', 'Bg3', 'Kf5', 'e4+',
+             'Kg4', 'e5', 'h4', 'Bxh4', 'Kxh4', 'e6', 'c5', 'bxc5', 'bxc5', 'e7', 'c4',
              'bxc4', 'Kg4', 'e8=Q', 'Kf5', 'Qe5+', 'Kg4', 'Re4#'],
      header: ['White', 'Jeff Hlywa', 'Black', 'Steve Bragg', 'GreatestGameEverPlayed?', 'True'],
      max_width:19,
@@ -531,7 +531,7 @@ suite("Load PGN", function() {
       test(i + String.fromCharCode(97 + j), function() {
 
         var result = chess.load_pgn(t.pgn.join(newline), { newline_char: newline });
-        
+
         /* some PGN's tests contain comments which are stripped during parsing,
          * so we'll need compare the results of the load against a FEN string
          * (instead of the reconstructed PGN [e.g. test.pgn.join(newline)])
@@ -846,7 +846,7 @@ suite("History", function() {
       for (var j = 0; j < t.moves.length; j++) {
         chess.move(t.moves[j])
       }
-      
+
       var history = chess.history({verbose: t.verbose});
       if (t.fen != chess.fen()) {
         passed = false;

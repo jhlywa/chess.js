@@ -5,7 +5,7 @@ piece placement/movement, and check/checkmate/stalemate detection - basically ev
 but the AI.
 
 Using chess.js in a browser is straight-forward:
-    
+
     <script type="text/javascript" src="chess.js"></script>
     <script type="text/javascript">
 
@@ -97,7 +97,7 @@ Returns the FEN string for the current position.
     chess.fen();
     // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
 
-### .game_over() 
+### .game_over()
 Returns true or false if the game has ended via checkmate, stalemate, or draw.
 
     var chess = new Chess();
@@ -133,7 +133,7 @@ verbose move fields.
     chess.move('e5');
     chess.move('f4');
     chess.move('exf4');
-    
+
     chess.history();
     // -> ['e4', 'e5', 'f4', 'exf4']
 
@@ -143,35 +143,35 @@ verbose move fields.
     //     { color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' },
     //     { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }]
 
-### .in_check() 
+### .in_check()
 Returns true or false if the side to move is in check.
 
     var chess = new Chess('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
     chess.in_check();
     // -> true
 
-### .in_checkmate() 
+### .in_checkmate()
 Returns true or false if the side to move has been checkmated.
 
     var chess = new Chess('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
     chess.in_checkmate();
     // -> true
 
-### .in_draw() 
+### .in_draw()
 Returns true or false if the game is drawn (50-move rule or insufficient material).
 
     var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
     chess.in_draw();
     // -> true
 
-### .in_stalemate() 
+### .in_stalemate()
 Returns true or false if the side to move has been stalemated.
 
     var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
     chess.in_stalemate();
     // -> true
 
-### .in_threefold_repetition() 
+### .in_threefold_repetition()
 Returns true or false if the current board position has occurred three or more
 times.
 
@@ -202,7 +202,7 @@ pairs can be passed to .header().
 
     chess.header('White', 'Morphy', 'Black', 'Anderssen', 'Date', '1858-??-??');
 
-### .insufficient_material() 
+### .insufficient_material()
 Returns true if the game is drawn due to insufficient material (K vs. K,
 K vs. KB, or K vs. KN); otherwise false.
 
@@ -217,12 +217,12 @@ successfully loaded, otherwise false.
     var chess = new Chess();
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
     // -> true
-    
+
     chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
     // -> false, bad piece X
 
 ### .load_pgn(pgn, [ options ])
-Load the moves of a game stored in 
+Load the moves of a game stored in
 [Portal Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
 Options is a optional parameter that contains a 'newline_char' denoting the line
 delimiter (the default delimiter is '\n').  Returns true if the PGN was parsed
@@ -254,7 +254,7 @@ successfully, otherwise false.
     chess.fen()
     // -> 1r3kr1/pbpBBp1p/1b3P2/8/8/2P2q2/P4PPP/3R2K1 b - - 0 24
 
-    chess.ascii() 
+    chess.ascii()
     // -> '  +------------------------+
     //     8 | .  r  .  .  .  k  r  . |
     //     7 | p  b  p  B  B  p  .  p |
@@ -274,7 +274,7 @@ a string in Standard Algebraic Notation (SAN):
 
     var chess = new Chess();
 
-    chess.move('e4') 
+    chess.move('e4')
     // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e2' }
 
     chess.move('nf6') // SAN is case sensitive!!
@@ -306,7 +306,7 @@ Returns a list of legals moves from the current position.  The function takes an
     // -> []
 
     chess.moves({ verbose: true });
-    // -> [{ color: 'w', from: 'a2', to: 'a3', 
+    // -> [{ color: 'w', from: 'a2', to: 'a3',
              flags: 'n', piece: 'p', san 'a3'
              # a captured: key is included when the move is a capture
              # a promotion: key is included when the move is a promotion
@@ -323,7 +323,7 @@ The _flags_ field in verbose mode may contain one or more of the following value
 - 'b' - a pawn push of two squares
 - 'e' - an en passant capture
 - 'c' - a standard capture
-- 'p' - a promotion 
+- 'p' - a promotion
 - 'k' - kingside castling
 - 'q' - queenside castling
 
@@ -395,7 +395,7 @@ Returns the current side to move.
 
 ### .undo()
 Takeback the last half-move, returning a move object if successful, otherwise null.
-    
+
     var chess = new Chess();
 
     chess.fen();
@@ -426,7 +426,7 @@ FEN string.
 
 ## CONTRIBUTORS
 
-Special thanks to the following developers for their patches and contributions 
+Special thanks to the following developers for their patches and contributions
 (alphabetically):
 
 - [Steve Bragg](https://github.com/2sb18)
