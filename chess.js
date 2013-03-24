@@ -472,6 +472,7 @@ var Chess = function(fen) {
 
     var first_sq = SQUARES.a8;
     var last_sq = SQUARES.h1;
+    var single_square = false;
 
     /* do we want legal moves? */
     var legal = (typeof options != 'undefined' && 'legal' in options) ?
@@ -481,6 +482,7 @@ var Chess = function(fen) {
     if (typeof options != 'undefined' && 'square' in options) {
       if (options.square in SQUARES) {
         first_sq = last_sq = SQUARES[options.square];
+        single_square = true;
       } else {
         /* invalid square */
         return [];
@@ -545,34 +547,39 @@ var Chess = function(fen) {
       }
     }
 
-    /* king-side castling */
-    if (castling[us] & BITS.KSIDE_CASTLE) {
-      var castling_from = kings[us];
-      var castling_to = castling_from + 2;
+    /* check for castling if: a) we're generating all moves, or b) we're doing
+     * single square move generation on the king's square
+     */
+    if ((!single_square) || last_sq == kings[us]) {
+      /* king-side castling */
+      if (castling[us] & BITS.KSIDE_CASTLE) {
+        var castling_from = kings[us];
+        var castling_to = castling_from + 2;
 
-      if (board[castling_from + 1] == null &&
-          board[castling_to]       == null &&
-          !attacked(them, kings[us]) &&
-          !attacked(them, castling_from + 1) &&
-          !attacked(them, castling_to)) {
-        add_move(board, moves, kings[us] , castling_to,
-                 BITS.KSIDE_CASTLE);
+        if (board[castling_from + 1] == null &&
+            board[castling_to]       == null &&
+            !attacked(them, kings[us]) &&
+            !attacked(them, castling_from + 1) &&
+            !attacked(them, castling_to)) {
+          add_move(board, moves, kings[us] , castling_to,
+                   BITS.KSIDE_CASTLE);
+        }
       }
-    }
 
-    /* queen-side castling */
-    if (castling[us] & BITS.QSIDE_CASTLE) {
-      var castling_from = kings[us];
-      var castling_to = castling_from - 2;
+      /* queen-side castling */
+      if (castling[us] & BITS.QSIDE_CASTLE) {
+        var castling_from = kings[us];
+        var castling_to = castling_from - 2;
 
-      if (board[castling_from - 1] == null &&
-          board[castling_from - 2] == null &&
-          board[castling_from - 3] == null &&
-          !attacked(them, kings[us]) &&
-          !attacked(them, castling_from - 1) &&
-          !attacked(them, castling_to)) {
-        add_move(board, moves, kings[us], castling_to,
-                 BITS.QSIDE_CASTLE);
+        if (board[castling_from - 1] == null &&
+            board[castling_from - 2] == null &&
+            board[castling_from - 3] == null &&
+            !attacked(them, kings[us]) &&
+            !attacked(them, castling_from - 1) &&
+            !attacked(them, castling_to)) {
+          add_move(board, moves, kings[us], castling_to,
+                   BITS.QSIDE_CASTLE);
+        }
       }
     }
 

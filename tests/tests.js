@@ -66,7 +66,8 @@ suite("Single Square Move Generation", function() {
          {color:'b', from:'d2', to:'d1', flags:'np', piece:'p', promotion:'b', san:'d1=B'},
          {color:'b', from:'d2', to:'d1', flags:'np', piece:'p', promotion:'n', san:'d1=N'}]
     }, // verbose
-
+    {fen: 'rnbqk2r/ppp1pp1p/5n1b/3p2pQ/1P2P3/B1N5/P1PP1PPP/R3KBNR b KQkq - 3 5',
+      square: 'f1', verbose: true, moves: []},  // issue #30
   ];
 
   positions.forEach(function(position) {
