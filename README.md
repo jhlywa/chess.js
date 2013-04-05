@@ -42,7 +42,7 @@ chess.js is used in the projects below:
 - [Chess in Javascript](http://thingsilearned.com/2012/11/22/javascript-chess-game/)
 - [Multiplayer Chess](http://multiplayerchess.com/)
 - [EasyChess.com](http://www.easychess.com/)
-- 
+
 ## API
 
 ### Constructor: Chess([ fen ])
