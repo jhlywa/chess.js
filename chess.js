@@ -166,7 +166,7 @@ var Chess = function(fen) {
     board = new Array(128);
     kings = {w: EMPTY, b: EMPTY};
     turn = WHITE;
-    castling = {w: '', b: ''};
+    castling = {w: 0, b: 0};
     ep_square = EMPTY;
     half_moves = 0;
     move_number = 1;
@@ -833,27 +833,26 @@ var Chess = function(fen) {
       }
 
       /* turn off castling */
-      castling[turn] = '';
+      castling[us] = '';
     }
 
     /* turn off castling if we move a rook */
-    if (castling[turn] != '') {
-
-      for (var i = 0, len = ROOKS[turn].length; i < len; i++) {
-        if (move.from == ROOKS[turn][i].square) {
-          castling[turn] =
-            castling[turn] ^= ROOKS[turn][i].flag;
+    if (castling[us]) {
+      for (var i = 0, len = ROOKS[us].length; i < len; i++) {
+        if (move.from == ROOKS[us][i].square &&
+            castling[us] & ROOKS[us][i].flag) {
+          castling[us] ^= ROOKS[us][i].flag;
           break;
         }
       }
     }
 
     /* turn off castling if we capture a rook */
-    if (castling[them] != '') {
+    if (castling[them]) {
       for (var i = 0, len = ROOKS[them].length; i < len; i++) {
-        if (move.to == ROOKS[them][i].square) {
-          castling[them] =
-            castling[them] ^= ROOKS[them][i].flag;
+        if (move.to == ROOKS[them][i].square &&
+            castling[them] & ROOKS[them][i].flag) {
+          castling[them] ^= ROOKS[them][i].flag;
           break;
         }
       }

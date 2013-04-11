@@ -874,6 +874,13 @@ suite("History", function() {
     });
 
   });
-
 });
 
+suite('Regression Tests', function() {
+  // Github Issue #32 reported by AlgoTrader
+  test('Issue #32 - castling flag reappearing', function() {
+    var chess = new Chess('b3k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qNP/6QK b k - 2 28');
+    chess.move({from:'a8', to:'g2'});
+    assert(chess.fen() == '4k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qbP/6QK w k - 0 29');
+  });
+});
