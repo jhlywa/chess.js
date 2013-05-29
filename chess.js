@@ -1319,7 +1319,7 @@ var Chess = function(fen) {
       */
       function move_from_san(move) {
         var to, from, flags = BITS.NORMAL, promotion;
-        var parse = move.match(/^([NBKRQ])?([abcdefgh12345678][12345678]?)?(x)?([abcdefgh][12345678])(=[NBRQ])?/);
+        var parse = move.match(/^([NBKRQ])?([abcdefgh12345678][12345678]?)?(x)?([abcdefgh][12345678])(=?[NBRQ])?/);
         if (move.slice(0, 5) == 'O-O-O') {
           from = kings[turn];
           to = from - 2;
@@ -1394,7 +1394,11 @@ var Chess = function(fen) {
           }
           // promotion?
           if (parse[5]) {
-            promotion = parse[5][1].toLowerCase();
+            if(typeof parse[5][1] == 'undefined') {
+              promotion = parse[5][0].toLowerCase();
+            } else {
+              promotion = parse[5][1].toLowerCase();
+            }
           }
         }
         if (from >=0 && to >=0 && flags) {
