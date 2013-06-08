@@ -549,7 +549,7 @@ suite("Load PGN", function() {
 
   });
 
-// special case dirty file containing a mix of \n and \n\r 
+// special case dirty file containing a mix of \n and \r\n 
   test('dirty pgn', function() {
     var pgn = 
          '[Event "Reykjavik WCh"]\n' +
