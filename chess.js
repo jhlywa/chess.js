@@ -1419,7 +1419,7 @@ var Chess = function(fen) {
       function parse_pgn_header(header, options) {
         var newline_char = (typeof options == 'object' &&
                             typeof options.newline_char == 'string') ?
-                            options.newline_char : '\n\r?';
+                            options.newline_char : '\r?\n';
         var header_obj = {};
         var headers = header.split(newline_char);
         var key = '';
@@ -1438,7 +1438,7 @@ var Chess = function(fen) {
 
       var newline_char = (typeof options == 'object' &&
                           typeof options.newline_char == 'string') ?
-                          options.newline_char : '\n\r?';
+                          options.newline_char : '\r?\n';
         var regex = new RegExp('^(\\[(.|' + mask(newline_char) + ')*\\])' +
                                '(' + mask(newline_char) + ')*' +
                                '1\.(' + mask(newline_char) + '|.)*$', 'g');
