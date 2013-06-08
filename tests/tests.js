@@ -549,6 +549,39 @@ suite("Load PGN", function() {
 
   });
 
+// special case dirty file containing a mix of \n and \n\r 
+  test('dirty pgn', function() {
+    var pgn = 
+         '[Event "Reykjavik WCh"]\n' +
+         '[Site "Reykjavik WCh"]\n' +
+         '[Date "1972.01.07"]\n' +
+         '[EventDate "?"]\n' +
+         '[Round "6"]\n' +
+         '[Result "1-0"]\n' +
+         '[White "Robert James Fischer"]\n\r' +
+         '[Black "Boris Spassky"]\n' +
+         '[ECO "D59"]\n' +
+         '[WhiteElo "?"]\n' +
+         '[BlackElo "?"]\n' +
+         '[PlyCount "81"]\n' +
+         '\n\r' +
+         '1. c4 e6 2. Nf3 d5 3. d4 Nf6 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6\n' +
+         '7. Bh4 b6 8. cxd5 Nxd5 9. Bxe7 Qxe7 10. Nxd5 exd5 11. Rc1 Be6\n' +
+         '12. Qa4 c5 13. Qa3 Rc8 14. Bb5 a6 15. dxc5 bxc5 16. O-O Ra7\n' +
+         '17. Be2 Nd7 18. Nd4 Qf8 19. Nxe6 fxe6 20. e4 d4 21. f4 Qe7\n\r' +
+         '22. e5 Rb8 23. Bc4 Kh8 24. Qh3 Nf8 25. b3 a5 26. f5 exf5\n' +
+         '27. Rxf5 Nh7 28. Rcf1 Qd8 29. Qg3 Re7 30. h4 Rbb7 31. e6 Rbc7\n' +
+         '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8\n' +
+         '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0\n';
+
+    var result = chess.load_pgn(pgn, { newline_char: '\n\r?' });
+    assert(result);
+
+    var result = chess.load_pgn(pgn);
+    assert(result);
+
+  });  
+
 });
 
 
