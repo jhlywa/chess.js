@@ -226,7 +226,7 @@ successfully loaded, otherwise false.
 Load the moves of a game stored in
 [Portal Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
 Options is a optional parameter that contains a 'newline_char' denoting the line
-delimiter (the default delimiter is '\n').  Returns true if the PGN was parsed
+delimiter (the default delimiter is '\r?\n', optional carriage return with newline).  Returns true if the PGN was parsed
 successfully, otherwise false.
 
     var chess = new Chess();
