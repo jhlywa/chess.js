@@ -21,8 +21,9 @@ Using chess.js in node.js is just as easy:
 var ch = require('./chess.js')
 
 var chess = new ch.Chess();
-```
 ...
+```
+
 ## Example Code
 The code below plays a complete game of chess ... randomly.
 
@@ -341,7 +342,7 @@ Returns a list of legals moves from the current position.  The function takes an
 var chess = new Chess();
 chess.moves();
 // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4',
-       'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
+//     'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
 
 chess.moves({square: 'e2'});
 // -> ['e3', 'e4']
@@ -351,12 +352,12 @@ chess.moves({square: 'e9'}); // invalid square
 
 chess.moves({ verbose: true });
 // -> [{ color: 'w', from: 'a2', to: 'a3',
-         flags: 'n', piece: 'p', san 'a3'
-         # a captured: key is included when the move is a capture
-         # a promotion: key is included when the move is a promotion
-       },
-       ...
-       ]
+//       flags: 'n', piece: 'p', san 'a3'
+//       # a captured: key is included when the move is a capture
+//       # a promotion: key is included when the move is a promotion
+//     },
+//     ...
+//     ]
 ```
 
 The _piece_, _captured_, and _promotion_ fields contain the lowercase
