@@ -5,7 +5,7 @@ piece placement/movement, and check/checkmate/stalemate detection - basically ev
 but the AI.
 
 Using chess.js in a browser is straight-forward:
-```js
+```html
 <script type="text/javascript" src="chess.js"></script>
 <script type="text/javascript">
 
