@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Copyright (c) 2011, Jeff Hlywa (jhlywa@gmail.com)
+ * Copyright (c) 2013, Jeff Hlywa (jhlywa@gmail.com)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  *----------------------------------------------------------------------------*/
+
+/* minified license below  */
+
+/*! Copyright (c) 2013, Jeff Hlywa (jhlywa@gmail.com)
+ *  Released under the BSD license
+ *  https://github.com/jhlywa/chess.js/blob/master/LICENSE
+ */
 
 var Chess = function(fen) {
 
