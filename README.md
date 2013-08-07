@@ -24,14 +24,16 @@ while (!chess.game_over()) {
 }
 ```
 
-Need a user interface?  Try [Chris Oakman's](https://github.com/oakmac)
-excellent [ChessBoardJS](http://chessboardjs.com) library.  The
-example below can be seen in action at [ChessBoardJS - Random vs Random](http://chessboardjs.com/examples#5002).
+Need a user interface?  Try Chris Oakman's excellent
+[ChessBoardJS](http://chessboardjs.com) library.  The code below can be
+seen in action at
+[ChessBoardJS - Random vs Random](http://chessboardjs.com/examples#5002).
 
 ```html
 ...
+<link rel="stylesheet" href="css/chessboard-0.2.0.css" />
 <script src="js/chess.js"></script>
-<script src="js/chessboard.js"></script>
+<script src="js/chessboard-0.2.0.js"></script>
 <script>
     var game = new Chess();
     var board = new ChessBoard('board', 'start');
@@ -47,6 +49,7 @@ example below can be seen in action at [ChessBoardJS - Random vs Random](http://
 
     window.setTimeout(random_move, 500);
 </script>
+...
 <div id="board" style="width: 400px"></div>
 ...
 ```
