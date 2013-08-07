@@ -1,28 +1,10 @@
 # chess.js
 
-chess.js is a Javascript chess library that is used for chess move generation/validation,
-piece placement/movement, and check/checkmate/stalemate detection - basically everything
-but the AI.
+chess.js is a Javascript chess library that is used for chess move
+generation/validation, piece placement/movement, and check/checkmate/stalemate
+detection - basically everything but the AI.
 
-Using chess.js in a browser is straight-forward:
-```html
-<script type="text/javascript" src="chess.js"></script>
-<script type="text/javascript">
-
-  var chess = new Chess();
-  ...
-
-</script>
-```
-
-Using chess.js in node.js is just as easy:
-
-```js
-var ch = require('./chess.js')
-
-var chess = new ch.Chess();
-...
-```
+chess.js has been extensively tested in node.js and most modern browsers.
 
 ## Example Code
 The code below plays a complete game of chess ... randomly.
@@ -40,6 +22,33 @@ while (!chess.game_over()) {
   chess.move(move);
   util.puts('move: ' + move);
 }
+```
+
+Need a user interface?  Try [Chris Oakman's](https://github.com/oakmac)
+excellent [ChessBoardJS](http://chessboardjs.com) library.  The
+example below can be seen in action at [ChessBoardJS - Random vs Random](http://chessboardjs.com/examples#5002).
+
+```html
+...
+<script src="js/chess.js"></script>
+<script src="js/chessboard.js"></script>
+<script>
+    var game = new Chess();
+    var board = new ChessBoard('board', 'start');
+
+    var random_move = function() {
+        if (game.game_over()) return;
+        var moves = game.moves();
+        var move = moves[Math.floor(Math.random() * moves.length)];
+        game.move(move);
+        board.position(game.fen());
+        window.setTimeout(random_move, 500);
+    };
+
+    window.setTimeout(random_move, 500);
+</script>
+<div id="board" style="width: 400px"></div>
+...
 ```
 
 chess.js is used in the projects below:
