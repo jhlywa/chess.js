@@ -62,47 +62,42 @@ Another example using ChessBoardJS with moves input by the user; try it out your
 <script src="js/jquery-1.10.1.min.js"></script>
 <script src="js/chess.js"></script>
 <script src="js/chessboard.js"></script>
-
-
 ...
-
-		<div id="board" style="width: 400px"></div>
-		<label id='lblMoves'></label>	
-	
+<div id="board" style="width: 400px"></div>
+<label id='lblMoves'></label>	
 ...	
-		<script type='text/JavaScript'>
-			var game = new Chess();
+<script type='text/JavaScript'>
+var game = new Chess();
 
-			var board = new ChessBoard('board', {
-			  draggable: true,
-			  dropOffBoard: 'snapback',
-			  sparePieces: false,
-			  onChange:  onBoardPositionChanged,
-			  onDrop: onPieceDropped
-			});
-			board.start();
-			
-			function onPieceDropped(fromSquare, toSquare, piece){
-				proposedMove = {from: fromSquare, to: toSquare};
-				
-				// TODO:  doesn't work for promotions
-				if (game.move(proposedMove)){
-					return;
-				}else{
-					//alert('illegal move:  ' + proposedMove.from + '-' + proposedMove.to);
-					return 'snapback';
-				}
-			};
-			
-			function onBoardPositionChanged(oldPosition, newPosition){
-				if (game.game_over()){
-					lblMoves.innerHTML = 'Game Over!';
-				}else{
-					lblMoves.innerHTML = 'Legal moves: ' + game.moves();
-				}
-			};
-		</script>
-		
+var board = new ChessBoard('board', {
+  draggable: true,
+  dropOffBoard: 'snapback',
+  sparePieces: false,
+  onChange:  onBoardPositionChanged,
+  onDrop: onPieceDropped
+});
+board.start();
+
+function onPieceDropped(fromSquare, toSquare, piece){
+	proposedMove = {from: fromSquare, to: toSquare};
+	
+	// TODO:  doesn't work for promotions
+	if (game.move(proposedMove)){
+		return;
+	}else{
+		//alert('illegal move:  ' + proposedMove.from + '-' + proposedMove.to);
+		return 'snapback';
+	}
+};
+
+function onBoardPositionChanged(oldPosition, newPosition){
+	if (game.game_over()){
+		lblMoves.innerHTML = 'Game Over!';
+	}else{
+		lblMoves.innerHTML = 'Legal moves: ' + game.moves();
+	}
+};
+</script>
 ...
 ```
 chess.js is used in the projects below:
