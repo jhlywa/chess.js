@@ -1477,6 +1477,11 @@ var Chess = function(fen) {
       /* delete header to get the moves */
       var ms = pgn.replace(header_string, '').replace(new RegExp(mask(newline_char), 'g'), ' ');
 
+      /* delete recursive annotation variations */
+      while (/(\([^\(\)]+\))+?/.test(ms)) {
+        ms = ms.replace(/(\([^\(\)]+\))+?/g, '');
+      }
+
       /* delete comments */
       ms = ms.replace(/(\{[^}]+\})+?/g, '');
 
