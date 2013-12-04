@@ -524,6 +524,10 @@ suite("Load PGN", function() {
     {fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
      pgn: [
       '1. e4 ( 1. d4 { Queen\'s pawn } d5 ( 1... Nf6 ) ) e5'
+    ]},
+    {fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+     pgn: [
+      '1. e4 { King\'s pawn } ( 1. d4 ) 1... e5'
     ]}
   ];
 
