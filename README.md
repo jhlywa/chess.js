@@ -102,7 +102,7 @@ chess.ascii();
 ```
 
 ### .clear()
-Clears the board.
+Clears the board, history and (PGN-) header.
 
 ```js
 chess.clear();
@@ -437,7 +437,11 @@ chess.remove('e1');
 ```
 
 ### .reset()
-Reset the board to the initial starting position.
+Resets the board to the initial (standard) starting position, clears history and (PGN-) header..
+
+### .restart()
+Resets the board to the initial starting position eventually given by a FEN tag, clears history but preserves the actual (PGN-) header.
+
 
 ### .square_color(square)
 Returns the color of the square ('light' or 'dark').
