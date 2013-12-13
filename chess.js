@@ -388,8 +388,8 @@ var Chess = function(fen) {
     if (history.length > 0) return;
 
     if (fen !== DEFAULT_POSITION) {
-      header['SetUp'] = fen;
-      header['FEN'] = '1';
+      header['SetUp'] = '1';
+      header['FEN'] = fen;
     } else {
       delete header['SetUp'];
       delete header['FEN'];
