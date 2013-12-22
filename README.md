@@ -25,42 +25,9 @@ while (!chess.game_over()) {
 ```
 
 Need a user interface?  Try Chris Oakman's excellent
-[ChessBoardJS](http://chessboardjs.com) library.  The code below can be
-seen in action at
-[ChessBoardJS - Random vs Random](http://chessboardjs.com/examples#5002).
-
-```html
-...
-<link rel="stylesheet" href="css/chessboard-0.2.0.css" />
-<script src="js/chess.js"></script>
-<script src="js/chessboard-0.2.0.js"></script>
-<script>
-    var game = new Chess();
-    var board = new ChessBoard('board', 'start');
-
-    var random_move = function() {
-        if (game.game_over()) return;
-        var moves = game.moves();
-        var move = moves[Math.floor(Math.random() * moves.length)];
-        game.move(move);
-        board.position(game.fen());
-        window.setTimeout(random_move, 500);
-    };
-
-    window.setTimeout(random_move, 500);
-</script>
-...
-<div id="board" style="width: 400px"></div>
-...
-```
-
-chess.js is used in the projects below:
-
-- [3D Hartwig Chess Set](http://codepen.io/juliangarnier/fulldetails/BsIih)
-- [Chess in Javascript](http://thingsilearned.com/2012/11/22/javascript-chess-game/)
-- [Multiplayer Chess](http://multiplayerchess.com/)
-- [EasyChess.com](http://www.easychess.com/)
-- [Reti Chess](http://retichess.nodejitsu.com/)
+[chessboard.js](http://chessboardjs.com) library.  See 
+[chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for
+an example integration of chess.js with chessboard.js.
 
 ## API
 
@@ -504,6 +471,7 @@ Special thanks to the following developers for their patches and contributions
 - [E. Azer Koçulu](https://github.com/azer)
 - [Falco Nogatz](https://github.com/fnogatz)
 - [jdponomarev](https://github.com/jdponomarev)
+- [Tom Offermann](https://github.com/toffer)
 - [David Moises Paz Reyes](https://github.com/davidmpaz)
 - [Raminder Singh](https://github.com/imor)
 - [Stiff](https://github.com/stiff)
