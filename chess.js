@@ -162,6 +162,7 @@ var Chess = function(fen) {
   var half_moves = 0;
   var move_number = 1;
   var history = [];
+  var future = [];
   var header = {};
 
   /* if the user passes in a fen string, load it, else default to
@@ -1586,6 +1587,23 @@ var Chess = function(fen) {
     undo: function() {
       var move = undo_move();
       return (move) ? make_pretty(move) : null;
+    },
+
+    back: function() {
+      var moves = this.history();
+      var tmp = new Chess();
+      var previous = moves.length-future.length-1;
+      for(var i=0;i<previous;i++) {
+        tmp.move(moves[i]);
+      }
+      var previous_fen = tmp.fen();
+      tmp.move(moves[previous]);
+      future.push(tmp.fen());
+      return previous_fen;
+    },
+
+    next: function() {
+      return future.pop();
     },
 
     clear: function() {
