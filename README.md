@@ -241,9 +241,9 @@ chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 ### .load_pgn(pgn, [ options ])
 Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
-Options is a optional parameter that contains a 'newline_char' denoting the line
-delimiter (the default delimiter is '\r?\n', optional carriage return with newline).  Returns true if the PGN was parsed
-successfully, otherwise false.
+Options is a optional parameter that contains a 'newline_char' which is a
+string representation of a RegExp (and should not be pre-escaped) and defaults
+to '\r?\n'). Returns true if the PGN was parsed successfully, otherwise false.
 
 ```js
 var chess = new Chess();

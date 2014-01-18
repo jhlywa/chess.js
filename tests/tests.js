@@ -577,9 +577,8 @@ suite("Load PGN", function() {
     var result = chess.load_pgn(pgn, { newline_char: '\r?\n' });
     assert(result);
 
-    var result = chess.load_pgn(pgn);
-    assert(result);
-
+    assert(chess.load_pgn(pgn));
+    assert(chess.pgn().match(/^\[\[/) === null);
   });  
 
 });
