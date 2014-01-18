@@ -1436,7 +1436,7 @@ var Chess = function(fen) {
                             typeof options.newline_char === 'string') ?
                             options.newline_char : '\r?\n';
         var header_obj = {};
-        var headers = header.split(new RegExp(newline_char));
+        var headers = header.split(new RegExp(mask(newline_char)));
         var key = '';
         var value = '';
 
