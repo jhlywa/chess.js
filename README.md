@@ -477,6 +477,7 @@ Special thanks to the following developers for their patches and contributions
 - [Stiff](https://github.com/stiff)
 - [Seb Vincent](https://github.com/sebv)
 - [Linmiao Xu](https://github.com/linrock)
+- [Jonathan Zacsh](https://github.com/jzacsh)
 
 Musical support provided by:
 
