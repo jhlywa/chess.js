@@ -491,7 +491,8 @@ suite("Load PGN", function() {
        '22. e5 Rb8 23. Bc4 Kh8 24. Qh3 Nf8 25. b3 a5 26. f5 exf5',
        '27. Rxf5 Nh7 28. Rcf1 Qd8 29. Qg3 Re7 30. h4 Rbb7 31. e6 Rbc7',
        '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8',
-       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0']
+       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0'],
+       expect: true
       },
     {fen: '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17',
      pgn: [
@@ -514,38 +515,49 @@ suite("Load PGN", function() {
       'here. He can\'t develop the [Queen\'s] knight because the pawn',
       'is hanging, the bishop is blocked because of the',
       'Queen.--Fischer} b5 10.Nxb5 cxb5 11.Bxb5+ Nbd7 12.O-O-O Rd8',
-      '13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8# 1-0']},
+      '13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8# 1-0'],
+      expect: true},
     {pgn: [
       '1. e4 e5 2. f4 exf4 3. Nf3 g5 4. h4 g4 5. Ne5 Nf6 6. Nxg4 Nxe4',
       '7. d3 Ng3 8. Bxf4 Nxh1 9. Qe2+ Qe7 10. Nf6+ Kd8 11. Bxc7+ Kxc7',
       '12. Nd5+ Kd8 13. Nxe7 Bxe7 14. Qg4 d6 15. Qf4 Rg8 16. Qxf7 Bxh4+',
       '17. Kd2 Re8 18. Na3 Na6 19. Qh5 Bf6 20. Qxh1 Bxb2 21. Qh4+ Kd7',
-      '22. Rb1 Bxa3 23. Qa4+']},
+      '22. Rb1 Bxa3 23. Qa4+'],
+      expect: true},
     /* regression test - broken PGN parser ended up here:
      * fen = rnbqk2r/pp1p1ppp/4pn2/1N6/1bPN4/8/PP2PPPP/R1BQKB1R b KQkq - 2 6 */
     {pgn: ['1. d4 Nf6 2. c4 e6 3. Nf3 c5 4. Nc3 cxd4 5. Nxd4 Bb4 6. Nb5'],
-     fen: 'rnbqk2r/pp1p1ppp/4pn2/1N6/1bP5/2N5/PP2PPPP/R1BQKB1R b KQkq - 2 6'},
+     fen: 'rnbqk2r/pp1p1ppp/4pn2/1N6/1bP5/2N5/PP2PPPP/R1BQKB1R b KQkq - 2 6',
+     expect: true},
+    {pgn: ['1. e4 Qxd7 1/2-1/2'],
+      expect: false},
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
 
   tests.forEach(function(t, i) {
-
     newline_chars.forEach(function(newline, j) {
-
       test(i + String.fromCharCode(97 + j), function() {
 
         var result = chess.load_pgn(t.pgn.join(newline), { newline_char: newline });
+        var should_pass = t.expect;
+
+        /* some tests are expected to fail */
+        if (should_pass) {
 
         /* some PGN's tests contain comments which are stripped during parsing,
          * so we'll need compare the results of the load against a FEN string
          * (instead of the reconstructed PGN [e.g. test.pgn.join(newline)])
          */
-        if ('fen' in t) {
-          assert(result && chess.fen() == t.fen);
+
+          if ('fen' in t) {
+            assert(result && chess.fen() == t.fen);
+          } else {
+            assert(result && chess.pgn({ max_width: 65, newline_char: newline }) == t.pgn.join(newline));
+          }
         } else {
-          assert(result && chess.pgn({ max_width: 65, newline_char: newline }) ==
-                 t.pgn.join(newline));
+          /* this test should fail, so make sure it does */
+          assert(result == should_pass);
         }
       });
 
@@ -553,9 +565,9 @@ suite("Load PGN", function() {
 
   });
 
-// special case dirty file containing a mix of \n and \r\n 
+// special case dirty file containing a mix of \n and \r\n
   test('dirty pgn', function() {
-    var pgn = 
+    var pgn =
          '[Event "Reykjavik WCh"]\n' +
          '[Site "Reykjavik WCh"]\n' +
          '[Date "1972.01.07"]\n' +
@@ -583,7 +595,7 @@ suite("Load PGN", function() {
 
     assert(chess.load_pgn(pgn));
     assert(chess.pgn().match(/^\[\[/) === null);
-  });  
+  });
 
 });
 
@@ -769,9 +781,7 @@ suite("Validate FEN", function() {
     });
 
   });
-
 });
-
 
 suite("History", function() {
 
