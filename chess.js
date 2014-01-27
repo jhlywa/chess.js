@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Copyright (c) 2013, Jeff Hlywa (jhlywa@gmail.com)
+ * Copyright (c) 2014, Jeff Hlywa (jhlywa@gmail.com)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
