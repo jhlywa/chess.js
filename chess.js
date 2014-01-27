@@ -1322,7 +1322,7 @@ var Chess = function(fen) {
 
     load_pgn: function(pgn, options) {
       function mask(str) {
-        return str.replace(/\n/g, '\\n').replace(/\r/g, '\\r');
+        return str.replace(/\\/g, '\\');
       }
 
       /* convert a move from Standard Algebraic Notation (SAN) to 0x88
@@ -1436,7 +1436,7 @@ var Chess = function(fen) {
                             typeof options.newline_char === 'string') ?
                             options.newline_char : '\r?\n';
         var header_obj = {};
-        var headers = header.split(newline_char);
+        var headers = header.split(new RegExp(mask(newline_char)));
         var key = '';
         var value = '';
 
