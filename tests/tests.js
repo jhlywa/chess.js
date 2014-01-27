@@ -521,6 +521,14 @@ suite("Load PGN", function() {
       '12. Nd5+ Kd8 13. Nxe7 Bxe7 14. Qg4 d6 15. Qf4 Rg8 16. Qxf7 Bxh4+',
       '17. Kd2 Re8 18. Na3 Na6 19. Qh5 Bf6 20. Qxh1 Bxb2 21. Qh4+ Kd7',
       '22. Rb1 Bxa3 23. Qa4+']},
+    {fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+     pgn: [
+      '1. e4 ( 1. d4 { Queen\'s pawn } d5 ( 1... Nf6 ) ) e5'
+    ]},
+    {fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+     pgn: [
+      '1. e4 { King\'s pawn } ( 1. d4 ) 1... e5'
+    ]}
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
