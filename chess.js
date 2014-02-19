@@ -154,7 +154,7 @@ var Chess = function(fen) {
   };
 
   var board = new Array(128);
-  var kings = {w: EMPTY, b: EMPTY};
+  var kings = {w: EMPTY, b: EMPTY, w_count: 0, b_count: 0};
   var turn = WHITE;
   var castling = {w: 0, b: 0};
   var ep_square = EMPTY;
@@ -174,7 +174,7 @@ var Chess = function(fen) {
 
   function clear() {
     board = new Array(128);
-    kings = {w: EMPTY, b: EMPTY};
+    kings = {w: EMPTY, b: EMPTY, w_count: 0, b_count: 0};
     turn = WHITE;
     castling = {w: 0, b: 0};
     ep_square = EMPTY;
@@ -417,8 +417,14 @@ var Chess = function(fen) {
     }
 
     var sq = SQUARES[square];
+    var old_piece = board[sq];
+    if (old_piece && old_piece.type === KING) {
+      kings[old_piece.color + '_count']--;
+      kings[old_piece.color] = EMPTY;
+    }
     board[sq] = {type: piece.type, color: piece.color};
     if (piece.type === KING) {
+      kings[piece.color + '_count']++;
       kings[piece.color] = sq;
     }
 
@@ -431,6 +437,7 @@ var Chess = function(fen) {
     var piece = get(square);
     board[SQUARES[square]] = null;
     if (piece && piece.type === KING) {
+      kings[piece.color + '_count']--;
       kings[piece.color] = EMPTY;
     }
 
@@ -560,34 +567,36 @@ var Chess = function(fen) {
     /* check for castling if: a) we're generating all moves, or b) we're doing
      * single square move generation on the king's square
      */
-    if ((!single_square) || last_sq === kings[us]) {
+    var king_square = get_sanitized_king_square(us);
+    if (king_square !== EMPTY && ((!single_square) || last_sq === king_square)) {
+
       /* king-side castling */
       if (castling[us] & BITS.KSIDE_CASTLE) {
-        var castling_from = kings[us];
+        var castling_from = king_square;
         var castling_to = castling_from + 2;
 
         if (board[castling_from + 1] == null &&
             board[castling_to]       == null &&
-            !attacked(them, kings[us]) &&
+            !attacked(them, king_square) &&
             !attacked(them, castling_from + 1) &&
             !attacked(them, castling_to)) {
-          add_move(board, moves, kings[us] , castling_to,
+          add_move(board, moves, king_square, castling_to,
                    BITS.KSIDE_CASTLE);
         }
       }
 
       /* queen-side castling */
       if (castling[us] & BITS.QSIDE_CASTLE) {
-        var castling_from = kings[us];
+        var castling_from = king_square;
         var castling_to = castling_from - 2;
 
         if (board[castling_from - 1] == null &&
             board[castling_from - 2] == null &&
             board[castling_from - 3] == null &&
-            !attacked(them, kings[us]) &&
+            !attacked(them, king_square) &&
             !attacked(them, castling_from - 1) &&
             !attacked(them, castling_to)) {
-          add_move(board, moves, kings[us], castling_to,
+          add_move(board, moves, king_square, castling_to,
                    BITS.QSIDE_CASTLE);
         }
       }
@@ -698,8 +707,37 @@ var Chess = function(fen) {
     return false;
   }
 
+  function get_sanitized_king_square(color) {
+
+    // There are two or more kings on the board, or no king at all
+    //  -> return an invalid square index.
+    if (kings[color + '_count'] != 1) {
+      return EMPTY;
+    }
+
+    // There is exactly one king on the board, but we don't know where it is.
+    //  -> search the board to find it.
+    //
+    // Remark: this never happens if the position is constructed through a valid
+    // FEN string and if it is never modified manually afterwards.
+    if (kings[color] === EMPTY) {
+      for (var i = SQUARES.a8; i<= SQUARES.h1; i++) {
+        if (i & 0x88) { i += 7; continue; }
+
+        var piece = board[i];
+        if (piece && piece.type === KING && piece.color === color) {
+          kings[color] = i;
+          return i;
+        }
+      }
+    }
+
+    return kings[color];
+  }
+
   function king_attacked(color) {
-    return attacked(swap_color(color), kings[color]);
+    var square = get_sanitized_king_square(color);
+    return (square === EMPTY) ? false : attacked(swap_color(color), square);
   }
 
   function in_check() {
@@ -794,7 +832,7 @@ var Chess = function(fen) {
   function push(move) {
     history.push({
       move: move,
-      kings: {b: kings.b, w: kings.w},
+      kings: {b: kings.b, w: kings.w, b_count: kings.b_count, w_count: kings.w_count},
       turn: turn,
       castling: {b: castling.b, w: castling.w},
       ep_square: ep_square,
