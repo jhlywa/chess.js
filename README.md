@@ -373,7 +373,9 @@ chess.pgn({ max_width: 5, newline_char: '<br />' });
 ### .put(piece, square)
 Place a piece on square where piece is an object with the form
 { type: ..., color: ... }.  Returns true if piece was successfully placed,
-otherwise false.
+otherwise the board remains unchanged and false is returned.  `put()` will fail
+when passed an invalid piece or square, or when two or more kings of the
+same color are placed.
 
 ```js
 chess.clear();
@@ -385,6 +387,18 @@ chess.put({ type: 'k', color: 'w' }, 'h1') // shorthand
 
 chess.fen();
 // -> '8/8/8/p7/8/8/8/7K w - - 0 0'
+
+chess.put({ type: 'z', color: 'w' }, 'a1') // invalid piece
+// -> false
+
+chess.clear();
+
+chess.put({ type: 'k', color: 'w' }, 'a1')
+// -> true
+
+chess.put({ type: 'k', color: 'w' }, 'h1') // fail - two kings
+// -> false
+
 ```
 
 ### .remove(square)

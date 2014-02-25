@@ -417,6 +417,13 @@ var Chess = function(fen) {
     }
 
     var sq = SQUARES[square];
+
+    /* don't let the user place more than one king */
+    if (piece.type == KING &&
+        !(kings[piece.color] == EMPTY || kings[piece.color] == sq)) {
+      return false;
+    }
+
     board[sq] = {type: piece.type, color: piece.color};
     if (piece.type === KING) {
       kings[piece.color] = sq;

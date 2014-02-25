@@ -296,6 +296,24 @@ suite("Get/Put/Remove", function() {
 
     {pieces: {j4: {type: chess.PAWN, color: chess.WHTIE}}, // bad square
      should_pass: false},
+
+    /* disallow two kings (black) */
+    {pieces: {a7: {type: chess.KING, color: chess.BLACK},
+              h2: {type: chess.KING, color: chess.WHITE},
+              a8: {type: chess.KING, color: chess.BLACK}},
+      should_pass: false},
+
+    /* disallow two kings (white) */
+    {pieces: {a7: {type: chess.KING, color: chess.BLACK},
+              h2: {type: chess.KING, color: chess.WHITE},
+              h1: {type: chess.KING, color: chess.WHITE}},
+      should_pass: false},
+
+    /* allow two kings if overwriting the exact same square */
+    {pieces: {a7: {type: chess.KING, color: chess.BLACK},
+              h2: {type: chess.KING, color: chess.WHITE},
+              h2: {type: chess.KING, color: chess.WHITE}},
+      should_pass: true},
   ];
 
   positions.forEach(function(position) {
@@ -928,5 +946,13 @@ suite('Regression Tests', function() {
     var chess = new Chess('b3k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qNP/6QK b k - 2 28');
     chess.move({from:'a8', to:'g2'});
     assert(chess.fen() == '4k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qbP/6QK w k - 0 29');
+  });
+
+  test('Issue #58 - placing more than one king', function() {
+    var chess = new Chess('N3k3/8/8/8/8/8/5b2/4K3 w - - 0 1');
+    assert(chess.put({type: 'k', color: 'w'}, 'a1') == false);
+    chess.put({type: 'q', color: 'w'}, 'a1');
+    chess.remove('a1');
+    assert(chess.moves().join(' ') == 'Kd2 Ke2 Kxf2 Kf1 Kd1');
   });
 });
