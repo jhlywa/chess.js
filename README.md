@@ -295,7 +295,7 @@ a string in Standard Algebraic Notation (SAN):
 var chess = new Chess();
 
 chess.move('e4')
-// -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e2' }
+// -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
 
 chess.move('nf6') // SAN is case sensitive!!
 // -> null
