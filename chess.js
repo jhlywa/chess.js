@@ -190,7 +190,7 @@ var Chess = function(fen) {
   }
 
   function load(fen) {
-    var tokens = fen.split(/\s+/);
+    var tokens = new String(fen).split(/\s+/);
     var position = tokens[0];
     var square = 0;
     var valid = SYMBOLS + '12345678/';
@@ -255,7 +255,7 @@ var Chess = function(fen) {
     };
 
     /* 1st criterion: 6 space-seperated fields? */
-    var tokens = fen.split(/\s+/);
+    var tokens = new String(fen).split(/\s+/);
     if (tokens.length !== 6) {
       return {valid: false, error_number: 1, error: errors[1]};
     }
