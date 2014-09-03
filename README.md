@@ -93,7 +93,7 @@ chess.fen();
 ```
 
 ### .game_over()
-Returns true or false if the game has ended via checkmate, stalemate, or draw.
+Returns true if the game has ended via checkmate, stalemate, draw, threefold repetition, or insufficient material. Otherwise, returns false.
 
 ```js
 var chess = new Chess();
@@ -191,12 +191,12 @@ var chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 chess.in_threefold_repetition();
 // -> false
 
-chess.move('Nf3'); chess.move('Nf6') chess.move('Ng1'); chess.move('Ng8');
+chess.move('Nf3'); chess.move('Nf6'); chess.move('Ng1'); chess.move('Ng8');
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 2nd time
 chess.in_threefold_repetition();
 // -> false
 
-chess.move('Nf3'); chess.move('Nf6') chess.move('Ng1'); chess.move('Ng8');
+chess.move('Nf3'); chess.move('Nf6'); chess.move('Ng1'); chess.move('Ng8');
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 3rd time
 chess.in_threefold_repetition();
 // -> true
