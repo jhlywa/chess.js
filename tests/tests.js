@@ -150,6 +150,9 @@ suite("Insufficient Material", function() {
     {fen: '8/2N5/8/8/8/8/8/k6K w - - 0 1', draw: true},
     {fen: '8/2b5/8/8/8/8/8/k6K w - - 0 1', draw: true},
     {fen: '8/b7/3B4/8/8/8/8/k6K w - - 0 1', draw: true},
+    {fen: '8/n7/3N4/8/8/8/8/k6K w - - 0 1', draw: true},
+    {fen: '8/b7/3N4/8/8/8/8/k6K w - - 0 1', draw: true},
+    {fen: '8/B7/3n4/8/8/8/8/k6K w - - 0 1', draw: true},
     {fen: '8/b7/B7/8/8/8/8/k6K w - - 0 1', draw: false},
     {fen: '8/b1B1b1B1/1b1B1b1B/8/8/8/8/1k5K w - - 0 1', draw: true},
     {fen: '8/bB2b1B1/1b1B1b1B/8/8/8/8/1k5K w - - 0 1', draw: false}
