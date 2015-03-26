@@ -618,6 +618,22 @@ suite("Load PGN", function() {
 });
 
 
+suite('Pawn promotion without equal sign', function() {
+  test('load_pgn', function() {
+    var chess = new Chess();
+    assert(chess.load_pgn('1. d4 c5 2. d5 b6 3. Nc3 e6 4. dxe6 g6 5. exf7+ Ke7 6. fxg8Q'));
+    assert.deepEqual(chess.history(), ['d4', 'c5', 'd5', 'b6', 'Nc3', 'e6', 'dxe6', 'g6', 'exf7+', 'Ke7', 'fxg8=Q']);
+  });
+
+  test('move', function() {
+    var chess = new Chess();
+    assert(chess.load_pgn('1. d4 c5 2. d5 b6 3. Nc3 e6 4. dxe6 g6 5. exf7+ Ke7'));
+    assert.isNotNull(chess.move('fxg8Q'));
+    assert.deepEqual(chess.history(), ['d4', 'c5', 'd5', 'b6', 'Nc3', 'e6', 'dxe6', 'g6', 'exf7+', 'Ke7', 'fxg8=Q']);
+  });
+});
+
+
 suite("Make Move", function() {
 
   var positions = [
