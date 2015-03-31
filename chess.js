@@ -189,6 +189,16 @@ var Chess = function(fen) {
     load(DEFAULT_POSITION);
   }
 
+  function restart() {
+    var temp = header;
+    if (header['FEN']) {
+      load(header['FEN']);
+    } else {
+      load(DEFAULT_POSITION);
+    };
+    header = temp;
+  }
+
   function load(fen) {
     var tokens = fen.split(/\s+/);
     var position = tokens[0];
@@ -1382,25 +1392,23 @@ var Chess = function(fen) {
       var newline_char = (typeof options === 'object' &&
                           typeof options.newline_char === 'string') ?
                           options.newline_char : '\r?\n';
-        var regex = new RegExp('^(\\[(.|' + mask(newline_char) + ')*\\])' +
-                               '(' + mask(newline_char) + ')*' +
-                               '1.(' + mask(newline_char) + '|.)*$', 'g');
 
       /* get header part of the PGN file */
-      var header_string = pgn.replace(regex, '$1');
+      var header_string = pgn.split(newline_char + newline_char)[0];
 
       /* no info part given, begins with moves */
       if (header_string[0] !== '[') {
         header_string = '';
       }
 
-     reset();
-
       /* parse PGN header */
+      header = {};
       var headers = parse_pgn_header(header_string, options);
       for (var key in headers) {
         set_header([key, headers[key]]);
       }
+
+      restart();
 
       /* delete header to get the moves */
       var ms = pgn.replace(header_string, '').replace(new RegExp(mask(newline_char), 'g'), ' ');
@@ -1409,7 +1417,7 @@ var Chess = function(fen) {
       ms = ms.replace(/(\{[^}]+\})+?/g, '');
 
       /* delete move numbers */
-      ms = ms.replace(/\d+\./g, '');
+      ms = ms.replace(/\d+\.\.\./g, '').replace(/\d+\./g, '');
 
 
       /* trim and get array of moves */
@@ -1520,6 +1528,10 @@ var Chess = function(fen) {
 
     clear: function() {
       return clear();
+    },
+
+    restart: function() {
+      return restart();
     },
 
     put: function(piece, square) {
