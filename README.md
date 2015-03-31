@@ -482,6 +482,7 @@ Special thanks to the following developers for their patches and contributions
 (alphabetically):
 
 - [Steve Bragg](https://github.com/2sb18)
+- [Ngoc Dao](https://github.com/ngocdaothanh)
 - [Matt Flaschen](https://github.com/mattflaschen)
 - [E. Azer Koçulu](https://github.com/azer)
 - [Falco Nogatz](https://github.com/fnogatz)
