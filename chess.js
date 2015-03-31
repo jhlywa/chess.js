@@ -1335,11 +1335,12 @@ var Chess = function(fen) {
        * coordinates
       */
       function move_from_san(move) {
+        /* strip off any move decorations: e.g Nf3+?! */
+        var moveReplaced = move.replace(/[+#?!=]/,'');
         var moves = generate_moves();
         for (var i = 0, len = moves.length; i < len; i++) {
-          /* strip off any trailing move decorations: e.g Nf3+?! */
-          if (move.replace(/[+#?!=]+$/,'') ==
-              move_to_san(moves[i]).replace(/[+#?!=]+$/,'')) {
+          if (moveReplaced ==
+              move_to_san(moves[i]).replace(/[+#?!=]/,'')) {
             return moves[i];
           }
         }
@@ -1476,8 +1477,10 @@ var Chess = function(fen) {
 
       if (typeof move === 'string') {
         /* convert the move string to a move object */
+        /* strip off any move decorations: e.g Nf3+?! */
+        var moveReplaced = move.replace(/[+#?!=]/,'');
         for (var i = 0, len = moves.length; i < len; i++) {
-          if (move === move_to_san(moves[i])) {
+          if (moveReplaced === move_to_san(moves[i]).replace(/[+#?!=]/,'')) {
             move_obj = moves[i];
             break;
           }
