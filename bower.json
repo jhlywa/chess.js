@@ -14,7 +14,11 @@
   ],
   "keywords": ["chess"],
   "main": "chess.js",
-
+  "ignore": {
+    "/.*",
+    "tests",
+    "Makefile"
+  },
   "repository" : {
     "type" : "git",
     "url" : "http://github.com/jhlywa/chess.js.git"
