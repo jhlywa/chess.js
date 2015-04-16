@@ -472,7 +472,7 @@ suite("PGN", function() {
         }
       }
 
-      chess.header.apply(null, position.header);
+      chess.header(position.header);
       var pgn = chess.pgn({max_width:position.max_width, newline_char:position.newline_char});
       var fen = chess.fen();
       passed = pgn === position.pgn && fen === position.fen;
