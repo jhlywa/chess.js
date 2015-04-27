@@ -1616,5 +1616,3 @@ var Chess = (function () {
 /* export Chess object if using node or any other CommonJS compatible
  * environment */
 if (typeof module !== 'undefined') module.exports = Chess;
-/* export Chess object for any RequireJS compatible environment */
-if (typeof define !== 'undefined') define( function () { return Chess;  });

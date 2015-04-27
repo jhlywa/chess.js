@@ -12,15 +12,23 @@
     "Stiff (https://github.com/stiff)",
     "Linmiao Xu (https://github.com/linrock)"
   ],
-  "keywords": ["chess"],
-  "main": "chess.js",
-
-  "repository" : {
-    "type" : "git",
-    "url" : "http://github.com/jhlywa/chess.js.git"
+  "keywords": [
+    "chess"
+  ],
+  "main": "src/chess.js",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/jhlywa/chess.js.git"
   },
   "devDependencies": {
-    "mocha": "*",
-    "chai": "*"
+    "chai": "*",
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.2",
+    "grunt-contrib-uglify": "^0.9.1",
+    "grunt-jscs": "^1.6.0",
+    "grunt-jslint": "^1.1.14",
+    "grunt-jsonlint": "^1.0.4",
+    "grunt-mocha-test": "^0.12.7",
+    "load-grunt-tasks": "^3.1.0"
   }
 }

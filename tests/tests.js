@@ -1,6 +1,6 @@
 if (typeof require != "undefined") {
   var chai = require('chai');
-  var Chess = require('../chess');
+  var Chess = require('../src/chess');
 }
 var assert = chai.assert;
 
