@@ -238,7 +238,7 @@ chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 // -> false, bad piece X
 ```
 
-### .loadPGN(pgn, [ options ])
+### .loadPgn(pgn, [ options ])
 Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
 Options is a optional parameter that contains a 'newlineChar' which is a
@@ -266,7 +266,7 @@ pgn = ['[Event "Casual Game"]',
        'Rg8 19.Rad1 Qxf3 20.Rxe7+ Nxe7 21.Qxd7+ Kxd7 22.Bf5+ Ke8',
        '23.Bd7+ Kf8 24.Bxe7# 1-0'];
 
-chess.loadPGN(pgn.join('\n'));
+chess.loadPgn(pgn.join('\n'));
 // -> true
 
 chess.fen()
@@ -462,15 +462,15 @@ chess.undo();
 // -> null
 ```
 
-### .validateFEN(fen):
+### .validateFen(fen):
 Returns a validation object specifying validity or the errors found within the
 FEN string.
 
 ```js
-chess.validateFEN('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25');
+chess.validateFen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25');
 // -> { valid: true, errorNumber: 0, error: 'No errors.' }
 
-chess.validateFEN('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+chess.validateFen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 // -> { valid: false, errorNumber: 9,
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
