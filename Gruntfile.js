@@ -56,7 +56,7 @@ module.exports = function( grunt ) {
             'ascii_only': true
           },
           banner: '/*! Chess.js v<%= pkg.version %> | ' +
-            'Copyright (c) 2014, Jeff Hlywa (jhlywa@gmail.com) | github.com/jhlywa/chess.js/blob/master/LICENSE */',
+            'Copyright (c) 2015, Jeff Hlywa (jhlywa@gmail.com) | github.com/jhlywa/chess.js/blob/master/LICENSE */',
           compress: {
             'hoist_funs': false,
             loops: false,

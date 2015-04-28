@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Copyright (c) 2014, Jeff Hlywa (jhlywa@gmail.com)
+ * Copyright (c) 2015, Jeff Hlywa (jhlywa@gmail.com)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,138 +34,137 @@
  */
 
 /* jshint indent: false */
-var Chess = (function () {
+var Chess = (function() {
 
-  var BLACK = 'b',
-      WHITE = 'w',
+  var BLACK = 'b';
+  var WHITE = 'w';
 
-      EMPTY = -1,
+  var EMPTY = -1;
 
-      PAWN   = 'p',
-      KNIGHT = 'n',
-      BISHOP = 'b',
-      ROOK   = 'r',
-      QUEEN  = 'q',
-      KING   = 'k',
+  var PAWN   = 'p';
+  var KNIGHT = 'n';
+  var BISHOP = 'b';
+  var ROOK   = 'r';
+  var QUEEN  = 'q';
+  var KING   = 'k';
 
-      SYMBOLS  = 'pnbrqkPNBRQK',
+  var SYMBOLS  = 'pnbrqkPNBRQK';
 
-      DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  var DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 
-      POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'],
+  var POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'];
 
-      PAWN_OFFSETS = {
-        b: [16, 32, 17, 15],
-        w: [-16, -32, -17, -15]
-      },
+  var PAWN_OFFSETS = {
+    b: [16, 32, 17, 15],
+    w: [-16, -32, -17, -15]
+  };
 
-      PIECE_OFFSETS = {
-        n: [-18, -33, -31, -14,  18, 33, 31,  14],
-        b: [-17, -15,  17,  15],
-        r: [-16,   1,  16,  -1],
-        q: [-17, -16, -15,   1,  17, 16, 15,  -1],
-        k: [-17, -16, -15,   1,  17, 16, 15,  -1]
-      },
+  var PIECE_OFFSETS = {
+    n: [-18, -33, -31, -14,  18, 33, 31,  14],
+    b: [-17, -15,  17,  15],
+    r: [-16,   1,  16,  -1],
+    q: [-17, -16, -15,   1,  17, 16, 15,  -1],
+    k: [-17, -16, -15,   1,  17, 16, 15,  -1]
+  };
 
-      ATTACKS = [
-        20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20, 0,
-         0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
-         0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
-         0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
-         0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
-         0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
-         0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
-        24,24,24,24,24,24,56,  0, 56,24,24,24,24,24,24, 0,
-         0, 0, 0, 0, 0, 2,53, 56, 53, 2, 0, 0, 0, 0, 0, 0,
-         0, 0, 0, 0, 0,20, 2, 24,  2,20, 0, 0, 0, 0, 0, 0,
-         0, 0, 0, 0,20, 0, 0, 24,  0, 0,20, 0, 0, 0, 0, 0,
-         0, 0, 0,20, 0, 0, 0, 24,  0, 0, 0,20, 0, 0, 0, 0,
-         0, 0,20, 0, 0, 0, 0, 24,  0, 0, 0, 0,20, 0, 0, 0,
-         0,20, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0,20, 0, 0,
-        20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20
-      ],
+  var ATTACKS = [
+    20,  0,  0,  0,  0,  0,  0, 24,  0,  0,  0,  0,  0,  0, 20, 0,
+     0, 20,  0,  0,  0,  0,  0, 24,  0,  0,  0,  0,  0, 20,  0, 0,
+     0,  0, 20,  0,  0,  0,  0, 24,  0,  0,  0,  0, 20,  0,  0, 0,
+     0,  0,  0, 20,  0,  0,  0, 24,  0,  0,  0, 20,  0,  0,  0, 0,
+     0,  0,  0,  0, 20,  0,  0, 24,  0,  0, 20,  0,  0,  0,  0, 0,
+     0,  0,  0,  0,  0, 20,  2, 24,  2, 20,  0,  0,  0,  0,  0, 0,
+     0,  0,  0,  0,  0,  2, 53, 56, 53,  2,  0,  0,  0,  0,  0, 0,
+    24, 24, 24, 24, 24, 24, 56,  0, 56, 24, 24, 24, 24, 24, 24, 0,
+     0,  0,  0,  0,  0,  2, 53, 56, 53,  2,  0,  0,  0,  0,  0, 0,
+     0,  0,  0,  0,  0, 20,  2, 24,  2, 20,  0,  0,  0,  0,  0, 0,
+     0,  0,  0,  0, 20,  0,  0, 24,  0,  0, 20,  0,  0,  0,  0, 0,
+     0,  0,  0, 20,  0,  0,  0, 24,  0,  0,  0, 20,  0,  0,  0, 0,
+     0,  0, 20,  0,  0,  0,  0, 24,  0,  0,  0,  0, 20,  0,  0, 0,
+     0, 20,  0,  0,  0,  0,  0, 24,  0,  0,  0,  0,  0, 20,  0, 0,
+    20,  0,  0,  0,  0,  0,  0, 24,  0,  0,  0,  0,  0,  0, 20
+  ];
 
-      RAYS = [
-         17,  0,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0,  0, 15, 0,
-          0, 17,  0,  0,  0,  0,  0, 16,  0,  0,  0,  0,  0, 15,  0, 0,
-          0,  0, 17,  0,  0,  0,  0, 16,  0,  0,  0,  0, 15,  0,  0, 0,
-          0,  0,  0, 17,  0,  0,  0, 16,  0,  0,  0, 15,  0,  0,  0, 0,
-          0,  0,  0,  0, 17,  0,  0, 16,  0,  0, 15,  0,  0,  0,  0, 0,
-          0,  0,  0,  0,  0, 17,  0, 16,  0, 15,  0,  0,  0,  0,  0, 0,
-          0,  0,  0,  0,  0,  0, 17, 16, 15,  0,  0,  0,  0,  0,  0, 0,
-          1,  1,  1,  1,  1,  1,  1,  0, -1, -1,  -1,-1, -1, -1, -1, 0,
-          0,  0,  0,  0,  0,  0,-15,-16,-17,  0,  0,  0,  0,  0,  0, 0,
-          0,  0,  0,  0,  0,-15,  0,-16,  0,-17,  0,  0,  0,  0,  0, 0,
-          0,  0,  0,  0,-15,  0,  0,-16,  0,  0,-17,  0,  0,  0,  0, 0,
-          0,  0,  0,-15,  0,  0,  0,-16,  0,  0,  0,-17,  0,  0,  0, 0,
-          0,  0,-15,  0,  0,  0,  0,-16,  0,  0,  0,  0,-17,  0,  0, 0,
-          0,-15,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,-17,  0, 0,
-        -15,  0,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,  0,-17
-      ],
+  var RAYS = [
+     17,   0,   0,   0,   0,   0,   0,  16,   0,   0,   0,   0,   0,   0,  15, 0,
+      0,  17,   0,   0,   0,   0,   0,  16,   0,   0,   0,   0,   0,  15,   0, 0,
+      0,   0,  17,   0,   0,   0,   0,  16,   0,   0,   0,   0,  15,   0,   0, 0,
+      0,   0,   0,  17,   0,   0,   0,  16,   0,   0,   0,  15,   0,   0,   0, 0,
+      0,   0,   0,   0,  17,   0,   0,  16,   0,   0,  15,   0,   0,   0,   0, 0,
+      0,   0,   0,   0,   0,  17,   0,  16,   0,  15,   0,   0,   0,   0,   0, 0,
+      0,   0,   0,   0,   0,   0,  17,  16,  15,   0,   0,   0,   0,   0,   0, 0,
+      1,   1,   1,   1,   1,   1,   1,   0,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0,
+      0,   0,   0,   0,   0,   0, -15, -16, -17,   0,   0,   0,   0,   0,   0, 0,
+      0,   0,   0,   0,   0, -15,   0, -16,   0, -17,   0,   0,   0,   0,   0, 0,
+      0,   0,   0,   0, -15,   0,   0, -16,   0,   0, -17,   0,   0,   0,   0, 0,
+      0,   0,   0, -15,   0,   0,   0, -16,   0,   0,   0, -17,   0,   0,   0, 0,
+      0,   0, -15,   0,   0,   0,   0, -16,   0,   0,   0,   0, -17,   0,   0, 0,
+      0, -15,   0,   0,   0,   0,   0, -16,   0,   0,   0,   0,   0, -17,   0, 0,
+    -15,   0,   0,   0,   0,   0,   0, -16,   0,   0,   0,   0,   0,   0, -17
+  ];
 
-      SHIFTS = { p: 0, n: 1, b: 2, r: 3, q: 4, k: 5 },
+  var SHIFTS = {p: 0, n: 1, b: 2, r: 3, q: 4, k: 5};
 
-      FLAGS = {
-        NORMAL: 'n',
-        CAPTURE: 'c',
-        BIG_PAWN: 'b',
-        EP_CAPTURE: 'e',
-        PROMOTION: 'p',
-        KSIDE_CASTLE: 'k',
-        QSIDE_CASTLE: 'q'
-      },
+  var FLAGS = {
+    NORMAL: 'n',
+    CAPTURE: 'c',
+    BIG_PAWN: 'b',
+    EP_CAPTURE: 'e',
+    PROMOTION: 'p',
+    KSIDE_CASTLE: 'k',
+    QSIDE_CASTLE: 'q'
+  };
 
-      BITS = {
-        NORMAL: 1,
-        CAPTURE: 2,
-        BIG_PAWN: 4,
-        EP_CAPTURE: 8,
-        PROMOTION: 16,
-        KSIDE_CASTLE: 32,
-        QSIDE_CASTLE: 64
-      },
+  var BITS = {
+    NORMAL: 1,
+    CAPTURE: 2,
+    BIG_PAWN: 4,
+    EP_CAPTURE: 8,
+    PROMOTION: 16,
+    KSIDE_CASTLE: 32,
+    QSIDE_CASTLE: 64
+  };
 
-      RANK_1 = 7,
-      RANK_2 = 6,
-      RANK_3 = 5,
-      RANK_4 = 4,
-      RANK_5 = 3,
-      RANK_6 = 2,
-      RANK_7 = 1,
-      RANK_8 = 0,
+  var RANK_1 = 7;
+  var RANK_2 = 6;
+  var RANK_3 = 5;
+  var RANK_4 = 4;
+  var RANK_5 = 3;
+  var RANK_6 = 2;
+  var RANK_7 = 1;
+  var RANK_8 = 0;
 
-      SQUARES = {
-        a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
-        a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
-        a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,
-        a5:  48, b5:  49, c5:  50, d5:  51, e5:  52, f5:  53, g5:  54, h5:  55,
-        a4:  64, b4:  65, c4:  66, d4:  67, e4:  68, f4:  69, g4:  70, h4:  71,
-        a3:  80, b3:  81, c3:  82, d3:  83, e3:  84, f3:  85, g3:  86, h3:  87,
-        a2:  96, b2:  97, c2:  98, d2:  99, e2: 100, f2: 101, g2: 102, h2: 103,
-        a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
-      },
+  var SQUARES = {
+    a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
+    a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
+    a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,
+    a5:  48, b5:  49, c5:  50, d5:  51, e5:  52, f5:  53, g5:  54, h5:  55,
+    a4:  64, b4:  65, c4:  66, d4:  67, e4:  68, f4:  69, g4:  70, h4:  71,
+    a3:  80, b3:  81, c3:  82, d3:  83, e3:  84, f3:  85, g3:  86, h3:  87,
+    a2:  96, b2:  97, c2:  98, d2:  99, e2: 100, f2: 101, g2: 102, h2: 103,
+    a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
+  };
 
-      ROOKS = {
-        w: [{square: SQUARES.a1, flag: BITS.QSIDE_CASTLE},
-            {square: SQUARES.h1, flag: BITS.KSIDE_CASTLE}],
-        b: [{square: SQUARES.a8, flag: BITS.QSIDE_CASTLE},
-            {square: SQUARES.h8, flag: BITS.KSIDE_CASTLE}]
-      },
+  var ROOKS = {
+    w: [{square: SQUARES.a1, flag: BITS.QSIDE_CASTLE},
+        {square: SQUARES.h1, flag: BITS.KSIDE_CASTLE}],
+    b: [{square: SQUARES.a8, flag: BITS.QSIDE_CASTLE},
+        {square: SQUARES.h8, flag: BITS.KSIDE_CASTLE}]
+  };
 
-
-      ERRORS = {
-           0: 'No errors.',
-           1: 'FEN string must contain six space-delimited fields.',
-           2: '6th field (move number) must be a positive integer.',
-           3: '5th field (half move counter) must be a non-negative integer.',
-           4: '4th field (en-passant square) is invalid.',
-           5: '3rd field (castling availability) is invalid.',
-           6: '2nd field (side to move) is invalid.',
-           7: '1st field (piece positions) does not contain 8 \'/\'-delimited rows.',
-           8: '1st field (piece positions) is invalid [consecutive numbers].',
-           9: '1st field (piece positions) is invalid [invalid piece].',
-          10: '1st field (piece positions) is invalid [row too large].',
-      };
+  var ERRORS = {
+    0:  'No errors.',
+    1:  'FEN string must contain six space-delimited fields.',
+    2:  '6th field (move number) must be a positive integer.',
+    3:  '5th field (half move counter) must be a non-negative integer.',
+    4:  '4th field (en-passant square) is invalid.',
+    5:  '3rd field (castling availability) is invalid.',
+    6:  '2nd field (side to move) is invalid.',
+    7:  '1st field (piece positions) does not contain 8 \'/\'-delimited rows.',
+    8:  '1st field (piece positions) is invalid [consecutive numbers].',
+    9:  '1st field (piece positions) is invalid [invalid piece].',
+    10: '1st field (piece positions) is invalid [row too large].',
+  };
 
   function Chess(fen) {
 
@@ -260,7 +259,6 @@ var Chess = (function () {
 
     validateFen: function(fen) {
 
-
       /* 1st criterion: 6 space-seperated fields? */
       var tokens = fen.split(/\s+/);
       if (tokens.length !== 6) {
@@ -283,7 +281,7 @@ var Chess = (function () {
       }
 
       /* 5th criterion: 3th field is a valid castle-string? */
-      if( !/^(KQ?k?q?|Qk?q?|kq?|q|-)$/.test(tokens[2])) {
+      if (!/^(KQ?k?q?|Qk?q?|kq?|q|-)$/.test(tokens[2])) {
         return {valid: false, errorNumber: 5, error: ERRORS[5]};
       }
 
@@ -361,7 +359,6 @@ var Chess = (function () {
         }
       }
 
-
       var cflags = '';
       if (this.castling[WHITE] & BITS.KSIDE_CASTLE) { cflags += 'K'; }
       if (this.castling[WHITE] & BITS.QSIDE_CASTLE) { cflags += 'Q'; }
@@ -392,7 +389,10 @@ var Chess = (function () {
      * made.
      */
     updateSetup: function(fen) {
-      if (this.history.length > 0) return;
+
+      if (this.history.length > 0) {
+        return;
+      }
 
       if (fen !== DEFAULT_POSITION) {
         this.header['SetUp'] = '1';
@@ -471,7 +471,7 @@ var Chess = (function () {
       if (this.board[to]) {
         move.captured = this.board[to].type;
       } else if (flags & BITS.EP_CAPTURE) {
-          move.captured = PAWN;
+        move.captured = PAWN;
       }
       return move;
     },
@@ -489,9 +489,7 @@ var Chess = (function () {
       }
     },
 
-
     generateMoves: function(options) {
- 
       var moves = [];
       var us = this.turn;
       var them = this.swapColor(us);
@@ -541,7 +539,9 @@ var Chess = (function () {
           /* pawn captures */
           for (j = 2; j < 4; j++) {
             var square = i + PAWN_OFFSETS[us][j];
-            if (square & 0x88) continue;
+            if (square & 0x88) {
+              continue;
+            }
 
             if (this.board[square] != null &&
                 this.board[square].color === them) {
@@ -557,18 +557,24 @@ var Chess = (function () {
 
             while (true) {
               square += offset;
-              if (square & 0x88) break;
+              if (square & 0x88) {
+                break;
+              }
 
               if (this.board[square] == null) {
                 this.addMove(moves, i, square, BITS.NORMAL);
               } else {
-                if (this.board[square].color === us) break;
+                if (this.board[square].color === us) {
+                  break;
+                }
                 this.addMove(moves, i, square, BITS.CAPTURE);
                 break;
               }
 
               /* break, if knight or king */
-              if (piece.type === KNIGHT || piece.type === KING) break;
+              if (piece.type === KNIGHT || piece.type === KING) {
+                break;
+              }
             }
           }
         }
@@ -679,11 +685,11 @@ var Chess = (function () {
      */
     moveFromSan: function(move) {
       /* strip off any move decorations: e.g Nf3+?! */
-      var moveReplaced = move.replace(/[+#?!=]/,'');
+      var moveReplaced = move.replace(/[+#?!=]/, '');
       var moves = this.generateMoves();
       for (var i = 0, len = moves.length; i < len; i++) {
         if (moveReplaced ===
-            this.moveToSan(moves[i]).replace(/[+#?!=]/,'')) {
+            this.moveToSan(moves[i]).replace(/[+#?!=]/, '')) {
           return moves[i];
         }
       }
@@ -696,7 +702,9 @@ var Chess = (function () {
         if (i & 0x88) { i += 7; continue; }
 
         /* if empty square or wrong color */
-        if (this.board[i] == null || this.board[i].color !== color) continue;
+        if (this.board[i] == null || this.board[i].color !== color) {
+          continue;
+        }
 
         var piece = this.board[i];
         var difference = i - square;
@@ -705,15 +713,21 @@ var Chess = (function () {
         if (ATTACKS[index] & (1 << SHIFTS[piece.type])) {
           if (piece.type === PAWN) {
             if (difference > 0) {
-              if (piece.color === WHITE) return true;
+              if (piece.color === WHITE) {
+                return true;
+              }
             } else {
-              if (piece.color === BLACK) return true;
+              if (piece.color === BLACK) {
+                return true;
+              }
             }
             continue;
           }
 
           /* if the piece is a knight or a king */
-          if (piece.type === KNIGHT || piece.type === KING) return true;
+          if (piece.type === KNIGHT || piece.type === KING) {
+            return true;
+          }
 
           var offset = RAYS[index];
           var j = i + offset;
@@ -724,7 +738,9 @@ var Chess = (function () {
             j += offset;
           }
 
-          if (!blocked) return true;
+          if (!blocked) {
+            return true;
+          }
         }
       }
 
@@ -753,9 +769,12 @@ var Chess = (function () {
       var numPieces = 0;
       var sqColor = 0;
 
-      for (var i = SQUARES.a8; i<= SQUARES.h1; i++) {
+      for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
         sqColor = (sqColor + 1) % 2;
-        if (i & 0x88) { i += 7; continue; }
+        if (i & 0x88) {
+          i += 7;
+          continue;
+        }
 
         var piece = this.board[i];
         if (piece) {
@@ -769,14 +788,15 @@ var Chess = (function () {
       }
 
       /* k vs. k */
-      if (numPieces === 2) { return true; }
+      if (numPieces === 2) {
+        return true;
 
       /* k vs. kn .... or .... k vs. kb */
-      else if (numPieces === 3 && (pieces[BISHOP] === 1 ||
-                                   pieces[KNIGHT] === 1)) { return true; }
+      } else if (numPieces === 3 && (pieces[BISHOP] === 1 || pieces[KNIGHT] === 1)) {
+        return true;
 
       /* kb vs. kb where any number of bishops are all on the same color */
-      else if (numPieces === pieces[BISHOP] + 2) {
+      }   else if (numPieces === pieces[BISHOP] + 2) {
         var sum = 0;
         var len = bishops.length;
         for (var i = 0; i < len; i++) {
@@ -800,14 +820,16 @@ var Chess = (function () {
 
       while (true) {
         var move = this.undoMove();
-        if (!move) break;
+        if (!move) {
+          break;
+        }
         moves.push(move);
       }
 
       while (true) {
         /* remove the last two fields in the FEN string, they're not needed
          * when checking for draw by rep */
-        var fen = this.generateFen().split(' ').slice(0,4).join(' ');
+        var fen = this.generateFen().split(' ').slice(0, 4).join(' ');
 
         /* has the position occurred three or move times */
         positions[fen] = (fen in positions) ? positions[fen] + 1 : 1;
@@ -959,9 +981,9 @@ var Chess = (function () {
         this.board[index] = {type: PAWN, color: them};
       }
 
-
       if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-        var castlingTo, castlingFrom;
+        var castlingTo;
+        var castlingFrom;
         if (move.flags & BITS.KSIDE_CASTLE) {
           castlingTo = move.to + 1;
           castlingFrom = move.to - 1;
@@ -1016,15 +1038,15 @@ var Chess = (function () {
          */
         if (sameRank > 0 && sameFile > 0) {
           return this.algebraic(from);
-        }
+
         /* if the moving piece rests on the same file, use the rank symbol as the
          * disambiguator
          */
-        else if (sameFile > 0) {
+        } else if (sameFile > 0) {
           return this.algebraic(from).charAt(1);
-        }
+
         /* else use the file symbol */
-        else {
+        } else {
           return this.algebraic(from).charAt(0);
         }
       }
@@ -1073,9 +1095,10 @@ var Chess = (function () {
       return i & 15;
     },
 
-    algebraic: function(i){
-      var f = this.file(i), r = this.rank(i);
-      return 'abcdefgh'.substring(f,f+1) + '87654321'.substring(r,r+1);
+    algebraic: function(i) {
+      var f = this.file(i);
+      var r = this.rank(i);
+      return 'abcdefgh'.substring(f, f + 1) + '87654321'.substring(r, r + 1);
     },
 
     swapColor: function(c) {
@@ -1130,7 +1153,6 @@ var Chess = (function () {
 
       return moves;
     },
-
 
     pgn: function(options) {
       /* using the specification from http://www.this.chessclub.com/help/PGN-spec
@@ -1246,9 +1268,9 @@ var Chess = (function () {
       if (typeof move === 'string') {
         /* convert the move string to a move object */
         /* strip off any move decorations: e.g Nf3+?! */
-        var moveReplaced = move.replace(/[+#?!=]/,'');
+        var moveReplaced = move.replace(/[+#?!=]/, '');
         for (var i = 0, len = moves.length; i < len; i++) {
-          if (moveReplaced === this.moveToSan(moves[i]).replace(/[+#?!=]/,'')) {
+          if (moveReplaced === this.moveToSan(moves[i]).replace(/[+#?!=]/, '')) {
             moveObj = moves[i];
             break;
           }
@@ -1282,11 +1304,11 @@ var Chess = (function () {
     },
 
     mask: function(str) {
-        return str.replace(/\\/g, '\\');
+      return str.replace(/\\/g, '\\');
     },
 
     getMoveObj: function(move) {
-        return this.moveFromSan(this.trim(move));
+      return this.moveFromSan(this.trim(move));
     },
 
     hasKeys: function(object) {
@@ -1300,7 +1322,7 @@ var Chess = (function () {
     newlineChar: function(i) {
       return (typeof i === 'object' &&
                           typeof i.newlineChar === 'string') ?
-          i.newlineChar : '\r?\n';  
+          i.newlineChar : '\r?\n';
     },
 
     parsePgnHeader: function(header, options) {
@@ -1352,7 +1374,6 @@ var Chess = (function () {
       /* delete move numbers */
       ms = ms.replace(/\d+\./g, '');
 
-
       /* trim and get array of moves */
       var moves = this.trim(ms).split(new RegExp(/\s+/));
 
@@ -1379,8 +1400,7 @@ var Chess = (function () {
         if (this.hasKeys(this.header) && typeof this.header.Result === 'undefined') {
           this.setHeader(['Result', move]);
         }
-      }
-      else {
+      } else {
         move = this.getMoveObj(move);
         if (move == null) {
           return false;
@@ -1390,7 +1410,6 @@ var Chess = (function () {
       }
       return true;
     },
-
 
     clone: function(obj) {
       var dupe = (obj instanceof Array) ? [] : {};
@@ -1433,10 +1452,8 @@ var Chess = (function () {
     trim: function(str) {
       return str.replace(/^\s+|\s+$/g, '');
     }
-
   };
 
-  
   /***************************************************************************
    * PUBLIC API
    **************************************************************************/
@@ -1453,17 +1470,16 @@ var Chess = (function () {
     ROOK: ROOK,
     QUEEN: QUEEN,
     KING: KING,
-    SQUARES: [ 'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
-               'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
-               'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
-               'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
-               'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
-               'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
-               'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
-               'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1' ],
+    SQUARES: ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
+              'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
+              'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
+              'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
+              'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
+              'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
+              'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
+              'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'],
 
     FLAGS: FLAGS,
-
 
     load: function(fen) {
       this.chess.load(fen);
@@ -1517,7 +1533,7 @@ var Chess = (function () {
     },
 
     fen: function() {
-        return this.chess.generateFen();
+      return this.chess.generateFen();
     },
 
     pgn: function(options) {
@@ -1548,7 +1564,7 @@ var Chess = (function () {
     },
 
     move: function(move) {
-      return this.chess.move(move);    
+      return this.chess.move(move);
     },
 
     undo: function() {
@@ -1578,8 +1594,8 @@ var Chess = (function () {
 
     squareColor: function(square) {
       if (square in this.chess.SQUARES) {
-        var sq_0x88 = this.chess.SQUARES[square];
-        return ((this.chess.rank(sq_0x88) + this.chess.file(sq_0x88)) % 2 === 0) ? 'light' : 'dark';
+        var sq0x88 = this.chess.SQUARES[square];
+        return ((this.chess.rank(sq0x88) + this.chess.file(sq0x88)) % 2 === 0) ? 'light' : 'dark';
       }
 
       return null;
@@ -1615,4 +1631,6 @@ var Chess = (function () {
 
 /* export Chess object if using node or any other CommonJS compatible
  * environment */
-if (typeof module !== 'undefined') module.exports = Chess;
+if (typeof module !== 'undefined') {
+  module.exports = Chess;
+}

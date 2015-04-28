@@ -13,7 +13,7 @@
     "Linmiao Xu (https://github.com/linrock)"
   ],
   "keywords": ["chess"],
-  "main": "chess.js",
+  "main": "dist/chess.min.js",
   "ignore": [
     "/.*",
     "tests",
