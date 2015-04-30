@@ -1,5 +1,5 @@
 {
-  "name": "chess.js",
+  "name": "chessjs",
   "version": "0.1.0",
   "description": "A Javascript chess library for chess move generation/validation, piece placement/movement, and check/checkmate/draw detection",
   "author": "Jeff Hlywa <jhlywa@gmail.com> (https://github.com/jhlywa)",
@@ -10,7 +10,8 @@
     "jdponomarev (https://github.com/jdponomarev)",
     "Raminder Singh (https://github.com/imor)",
     "Stiff (https://github.com/stiff)",
-    "Linmiao Xu (https://github.com/linrock)"
+    "Linmiao Xu (https://github.com/linrock)",
+    "Juan Gacía (https://github.com/jnuserful)"
   ],
   "keywords": ["chess"],
   "main": "dist/chess.min.js",
@@ -21,6 +22,6 @@
   ],
   "repository" : {
     "type" : "git",
-    "url" : "http://github.com/jhlywa/chess.js.git"
+    "url" : "http://github.com/jnuserful/chessjs.git"
   }
 }

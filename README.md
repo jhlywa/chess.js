@@ -1,10 +1,10 @@
-# chess.js
+# chessJS
 
-chess.js is a Javascript chess library that is used for chess move
+chessJS is a Javascript chess library that is used for chess move
 generation/validation, piece placement/movement, and check/checkmate/stalemate
 detection - basically everything but the AI.
 
-chess.js has been extensively tested in node.js and most modern browsers.
+chessJS has been extensively tested in node.js and most modern browsers.
 
 ## Example Code
 The code below plays a complete game of chess ... randomly.
@@ -27,7 +27,7 @@ while (!chess.gameOver()) {
 Need a user interface?  Try Chris Oakman's excellent
 [chessboard.js](http://chessboardjs.com) library.  See 
 [chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for
-an example integration of chess.js with chessboard.js.
+an example integration of chessJS with chessboard.js.
 
 ## API
 
@@ -494,6 +494,7 @@ Special thanks to the following developers for their patches and contributions
 - [Seb Vincent](https://github.com/sebv)
 - [Linmiao Xu](https://github.com/linrock)
 - [Jonathan Zacsh](https://github.com/jzacsh)
+- [Juan García](https://github.com/jnuserful)
 
 Musical support provided by:
 
@@ -513,7 +514,6 @@ Musical support provided by:
 - Add AI (basic alpha-beta search w/ primitive position evaluation).  The AI
   should probably be internal to the underlying Chess() object to take full
   advantage of 0x88 move generation.
-- Add jQuery chessboard widget.  (see widget branch for prototype)
 - Investigate the use of piece lists (this may shave a few cycles off
   generateMoves() and attacked())
 
