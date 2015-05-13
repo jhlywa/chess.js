@@ -10,22 +10,32 @@ chess.js has been extensively tested in node.js and most modern browsers.
 The code below plays a complete game of chess ... randomly.
 
 ```js
-var util = require('util'),
-    ch =  require('./chess');
-
-var chess = new ch.Chess();
+var Chess = require('./chess').Chess;
+var chess = new Chess();
 
 while (!chess.game_over()) {
-  util.puts('position: ' + chess.fen());
   var moves = chess.moves();
   var move = moves[Math.floor(Math.random() * moves.length)];
   chess.move(move);
-  util.puts('move: ' + move);
 }
+console.log(chess.pgn());
 ```
 
+## Sites Using chess.js
+
+- [The Internet Chess Club (ICC)](http://www.chessclub.com/)
+- [lichess](http://lichess.org/tv)
+- [Redbull - Battle for the Queen](http://battleforthequeen.redbull.com/)
+- [3D Hartwig Chess](http://creativejs.com/2012/12/3d-hartwig-chess/)
+- [Scene VR](http://client.scenevr.com/?connect=chess.scenevr.hosting/chess.xml)
+- [Multiplayer Chess](http://chessapp.com/)
+- [Reti Chess](http://retichess.nodejitsu.com/)
+- [Chess Fork](http://www.chessfork.com/)
+- [Lozza](http://op12no2.me/posts/1641)
+- [angular-chess](http://theborakompanioni.github.io/angular-chess)
+
 Need a user interface?  Try Chris Oakman's excellent
-[chessboard.js](http://chessboardjs.com) library.  See 
+[chessboard.js](http://chessboardjs.com) library.  See
 [chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for
 an example integration of chess.js with chessboard.js.
 
@@ -475,45 +485,20 @@ chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
 
-
-## CONTRIBUTORS
-
-Special thanks to the following developers for their patches and contributions
-(alphabetically):
-
-- [Steve Bragg](https://github.com/2sb18)
-- [Ngoc Dao](https://github.com/ngocdaothanh)
-- [Matt Flaschen](https://github.com/mattflaschen)
-- [E. Azer Koçulu](https://github.com/azer)
-- [Falco Nogatz](https://github.com/fnogatz)
-- [jdponomarev](https://github.com/jdponomarev)
-- [Tom Offermann](https://github.com/toffer)
-- [David Moises Paz Reyes](https://github.com/davidmpaz)
-- [Raminder Singh](https://github.com/imor)
-- [Stiff](https://github.com/stiff)
-- [Seb Vincent](https://github.com/sebv)
-- [Linmiao Xu](https://github.com/linrock)
-- [Jonathan Zacsh](https://github.com/jzacsh)
+## MUSIC
 
 Musical support provided by:
 
-- [The Grateful Dead](http://www.youtube.com/watch?v=YLzUme1gN8c)
+- [The Grateful Dead](https://www.youtube.com/watch?feature=player_detailpage&v=ANF6qanEB7s#t=2999)
 - [Umphrey's McGee](http://www.youtube.com/watch?v=jh-1fFWkSdw)
-
-
 
 ## BUGS
 
 - The en passant square and castling flags aren't adjusted when using the put/remove functions (workaround: use .load() instead)
 
-
-
 ## TODO
 
-- Add AI (basic alpha-beta search w/ primitive position evaluation).  The AI
-  should probably be internal to the underlying Chess() object to take full
-  advantage of 0x88 move generation.
-- Add jQuery chessboard widget.  (see widget branch for prototype)
 - Investigate the use of piece lists (this may shave a few cycles off
-  generate_moves() and attacked())
-
+  generate_moves() and attacked()).
+- Refactor API to use camelCase - yuck.
+- Add more robust FEN validation.

@@ -3,18 +3,8 @@
   "version": "0.1.0",
   "description": "A Javascript chess library for chess move generation/validation, piece placement/movement, and check/checkmate/draw detection",
   "author": "Jeff Hlywa <jhlywa@gmail.com> (https://github.com/jhlywa)",
-  "contributors": [
-    "Steve Bragg (https://github.com/2sb18)",
-    "E. Azer Koçulu (https://github.com/azer)",
-    "Falco Nogatz (https://github.com/fnogatz)",
-    "jdponomarev (https://github.com/jdponomarev)",
-    "Raminder Singh (https://github.com/imor)",
-    "Stiff (https://github.com/stiff)",
-    "Linmiao Xu (https://github.com/linrock)"
-  ],
   "keywords": ["chess"],
   "main": "chess.js",
-
   "repository" : {
     "type" : "git",
     "url" : "http://github.com/jhlywa/chess.js.git"
