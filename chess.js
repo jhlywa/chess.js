@@ -1403,6 +1403,14 @@ var Chess = function(fen) {
         set_header([key, headers[key]]);
       }
 
+      /* load the starting position indicated by [Setup '1'] and
+      * [FEN position] */
+      if (headers['SetUp'] === '1') {
+          if (!(('FEN' in headers) && load(headers['FEN']))) {
+            return false;
+          }
+      }
+
       /* delete header to get the moves */
       var ms = pgn.replace(header_string, '').replace(new RegExp(mask(newline_char), 'g'), ' ');
 

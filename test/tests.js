@@ -943,4 +943,13 @@ describe('Regression Tests', function() {
     chess.remove('a1');
     assert(chess.moves().join(' ') == 'Kd2 Ke2 Kxf2 Kf1 Kd1');
   });
+
+  it('Github Issue #85 - SetUp and FEN should be accepted in load_pgn',
+     function() {
+       var chess = new Chess();
+       var pgn = ['[SetUp "1"]', '[FEN "7k/5K2/4R3/8/8/8/8/8 w KQkq - 0 1"]', "", '1. Rh6#'];
+       var result = chess.load_pgn(pgn.join("\n"));
+       assert(result);
+       assert(chess.fen() === '7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1');
+     });
 });
