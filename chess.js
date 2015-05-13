@@ -28,9 +28,10 @@
 
 /* minified license below  */
 
-/*! Copyright (c) 2015, Jeff Hlywa (jhlywa@gmail.com)
- *  Released under the BSD license
- *  https://github.com/jhlywa/chess.js/blob/master/LICENSE
+/* @license
+ * Copyright (c) 2015, Jeff Hlywa (jhlywa@gmail.com)
+ * Released under the BSD license
+ * https://github.com/jhlywa/chess.js/blob/master/LICENSE
  */
 
 var Chess = function(fen) {
