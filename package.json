@@ -10,7 +10,12 @@
     "url" : "http://github.com/jhlywa/chess.js.git"
   },
   "devDependencies": {
-    "mocha": "*",
-    "chai": "*"
+    "mocha": "2.2.4",
+    "chai": "2.3.0",
+    "uglify-js": "2.4.21"
+  },
+  "scripts": {
+      "test":   "./node_modules/.bin/mocha",
+      "minify": "./node_modules/.bin/uglifyjs chess.js -c -m --comments 'license' > chess.min.js"
   }
 }
