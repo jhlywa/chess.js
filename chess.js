@@ -194,7 +194,6 @@ var Chess = function(fen) {
     var tokens = fen.split(/\s+/);
     var position = tokens[0];
     var square = 0;
-    var valid = SYMBOLS + '12345678/';
 
     if (!validate_fen(fen).valid) {
       return false;
