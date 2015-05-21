@@ -1,3 +1,181 @@
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Chess = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/***************************************************************************
+ * PUBLIC API
+ **************************************************************************/
+'use strict';
+
+function api(chessObj) {
+  this.chess = chessObj;
+}
+
+api.prototype = {
+  WHITE: WHITE,
+  BLACK: BLACK,
+  PAWN: PAWN,
+  KNIGHT: KNIGHT,
+  BISHOP: BISHOP,
+  ROOK: ROOK,
+  QUEEN: QUEEN,
+  KING: KING,
+  SQUARES: ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
+            'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
+            'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
+            'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
+            'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
+            'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
+            'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
+            'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'],
+
+  FLAGS: FLAGS,
+
+  load: function(fen) {
+    this.chess.load(fen);
+  },
+
+  reset: function() {
+    return this.chess.reset();
+  },
+
+  moves: function(options) {
+    return this.chess.moves(options);
+  },
+
+  inCheck: function() {
+    return this.chess.inCheck();
+  },
+
+  inCheckmate: function() {
+    return this.chess.inCheckmate();
+  },
+
+  inStalemate: function() {
+    return this.chess.inStalemate();
+  },
+
+  inDraw: function() {
+    return this.chess.halfMoves >= 100 ||
+      this.chess.inStalemate() ||
+      this.chess.insufficientMaterial() ||
+      this.chess.inThreefoldRepetition();
+  },
+
+  insufficientMaterial: function() {
+    return this.chess.insufficientMaterial();
+  },
+
+  inThreefoldRepetition: function() {
+    return this.chess.inThreefoldRepetition();
+  },
+
+  gameOver: function() {
+    return this.chess.halfMoves >= 100 ||
+      this.chess.inCheckmate() ||
+      this.chess.inStalemate() ||
+             this.chess.insufficientMaterial() ||
+      this.chess.inThreefoldRepetition();
+  },
+
+  validateFen: function(fen) {
+    return this.chess.validateFen(fen);
+  },
+
+  fen: function() {
+    return this.chess.generateFen();
+  },
+
+  pgn: function(options) {
+    return this.chess.pgn(options);
+  },
+
+  /* convert a move from Standard Algebraic Notation (SAN) to 0x88
+   * coordinates
+   */
+  moveFromSan: function(move) {
+    return this.chess.moveFromSan(move);
+  },
+
+  loadPgn: function(pgn, options) {
+    return this.chess.loadPgn(pgn, options);
+  },
+
+  header: function(args) {
+    return this.chess.setHeader(args);
+  },
+
+  ascii: function() {
+    return this.chess.ascii();
+  },
+
+  turn: function() {
+    return this.chess.turn;
+  },
+
+  move: function(move) {
+    return this.chess.move(move);
+  },
+
+  undo: function() {
+    var move = this.chess.undoMove();
+    return (move) ? this.chess.makePretty(move) : null;
+  },
+
+  clear: function() {
+    return this.chess.clear();
+  },
+
+  put: function(piece, square) {
+    return this.chess.put(piece, square);
+  },
+
+  get: function(square) {
+    return this.chess.get(square);
+  },
+
+  remove: function(square) {
+    return this.chess.remove(square);
+  },
+
+  perft: function(depth) {
+    return this.chess.perft(depth);
+  },
+
+  squareColor: function(square) {
+    if (square in this.chess.SQUARES) {
+      var sq0x88 = this.chess.SQUARES[square];
+      return ((this.chess.rank(sq0x88) + this.chess.file(sq0x88)) % 2 === 0) ? 'light' : 'dark';
+    }
+
+    return null;
+  },
+
+  history: function(options) {
+    var reversedHistory = [];
+    var moveHistory = [];
+    var verbose = (typeof options !== 'undefined' && 'verbose' in options &&
+                   options.verbose);
+
+    while (this.chess.history.length > 0) {
+      reversedHistory.push(this.chess.undoMove());
+    }
+
+    while (reversedHistory.length > 0) {
+      var move = reversedHistory.pop();
+      if (verbose) {
+        moveHistory.push(this.chess.makePretty(move));
+      } else {
+        moveHistory.push(this.chess.moveToSan(move));
+      }
+      this.chess.makeMove(move);
+    }
+
+    return moveHistory;
+  }
+};
+
+module.exports = api;
+
+
+},{}],2:[function(require,module,exports){
 'use strict';
 
 function Chess(fen) {
@@ -1289,3 +1467,180 @@ Chess.prototype = {
 };
 
 module.exports = Chess;
+
+},{}],3:[function(require,module,exports){
+(function (global){
+'use strict';
+
+global.BLACK = 'b';
+global.WHITE = 'w';
+
+global.EMPTY = -1;
+
+global.PAWN   = 'p';
+global.KNIGHT = 'n';
+global.BISHOP = 'b';
+global.ROOK   = 'r';
+global.QUEEN  = 'q';
+global.KING   = 'k';
+
+global.SYMBOLS  = 'pnbrqkPNBRQK';
+
+global.DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+global.POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*'];
+
+global.PAWN_OFFSETS = {
+  b: [16, 32, 17, 15],
+  w: [-16, -32, -17, -15]
+};
+
+global.PIECE_OFFSETS = {
+  n: [-18, -33, -31, -14,  18, 33, 31,  14],
+  b: [-17, -15,  17,  15],
+  r: [-16,   1,  16,  -1],
+  q: [-17, -16, -15,   1,  17, 16, 15,  -1],
+  k: [-17, -16, -15,   1,  17, 16, 15,  -1]
+};
+
+global.ATTACKS = [
+  20,  0,  0,  0,  0,  0,  0, 24,  0,  0,  0,  0,  0,  0, 20, 0,
+   0, 20,  0,  0,  0,  0,  0, 24,  0,  0,  0,  0,  0, 20,  0, 0,
+   0,  0, 20,  0,  0,  0,  0, 24,  0,  0,  0,  0, 20,  0,  0, 0,
+   0,  0,  0, 20,  0,  0,  0, 24,  0,  0,  0, 20,  0,  0,  0, 0,
+   0,  0,  0,  0, 20,  0,  0, 24,  0,  0, 20,  0,  0,  0,  0, 0,
+   0,  0,  0,  0,  0, 20,  2, 24,  2, 20,  0,  0,  0,  0,  0, 0,
+   0,  0,  0,  0,  0,  2, 53, 56, 53,  2,  0,  0,  0,  0,  0, 0,
+  24, 24, 24, 24, 24, 24, 56,  0, 56, 24, 24, 24, 24, 24, 24, 0,
+   0,  0,  0,  0,  0,  2, 53, 56, 53,  2,  0,  0,  0,  0,  0, 0,
+   0,  0,  0,  0,  0, 20,  2, 24,  2, 20,  0,  0,  0,  0,  0, 0,
+   0,  0,  0,  0, 20,  0,  0, 24,  0,  0, 20,  0,  0,  0,  0, 0,
+   0,  0,  0, 20,  0,  0,  0, 24,  0,  0,  0, 20,  0,  0,  0, 0,
+   0,  0, 20,  0,  0,  0,  0, 24,  0,  0,  0,  0, 20,  0,  0, 0,
+   0, 20,  0,  0,  0,  0,  0, 24,  0,  0,  0,  0,  0, 20,  0, 0,
+  20,  0,  0,  0,  0,  0,  0, 24,  0,  0,  0,  0,  0,  0, 20
+];
+
+global.RAYS = [
+   17,   0,   0,   0,   0,   0,   0,  16,   0,   0,   0,   0,   0,   0,  15, 0,
+    0,  17,   0,   0,   0,   0,   0,  16,   0,   0,   0,   0,   0,  15,   0, 0,
+    0,   0,  17,   0,   0,   0,   0,  16,   0,   0,   0,   0,  15,   0,   0, 0,
+    0,   0,   0,  17,   0,   0,   0,  16,   0,   0,   0,  15,   0,   0,   0, 0,
+    0,   0,   0,   0,  17,   0,   0,  16,   0,   0,  15,   0,   0,   0,   0, 0,
+    0,   0,   0,   0,   0,  17,   0,  16,   0,  15,   0,   0,   0,   0,   0, 0,
+    0,   0,   0,   0,   0,   0,  17,  16,  15,   0,   0,   0,   0,   0,   0, 0,
+    1,   1,   1,   1,   1,   1,   1,   0,  -1,  -1,  -1,  -1,  -1,  -1,  -1, 0,
+    0,   0,   0,   0,   0,   0, -15, -16, -17,   0,   0,   0,   0,   0,   0, 0,
+    0,   0,   0,   0,   0, -15,   0, -16,   0, -17,   0,   0,   0,   0,   0, 0,
+    0,   0,   0,   0, -15,   0,   0, -16,   0,   0, -17,   0,   0,   0,   0, 0,
+    0,   0,   0, -15,   0,   0,   0, -16,   0,   0,   0, -17,   0,   0,   0, 0,
+    0,   0, -15,   0,   0,   0,   0, -16,   0,   0,   0,   0, -17,   0,   0, 0,
+    0, -15,   0,   0,   0,   0,   0, -16,   0,   0,   0,   0,   0, -17,   0, 0,
+  -15,   0,   0,   0,   0,   0,   0, -16,   0,   0,   0,   0,   0,   0, -17
+];
+
+global.SHIFTS = {p: 0, n: 1, b: 2, r: 3, q: 4, k: 5};
+
+global.FLAGS = {
+  NORMAL: 'n',
+  CAPTURE: 'c',
+  BIG_PAWN: 'b',
+  EP_CAPTURE: 'e',
+  PROMOTION: 'p',
+  KSIDE_CASTLE: 'k',
+  QSIDE_CASTLE: 'q'
+};
+
+global.BITS = {
+  NORMAL: 1,
+  CAPTURE: 2,
+  BIG_PAWN: 4,
+  EP_CAPTURE: 8,
+  PROMOTION: 16,
+  KSIDE_CASTLE: 32,
+  QSIDE_CASTLE: 64
+};
+
+global.RANK_1 = 7;
+global.RANK_2 = 6;
+global.RANK_3 = 5;
+global.RANK_4 = 4;
+global.RANK_5 = 3;
+global.RANK_6 = 2;
+global.RANK_7 = 1;
+global.RANK_8 = 0;
+
+global.SQUARES = {
+  a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
+  a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
+  a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,
+  a5:  48, b5:  49, c5:  50, d5:  51, e5:  52, f5:  53, g5:  54, h5:  55,
+  a4:  64, b4:  65, c4:  66, d4:  67, e4:  68, f4:  69, g4:  70, h4:  71,
+  a3:  80, b3:  81, c3:  82, d3:  83, e3:  84, f3:  85, g3:  86, h3:  87,
+  a2:  96, b2:  97, c2:  98, d2:  99, e2: 100, f2: 101, g2: 102, h2: 103,
+  a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
+};
+
+global.ROOKS = {
+  w: [{square: SQUARES.a1, flag: BITS.QSIDE_CASTLE},
+      {square: SQUARES.h1, flag: BITS.KSIDE_CASTLE}],
+  b: [{square: SQUARES.a8, flag: BITS.QSIDE_CASTLE},
+      {square: SQUARES.h8, flag: BITS.KSIDE_CASTLE}]
+};
+
+global.ERRORS = {
+  0:  'No errors.',
+  1:  'FEN string must contain six space-delimited fields.',
+  2:  '6th field (move number) must be a positive integer.',
+  3:  '5th field (half move counter) must be a non-negative integer.',
+  4:  '4th field (en-passant square) is invalid.',
+  5:  '3rd field (castling availability) is invalid.',
+  6:  '2nd field (side to move) is invalid.',
+  7:  '1st field (piece positions) does not contain 8 \'/\'-delimited rows.',
+  8:  '1st field (piece positions) is invalid [consecutive numbers].',
+  9:  '1st field (piece positions) is invalid [invalid piece].',
+  10: '1st field (piece positions) is invalid [row too large].',
+};
+
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],4:[function(require,module,exports){
+'use strict';
+/*
+ * Copyright (c) 2015, Jeff Hlywa (jhlywa@gmail.com)
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ *----------------------------------------------------------------------------*/
+
+require('./globals');
+
+var Chess = require('./chess');
+var api   = require('./api');
+
+module.exports = function(fen) {
+  return new api(new Chess(fen));
+};
+
+},{"./api":1,"./chess":2,"./globals":3}]},{},[4])(4)
+});

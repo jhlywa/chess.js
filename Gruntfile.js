@@ -21,10 +21,24 @@ module.exports = function( grunt ) {
         src: [ 'bower.json' ]
       }
     },
+
+    browserify: {
+      dist: {
+        files: {
+          'dist/chess.js': ['src/main.js'],
+        },
+        options: {
+          browserifyOptions: {
+            standalone: 'Chess'
+          } 
+        }
+      }
+    },
+
     jshint: {
 
       files: [
-        'src/**/*.js', 'Gruntfile.js', 'test/**/*.js'
+        'src/main.js', 'Gruntfile.js', 'test/**/*.js'
       ],
       options: {
         jshintrc: true
@@ -47,7 +61,7 @@ module.exports = function( grunt ) {
     uglify: {
       all: {
         files: {
-          'dist/chess.min.js': [ 'src/chess.js' ]
+          'dist/chess.min.js': [ 'dist/chess.js' ]
         },
         options: {
           preserveComments: false,
@@ -85,7 +99,7 @@ module.exports = function( grunt ) {
 
 
   // Short list as a high frequency watch task
-  grunt.registerTask( 'dev', [ 'lint', 'uglify', 'mochaTest' ] );
+  grunt.registerTask( 'dev', ['lint', 'mochaTest', 'browserify'] );
 
-  grunt.registerTask( 'default', [ 'dev' ] );
+  grunt.registerTask( 'default', ['dev', 'uglify'] );
 };

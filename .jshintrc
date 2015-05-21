@@ -10,6 +10,7 @@
   "globals": {
   },
   "immed": true,
+  "validthis": true,
   "indent": 2,
   "latedef": false,
   "newcap": true,
