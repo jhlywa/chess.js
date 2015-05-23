@@ -2,19 +2,10 @@ if (typeof require != "undefined") {
   var chai = require('chai');
   var Chess = require('../src/main');
 }
+
 var assert = chai.assert;
 
-if (!Array.prototype.forEach) {
-  Array.prototype.forEach = function(fn, scope) {
-    for(var i = 0, len = this.length; i < len; ++i) {
-      fn.call(scope, this[i], i, this);
-    }
-  }
-}
-
-
-suite("Perft", function() {
-
+describe("Perft", function() {
   var perfts = [
     {fen: 'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1',
       depth: 3, nodes: 97862},
@@ -30,17 +21,16 @@ suite("Perft", function() {
     var chess = new Chess();
     chess.load(perft.fen);
 
-    test(perft.fen, function() {
+    it(perft.fen, function() {
       var nodes = chess.perft(perft.depth);
       assert(nodes == perft.nodes);
     });
 
   });
-
 });
 
 
-suite("Single Square Move Generation", function() {
+describe("Single Square Move Generation", function() {
 
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -73,7 +63,7 @@ suite("Single Square Move Generation", function() {
     var chess = new Chess();
     chess.load(position.fen);
 
-    test(position.fen + ' ' + position.square, function() {
+    it(position.fen + ' ' + position.square, function() {
 
       var moves = chess.moves({square: position.square, verbose: position.verbose});
       var passed = position.moves.length == moves.length;
@@ -98,7 +88,7 @@ suite("Single Square Move Generation", function() {
 
 
 
-suite("Checkmate", function() {
+describe("Checkmate", function() {
 
   var chess = new Chess();
   var checkmates = [
@@ -111,7 +101,7 @@ suite("Checkmate", function() {
   checkmates.forEach(function(checkmate) {
     chess.load(checkmate);
 
-    test(checkmate, function() {
+    it(checkmate, function() {
       assert(chess.inCheckmate());
     });
   });
@@ -120,7 +110,7 @@ suite("Checkmate", function() {
 
 
 
-suite("Stalemate", function() {
+describe("Stalemate", function() {
 
   var stalemates = [
     '1R6/8/8/8/8/8/7R/k6K b - - 0 1',
@@ -131,7 +121,7 @@ suite("Stalemate", function() {
     var chess = new Chess();
     chess.load(stalemate);
 
-    test(stalemate, function() {
+    it(stalemate, function() {
       assert(chess.inStalemate())
     });
 
@@ -140,7 +130,7 @@ suite("Stalemate", function() {
 });
 
 
-suite("Insufficient Material", function() {
+describe("Insufficient Material", function() {
 
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', draw: false},
@@ -158,7 +148,7 @@ suite("Insufficient Material", function() {
     var chess = new Chess();
     chess.load(position.fen);
 
-    test(position.fen, function() {
+    it(position.fen, function() {
       if (position.draw) {
         assert(chess.insufficientMaterial() && chess.inDraw());
       } else {
@@ -171,7 +161,7 @@ suite("Insufficient Material", function() {
 });
 
 
-suite("Threefold Repetition", function() {
+describe("Threefold Repetition", function() {
 
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -186,7 +176,7 @@ suite("Threefold Repetition", function() {
     var chess = new Chess();
     chess.load(position.fen);
 
-    test(position.fen, function() {
+    it(position.fen, function() {
 
       var passed = true;
       for (var j = 0; j < position.moves.length; j++) {
@@ -206,7 +196,7 @@ suite("Threefold Repetition", function() {
 });
 
 
-suite("Algebraic Notation", function() {
+describe("Algebraic Notation", function() {
 
   var positions = [
     {fen: '7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1',
@@ -251,7 +241,7 @@ suite("Algebraic Notation", function() {
     var passed = true;
     chess.load(position.fen);
 
-    test(position.fen, function() {
+    it(position.fen, function() {
       var moves = chess.moves();
       if (moves.length != position.moves.length) {
         passed = false;
@@ -271,7 +261,7 @@ suite("Algebraic Notation", function() {
 });
 
 
-suite("Get/Put/Remove", function() {
+describe("Get/Put/Remove", function() {
 
   var chess = new Chess();
   var passed = true;
@@ -320,7 +310,7 @@ suite("Get/Put/Remove", function() {
     passed = true;
     chess.clear();
 
-    test("position should pass - " + position.shouldPass, function() {
+    it("position should pass - " + position.shouldPass, function() {
 
       /* places the pieces */
       for (var square in position.pieces) {
@@ -383,7 +373,7 @@ suite("Get/Put/Remove", function() {
 });
 
 
-suite("FEN", function() {
+describe("FEN", function() {
 
   var positions = [
     {fen: '8/8/8/8/8/8/8/8 w - - 0 1', shouldPass: true},
@@ -404,7 +394,7 @@ suite("FEN", function() {
   positions.forEach(function(position) {
     var chess = new Chess();
 
-    test(position.fen + ' (' + position.shouldPass + ')', function() {
+    it(position.fen + ' (' + position.shouldPass + ')', function() {
       chess.load(position.fen);
       assert(chess.fen() == position.fen == position.shouldPass);
     });
@@ -414,7 +404,7 @@ suite("FEN", function() {
 });
 
 
-suite("PGN", function() {
+describe("PGN", function() {
 
   var passed = true;
   var errorMessage;
@@ -460,7 +450,7 @@ suite("PGN", function() {
 
   positions.forEach(function(position, i) {
 
-    test(i, function() {
+    it(i, function() {
       var chess = ("startingPosition" in position) ? new Chess(position.startingPosition) : new Chess();
       passed = true;
       errorMessage = "";
@@ -471,7 +461,7 @@ suite("PGN", function() {
         }
       }
 
-      chess.header(position.header);
+      chess.header.apply(null, position.header);
       var pgn = chess.pgn({maxWidth:position.maxWidth, newlineChar:position.newlineChar});
       var fen = chess.fen();
       passed = pgn === position.pgn && fen === position.fen;
@@ -483,7 +473,7 @@ suite("PGN", function() {
 });
 
 
-suite("Load PGN", function() {
+describe("Load PGN", function() {
 
   var chess = new Chess();
   var tests = [
@@ -554,7 +544,7 @@ suite("Load PGN", function() {
 
   tests.forEach(function(t, i) {
     newlineChars.forEach(function(newline, j) {
-      test(i + String.fromCharCode(97 + j), function() {
+      it(i + String.fromCharCode(97 + j), function() {
 
         var result = chess.loadPgn(t.pgn.join(newline), { newlineChar: newline });
         var shouldPass = t.expect;
@@ -582,8 +572,8 @@ suite("Load PGN", function() {
 
   });
 
-// special case dirty file containing a mix of \n and \r\n
-  test('dirty pgn', function() {
+  // special case dirty file containing a mix of \n and \r\n
+  it('dirty pgn', function() {
     var pgn =
          '[Event "Reykjavik WCh"]\n' +
          '[Site "Reykjavik WCh"]\n' +
@@ -617,23 +607,7 @@ suite("Load PGN", function() {
 });
 
 
-suite('Pawn promotion without equal sign', function() {
-  test('loadPgn', function() {
-    var chess = new Chess();
-    assert(chess.loadPgn('1. d4 c5 2. d5 b6 3. Nc3 e6 4. dxe6 g6 5. exf7+ Ke7 6. fxg8Q'));
-    assert.deepEqual(chess.history(), ['d4', 'c5', 'd5', 'b6', 'Nc3', 'e6', 'dxe6', 'g6', 'exf7+', 'Ke7', 'fxg8=Q']);
-  });
-
-  test('move', function() {
-    var chess = new Chess();
-    assert(chess.loadPgn('1. d4 c5 2. d5 b6 3. Nc3 e6 4. dxe6 g6 5. exf7+ Ke7'));
-    assert.isNotNull(chess.move('fxg8Q'));
-    assert.deepEqual(chess.history(), ['d4', 'c5', 'd5', 'b6', 'Nc3', 'e6', 'dxe6', 'g6', 'exf7+', 'Ke7', 'fxg8=Q']);
-  });
-});
-
-
-suite("Make Move", function() {
+describe("Make Move", function() {
 
   var positions = [
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -662,7 +636,7 @@ suite("Make Move", function() {
   positions.forEach(function(position) {
     var chess = new Chess();
     chess.load(position.fen);
-    test(position.fen + ' (' + position.move + ' ' + position.legal + ')', function() {
+    it(position.fen + ' (' + position.move + ' ' + position.legal + ')', function() {
       var result = chess.move(position.move);
       if (position.legal) {
         assert(result
@@ -678,7 +652,7 @@ suite("Make Move", function() {
 });
 
 
-suite("Validate FEN", function() {
+describe("Validate FEN", function() {
 
   var chess = new Chess();
   var positions = [
@@ -808,7 +782,7 @@ suite("Validate FEN", function() {
 
   positions.forEach(function(position) {
 
-    test(position.fen + ' (valid: ' + (position.errorNumber  == 0) + ')', function() {
+    it(position.fen + ' (valid: ' + (position.errorNumber  == 0) + ')', function() {
       var result = chess.validateFen(position.fen);
       assert(result.errorNumber == position.errorNumber, result.errorNumber);
     });
@@ -816,7 +790,7 @@ suite("Validate FEN", function() {
   });
 });
 
-suite("History", function() {
+describe("History", function() {
 
   var chess = new Chess();
   var tests = [
@@ -920,7 +894,7 @@ suite("History", function() {
   tests.forEach(function(t, i) {
     var passed = true;
 
-    test(i, function() {
+    it(i, function() {
       chess.reset();
 
       for (var j = 0; j < t.moves.length; j++) {
@@ -955,19 +929,27 @@ suite("History", function() {
   });
 });
 
-suite('Regression Tests', function() {
-  // Github Issue #32 reported by AlgoTrader
-  test('Issue #32 - castling flag reappearing', function() {
+describe('Regression Tests', function() {
+  it('Github Issue #32 - castling flag reappearing', function() {
     var chess = new Chess('b3k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qNP/6QK b k - 2 28');
     chess.move({from:'a8', to:'g2'});
     assert(chess.fen() == '4k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qbP/6QK w k - 0 29');
   });
 
-  test('Issue #58 - placing more than one king', function() {
+  it('Github Issue #58 - placing more than one king', function() {
     var chess = new Chess('N3k3/8/8/8/8/8/5b2/4K3 w - - 0 1');
     assert(chess.put({type: 'k', color: 'w'}, 'a1') == false);
     chess.put({type: 'q', color: 'w'}, 'a1');
     chess.remove('a1');
     assert(chess.moves().join(' ') == 'Kd2 Ke2 Kxf2 Kf1 Kd1');
   });
+  
+  it('Github Issue #85 - SetUp and FEN should be accepted in load_pgn',
+    function() {
+      var chess = new Chess();
+      var pgn = ['[SetUp "1"]', '[FEN "7k/5K2/4R3/8/8/8/8/8 w KQkq - 0 1"]', "", '1. Rh6#'];
+      var result = chess.load_pgn(pgn.join("\n"));
+      assert(result);
+      assert(chess.fen() === '7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1');
+    });
 });

@@ -45,7 +45,6 @@ Chess.prototype = {
     var tokens = fen.split(/\s+/);
     var position = tokens[0];
     var square = 0;
-    var valid = SYMBOLS + '12345678/';
 
     if (!this.validateFen(fen).valid) {
       return false;
@@ -1167,8 +1166,8 @@ Chess.prototype = {
     var value = '';
 
     for (var i = 0; i < headers.length; i++) {
-      key = headers[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1');
-      value = headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\]$/, '$1');
+      key = this.headers[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1');
+      value = this.headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\]$/, '$1');
       if (this.trim(key).length > 0) {
         headerObj[key] = value;
       }
@@ -1199,6 +1198,14 @@ Chess.prototype = {
       this.setHeader([key, headers[key]]);
     }
 
+    /* load the starting position indicated by [Setup '1'] and
+     * [FEN position] */
+    if (headers['SetUp'] === '1') {
+      if (!(('FEN' in headers) && load(headers['FEN']))) {
+        return false;
+      }
+    }
+    
     /* delete header to get the moves */
     var ms = pgn.replace(headerString, '').replace(new RegExp(this.mask(newlineChar), 'g'), ' ');
 
@@ -1207,6 +1214,9 @@ Chess.prototype = {
 
     /* delete move numbers */
     ms = ms.replace(/\d+\./g, '');
+	
+    /* delete ... indicating black to move */
+    ms = ms.replace(/\.\.\./g, '');
 
     /* trim and get array of moves */
     var moves = this.trim(ms).split(new RegExp(/\s+/));

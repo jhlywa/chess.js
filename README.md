@@ -1,33 +1,30 @@
 # chessJS
 
-chessJS is a Javascript chess library that is used for chess move
+ChessJs is a Javascript chess library that is used for chess move
 generation/validation, piece placement/movement, and check/checkmate/stalemate
 detection - basically everything but the AI.
 
-chessJS has been extensively tested in node.js and most modern browsers.
+ChessJS has been extensively tested in node.js and most modern browsers.
 
 ## Example Code
 The code below plays a complete game of chess ... randomly.
 
 ```js
-var util = require('util'),
-    Chess =  require('./chess');
-
+var Chess = require('./chess');
 var chess = new Chess();
 
 while (!chess.gameOver()) {
-  util.puts('position: ' + chess.fen());
   var moves = chess.moves();
   var move = moves[Math.floor(Math.random() * moves.length)];
   chess.move(move);
-  util.puts('move: ' + move);
 }
+console.log(chess.pgn());
 ```
 
 Need a user interface?  Try Chris Oakman's excellent
-[chessboard.js](http://chessboardjs.com) library.  See 
+[chessboard.js](http://chessboardjs.com) library. See
 [chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for
-an example integration of chessJS with chessboard.js.
+an example integration of ChessJS with chessboard.js.
 
 ## API
 
@@ -475,45 +472,20 @@ chess.validateFen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
 
-
-## CONTRIBUTORS
-
-Special thanks to the following developers for their patches and contributions
-(alphabetically):
-
-- [Steve Bragg](https://github.com/2sb18)
-- [Ngoc Dao](https://github.com/ngocdaothanh)
-- [Matt Flaschen](https://github.com/mattflaschen)
-- [E. Azer Koçulu](https://github.com/azer)
-- [Falco Nogatz](https://github.com/fnogatz)
-- [jdponomarev](https://github.com/jdponomarev)
-- [Tom Offermann](https://github.com/toffer)
-- [David Moises Paz Reyes](https://github.com/davidmpaz)
-- [Raminder Singh](https://github.com/imor)
-- [Stiff](https://github.com/stiff)
-- [Seb Vincent](https://github.com/sebv)
-- [Linmiao Xu](https://github.com/linrock)
-- [Jonathan Zacsh](https://github.com/jzacsh)
-- [Juan García](https://github.com/jnuserful)
+## MUSIC
 
 Musical support provided by:
 
-- [The Grateful Dead](http://www.youtube.com/watch?v=YLzUme1gN8c)
+- [The Grateful Dead](https://www.youtube.com/watch?feature=playerDetailpage&v=ANF6qanEB7s#t=2999)
 - [Umphrey's McGee](http://www.youtube.com/watch?v=jh-1fFWkSdw)
-
-
 
 ## BUGS
 
 - The en passant square and castling flags aren't adjusted when using the put/remove functions (workaround: use .load() instead)
 
-
-
 ## TODO
 
-- Add AI (basic alpha-beta search w/ primitive position evaluation).  The AI
-  should probably be internal to the underlying Chess() object to take full
-  advantage of 0x88 move generation.
 - Investigate the use of piece lists (this may shave a few cycles off
-  generateMoves() and attacked())
-
+  generateMoves() and attacked()).
+- Refactor API to use camelCase - yuck.
+- Add more robust FEN validation.
