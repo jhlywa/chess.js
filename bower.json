@@ -3,7 +3,6 @@
   "version": "0.9.0",
   "description": "A Javascript chess library for chess move generation/validation, piece placement/movement, and check/checkmate/draw detection",
   "author": "Jeff Hlywa <jhlywa@gmail.com> (https://github.com/jhlywa)",
-  "license": "MIT",
   "contributors": [
     "Steve Bragg (https://github.com/2sb18)",
     "E. Azer Koçulu (https://github.com/azer)",
@@ -14,25 +13,15 @@
     "Linmiao Xu (https://github.com/linrock)",
     "Juan Gacía (https://github.com/jnuserful)"
   ],
-  "keywords": [
-    "chess"
+  "keywords": ["chess"],
+  "main": "dist/chess.min.js",
+  "ignore": [
+    "/.*",
+    "tests",
+    "src"
   ],
-  "main": "src/main.js",
-  "repository": {
-    "type": "git",
-    "url": "http://github.com/juangl/chessjs.git"
-  },
-  "devDependencies": {
-    "chai": "*",
-    "grunt": "^0.4.5",
-    "grunt-browserify": "^3.8.0",
-    "grunt-contrib-jshint": "^0.11.2",
-    "grunt-contrib-uglify": "^0.9.1",
-    "grunt-jscs": "^1.6.0",
-    "grunt-jslint": "^1.1.14",
-    "grunt-jsonlint": "^1.0.4",
-    "grunt-mocha-test": "^0.12.7",
-    "load-grunt-tasks": "^3.1.0"
-  },
-  "dependencies": {}
+  "repository" : {
+    "type" : "git",
+    "url" : "http://github.com/jnuserful/chessjs.git"
+  }
 }
