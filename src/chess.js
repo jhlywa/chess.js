@@ -1166,8 +1166,8 @@ Chess.prototype = {
     var value = '';
 
     for (var i = 0; i < headers.length; i++) {
-      key = this.headers[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1');
-      value = this.headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\]$/, '$1');
+      key = headers[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1');
+      value = headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\]$/, '$1');
       if (this.trim(key).length > 0) {
         headerObj[key] = value;
       }
@@ -1181,6 +1181,7 @@ Chess.prototype = {
     var regex = new RegExp('^(\\[(.|' + this.mask(newlineChar) + ')*\\])' +
                            '(' + this.mask(newlineChar) + ')*' +
                            '1.(' + this.mask(newlineChar) + '|.)*$', 'g');
+
 
     /* get header part of the PGN file */
     var headerString = pgn.replace(regex, '$1');
@@ -1201,11 +1202,11 @@ Chess.prototype = {
     /* load the starting position indicated by [Setup '1'] and
      * [FEN position] */
     if (headers['SetUp'] === '1') {
-      if (!(('FEN' in headers) && load(headers['FEN']))) {
+      if (!(('FEN' in headers) && this.load(headers['FEN']))) {
         return false;
       }
     }
-    
+
     /* delete header to get the moves */
     var ms = pgn.replace(headerString, '').replace(new RegExp(this.mask(newlineChar), 'g'), ' ');
 
@@ -1214,7 +1215,7 @@ Chess.prototype = {
 
     /* delete move numbers */
     ms = ms.replace(/\d+\./g, '');
-	
+
     /* delete ... indicating black to move */
     ms = ms.replace(/\.\.\./g, '');
 
