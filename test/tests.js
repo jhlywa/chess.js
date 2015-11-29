@@ -537,7 +537,21 @@ describe("Load PGN", function() {
      fen: 'rnbqk2r/pp1p1ppp/4pn2/1N6/1bP5/2N5/PP2PPPP/R1BQKB1R b KQkq - 2 6',
      expect: true},
     {pgn: ['1. e4 Qxd7 1/2-1/2'],
-      expect: false},
+     expect: false},
+    {pgn: ['1. e4 ( 1. d4 { Queen\'s pawn } d5 ( 1... Nf6 ) ) e5'],
+     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+     expect: true
+    },
+    {pgn: [
+      '1. e4 c5 2. Nf3 e6 { Sicilian Defence, French Variation } 3. Nc3 a6',
+      '4. Be2 Nc6 5. d4 cxd4 6. Nxd4 Qc7 7. O-O Nf6 8. Be3 Be7 9. f4 d6',
+      '10. Kh1 O-O 11. Qe1 Nxd4 12. Bxd4 b5 13. Qg3 Bb7 14. a3 Rad8',
+      '15. Rae1 Rd7 16. Bd3 Qd8 17. Qh3 g6? { (0.05 → 1.03) Inaccuracy.',
+      'The best move was h6. } (17... h6 18. Rd1 Re8 19. Qg3 Nh5 20. Qg4',
+      'Nf6 21. Qh3 Bc6 22. Kg1 Qb8 23. Qg3 Nh5 24. Qf2 Bf6 25. Be2 Bxd4',
+      '26. Rxd4 Nf6 27. g3) 18. f5 e5'],
+     fen: '3q1rk1/1b1rbp1p/p2p1np1/1p2pP2/3BP3/P1NB3Q/1PP3PP/4RR1K w - - 0 19',
+     expect: true}
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
