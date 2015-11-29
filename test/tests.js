@@ -538,6 +538,14 @@ describe("Load PGN", function() {
      expect: true},
     {pgn: ['1. e4 Qxd7 1/2-1/2'],
       expect: false},
+    {pgn: ['1. e4!! e5?! 2. d4?? d5!?'],
+     fen: 'rnbqkbnr/ppp2ppp/8/3pp3/3PP3/8/PPP2PPP/RNBQKBNR w KQkq d6 0 3',
+     expect: true},
+    {pgn: ['1. e4!+'],
+     expect: false},
+    {pgn: ['1.e4 e6 2.d4 d5 3.exd5 c6?? 4.dxe6 Nf6?! 5.exf7+!! Kd7!? 6.Nf3 Bd6 7.f8=N+!! Qxf8'],
+     fen: 'rnb2q1r/pp1k2pp/2pb1n2/8/3P4/5N2/PPP2PPP/RNBQKB1R w KQ - 0 8',
+     expect: true}
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
