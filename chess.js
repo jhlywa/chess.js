@@ -1416,6 +1416,12 @@ var Chess = function(fen) {
       /* delete comments */
       ms = ms.replace(/(\{[^}]+\})+?/g, '');
 
+      /* delete recursive annotation variations */
+      var rav_regex = /(\([^\(\)]+\))+?/g
+      while (rav_regex.test(ms)) {
+        ms = ms.replace(rav_regex, '');
+      }
+
       /* delete move numbers */
       ms = ms.replace(/\d+\./g, '');
 
