@@ -227,6 +227,13 @@ chess.header('Black', 'Mikhail Tal');
 chess.header('White', 'Morphy', 'Black', 'Anderssen', 'Date', '1858-??-??');
 ```
 
+Calling .header() without any arguments returns the header information as an object.
+
+```js
+chess.header();
+// -> { White: 'Morphy', Black: 'Anderssen', Date: '1858-??-??' }
+```
+
 ### .insufficient_material()
 Returns true if the game is drawn due to insufficient material (K vs. K,
 K vs. KB, or K vs. KN); otherwise false.
