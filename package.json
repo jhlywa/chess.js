@@ -3,12 +3,24 @@
   "version": "0.9.2",
   "description": "A Javascript chess library for chess move generation/validation, piece placement/movement, and check/checkmate/draw detection",
   "author": "Jeff Hlywa <jhlywa@gmail.com> (https://github.com/jhlywa)",
-  "license" : "BSD-2-Clause",
-  "keywords": ["chess"],
+  "license": "BSD-2-Clause",
+  "homepage": "https://github.com/jhlywa/chess.js",
+  "keywords": [
+    "chess"
+  ],
   "main": "chess.js",
-  "repository" : {
-    "type" : "git",
-    "url" : "http://github.com/jhlywa/chess.js.git"
+  "filename": "chess.min.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jhlywa/chess.js.git"
+  },
+  "autoupdate": {
+    "source": "git",
+    "target": "git://github.com/jhlywa/chess.js.git",
+    "basePath": "",
+    "files": [
+      "chess*.js"
+    ]
   },
   "devDependencies": {
     "mocha": "2.2.4",
@@ -16,7 +28,7 @@
     "uglify-js": "2.4.21"
   },
   "scripts": {
-      "test":   "./node_modules/.bin/mocha",
-      "minify": "./node_modules/.bin/uglifyjs chess.js -c -m --comments 'license' > chess.min.js"
+    "test":   "./node_modules/.bin/mocha",
+    "minify": "./node_modules/.bin/uglifyjs chess.js -c -m --comments 'license' > chess.min.js"
   }
 }
