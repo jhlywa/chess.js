@@ -1423,7 +1423,7 @@ var Chess = function(fen) {
       }
 
       /* delete move numbers */
-      ms = ms.replace(/\d+\./g, '');
+      ms = ms.replace(/\d+\.(\.\.)?/g, '');
 
       /* delete ... indicating black to move */
       ms = ms.replace(/\.\.\./g, '');
