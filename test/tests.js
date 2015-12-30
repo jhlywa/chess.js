@@ -567,6 +567,11 @@ describe("Load PGN", function() {
       '20. c5 Nc4 21. Rf1 Qg6 22. Qc2 c6 23. Be2 Rfd8 24. a5 h5 $2 (24... Rd7 $11)',
       '25. Rb3 $1 h4 26. Rh3 Qf6 27. Rf3'],
      fen: 'r2r2k1/5pp1/p1p2q2/PpP1p3/1PnbP2p/5R2/2Q1BPPP/2B2RK1 b - - 3 27',
+     expect: true},
+    {pgn: [
+      '1. d4 d5 2. Bf4 Nf6 3. e3 g6 4. Nf3 (4. Nc3 Bg7 5. Nf3 O-O 6. Be2 c5)',
+      '4... Bg7 5. h3 { 5. Be2 O-O 6. O-O c5 7. c3 Nc6 } 5... O-O'],
+     fen: 'rnbq1rk1/ppp1ppbp/5np1/3p4/3P1B2/4PN1P/PPP2PP1/RN1QKB1R w KQ - 1 6',
      expect: true}
   ];
 
