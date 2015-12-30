@@ -1428,6 +1428,9 @@ var Chess = function(fen) {
       /* delete ... indicating black to move */
       ms = ms.replace(/\.\.\./g, '');
 
+      /* delete numeric annotation glyphs */
+      ms = ms.replace(/\$\d+/g, '');
+
       /* trim and get array of moves */
       var moves = trim(ms).split(new RegExp(/\s+/));
 

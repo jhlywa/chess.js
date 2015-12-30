@@ -559,6 +559,14 @@ describe("Load PGN", function() {
       'Nf6 21. Qh3 Bc6 22. Kg1 Qb8 23. Qg3 Nh5 24. Qf2 Bf6 25. Be2 Bxd4',
       '26. Rxd4 Nf6 27. g3) 18. f5 e5'],
      fen: '3q1rk1/1b1rbp1p/p2p1np1/1p2pP2/3BP3/P1NB3Q/1PP3PP/4RR1K w - - 0 19',
+     expect: true},
+    {pgn: [
+      '1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. b4 Bb6 5. a4 a6 6. c3 Nf6 7. d3 d6',
+      '8. Nbd2 O-O 9. O-O Ne7 10. d4 Ng6 11. dxe5 Nxe5 12. Nxe5 dxe5 13. Qb3 Ne8',
+      '14. Nf3 Nd6 15. Rd1 Bg4 16. Be2 Qf6 17. c4 Bxf3 18. Bxf3 Bd4 19. Rb1 b5 $2',
+      '20. c5 Nc4 21. Rf1 Qg6 22. Qc2 c6 23. Be2 Rfd8 24. a5 h5 $2 (24... Rd7 $11)',
+      '25. Rb3 $1 h4 26. Rh3 Qf6 27. Rf3'],
+     fen: 'r2r2k1/5pp1/p1p2q2/PpP1p3/1PnbP2p/5R2/2Q1BPPP/2B2RK1 b - - 3 27',
      expect: true}
   ];
 
