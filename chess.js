@@ -1529,6 +1529,7 @@ var Chess = function(fen) {
       var pretty_move = make_pretty(move_obj);
 
       make_move(move_obj);
+      pretty_move.fen = generate_fen();
 
       return pretty_move;
     },
@@ -1585,6 +1586,9 @@ var Chess = function(fen) {
           move_history.push(move_to_san(move));
         }
         make_move(move);
+        if (verbose){
+          move_history[move_history.length -1].fen = generate_fen();
+        }
       }
 
       return move_history;
