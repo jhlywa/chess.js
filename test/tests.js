@@ -963,6 +963,62 @@ describe("History", function() {
   });
 });
 
+describe("Commentary Tests", function() {
+
+  var chess = new Chess();
+  var tests = [
+     {pgn: [
+        '[Event "Paris"]',
+        '[Site "Paris"]',
+        '[Date "1858.??.??"]',
+        '[EventDate "?"]',
+        '[Round "?"]',
+        '[Result "1-0"]',
+        '[White "Paul Morphy"]',
+        '[Black "Duke Karl / Count Isouard"]',
+        '[ECO "C41"]',
+        '[WhiteElo "?"]',
+        '[BlackElo "?"]',
+        '[PlyCount "33"]',
+        '',
+        '1.e4 e5 2.Nf3 d6 3.d4 Bg4 {This is a weak move',
+        'already.--Fischer} 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Bc4 Nf6 7.Qb3 Qe7',
+        '8.Nc3 c6 9.Bg5 {Black is in what\'s like a zugzwang position',
+        'here. He can\'t develop the [Queen\'s] knight because the pawn',
+        'is hanging, the bishop is blocked because of the',
+        'Queen.--Fischer} b5 10.Nxb5 cxb5 11.Bxb5+ Nbd7 12.O-O-O Rd8',
+        '13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8# 1-0'
+      ],
+      commentLocations: [6, 17]
+     }
+  ];
+  
+  tests.forEach(function(t, i) {
+    it(i, function() {
+      chess.load_pgn(t.pgn.join('\n'));
+      
+      var passed = true;
+      var comments = chess.comments();
+      
+      for(var j = 0; j < comments.length; j++) {
+        var comment = comments[j];
+        
+        if(
+          (comment == null && t.commentLocations.indexOf(j + 1) > -1) ||
+          (comment != null && t.commentLocations.indexOf(j + 1) == -1)
+        ) {
+          passed = false;
+          break;
+        }
+      }
+      
+      assert(passed);
+    });
+  });
+  
+  assert(tests.length == 1);
+});
+
 describe('Regression Tests', function() {
   it('Github Issue #32 - castling flag reappearing', function() {
     var chess = new Chess('b3k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qNP/6QK b k - 2 28');

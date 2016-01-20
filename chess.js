@@ -162,6 +162,7 @@ var Chess = function(fen) {
   var half_moves = 0;
   var move_number = 1;
   var history = [];
+  var comments = [];
   var header = {};
 
   /* if the user passes in a fen string, load it, else default to
@@ -1358,6 +1359,11 @@ var Chess = function(fen) {
         }
         return has_keys;
       }
+      
+      function is_comment(string)
+      {
+        return string.search(/\{.*\}/g) != -1;
+      }
 
       function parse_pgn_header(header, options) {
         var newline_char = (typeof options === 'object' &&
@@ -1413,8 +1419,10 @@ var Chess = function(fen) {
       /* delete header to get the moves */
       var ms = pgn.replace(header_string, '').replace(new RegExp(mask(newline_char), 'g'), ' ');
 
-      /* delete comments */
-      ms = ms.replace(/(\{[^}]+\})+?/g, '');
+      /* temporarly remove whitespaces from comments to include them in the loop */
+      ms = ms.replace(/{.+?}/g, function(c) {
+        return c.replace(/\s+/g, '%20').replace(/\,/g, '%2C');
+      });
 
       /* delete recursive annotation variations */
       var rav_regex = /(\([^\(\)]+\))+?/g
@@ -1438,7 +1446,12 @@ var Chess = function(fen) {
       moves = moves.join(',').replace(/,,+/g, ',').split(',');
       var move = '';
 
-      for (var half_move = 0; half_move < moves.length - 1; half_move++) {
+      for (var half_move = 0, c_index = 0; half_move < moves.length - 1; half_move++, c_index++) {
+        if (is_comment(moves[half_move])) {
+          c_index--;
+          continue;
+        }
+
         move = get_move_obj(moves[half_move]);
 
         /* move not possible! (don't clear the board to examine to show the
@@ -1448,6 +1461,14 @@ var Chess = function(fen) {
           return false;
         } else {
           make_move(move);
+
+          /* if the next element in array is a comment, it gets appended to comments */
+          if (half_move + 1 < moves.length - 1 && is_comment(moves[half_move + 1])) {
+            /* bring back whitespaces and remove curly brackets */
+            comments[c_index] = moves[half_move + 1].replace(/\%20/g, ' ').replace(/\%2C/g, ',').replace(/{(.+?)}/g, '$1');
+          } else {
+            comments[c_index] = null;
+          }
         }
       }
 
@@ -1588,6 +1609,10 @@ var Chess = function(fen) {
       }
 
       return move_history;
+    },
+    
+    comments: function(options) {
+      return comments;
     }
 
   };
