@@ -163,7 +163,7 @@ var Chess = function(fen) {
   var move_number = 1;
   var history = [];
   var header = {};
-  var starting_move_number = 1;
+
   /* if the user passes in a fen string, load it, else default to
    * starting position
    */
@@ -233,7 +233,6 @@ var Chess = function(fen) {
     ep_square = (tokens[3] === '-') ? EMPTY : SQUARES[tokens[3]];
     half_moves = parseInt(tokens[4], 10);
     move_number = parseInt(tokens[5], 10);
-    starting_move_number = parseInt(tokens[5], 10);
 
     update_setup(generate_fen());
 
@@ -1263,23 +1262,20 @@ var Chess = function(fen) {
 
       var moves = [];
       var move_string = '';
-      var pgn_move_number = starting_move_number;
 
       /* build the list of moves.  a move_string looks like: "3. e3 e6" */
       while (reversed_history.length > 0) {
         var move = reversed_history.pop();
 
         /* if the position started with black to move, start PGN with 1. ... */
-        if (pgn_move_number === starting_move_number && move.color === 'b') {
-          move_string = pgn_move_number + '. ...';
-          pgn_move_number++;
+        if (!history.length && move.color === 'b') {
+          move_string = move_number + '. ...';
         } else if (move.color === 'w') {
           /* store the previous generated move_string if we have one */
           if (move_string.length) {
             moves.push(move_string);
           }
-          move_string = pgn_move_number + '.';
-          pgn_move_number++;
+          move_string = move_number + '.';
         }
 
         move_string = move_string + ' ' + move_to_san(move);
