@@ -994,4 +994,20 @@ describe('Regression Tests', function() {
        assert(chess.fen() === 'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2');
   });
 
+  it('Github Issue #98 (white) - Wrong movement number after setting a position via FEN', function () {
+    var chess = new Chess();
+    chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+    chess.move('f7');
+    var result = chess.pgn();
+    assert(result.match(/(45\. f7)$/));
+  })
+
+  it('Github Issue #98 (black) - Wrong movement number after setting a position via FEN', function () {
+    var chess = new Chess();
+    chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 b - - 1 45');
+    chess.move('Rf1+');
+    var result = chess.pgn();
+    assert(result.match(/(45\. \.\.\. Rf1\+)$/));
+  })
+
 });

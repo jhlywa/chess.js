@@ -1262,23 +1262,20 @@ var Chess = function(fen) {
 
       var moves = [];
       var move_string = '';
-      var pgn_move_number = 1;
 
       /* build the list of moves.  a move_string looks like: "3. e3 e6" */
       while (reversed_history.length > 0) {
         var move = reversed_history.pop();
 
         /* if the position started with black to move, start PGN with 1. ... */
-        if (pgn_move_number === 1 && move.color === 'b') {
-          move_string = '1. ...';
-          pgn_move_number++;
+        if (!history.length && move.color === 'b') {
+          move_string = move_number + '. ...';
         } else if (move.color === 'w') {
           /* store the previous generated move_string if we have one */
           if (move_string.length) {
             moves.push(move_string);
           }
-          move_string = pgn_move_number + '.';
-          pgn_move_number++;
+          move_string = move_number + '.';
         }
 
         move_string = move_string + ' ' + move_to_san(move);
