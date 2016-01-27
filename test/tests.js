@@ -964,34 +964,41 @@ describe("History", function() {
 });
 
 describe('Regression Tests', function() {
-  it('Github Issue #32 - castling flag reappearing', function() {
-    var chess = new Chess('b3k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qNP/6QK b k - 2 28');
-    chess.move({from:'a8', to:'g2'});
-    assert(chess.fen() == '4k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qbP/6QK w k - 0 29');
-  });
+    it('Github Issue #32 - castling flag reappearing', function () {
+        var chess = new Chess('b3k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qNP/6QK b k - 2 28');
+        chess.move({from: 'a8', to: 'g2'});
+        assert(chess.fen() == '4k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qbP/6QK w k - 0 29');
+    });
 
-  it('Github Issue #58 - placing more than one king', function() {
-    var chess = new Chess('N3k3/8/8/8/8/8/5b2/4K3 w - - 0 1');
-    assert(chess.put({type: 'k', color: 'w'}, 'a1') == false);
-    chess.put({type: 'q', color: 'w'}, 'a1');
-    chess.remove('a1');
-    assert(chess.moves().join(' ') == 'Kd2 Ke2 Kxf2 Kf1 Kd1');
-  });
+    it('Github Issue #58 - placing more than one king', function () {
+        var chess = new Chess('N3k3/8/8/8/8/8/5b2/4K3 w - - 0 1');
+        assert(chess.put({type: 'k', color: 'w'}, 'a1') == false);
+        chess.put({type: 'q', color: 'w'}, 'a1');
+        chess.remove('a1');
+        assert(chess.moves().join(' ') == 'Kd2 Ke2 Kxf2 Kf1 Kd1');
+    });
 
-  it('Github Issue #85 (white) - SetUp and FEN should be accepted in load_pgn', function() {
-       var chess = new Chess();
-       var pgn = ['[SetUp "1"]', '[FEN "7k/5K2/4R3/8/8/8/8/8 w KQkq - 0 1"]', "", '1. Rh6#'];
-       var result = chess.load_pgn(pgn.join("\n"));
-       assert(result);
-       assert(chess.fen() === '7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1');
-  });
+    it('Github Issue #85 (white) - SetUp and FEN should be accepted in load_pgn', function () {
+        var chess = new Chess();
+        var pgn = ['[SetUp "1"]', '[FEN "7k/5K2/4R3/8/8/8/8/8 w KQkq - 0 1"]', "", '1. Rh6#'];
+        var result = chess.load_pgn(pgn.join("\n"));
+        assert(result);
+        assert(chess.fen() === '7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1');
+    });
 
-  it('Github Issue #85 (black) - SetUp and FEN should be accepted in load_pgn', function() {
-       var chess = new Chess();
-       var pgn = ['[SetUp "1"]', '[FEN "r4r1k/1p4b1/3p3p/5qp1/1RP5/6P1/3NP3/2Q2RKB b KQkq - 0 1"]', "", '1. ... Qc5+'];
-       var result = chess.load_pgn(pgn.join("\n"));
-       assert(result);
-       assert(chess.fen() === 'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2');
-  });
+    it('Github Issue #85 (black) - SetUp and FEN should be accepted in load_pgn', function () {
+        var chess = new Chess();
+        var pgn = ['[SetUp "1"]', '[FEN "r4r1k/1p4b1/3p3p/5qp1/1RP5/6P1/3NP3/2Q2RKB b KQkq - 0 1"]', "", '1. ... Qc5+'];
+        var result = chess.load_pgn(pgn.join("\n"));
+        assert(result);
+        assert(chess.fen() === 'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2');
+    });
 
+    it('Github Issue #98 - Wrong movement number after setting a position via FEN', function () {
+        var chess = new Chess();
+        chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+        chess.move('f7');
+        var result = chess.pgn();
+        assert(result.match(/(45\. f7)$/));
+    });
 });
