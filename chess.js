@@ -239,6 +239,11 @@ var Chess = function(fen) {
     return true;
   }
 
+  /* TODO: this function is pretty much crap - it validates structure but
+   * completely ignores content (e.g. doesn't verify that each side has a king)
+   * ... we should rewrite this, and ditch the silly error_number field while
+   * we're at it
+   */
   function validate_fen(fen) {
     var errors = {
        0: 'No errors.',
@@ -252,6 +257,7 @@ var Chess = function(fen) {
        8: '1st field (piece positions) is invalid [consecutive numbers].',
        9: '1st field (piece positions) is invalid [invalid piece].',
       10: '1st field (piece positions) is invalid [row too large].',
+      11: 'Illegal en-passant square',
     };
 
     /* 1st criterion: 6 space-seperated fields? */
@@ -315,6 +321,11 @@ var Chess = function(fen) {
       if (sum_fields !== 8) {
         return {valid: false, error_number: 10, error: errors[10]};
       }
+    }
+
+    if ((tokens[3][1] == '3' && tokens[1] == 'w') ||
+        (tokens[3][1] == '6' && tokens[1] == 'b')) {
+          return {valid: false, error_number: 11, error: errors[11]};
     }
 
     /* everything's okay! */
