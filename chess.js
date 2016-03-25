@@ -1,6 +1,6 @@
 'use strict';
 /*
- * Copyright (c) 2015, Jeff Hlywa (jhlywa@gmail.com)
+ * Copyright (c) 2016, Jeff Hlywa (jhlywa@gmail.com)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 /* minified license below  */
 
 /* @license
- * Copyright (c) 2015, Jeff Hlywa (jhlywa@gmail.com)
+ * Copyright (c) 2016, Jeff Hlywa (jhlywa@gmail.com)
  * Released under the BSD license
  * https://github.com/jhlywa/chess.js/blob/master/LICENSE
  */
