@@ -1433,8 +1433,8 @@ var Chess = function(fen) {
       /* delete move numbers */
       ms = ms.replace(/\d+\.(\.\.)?/g, '');
 
-      /* delete ... indicating black to move */
-      ms = ms.replace(/\.\.\./g, '');
+      /* delete ... or .. indicating black to move */
+      ms = ms.replace(/\.{2,3}/g, '');
 
       /* delete numeric annotation glyphs */
       ms = ms.replace(/\$\d+/g, '');
