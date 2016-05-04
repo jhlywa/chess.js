@@ -1360,11 +1360,10 @@ var Chess = function(fen) {
       }
 
       function has_keys(object) {
-        var has_keys = false;
         for (var key in object) {
-          has_keys = true;
+          return true;
         }
-        return has_keys;
+        return false;
       }
 
       function parse_pgn_header(header, options) {
