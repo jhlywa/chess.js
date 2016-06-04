@@ -8,6 +8,20 @@ detection - basically everything but the AI.
 
 chess.js has been extensively tested in node.js and most modern browsers.
 
+## Installation
+
+To install the stable version:
+
+```sh
+npm install --save chess.js
+```
+
+chess.js is also available via [CDNJS](https://cdnjs.com/libraries/chess.js):
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.9.4/chess.js"></script>
+```
+
 ## Example Code
 The code below plays a complete game of chess ... randomly.
 
