@@ -163,6 +163,7 @@ var Chess = function(fen) {
   var move_number = 1;
   var history = [];
   var header = {};
+  var generateMovesCaches = {};
 
   /* if the user passes in a fen string, load it, else default to
    * starting position
@@ -183,6 +184,7 @@ var Chess = function(fen) {
     move_number = 1;
     history = [];
     header = {};
+    generateMovesCaches = {};
     update_setup(generate_fen());
   }
 
@@ -480,6 +482,12 @@ var Chess = function(fen) {
   }
 
   function generate_moves(options) {
+	// try to load from cache
+	var cacheKey = generate_fen() + JSON.stringify(options);
+	if (typeof generateMovesCaches[cacheKey] != 'undefined') {
+		return generateMovesCaches[cacheKey];
+	}
+	  
     function add_move(board, moves, from, to, flags) {
       /* if pawn promotion */
       if (board[from].type === PAWN &&
@@ -615,6 +623,7 @@ var Chess = function(fen) {
      * to be captured)
      */
     if (!legal) {
+	  generateMovesCaches[cacheKey] = moves;
       return moves;
     }
 
@@ -628,6 +637,7 @@ var Chess = function(fen) {
       undo_move();
     }
 
+	generateMovesCaches[cacheKey] = legal_moves;
     return legal_moves;
   }
 
