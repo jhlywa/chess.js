@@ -19,7 +19,7 @@ npm install --save chess.js
 chess.js is also available via [CDNJS](https://cdnjs.com/libraries/chess.js):
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.9.4/chess.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.0/chess.js"></script>
 ```
 
 ## Example Code
