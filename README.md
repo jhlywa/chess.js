@@ -274,9 +274,9 @@ chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 ### .load_pgn(pgn, [ options ])
 Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
-Options is a optional parameter that contains a 'newline_char' which is a
+Options is a optional parameter that may contain a `newline_char` which is a
 string representation of a RegExp (and should not be pre-escaped) and defaults
-to '\r?\n').  Options may also contain the `sloppy` flag to handle overly
+to `\r?\n`).  Options may also contain the `sloppy` flag to handle overly
 disambiguated moves (see `.move` documentation for more information).  Returns
 true if the PGN was parsed successfully, otherwise false.
 
@@ -354,11 +354,13 @@ handle these situations, a sloppy flag can be passed to .move to allow slightly
 relaxed parsing:
 
 ```js
+// there are two black knights in the postion below, one on c6 (pinned) and one
+// one g8
 var chess = new Chess('r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7');
 
-// the knight on c6 is pinned, therefore Ne7 is legal doesn't need disambiguation
-
-// so this SAN move is technically incorrect
+// Ne7 doesn't need disambiguation because only one knight can legally move to
+// e7, so chess.js will reject any attempts at disambiguation (it violates SAN
+// spec)
 chess.move('Nge7');
 // -> null
 
