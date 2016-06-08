@@ -1,4 +1,3 @@
-'use strict';
 /*
  * Copyright (c) 2016, Jeff Hlywa (jhlywa@gmail.com)
  * All rights reserved.
@@ -633,8 +632,16 @@ var Chess = function(fen) {
 
   /* convert a move from 0x88 coordinates to Standard Algebraic Notation
    * (SAN)
+   *
+   * @param {boolean} sloppy Use the sloppy SAN generator to work around over
+   * disambiguation bugs in Fritz and Chessbase.  See below:
+   *
+   * r1bqkbnr/ppp2ppp/2n5/1B1pP3/4P3/8/PPPP2PP/RNBQK1NR b KQkq - 2 4
+   * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
+   * 4. ... Ne7 is technically the valid SAN
    */
-  function move_to_san(move) {
+  function move_to_san(move, sloppy) {
+
     var output = '';
 
     if (move.flags & BITS.KSIDE_CASTLE) {
@@ -642,7 +649,7 @@ var Chess = function(fen) {
     } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O';
     } else {
-      var disambiguator = get_disambiguator(move);
+      var disambiguator = get_disambiguator(move, sloppy);
 
       if (move.piece !== PAWN) {
         output += move.piece.toUpperCase() + disambiguator;
@@ -962,8 +969,8 @@ var Chess = function(fen) {
   }
 
   /* this function is used to uniquely identify ambiguous moves */
-  function get_disambiguator(move) {
-    var moves = generate_moves();
+  function get_disambiguator(move, sloppy) {
+    var moves = generate_moves({legal: !sloppy});
 
     var from = move.from;
     var to = move.to;
@@ -1073,7 +1080,7 @@ var Chess = function(fen) {
   /* pretty = external move object */
   function make_pretty(ugly_move) {
     var move = clone(ugly_move);
-    move.san = move_to_san(move);
+    move.san = move_to_san(move, false);
     move.to = algebraic(move.to);
     move.from = algebraic(move.from);
 
@@ -1189,7 +1196,7 @@ var Chess = function(fen) {
             options.verbose) {
           moves.push(make_pretty(ugly_moves[i]));
         } else {
-          moves.push(move_to_san(ugly_moves[i]));
+          moves.push(move_to_san(ugly_moves[i], false));
         }
       }
 
@@ -1289,7 +1296,7 @@ var Chess = function(fen) {
           move_string = move_number + '.';
         }
 
-        move_string = move_string + ' ' + move_to_san(move);
+        move_string = move_string + ' ' + move_to_san(move, false);
         make_move(move);
       }
 
@@ -1335,6 +1342,11 @@ var Chess = function(fen) {
     },
 
     load_pgn: function(pgn, options) {
+      // allow the user to specify the sloppy move parser to work around over
+      // disambiguation bugs in Fritz and Chessbase
+      var sloppy = (typeof options !== 'undefined' && 'sloppy' in options) ?
+                    options.sloppy : false;
+
       function mask(str) {
         return str.replace(/\\/g, '\\');
       }
@@ -1348,7 +1360,7 @@ var Chess = function(fen) {
         var moves = generate_moves();
         for (var i = 0, len = moves.length; i < len; i++) {
           if (move_replaced ===
-              move_to_san(moves[i]).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) {
+              move_to_san(moves[i], sloppy).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) {
             return moves[i];
           }
         }
@@ -1488,7 +1500,7 @@ var Chess = function(fen) {
       return turn;
     },
 
-    move: function(move) {
+    move: function(move, options) {
       /* The move function can be called with in the following parameters:
        *
        * .move('Nxb7')      <- where 'move' is a case-sensitive SAN string
@@ -1498,6 +1510,12 @@ var Chess = function(fen) {
        *         promotion: 'q',
        *      })
        */
+
+      // allow the user to specify the sloppy move parser to work around over
+      // disambiguation bugs in Fritz and Chessbase
+      var sloppy = (typeof options !== 'undefined' && 'sloppy' in options) ?
+                    options.sloppy : false;
+
       var move_obj = null;
       var moves = generate_moves();
 
@@ -1507,7 +1525,7 @@ var Chess = function(fen) {
         var move_replaced = move.replace(/=/,'').replace(/[+#]?[?!]*$/,'');
         for (var i = 0, len = moves.length; i < len; i++) {
           if (move_replaced ===
-              move_to_san(moves[i]).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) {
+              move_to_san(moves[i], sloppy).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) {
             move_obj = moves[i];
             break;
           }

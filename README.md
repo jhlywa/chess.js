@@ -276,7 +276,9 @@ Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
 Options is a optional parameter that contains a 'newline_char' which is a
 string representation of a RegExp (and should not be pre-escaped) and defaults
-to '\r?\n'). Returns true if the PGN was parsed successfully, otherwise false.
+to '\r?\n').  Options may also contain the `sloppy` flag to handle overly
+disambiguated moves (see `.move` documentation for more information).  Returns
+true if the PGN was parsed successfully, otherwise false.
 
 ```js
 var chess = new Chess();
@@ -319,7 +321,7 @@ chess.ascii()
 //         a  b  c  d  e  f  g  h'
 ```
 
-### .move(move)
+### .move(move, [ options ])
 Attempts to make a move on the board, returning a move object if the move was
 legal, otherwise null.  The .move function can be called two ways, by passing
 a string in Standard Algebraic Notation (SAN):
@@ -347,6 +349,23 @@ chess.move({ from: 'g2', to: 'g3' });
 // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
 ```
 
+Some chess applications (e.g. Fritz and Chessbase) overly disambiguate SAN. To
+handle these situations, a sloppy flag can be passed to .move to allow slightly
+relaxed parsing:
+
+```js
+var chess = new Chess('r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7');
+
+// the knight on c6 is pinned, therefore Ne7 is legal doesn't need disambiguation
+
+// so this SAN move is technically incorrect
+chess.move('Nge7');
+// -> null
+
+// to relax the overly disambiguation constraint, use the sloppy flag
+chess.move('Nge7', {sloppy: true});
+// -> { color: 'b', from: 'g8', to: 'e7', flags: 'n', piece: 'n', san: 'Ne7' }
+```
 ### .moves([ options ])
 Returns a list of legals moves from the current position.  The function takes an optional parameter which controls the single-square move generation and verbosity.
 

@@ -572,7 +572,31 @@ describe("Load PGN", function() {
       '1. d4 d5 2. Bf4 Nf6 3. e3 g6 4. Nf3 (4. Nc3 Bg7 5. Nf3 O-O 6. Be2 c5)',
       '4... Bg7 5. h3 { 5. Be2 O-O 6. O-O c5 7. c3 Nc6 } 5... O-O'],
      fen: 'rnbq1rk1/ppp1ppbp/5np1/3p4/3P1B2/4PN1P/PPP2PP1/RN1QKB1R w KQ - 1 6',
-     expect: true}
+     expect: true},
+
+    // test the sloppy PGN parser
+    {pgn: [
+      '1.e4 e5 2.Nf3 d6 3.d4 Bg4 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Qf5 Nc6 7.Bb5 Nge7',
+      '8.Qxe5 Qd7 9.O-O Nxe5 10.Bxd7+ Nxd7 11.Rd1 O-O-O 12.Nc3 Ng6 13.Be3 a6',
+      '14.Ba7 b6 15.Na4 Kb7 16.Bxb6 cxb6 17.b3 b5 18.Nb2 Nge5 19.f3 Rc8',
+      '20.Rac1 Ba3 21.Rb1 Rxc2 22.f4 Ng4 23.Rxd7+ Kc6 24.Rxf7 Bxb2 25.Rxg7',
+      'Ne3 26.Rg3 Bd4 27.Kh1 Rxa2 28.Rc1+ Kb6 29.e5 Rf8 30.e6 Rxf4 31.e7 Re4',
+      '32.Rg7 Bxg7'],
+      fen: '8/4P1bp/pk6/1p6/4r3/1P2n3/r5PP/2R4K w - - 0 33',
+      expect: false,
+      sloppy: false},
+
+    {pgn: [
+      '1.e4 e5 2.Nf3 d6 3.d4 Bg4 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Qf5 Nc6 7.Bb5 Nge7',
+      '8.Qxe5 Qd7 9.O-O Nxe5 10.Bxd7+ Nxd7 11.Rd1 O-O-O 12.Nc3 Ng6 13.Be3 a6',
+      '14.Ba7 b6 15.Na4 Kb7 16.Bxb6 cxb6 17.b3 b5 18.Nb2 Nge5 19.f3 Rc8',
+      '20.Rac1 Ba3 21.Rb1 Rxc2 22.f4 Ng4 23.Rxd7+ Kc6 24.Rxf7 Bxb2 25.Rxg7',
+      'Ne3 26.Rg3 Bd4 27.Kh1 Rxa2 28.Rc1+ Kb6 29.e5 Rf8 30.e6 Rxf4 31.e7 Re4',
+      '32.Rg7 Bxg7'],
+      fen: '8/4P1bp/pk6/1p6/4r3/1P2n3/r5PP/2R4K w - - 0 33',
+      expect: true,
+      sloppy: true}
+
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
@@ -580,7 +604,9 @@ describe("Load PGN", function() {
   tests.forEach(function(t, i) {
     newline_chars.forEach(function(newline, j) {
       it(i + String.fromCharCode(97 + j), function() {
-        var result = chess.load_pgn(t.pgn.join(newline), { newline_char: newline });
+        var sloppy = t.sloppy || false;
+        var result = chess.load_pgn(t.pgn.join(newline), {sloppy: sloppy,
+                                                          newline_char: newline});
         var should_pass = t.expect;
 
         /* some tests are expected to fail */
@@ -590,7 +616,6 @@ describe("Load PGN", function() {
          * so we'll need compare the results of the load against a FEN string
          * (instead of the reconstructed PGN [e.g. test.pgn.join(newline)])
          */
-
           if ('fen' in t) {
             assert(result && chess.fen() == t.fen);
           } else {
@@ -664,14 +689,27 @@ describe("Make Move", function() {
      legal: true,
      move: 'fxe3',
      next: 'rnbqkbnr/pppp2pp/8/4p3/8/2PPp3/PP3PPP/RNBQKBNR w KQkq - 0 2',
-     captured: 'p'}
+     captured: 'p'},
+
+     // sloppy move parser
+    {fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
+     legal: false,
+     move: 'Nge7'},
+
+    {fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
+     legal: true,
+     sloppy: true,
+     move: 'Nge7',
+     next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'},
+
   ];
 
   positions.forEach(function(position) {
     var chess = new Chess();
     chess.load(position.fen);
     it(position.fen + ' (' + position.move + ' ' + position.legal + ')', function() {
-      var result = chess.move(position.move);
+      var sloppy = position.sloppy || false;
+      var result = chess.move(position.move, {sloppy: sloppy});
       if (position.legal) {
         assert(result
                && chess.fen() == position.next
