@@ -682,6 +682,11 @@ var Chess = function(fen) {
     return output;
   }
 
+  // parses all of the decorators out of a SAN string
+  function stripped_san(move) {
+    return move.replace(/=/,'').replace(/[+#]?[?!]*$/,'');
+  }
+
   function attacked(color, square) {
     for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
       /* did we run off the end of the board */
@@ -1053,6 +1058,25 @@ var Chess = function(fen) {
     return s;
   }
 
+  // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
+  function move_from_san(move, sloppy) {
+    // strip off any move decorations: e.g Nf3+?!
+    var move_replaced = stripped_san(move);
+    var moves = generate_moves();
+
+    for (var i = 0, len = moves.length; i < len; i++) {
+      // try the strict parser first, then the sloppy parser if requested
+      // by the user
+      if ((move_replaced === stripped_san(move_to_san(moves[i]))) ||
+          (sloppy && move_replaced === stripped_san(move_to_san(moves[i], true)))) {
+        return moves[i];
+      }
+    }
+
+    return null;
+  }
+
+
   /*****************************************************************************
    * UTILITY FUNCTIONS
    ****************************************************************************/
@@ -1351,33 +1375,6 @@ var Chess = function(fen) {
         return str.replace(/\\/g, '\\');
       }
 
-      /* convert a move from Standard Algebraic Notation (SAN) to 0x88
-       * coordinates
-      */
-      function move_from_san(move) {
-        /* strip off any move decorations: e.g Nf3+?! */
-        var move_replaced = move.replace(/=/,'').replace(/[+#]?[?!]*$/,'');
-        var moves = generate_moves();
-        for (var i = 0, len = moves.length; i < len; i++) {
-
-          // try the strict parser first, then the sloppy parser if requested
-          // by the user
-          if ((move_replaced ===
-               move_to_san(moves[i]).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) ||
-              (sloppy &&
-               move_replaced ===
-               move_to_san(moves[i], sloppy).replace(/=/,'').replace(/[+#]?[?!]*$/,''))) {
-            return moves[i];
-          }
-        }
-
-        return null;
-      }
-
-      function get_move_obj(move) {
-        return move_from_san(trim(move));
-      }
-
       function has_keys(object) {
         for (var key in object) {
           return true;
@@ -1408,9 +1405,9 @@ var Chess = function(fen) {
       var newline_char = (typeof options === 'object' &&
                           typeof options.newline_char === 'string') ?
                           options.newline_char : '\r?\n';
-        var regex = new RegExp('^(\\[(.|' + mask(newline_char) + ')*\\])' +
-                               '(' + mask(newline_char) + ')*' +
-                               '1.(' + mask(newline_char) + '|.)*$', 'g');
+      var regex = new RegExp('^(\\[(.|' + mask(newline_char) + ')*\\])' +
+                             '(' + mask(newline_char) + ')*' +
+                             '1.(' + mask(newline_char) + '|.)*$', 'g');
 
       /* get header part of the PGN file */
       var header_string = pgn.replace(regex, '$1');
@@ -1420,7 +1417,7 @@ var Chess = function(fen) {
         header_string = '';
       }
 
-     reset();
+      reset();
 
       /* parse PGN header */
       var headers = parse_pgn_header(header_string, options);
@@ -1465,7 +1462,7 @@ var Chess = function(fen) {
       var move = '';
 
       for (var half_move = 0; half_move < moves.length - 1; half_move++) {
-        move = get_move_obj(moves[half_move]);
+        move = move_from_san(moves[half_move], sloppy);
 
         /* move not possible! (don't clear the board to examine to show the
          * latest valid position)
@@ -1485,7 +1482,7 @@ var Chess = function(fen) {
         }
       }
       else {
-        move = get_move_obj(move);
+        move = move_from_san(move, sloppy);
         if (move == null) {
           return false;
         } else {
@@ -1524,26 +1521,12 @@ var Chess = function(fen) {
                     options.sloppy : false;
 
       var move_obj = null;
-      var moves = generate_moves();
 
       if (typeof move === 'string') {
-        /* convert the move string to a move object */
-        /* strip off any move decorations: e.g Nf3+?! */
-        var move_replaced = move.replace(/=/,'').replace(/[+#]?[?!]*$/,'');
-        for (var i = 0, len = moves.length; i < len; i++) {
-
-          // try the strict parser first, then the sloppy parser if requested
-          // by the user
-          if ((move_replaced ===
-               move_to_san(moves[i]).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) ||
-              (sloppy &&
-               move_replaced ===
-               move_to_san(moves[i], sloppy).replace(/=/,'').replace(/[+#]?[?!]*$/,''))) {
-            move_obj = moves[i];
-            break;
-          }
-        }
+        move_obj = move_from_san(move, sloppy);
       } else if (typeof move === 'object') {
+        var moves = generate_moves();
+
         /* convert the pretty move object to an ugly move object */
         for (var i = 0, len = moves.length; i < len; i++) {
           if (move.from === algebraic(moves[i].from) &&
