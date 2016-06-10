@@ -360,13 +360,13 @@ var chess = new Chess();
 
 // various forms of Long Algebraic Notation
 chess.move('e2e4', {sloppy: true});
-{ color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
+// -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
 chess.move('e7-e5', {sloppy: true});
-{ color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5' }
+// -> { color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5' }
 chess.move('Pf2f4', {sloppy: true});
-{ color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' }
+// -> { color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' }
 chess.move('Pe5xf4', {sloppy: true});
-{ color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }
+// -> { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }
 
 
 // correctly parses incorrectly disambiguated moves

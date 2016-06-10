@@ -678,7 +678,7 @@ describe("Load PGN", function() {
       sloppy: true
     },
 
-    // sloppy parse should parse abbreviate long algebraic notation
+    // sloppy parse should parse abbreviated long algebraic notation
     {pgn: [
       '1. d2d4 f7f5 2. Bc1g5 d7d6 3. e2e3 Nb8d7 4. c2c4 Ng8f6 5. Nb1c3 e7e5 6.',
       'd4e5 d6e5 7. g2g3 Bf8e7 8. Bf1h3 h7h6 9. Bg5f6 Nd7f6 10. Qd1d8+ Be7d8 11.',
