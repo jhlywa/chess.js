@@ -42,6 +42,7 @@ console.log(chess.pgn());
 - [The Internet Chess Club (ICC)](http://www.chessclub.com/)
 - [lichess](http://lichess.org/tv)
 - [Redbull - Battle for the Queen](http://battleforthequeen.redbull.com/)
+- [Asm.js Chess Battle](https://developer.microsoft.com/en-us/microsoft-edge/testdrive/demos/chess/)
 - [3D Hartwig Chess](http://creativejs.com/2012/12/3d-hartwig-chess/)
 - [Scene VR](http://client.scenevr.com/?connect=chess.scenevr.hosting/chess.xml)
 - [Multiplayer Chess](http://chessapp.com/)

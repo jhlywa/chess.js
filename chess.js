@@ -1359,11 +1359,18 @@ var Chess = function(fen) {
         var move_replaced = move.replace(/=/,'').replace(/[+#]?[?!]*$/,'');
         var moves = generate_moves();
         for (var i = 0, len = moves.length; i < len; i++) {
-          if (move_replaced ===
-              move_to_san(moves[i], sloppy).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) {
+
+          // try the strict parser first, then the sloppy parser if requested
+          // by the user
+          if ((move_replaced ===
+               move_to_san(moves[i]).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) ||
+              (sloppy &&
+               move_replaced ===
+               move_to_san(moves[i], sloppy).replace(/=/,'').replace(/[+#]?[?!]*$/,''))) {
             return moves[i];
           }
         }
+
         return null;
       }
 
@@ -1524,8 +1531,14 @@ var Chess = function(fen) {
         /* strip off any move decorations: e.g Nf3+?! */
         var move_replaced = move.replace(/=/,'').replace(/[+#]?[?!]*$/,'');
         for (var i = 0, len = moves.length; i < len; i++) {
-          if (move_replaced ===
-              move_to_san(moves[i], sloppy).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) {
+
+          // try the strict parser first, then the sloppy parser if requested
+          // by the user
+          if ((move_replaced ===
+               move_to_san(moves[i]).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) ||
+              (sloppy &&
+               move_replaced ===
+               move_to_san(moves[i], sloppy).replace(/=/,'').replace(/[+#]?[?!]*$/,''))) {
             move_obj = moves[i];
             break;
           }
