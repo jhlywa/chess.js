@@ -19,7 +19,7 @@ npm install --save chess.js
 chess.js is also available via [CDNJS](https://cdnjs.com/libraries/chess.js):
 
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.1/chess.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
 ```
 
 ## Example Code
@@ -277,9 +277,10 @@ Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
 Options is a optional parameter that may contain a `newline_char` which is a
 string representation of a RegExp (and should not be pre-escaped) and defaults
-to `\r?\n`).  Options may also contain the `sloppy` flag to handle overly
-disambiguated moves (see `.move` documentation for more information).  Returns
-true if the PGN was parsed successfully, otherwise false.
+to `\r?\n`).  Options may also contain a `sloppy` flag which allows chess.js
+to parse moves in various non-standard notations  (see `.move` documentation
+for more information).  Returns true if the PGN was parsed successfully,
+otherwise false.
 
 ```js
 var chess = new Chess();
@@ -350,22 +351,30 @@ chess.move({ from: 'g2', to: 'g3' });
 // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
 ```
 
-Some chess applications (e.g. Fritz and Chessbase) overly disambiguate SAN. To
-handle these situations, a sloppy flag can be passed to .move to allow slightly
-relaxed parsing:
+An optional sloppy flag can be used to parse a variety of non-standard move
+notations:
 
 ```js
-// there are two black knights in the postion below, one on c6 (pinned) and one
-// one g8
-var chess = new Chess('r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7');
 
-// Ne7 doesn't need disambiguation because only one knight can legally move to
-// e7, so chess.js will reject any attempts at disambiguation (it violates SAN
-// spec)
-chess.move('Nge7');
+var chess = new Chess();
+
+// various forms of Long Algebraic Notation
+chess.move('e2e4', {sloppy: true});
+{ color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
+chess.move('e7-e5', {sloppy: true});
+{ color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5' }
+chess.move('Pf2f4', {sloppy: true});
+{ color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' }
+chess.move('Pe5xf4', {sloppy: true});
+{ color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }
+
+
+// correctly parses incorrectly disambiguated moves
+chess = new Chess('r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7');
+
+chess.move('Nge7');  // Ne7 is unambiguous because the knight on c6 is pinned
 // -> null
 
-// to relax the overly disambiguation constraint, use the sloppy flag
 chess.move('Nge7', {sloppy: true});
 // -> { color: 'b', from: 'g8', to: 'e7', flags: 'n', piece: 'n', san: 'Ne7' }
 ```
