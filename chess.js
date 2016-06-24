@@ -732,12 +732,15 @@ var Chess = function(fen) {
     return attacked(swap_color(color), kings[color]);
   }
 
-  function in_check() {
+  function in_check(color) {
+	  if(color){
+		  return king_attacked(color);
+	  }
     return king_attacked(turn);
   }
 
-  function in_checkmate() {
-    return in_check() && generate_moves().length === 0;
+  function in_checkmate(color) {
+    return in_check(color) && generate_moves().length === 0;
   }
 
   function in_stalemate() {
@@ -1251,8 +1254,8 @@ var Chess = function(fen) {
       return in_check();
     },
 
-    in_checkmate: function() {
-      return in_checkmate();
+    in_checkmate: function(color) {
+      return in_checkmate(color);
     },
 
     in_stalemate: function() {
