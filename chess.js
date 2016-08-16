@@ -1570,7 +1570,8 @@ var Chess = function(fen) {
       var pretty_move = make_pretty(move_obj);
 
       make_move(move_obj);
-      pretty_move.fen = generate_fen();
+      // Actuall we don't need to record here. History will take care of it.
+      // pretty_move.fen = generate_fen();
 
       return pretty_move;
     },
@@ -1627,6 +1628,10 @@ var Chess = function(fen) {
           move_history.push(move_to_san(move));
         }
         make_move(move);
+
+        /*
+         * Attach FEN to the history,
+         * so that when we jumb back to certain move, UI can show the game situation. */
         if (verbose){
           move_history[move_history.length -1].fen = generate_fen();
         }
