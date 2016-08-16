@@ -1,6 +1,5 @@
-'use strict';
 /*
- * Copyright (c) 2015, Jeff Hlywa (jhlywa@gmail.com)
+ * Copyright (c) 2016, Jeff Hlywa (jhlywa@gmail.com)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,7 +28,7 @@
 /* minified license below  */
 
 /* @license
- * Copyright (c) 2015, Jeff Hlywa (jhlywa@gmail.com)
+ * Copyright (c) 2016, Jeff Hlywa (jhlywa@gmail.com)
  * Released under the BSD license
  * https://github.com/jhlywa/chess.js/blob/master/LICENSE
  */
@@ -239,6 +238,11 @@ var Chess = function(fen) {
     return true;
   }
 
+  /* TODO: this function is pretty much crap - it validates structure but
+   * completely ignores content (e.g. doesn't verify that each side has a king)
+   * ... we should rewrite this, and ditch the silly error_number field while
+   * we're at it
+   */
   function validate_fen(fen) {
     var errors = {
        0: 'No errors.',
@@ -252,6 +256,7 @@ var Chess = function(fen) {
        8: '1st field (piece positions) is invalid [consecutive numbers].',
        9: '1st field (piece positions) is invalid [invalid piece].',
       10: '1st field (piece positions) is invalid [row too large].',
+      11: 'Illegal en-passant square',
     };
 
     /* 1st criterion: 6 space-seperated fields? */
@@ -315,6 +320,11 @@ var Chess = function(fen) {
       if (sum_fields !== 8) {
         return {valid: false, error_number: 10, error: errors[10]};
       }
+    }
+
+    if ((tokens[3][1] == '3' && tokens[1] == 'w') ||
+        (tokens[3][1] == '6' && tokens[1] == 'b')) {
+          return {valid: false, error_number: 11, error: errors[11]};
     }
 
     /* everything's okay! */
@@ -622,8 +632,16 @@ var Chess = function(fen) {
 
   /* convert a move from 0x88 coordinates to Standard Algebraic Notation
    * (SAN)
+   *
+   * @param {boolean} sloppy Use the sloppy SAN generator to work around over
+   * disambiguation bugs in Fritz and Chessbase.  See below:
+   *
+   * r1bqkbnr/ppp2ppp/2n5/1B1pP3/4P3/8/PPPP2PP/RNBQK1NR b KQkq - 2 4
+   * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
+   * 4. ... Ne7 is technically the valid SAN
    */
-  function move_to_san(move) {
+  function move_to_san(move, sloppy) {
+
     var output = '';
 
     if (move.flags & BITS.KSIDE_CASTLE) {
@@ -631,7 +649,7 @@ var Chess = function(fen) {
     } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O';
     } else {
-      var disambiguator = get_disambiguator(move);
+      var disambiguator = get_disambiguator(move, sloppy);
 
       if (move.piece !== PAWN) {
         output += move.piece.toUpperCase() + disambiguator;
@@ -662,6 +680,11 @@ var Chess = function(fen) {
     undo_move();
 
     return output;
+  }
+
+  // parses all of the decorators out of a SAN string
+  function stripped_san(move) {
+    return move.replace(/=/,'').replace(/[+#]?[?!]*$/,'');
   }
 
   function attacked(color, square) {
@@ -951,8 +974,8 @@ var Chess = function(fen) {
   }
 
   /* this function is used to uniquely identify ambiguous moves */
-  function get_disambiguator(move) {
-    var moves = generate_moves();
+  function get_disambiguator(move, sloppy) {
+    var moves = generate_moves({legal: !sloppy});
 
     var from = move.from;
     var to = move.to;
@@ -1035,6 +1058,45 @@ var Chess = function(fen) {
     return s;
   }
 
+  // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
+  function move_from_san(move, sloppy) {
+    // strip off any move decorations: e.g Nf3+?!
+    var clean_move = stripped_san(move);
+
+    // if we're using the sloppy parser run a regex to grab piece, to, and from
+    // this should parse invalid SAN like: Pe2-e4, Rc1c4, Qf3xf7
+    if (sloppy) {
+      var matches = clean_move.match(/([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/);
+      if (matches) {
+        var piece = matches[1];
+        var from = matches[2];
+        var to = matches[3];
+        var promotion = matches[4];
+      }
+    }
+
+    var moves = generate_moves();
+    for (var i = 0, len = moves.length; i < len; i++) {
+      // try the strict parser first, then the sloppy parser if requested
+      // by the user
+      if ((clean_move === stripped_san(move_to_san(moves[i]))) ||
+          (sloppy && clean_move === stripped_san(move_to_san(moves[i], true)))) {
+        return moves[i];
+      } else {
+        if (matches &&
+            (!piece || piece.toLowerCase() == moves[i].piece) &&
+            SQUARES[from] == moves[i].from &&
+            SQUARES[to] == moves[i].to &&
+            (!promotion || promotion.toLowerCase() == moves[i].promotion)) {
+          return moves[i];
+        }
+      }
+    }
+
+    return null;
+  }
+
+
   /*****************************************************************************
    * UTILITY FUNCTIONS
    ****************************************************************************/
@@ -1062,7 +1124,7 @@ var Chess = function(fen) {
   /* pretty = external move object */
   function make_pretty(ugly_move) {
     var move = clone(ugly_move);
-    move.san = move_to_san(move);
+    move.san = move_to_san(move, false);
     move.to = algebraic(move.to);
     move.from = algebraic(move.from);
 
@@ -1178,7 +1240,7 @@ var Chess = function(fen) {
             options.verbose) {
           moves.push(make_pretty(ugly_moves[i]));
         } else {
-          moves.push(move_to_san(ugly_moves[i]));
+          moves.push(move_to_san(ugly_moves[i], false));
         }
       }
 
@@ -1262,26 +1324,23 @@ var Chess = function(fen) {
 
       var moves = [];
       var move_string = '';
-      var pgn_move_number = 1;
 
       /* build the list of moves.  a move_string looks like: "3. e3 e6" */
       while (reversed_history.length > 0) {
         var move = reversed_history.pop();
 
         /* if the position started with black to move, start PGN with 1. ... */
-        if (pgn_move_number === 1 && move.color === 'b') {
-          move_string = '1. ...';
-          pgn_move_number++;
+        if (!history.length && move.color === 'b') {
+          move_string = move_number + '. ...';
         } else if (move.color === 'w') {
           /* store the previous generated move_string if we have one */
           if (move_string.length) {
             moves.push(move_string);
           }
-          move_string = pgn_move_number + '.';
-          pgn_move_number++;
+          move_string = move_number + '.';
         }
 
-        move_string = move_string + ' ' + move_to_san(move);
+        move_string = move_string + ' ' + move_to_san(move, false);
         make_move(move);
       }
 
@@ -1327,36 +1386,20 @@ var Chess = function(fen) {
     },
 
     load_pgn: function(pgn, options) {
+      // allow the user to specify the sloppy move parser to work around over
+      // disambiguation bugs in Fritz and Chessbase
+      var sloppy = (typeof options !== 'undefined' && 'sloppy' in options) ?
+                    options.sloppy : false;
+
       function mask(str) {
         return str.replace(/\\/g, '\\');
       }
 
-      /* convert a move from Standard Algebraic Notation (SAN) to 0x88
-       * coordinates
-      */
-      function move_from_san(move) {
-        /* strip off any move decorations: e.g Nf3+?! */
-        var move_replaced = move.replace(/=/,'').replace(/[+#]?[?!]*$/,'');
-        var moves = generate_moves();
-        for (var i = 0, len = moves.length; i < len; i++) {
-          if (move_replaced ===
-              move_to_san(moves[i]).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) {
-            return moves[i];
-          }
-        }
-        return null;
-      }
-
-      function get_move_obj(move) {
-        return move_from_san(trim(move));
-      }
-
       function has_keys(object) {
-        var has_keys = false;
         for (var key in object) {
-          has_keys = true;
+          return true;
         }
-        return has_keys;
+        return false;
       }
 
       function parse_pgn_header(header, options) {
@@ -1382,9 +1425,9 @@ var Chess = function(fen) {
       var newline_char = (typeof options === 'object' &&
                           typeof options.newline_char === 'string') ?
                           options.newline_char : '\r?\n';
-        var regex = new RegExp('^(\\[(.|' + mask(newline_char) + ')*\\])' +
-                               '(' + mask(newline_char) + ')*' +
-                               '1.(' + mask(newline_char) + '|.)*$', 'g');
+      var regex = new RegExp('^(\\[(.|' + mask(newline_char) + ')*\\])' +
+                             '(' + mask(newline_char) + ')*' +
+                             '1.(' + mask(newline_char) + '|.)*$', 'g');
 
       /* get header part of the PGN file */
       var header_string = pgn.replace(regex, '$1');
@@ -1394,7 +1437,7 @@ var Chess = function(fen) {
         header_string = '';
       }
 
-     reset();
+      reset();
 
       /* parse PGN header */
       var headers = parse_pgn_header(header_string, options);
@@ -1439,7 +1482,7 @@ var Chess = function(fen) {
       var move = '';
 
       for (var half_move = 0; half_move < moves.length - 1; half_move++) {
-        move = get_move_obj(moves[half_move]);
+        move = move_from_san(moves[half_move], sloppy);
 
         /* move not possible! (don't clear the board to examine to show the
          * latest valid position)
@@ -1459,7 +1502,7 @@ var Chess = function(fen) {
         }
       }
       else {
-        move = get_move_obj(move);
+        move = move_from_san(move, sloppy);
         if (move == null) {
           return false;
         } else {
@@ -1481,7 +1524,7 @@ var Chess = function(fen) {
       return turn;
     },
 
-    move: function(move) {
+    move: function(move, options) {
       /* The move function can be called with in the following parameters:
        *
        * .move('Nxb7')      <- where 'move' is a case-sensitive SAN string
@@ -1491,21 +1534,19 @@ var Chess = function(fen) {
        *         promotion: 'q',
        *      })
        */
+
+      // allow the user to specify the sloppy move parser to work around over
+      // disambiguation bugs in Fritz and Chessbase
+      var sloppy = (typeof options !== 'undefined' && 'sloppy' in options) ?
+                    options.sloppy : false;
+
       var move_obj = null;
-      var moves = generate_moves();
 
       if (typeof move === 'string') {
-        /* convert the move string to a move object */
-        /* strip off any move decorations: e.g Nf3+?! */
-        var move_replaced = move.replace(/=/,'').replace(/[+#]?[?!]*$/,'');
-        for (var i = 0, len = moves.length; i < len; i++) {
-          if (move_replaced ===
-              move_to_san(moves[i]).replace(/=/,'').replace(/[+#]?[?!]*$/,'')) {
-            move_obj = moves[i];
-            break;
-          }
-        }
+        move_obj = move_from_san(move, sloppy);
       } else if (typeof move === 'object') {
+        var moves = generate_moves();
+
         /* convert the pretty move object to an ugly move object */
         for (var i = 0, len = moves.length; i < len; i++) {
           if (move.from === algebraic(moves[i].from) &&

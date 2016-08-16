@@ -572,7 +572,155 @@ describe("Load PGN", function() {
       '1. d4 d5 2. Bf4 Nf6 3. e3 g6 4. Nf3 (4. Nc3 Bg7 5. Nf3 O-O 6. Be2 c5)',
       '4... Bg7 5. h3 { 5. Be2 O-O 6. O-O c5 7. c3 Nc6 } 5... O-O'],
      fen: 'rnbq1rk1/ppp1ppbp/5np1/3p4/3P1B2/4PN1P/PPP2PP1/RN1QKB1R w KQ - 1 6',
-     expect: true}
+     expect: true},
+
+    // test the sloppy PGN parser
+    {pgn: [
+      '1.e4 e5 2.Nf3 d6 3.d4 Bg4 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Qf5 Nc6 7.Bb5 Nge7',
+      '8.Qxe5 Qd7 9.O-O Nxe5 10.Bxd7+ Nxd7 11.Rd1 O-O-O 12.Nc3 Ng6 13.Be3 a6',
+      '14.Ba7 b6 15.Na4 Kb7 16.Bxb6 cxb6 17.b3 b5 18.Nb2 Nge5 19.f3 Rc8',
+      '20.Rac1 Ba3 21.Rb1 Rxc2 22.f4 Ng4 23.Rxd7+ Kc6 24.Rxf7 Bxb2 25.Rxg7',
+      'Ne3 26.Rg3 Bd4 27.Kh1 Rxa2 28.Rc1+ Kb6 29.e5 Rf8 30.e6 Rxf4 31.e7 Re4',
+      '32.Rg7 Bxg7'],
+      fen: '8/4P1bp/pk6/1p6/4r3/1P2n3/r5PP/2R4K w - - 0 33',
+      expect: false,
+      sloppy: false},
+
+    {pgn: [
+      '1.e4 e5 2.Nf3 d6 3.d4 Bg4 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Qf5 Nc6 7.Bb5 Nge7',
+      '8.Qxe5 Qd7 9.O-O Nxe5 10.Bxd7+ Nxd7 11.Rd1 O-O-O 12.Nc3 Ng6 13.Be3 a6',
+      '14.Ba7 b6 15.Na4 Kb7 16.Bxb6 cxb6 17.b3 b5 18.Nb2 Nge5 19.f3 Rc8',
+      '20.Rac1 Ba3 21.Rb1 Rxc2 22.f4 Ng4 23.Rxd7+ Kc6 24.Rxf7 Bxb2 25.Rxg7',
+      'Ne3 26.Rg3 Bd4 27.Kh1 Rxa2 28.Rc1+ Kb6 29.e5 Rf8 30.e6 Rxf4 31.e7 Re4',
+      '32.Rg7 Bxg7'],
+      fen: '8/4P1bp/pk6/1p6/4r3/1P2n3/r5PP/2R4K w - - 0 33',
+      expect: true,
+      sloppy: true},
+
+
+    // the sloppy PGN parser should still accept correctly disambiguated moves
+    {pgn: [
+      '1.e4 e5 2.Nf3 d6 3.d4 Bg4 4.dxe5 Bxf3 5.Qxf3 dxe5 6.Qf5 Nc6 7.Bb5 Ne7',
+      '8.Qxe5 Qd7 9.O-O Nxe5 10.Bxd7+ Nxd7 11.Rd1 O-O-O 12.Nc3 Ng6 13.Be3 a6',
+      '14.Ba7 b6 15.Na4 Kb7 16.Bxb6 cxb6 17.b3 b5 18.Nb2 Nge5 19.f3 Rc8',
+      '20.Rac1 Ba3 21.Rb1 Rxc2 22.f4 Ng4 23.Rxd7+ Kc6 24.Rxf7 Bxb2 25.Rxg7',
+      'Ne3 26.Rg3 Bd4 27.Kh1 Rxa2 28.Rc1+ Kb6 29.e5 Rf8 30.e6 Rxf4 31.e7 Re4',
+      '32.Rg7 Bxg7'],
+      fen: '8/4P1bp/pk6/1p6/4r3/1P2n3/r5PP/2R4K w - - 0 33',
+      expect: true,
+      sloppy: true},
+
+    {pgn: [
+      '1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6 4.Ng5 d5 5.exd5 Nxd5 6.Nxf7 Kxf7 7.Qf3+',
+      'Ke6 8.Nc3 Nb4'],
+      fen: 'r1bq1b1r/ppp3pp/4k3/3np3/1nB5/2N2Q2/PPPP1PPP/R1B1K2R w KQ - 4 9',
+      expect: true,
+      sloppy: true
+    },
+
+
+    // the sloppy parser should handle lazy disambiguation (e.g. Rc1c4 below)
+    {pgn: [
+      '1.e4 e5 2. Nf3 d5 3. Nxe5 f6 4. Bb5+ c6 5. Qh5+ Ke7',
+      'Qf7+ Kd6 7. d3 Kxe5 8. Qh5+ g5 9. g3 cxb5 10. Bf4+ Ke6',
+      'exd5+ Qxd5 12. Qe8+ Kf5 13. Rg1 gxf4 14. Nc3 Qc5 15. Ne4 Qxf2+',
+      'Kxf2 fxg3+ 17. Rxg3 Nd7 18. Qh5+ Ke6 19. Qe8+ Kd5 20. Rg4 Rb8',
+      'c4+ Kc6 22. Qe6+ Kc7 23. cxb5 Ne7 24. Rc1+ Kd8 25. Nxf6 Ra8',
+      'Kf1 Rb8 27. Rc1c4 b6 28. Rc4-d4 Rb7 29. Qf7 Rc7 30. Qe8# 1-0'],
+      fen: '2bkQb1r/p1rnn2p/1p3N2/1P6/3R2R1/3P4/PP5P/5K2 b - - 5 30',
+      expect: true,
+      sloppy: true
+    },
+
+    // sloppy parse should parse long algebraic notation
+    {pgn: [
+      'e2e4 d7d5 e4d5 d8d5 d2d4 g8f6 c2c4 d5d8 g1f3 c8g4 f1e2 e7e6 b1c3 f8e7',
+      'c1e3 e8g8 d1b3 b8c6 a1d1 a8b8 e1g1 d8c8 h2h3 g4h5 d4d5 e6d5 c4d5 h5f3',
+      'e2f3 c6e5 f3e2 a7a6 e3a7 b8a8 a7d4 e7d6 b3c2 f8e8 f2f4 e5d7 e2d3 c7c5',
+      'd4f2 d6f4 c3e4 f6d5 e4d6 f4d6 d3h7'],
+      fen: 'r1q1r1k1/1p1n1ppB/p2b4/2pn4/8/7P/PPQ2BP1/3R1RK1 b - - 0 25',
+      expect: true,
+      sloppy: true,
+    },
+
+    // sloppy parse should parse extended long algebraic notation w/ en passant
+    {pgn: [
+      '1. d2d4 f7f5 2. b2b3 e7e6 3. c1b2 d7d5 4. g1f3 f8d6 5. e2e3 g8f6 6. b1d2',
+      'e8g8 7. c2c4 c7c6 8. f1d3 b8d7 9. e1g1 f6e4 10. a1c1 g7g5 11. h2h3 d8e8 12.',
+      'd3e4 d5e4 13. f3g5 e8g6 14. h3h4 h7h6 15. g5h3 d7f6 16. f2f4 e4f3 17. d2f3',
+      'f6g4 18. d1e2 d6g3 19. h3f4 g6g7 20. d4d5 g7f7 21. d5e6 c8e6 22. f3e5 g4e5',
+      '23. b2e5 g8h7 24. h4h5 f8g8 25. e2f3 g3f4 26. e5f4 g8g4 27. g2g3 a8g8 28.',
+      'c1c2 b7b5 29. c4b5 e6d5 30. f3d1 f7h5 31. c2h2 g4g3+ 32. f4g3 g8g3+ 33.',
+      'g1f2 h5h2+ 34. f2e1 g3g2 35. d1d3 d5e4 36. d3d7+ h7g6 37. b5c6 g2e2+ 38.',
+      'e1d1 e2a2 0-1'],
+      fen: '8/p2Q4/2P3kp/5p2/4b3/1P2P3/r6q/3K1R2 w - - 0 39',
+      expect: true,
+      sloppy: true
+    },
+
+    // sloppy parse should parse long algebraic notation w/ underpromotions
+    {pgn: [
+      '1. e2e4 c7c5 2. g1f3 d7d6 3. d2d4 c5d4 4. f3d4 g8f6 5. f1d3 a7a6 6. c1e3',
+      'e7e5 7. d4f5 c8f5 8. e4f5 d6d5 9. e3g5 f8e7 10. d1e2 e5e4 11. g5f6 e7f6 12.',
+      'd3e4 d5e4 13. e2e4+ d8e7 14. e4e7+ f6e7 15. e1g1 e8g8 16. f1e1 e7f6 17.',
+      'c2c3 b8c6 18. b1d2 a8d8 19. d2e4 f8e8 20. e1e3 c6e5 21. a1e1 e5d3 22. e4f6+',
+      'g7f6 23. e3e8+ d8e8 24. e1e8+ g8g7 25. b2b4 d3e5 26. a2a4 b7b5 27. a4b5',
+      'a6b5 28. e8b8 e5g4 29. b8b5 g4e5 30. b5c5 g7f8 31. b4b5 f8e7 32. f2f4 e5d7',
+      '33. c5c7 e7d6 34. c7c8 d7b6 35. c8c6+ d6d7 36. c6b6 h7h5 37. b6f6 h5h4 38.',
+      'f6f7+ d7d6 39. f7h7 h4h3 40. h7h3 d6e7 41. b5b6 e7f6 42. h3h5 f6g7 43. b6b7',
+      'g7g8 44. b7b8N g8g7 45. c3c4 g7f6 46. c4c5 f6e7 47. c5c6 e7f6 48. c6c7 f6e7',
+      '49. c7c8B e7d6 50. b8a6 d6e7 51. c8e6 e7f6 52. a6c5 f6g7 53. c5e4 g7f8 54.',
+      'h5h8+ f8g7 55. h8g8+ g7h6 56. g8g6+ h6h7 57. e4f6+ h7h8 58. f6e4 h8h7 59.',
+      'f5f6 h7g6 60. f6f7 g6h5 61. f7f8R h5h6 62. f4f5 h6h7 63. f8f7+ h7h6 64.',
+      'f5f6 h6g6 65. f7g7+ g6h5 66. f6f7 h5h4 67. f7f8Q h4h5 68. f8h8# 1-0'],
+      fen: '7Q/6R1/4B3/7k/4N3/8/6PP/6K1 b - - 2 68',
+      expect: true,
+      sloppy: true
+    },
+
+    // sloppy parse should parse abbreviated long algebraic notation
+    {pgn: [
+      '1. d2d4 f7f5 2. Bc1g5 d7d6 3. e2e3 Nb8d7 4. c2c4 Ng8f6 5. Nb1c3 e7e5 6.',
+      'd4e5 d6e5 7. g2g3 Bf8e7 8. Bf1h3 h7h6 9. Bg5f6 Nd7f6 10. Qd1d8+ Be7d8 11.',
+      'Ng1f3 e5e4 12. Nf3d4 g7g6 13. e1g1 c7c5 14. Nd4b5 e8g8 15. Nb5d6 Bd8c7 16.',
+      'Nd6c8 Ra8c8 17. Rf1d1 Rc8d8 18. Bh3f1 b7b6 19. Nc3d5 Nf6d5 20. c4d5 Rf8e8',
+      '21. Bf1b5 Re8e5 22. Bb5c6 Kg8f7 23. Kg1f1 Kf7f6 24. h2h4 g6g5 25. h4g5+',
+      'h6g5 26. Kf1e2 Rd8h8 27. Rd1h1 Rh8h1 28. Ra1h1 Kf6g7 29. Rh1h5 Kg7g6 30.',
+      'Rh5h8 Re5e7 31. Rh8a8 a7a5 32. Ra8a7 Kg6f6 33. Ra7b7 Kf6e5 34. Ke2d2 f5f4',
+      '35. g3f4+ g5f4 36. Kd2c3 f4e3 37. f2e3 Re7f7 38. Kc3c4 Ke5d6 39. a2a3 Rf7f3',
+      '40. b2b4 a5b4 41. a3b4 c5b4 42. Kc4b4 Rf3e3 43. Kb4c4 Re3a3 44. Kc4b4 e4e3',
+      '45. Bc6b5 Ra3a1 46. Kb4c3 Ra1a3+ 47. Kc3d4 Ra3b3 48. Bb5e2 Rb3b4+ 49. Kd4e3',
+      'Rb4h4 50. Be2f3 Rh4h3 51. Rb7a7 Rh3f3+ 52. Ke3f3 b6b5 53. Kf3e4 Kd6c5 54.',
+      'Ra7b7 Bc7b6 55. Ke4e5 b5b4 56. d5d6 b4b3 57. Rb7b6 Kc5b6 58. d6d7 Kb6c7 59.',
+      'Ke5e6 1-0'],
+      fen: '8/2kP4/4K3/8/8/1p6/8/8 b - - 2 59',
+      expect: true,
+      sloppy: true
+    },
+
+    // sloppy parse should parse extended long algebraic notation
+    {pgn: [
+      '1. e2-e4 c7-c5 2. Ng1-f3 d7-d6 3. d2-d4 c5xd4 4. Nf3xd4 Ng8-f6 5. Bf1-d3',
+      'a7-a6 6. Bc1-e3 e7-e5 7. Nd4-f5 Bc8xf5 8. e4xf5 d6-d5 9. Be3-g5 Bf8-e7 10.',
+      'Qd1-e2 e5-e4 11. Bg5xf6 Be7xf6 12. Bd3xe4 d5xe4 13. Qe2xe4+ Qd8-e7 14.',
+      'Qe4xe7+ Bf6xe7 15. e1-g1 e8-g8 16. Rf1-e1 Be7-f6 17. c2-c3 Nb8-c6 18.',
+      'Nb1-d2 Ra8-d8 19. Nd2-e4 Rf8-e8 20. Re1-e3 Nc6-e5 21. Ra1-e1 Ne5-d3 22.',
+      'Ne4xf6+ g7xf6 23. Re3xe8+ Rd8xe8 24. Re1xe8+ Kg8-g7 25. b2-b4 Nd3-e5 26.',
+      'a2-a4 b7-b5 27. a4xb5 a6xb5 28. Re8-b8 Ne5-g4 29. Rb8xb5 Ng4-e5 30. Rb5-c5',
+      'Kg7-f8 31. b4-b5 Kf8-e7 32. f2-f4 Ne5-d7 33. Rc5-c7 Ke7-d6 34. Rc7-c8',
+      'Nd7-b6 35. Rc8-c6+ Kd6-d7 36. Rc6xb6 h7-h5 37. Rb6xf6 h5-h4 38. Rf6xf7+',
+      'Kd7-d6 39. Rf7-h7 h4-h3 40. Rh7xh3 Kd6-e7 41. b5-b6 Ke7-f6 42. Rh3-h5',
+      'Kf6-g7 43. b6-b7 Kg7-g8 44. b7-b8N Kg8-g7 45. c3-c4 Kg7-f6 46. c4-c5 Kf6-e7',
+      '47. c5-c6 Ke7-f6 48. c6-c7 Kf6-e7 49. c7-c8B Ke7-d6 50. Nb8-a6 Kd6-e7 51.',
+      'Bc8-e6 Ke7-f6 52. Na6-c5 Kf6-g7 53. Nc5-e4 Kg7-f8 54. Rh5-h8+ Kf8-g7 55.',
+      'Rh8-g8+ Kg7-h6 56. Rg8-g6+ Kh6-h7 57. Ne4-f6+ Kh7-h8 58. Nf6-e4 Kh8-h7 59.',
+      'f5-f6 Kh7xg6 60. f6-f7 Kg6-h5 61. f7-f8R Kh5-h6 62. f4-f5 Kh6-h7 63.',
+      'Rf8-f7+ Kh7-h6 64. f5-f6 Kh6-g6 65. Rf7-g7+ Kg6-h5 66. f6-f7 Kh5-h4 67.',
+      'f7-f8Q Kh4-h5 68. Qf8-h8# 1-0'],
+      fen: '7Q/6R1/4B3/7k/4N3/8/6PP/6K1 b - - 2 68',
+      expect: true,
+      sloppy: true
+    },
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
@@ -580,7 +728,9 @@ describe("Load PGN", function() {
   tests.forEach(function(t, i) {
     newline_chars.forEach(function(newline, j) {
       it(i + String.fromCharCode(97 + j), function() {
-        var result = chess.load_pgn(t.pgn.join(newline), { newline_char: newline });
+        var sloppy = t.sloppy || false;
+        var result = chess.load_pgn(t.pgn.join(newline), {sloppy: sloppy,
+                                                          newline_char: newline});
         var should_pass = t.expect;
 
         /* some tests are expected to fail */
@@ -590,12 +740,12 @@ describe("Load PGN", function() {
          * so we'll need compare the results of the load against a FEN string
          * (instead of the reconstructed PGN [e.g. test.pgn.join(newline)])
          */
-
           if ('fen' in t) {
             assert(result && chess.fen() == t.fen);
           } else {
             assert(result && chess.pgn({ max_width: 65, newline_char: newline }) == t.pgn.join(newline));
           }
+
         } else {
           /* this test should fail, so make sure it does */
           assert(result == should_pass);
@@ -664,14 +814,40 @@ describe("Make Move", function() {
      legal: true,
      move: 'fxe3',
      next: 'rnbqkbnr/pppp2pp/8/4p3/8/2PPp3/PP3PPP/RNBQKBNR w KQkq - 0 2',
-     captured: 'p'}
+     captured: 'p'},
+
+     // strict move parser
+    {fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
+     legal: true,
+     next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8',
+     move: 'Ne7'},
+
+     // strict move parser should reject over disambiguation
+    {fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
+     legal: false,
+     move: 'Nge7'},
+
+     // sloppy move parser
+    {fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
+     legal: true,
+     sloppy: true,
+     move: 'Nge7',
+     next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'},
+
+     // the sloppy parser should still accept correctly disambiguated moves
+    {fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
+     legal: true,
+     sloppy: true,
+     move: 'Ne7',
+     next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'}
   ];
 
   positions.forEach(function(position) {
     var chess = new Chess();
     chess.load(position.fen);
     it(position.fen + ' (' + position.move + ' ' + position.legal + ')', function() {
-      var result = chess.move(position.move);
+      var sloppy = position.sloppy || false;
+      var result = chess.move(position.move, {sloppy: sloppy});
       if (position.legal) {
         assert(result
                && chess.fen() == position.next
@@ -707,6 +883,8 @@ describe("Validate FEN", function() {
     {fen: 'rnbqk?nr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',  error_number: 9},
     {fen: 'rnbqkbnr/pppppppp/7/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',  error_number: 10},
     {fen: 'rnbqkbnr/p1p1p1p1p/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', error_number: 10},
+    {fen: 'r1bqkbnr/2pppppp/n7/1p6/8/4P3/PPPP1PPP/RNBQK1NR b KQkq b6 0 4', error_number: 11},
+    {fen: 'rnbqkbnr/1p1ppppp/B1p5/8/6P1/4P3/PPPP1P1P/RNBQK1NR w KQkq g3 0 3', error_number: 11},
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',  error_number: 0},
     {fen: 'rnbqkbnr/pppp1ppp/8/4p3/2P5/8/PP1PPPPP/RNBQKBNR w KQkq e6 0 2', error_number: 0},
     {fen: '3r2k1/p1q2pp1/2nr1n1p/2p1p3/4P2B/P1P2Q1P/B4PP1/1R2R1K1 b - - 3 20', error_number: 0},
@@ -993,5 +1171,21 @@ describe('Regression Tests', function() {
        assert(result);
        assert(chess.fen() === 'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2');
   });
+
+  it('Github Issue #98 (white) - Wrong movement number after setting a position via FEN', function () {
+    var chess = new Chess();
+    chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+    chess.move('f7');
+    var result = chess.pgn();
+    assert(result.match(/(45\. f7)$/));
+  })
+
+  it('Github Issue #98 (black) - Wrong movement number after setting a position via FEN', function () {
+    var chess = new Chess();
+    chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 b - - 1 45');
+    chess.move('Rf1+');
+    var result = chess.pgn();
+    assert(result.match(/(45\. \.\.\. Rf1\+)$/));
+  })
 
 });

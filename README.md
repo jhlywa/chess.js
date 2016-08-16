@@ -8,6 +8,20 @@ detection - basically everything but the AI.
 
 chess.js has been extensively tested in node.js and most modern browsers.
 
+## Installation
+
+To install the stable version:
+
+```sh
+npm install --save chess.js
+```
+
+chess.js is also available via [CDNJS](https://cdnjs.com/libraries/chess.js):
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
+```
+
 ## Example Code
 The code below plays a complete game of chess ... randomly.
 
@@ -28,6 +42,7 @@ console.log(chess.pgn());
 - [The Internet Chess Club (ICC)](http://www.chessclub.com/)
 - [lichess](http://lichess.org/tv)
 - [Redbull - Battle for the Queen](http://battleforthequeen.redbull.com/)
+- [Asm.js Chess Battle](https://developer.microsoft.com/en-us/microsoft-edge/testdrive/demos/chess/)
 - [3D Hartwig Chess](http://creativejs.com/2012/12/3d-hartwig-chess/)
 - [Scene VR](http://client.scenevr.com/?connect=chess.scenevr.hosting/chess.xml)
 - [Multiplayer Chess](http://chessapp.com/)
@@ -260,9 +275,12 @@ chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 ### .load_pgn(pgn, [ options ])
 Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
-Options is a optional parameter that contains a 'newline_char' which is a
+Options is a optional parameter that may contain a `newline_char` which is a
 string representation of a RegExp (and should not be pre-escaped) and defaults
-to '\r?\n'). Returns true if the PGN was parsed successfully, otherwise false.
+to `\r?\n`).  Options may also contain a `sloppy` flag which allows chess.js
+to parse moves in various non-standard notations  (see `.move` documentation
+for more information).  Returns true if the PGN was parsed successfully,
+otherwise false.
 
 ```js
 var chess = new Chess();
@@ -305,7 +323,7 @@ chess.ascii()
 //         a  b  c  d  e  f  g  h'
 ```
 
-### .move(move)
+### .move(move, [ options ])
 Attempts to make a move on the board, returning a move object if the move was
 legal, otherwise null.  The .move function can be called two ways, by passing
 a string in Standard Algebraic Notation (SAN):
@@ -333,6 +351,33 @@ chess.move({ from: 'g2', to: 'g3' });
 // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
 ```
 
+An optional sloppy flag can be used to parse a variety of non-standard move
+notations:
+
+```js
+
+var chess = new Chess();
+
+// various forms of Long Algebraic Notation
+chess.move('e2e4', {sloppy: true});
+// -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
+chess.move('e7-e5', {sloppy: true});
+// -> { color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5' }
+chess.move('Pf2f4', {sloppy: true});
+// -> { color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' }
+chess.move('Pe5xf4', {sloppy: true});
+// -> { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }
+
+
+// correctly parses incorrectly disambiguated moves
+chess = new Chess('r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7');
+
+chess.move('Nge7');  // Ne7 is unambiguous because the knight on c6 is pinned
+// -> null
+
+chess.move('Nge7', {sloppy: true});
+// -> { color: 'b', from: 'g8', to: 'e7', flags: 'n', piece: 'n', san: 'Ne7' }
+```
 ### .moves([ options ])
 Returns a list of legals moves from the current position.  The function takes an optional parameter which controls the single-square move generation and verbosity.
 
@@ -476,7 +521,7 @@ chess.fen();
 chess.undo();
 // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
 chess.fen();
-// -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+// -> 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 chess.undo();
 // -> null
 ```
