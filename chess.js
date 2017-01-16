@@ -1290,6 +1290,26 @@ var Chess = function(fen) {
       return generate_fen();
     },
 
+    board: function() {
+      var output = [],
+          row    = [];
+
+      for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+        if (board[i] == null) {
+          row.push(null)
+        } else {
+          row.push({type: board[i].type, color: board[i].color})
+        }
+        if ((i + 1) & 0x88) {
+          output.push(row);
+          row = []
+          i += 8;
+        }
+      }
+
+      return output;
+    },
+
     pgn: function(options) {
       /* using the specification from http://www.chessclub.com/help/PGN-spec
        * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })

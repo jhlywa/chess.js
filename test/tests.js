@@ -1141,6 +1141,116 @@ describe("History", function() {
   });
 });
 
+describe('Board Tests', function() {
+
+  var tests = [
+    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+      board: [[{type: 'r', color: 'b'},
+               {type: 'n', color: 'b'},
+               {type: 'b', color: 'b'},
+               {type: 'q', color: 'b'},
+               {type: 'k', color: 'b'},
+               {type: 'b', color: 'b'},
+               {type: 'n', color: 'b'},
+               {type: 'r', color: 'b'}],
+              [{type: 'p', color: 'b'},
+               {type: 'p', color: 'b'},
+               {type: 'p', color: 'b'},
+               {type: 'p', color: 'b'},
+               {type: 'p', color: 'b'},
+               {type: 'p', color: 'b'},
+               {type: 'p', color: 'b'},
+               {type: 'p', color: 'b'}],
+              [null, null, null, null, null, null, null, null],
+              [null, null, null, null, null, null, null, null],
+              [null, null, null, null, null, null, null, null],
+              [null, null, null, null, null, null, null, null],
+              [{type: 'p', color: 'w'},
+               {type: 'p', color: 'w'},
+               {type: 'p', color: 'w'},
+               {type: 'p', color: 'w'},
+               {type: 'p', color: 'w'},
+               {type: 'p', color: 'w'},
+               {type: 'p', color: 'w'},
+               {type: 'p', color: 'w'}],
+              [{type: 'r', color: 'w'},
+               {type: 'n', color: 'w'},
+               {type: 'b', color: 'w'},
+               {type: 'q', color: 'w'},
+               {type: 'k', color: 'w'},
+               {type: 'b', color: 'w'},
+               {type: 'n', color: 'w'},
+               {type: 'r', color: 'w'}]]},
+    // checkmate
+	{fen: 'r3k2r/ppp2p1p/2n1p1p1/8/2B2P1q/2NPb1n1/PP4PP/R2Q3K w kq - 0 8',
+	  board:[[{type: 'r', color: 'b'},
+			  null,
+			  null,
+			  null,
+			  {type: 'k', color: 'b'},
+			  null,
+			  null,
+			  {type: 'r', color: 'b'}],
+		     [{type: 'p', color: 'b'},
+		      {type: 'p', color: 'b'},
+		      {type: 'p', color: 'b'},
+		      null,
+		      null,
+		      {type: 'p', color: 'b'},
+		      null,
+		      {type: 'p', color: 'b'}],
+		     [null,
+		      null,
+		      {type: 'n', color: 'b'},
+		      null,
+		      {type: 'p', color: 'b'},
+		      null,
+		      {type: 'p', color: 'b'},
+		      null],
+		     [null, null, null, null, null, null, null, null],
+		     [null,
+		      null,
+		      {type: 'b', color: 'w'},
+		      null,
+		      null,
+		      {type: 'p', color: 'w'},
+		      null,
+		      {type: 'q', color: 'b'}],
+		     [null,
+		      null,
+		      {type: 'n', color: 'w'},
+		      {type: 'p', color: 'w'},
+		      {type: 'b', color: 'b'},
+		      null,
+		      {type: 'n', color: 'b'},
+		      null],
+		     [{type: 'p', color: 'w'},
+		      {type: 'p', color: 'w'},
+		      null,
+		      null,
+		      null,
+		      null,
+		      {type: 'p', color: 'w'},
+		      {type: 'p', color: 'w'}],
+		     [{type: 'r', color: 'w'},
+		      null,
+		      null,
+		      {type: 'q', color: 'w'},
+		      null,
+		      null,
+		      null,
+		      {type: 'k', color: 'w'}]]}
+  ];
+
+
+  tests.forEach(function(test) {
+    it('Board - ' + test.fen, function() {
+      var chess = new Chess(test.fen);
+      assert(JSON.stringify(chess.board()) === JSON.stringify(test.board));
+    })
+  })
+});
+
 describe('Regression Tests', function() {
   it('Github Issue #32 - castling flag reappearing', function() {
     var chess = new Chess('b3k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qNP/6QK b k - 2 28');
@@ -1189,3 +1299,5 @@ describe('Regression Tests', function() {
   })
 
 });
+
+
