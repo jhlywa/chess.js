@@ -39,6 +39,7 @@ console.log(chess.pgn());
 
 ## Sites Using chess.js
 
+- [chess.com](http://www.chess.com/)
 - [The Internet Chess Club (ICC)](http://www.chessclub.com/)
 - [lichess](http://lichess.org/tv)
 - [Redbull - Battle for the Queen](http://battleforthequeen.redbull.com/)
