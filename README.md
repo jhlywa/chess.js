@@ -51,6 +51,7 @@ console.log(chess.pgn());
 - [Chess Fork](http://www.chessfork.com/)
 - [Lozza](http://op12no2.me/posts/1641)
 - [angular-chess](http://theborakompanioni.github.io/angular-chess)
+- [Chessable](https://www.chessable.com)
 
 Need a user interface?  Try Chris Oakman's excellent
 [chessboard.js](http://chessboardjs.com) library.  See
@@ -60,7 +61,7 @@ an example integration of chess.js with chessboard.js.
 ## API
 
 ### Constructor: Chess([ fen ])
-The Chess() constructor takes a optional parameter which specifies the board configuration
+The Chess() constructor takes an optional parameter which specifies the board configuration
 in [Forsyth-Edwards Notation](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation).
 
 ```js
@@ -294,7 +295,7 @@ chess.insufficient_material()
 ```
 
 ### .load(fen)
-The board is cleared and the FEN string is loaded.  Returns true if position was
+The board is cleared, and the FEN string is loaded.  Returns true if the position was
 successfully loaded, otherwise false.
 
 ```js
@@ -309,7 +310,7 @@ chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 ### .load_pgn(pgn, [ options ])
 Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
-Options is a optional parameter that may contain a `newline_char` which is a
+Options is an optional parameter that may contain a `newline_char` which is a
 string representation of a RegExp (and should not be pre-escaped) and defaults
 to `\r?\n`).  Options may also contain a `sloppy` flag which allows chess.js
 to parse moves in various non-standard notations  (see `.move` documentation
@@ -413,7 +414,7 @@ chess.move('Nge7', {sloppy: true});
 // -> { color: 'b', from: 'g8', to: 'e7', flags: 'n', piece: 'n', san: 'Ne7' }
 ```
 ### .moves([ options ])
-Returns a list of legals moves from the current position.  The function takes an optional parameter which controls the single-square move generation and verbosity.
+Returns a list of legal moves from the current position.  The function takes an optional parameter which controls the single-square move generation and verbosity.
 
 ```js
 var chess = new Chess();
@@ -469,9 +470,9 @@ chess.pgn({ max_width: 5, newline_char: '<br />' });
 ```
 
 ### .put(piece, square)
-Place a piece on square where piece is an object with the form
-{ type: ..., color: ... }.  Returns true if piece was successfully placed,
-otherwise the board remains unchanged and false is returned.  `put()` will fail
+Place a piece on the square where piece is an object with the form
+{ type: ..., color: ... }.  Returns true if the piece was successfully placed,
+otherwise, the board remains unchanged and false is returned.  `put()` will fail
 when passed an invalid piece or square, or when two or more kings of the
 same color are placed.
 
