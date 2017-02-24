@@ -52,6 +52,7 @@ console.log(chess.pgn());
 - [Lozza](http://op12no2.me/posts/1641)
 - [angular-chess](http://theborakompanioni.github.io/angular-chess)
 - [Chessable](https://www.chessable.com)
+- [SlimChess](https://slimchess.com/now)
 
 Need a user interface?  Try Chris Oakman's excellent
 [chessboard.js](http://chessboardjs.com) library.  See
