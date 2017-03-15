@@ -1,6 +1,7 @@
 if (typeof require != "undefined") {
   var chai = require('chai');
-  var Chess = require('../chess').Chess;
+  var min_or_normal = process.env.TEST_MIN ? '.min.js' : '.js';
+  var Chess = require('../chess' + min_or_normal).Chess;
 }
 
 var assert = chai.assert;

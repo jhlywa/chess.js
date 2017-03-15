@@ -30,6 +30,7 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha",
+    "test-min": "TEST_MIN=true ./node_modules/.bin/mocha",
     "minify": "./node_modules/.bin/uglifyjs chess.js -c -m --comments 'license' > chess.min.js"
   }
 }
