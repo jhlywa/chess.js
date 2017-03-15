@@ -821,6 +821,18 @@ var Chess = function(fen) {
     return repetition;
   }
 
+  function is_promotion(from, to) {
+
+    var possible_moves = generate_moves({ square: from });
+
+    for (var i = 0, len = possible_moves.length; i < len; i++) {
+      if (to === algebraic(possible_moves[i].to)) {
+        return !!(possible_moves[i].flags & BITS.PROMOTION);
+      }
+    }
+    return false;
+  }
+
   function push(move) {
     history.push({
       move: move,
@@ -1280,6 +1292,10 @@ var Chess = function(fen) {
              in_stalemate() ||
              insufficient_material() ||
              in_threefold_repetition();
+    },
+
+    is_promotion: function(from, to) {
+      return is_promotion(from, to);
     },
 
     validate_fen: function(fen) {

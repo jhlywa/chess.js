@@ -358,6 +358,37 @@ chess.ascii()
 //         a  b  c  d  e  f  g  h'
 ```
 
+### .is_promotion(from, to)
+Returns true if moving the piece on square `from` to square `to` should result
+in promotion; otherwise false.
+
+```js
+var chess = new Chess('8/2P2k2/8/8/8/5K2/8/8 w - - 0 1');
+chess.is_promotion('c7', 'c8')
+// -> true
+```
+
+This can be used to interactively prompt a user for promotion when needed.
+
+```js
+function handleUserMove(from, to) {
+
+  if (chess.is_promotion(from, to)) {
+
+    // (somehow) prompt the user for their choice, move and promote in the callback
+    promptPromotionChoice(function callback(choice) {
+      chess.move({ from: from, to: to, promotion: choice });
+    });
+
+  } else {
+
+    // no promotion needed
+    chess.move({ from: from, to: to });
+
+  }
+}
+```
+
 ### .move(move, [ options ])
 Attempts to make a move on the board, returning a move object if the move was
 legal, otherwise null.  The .move function can be called two ways, by passing
