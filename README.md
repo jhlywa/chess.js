@@ -371,12 +371,12 @@ chess.is_promotion('c7', 'c8')
 This can be used to interactively prompt a user for promotion when needed.
 
 ```js
-function handleUserMove(from, to) {
+function handle_user_move(from, to) {
 
   if (chess.is_promotion(from, to)) {
 
     // (somehow) prompt the user for their choice, move and promote in the callback
-    promptPromotionChoice(function callback(choice) {
+    prompt_promotion_choice(function callback(choice) {
       chess.move({ from: from, to: to, promotion: choice });
     });
 
