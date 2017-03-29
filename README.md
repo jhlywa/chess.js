@@ -311,12 +311,22 @@ chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 ### .load_pgn(pgn, [ options ])
 Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
-Options is an optional parameter that may contain a `newline_char` which is a
-string representation of a RegExp (and should not be pre-escaped) and defaults
-to `\r?\n`).  Options may also contain a `sloppy` flag which allows chess.js
-to parse moves in various non-standard notations  (see `.move` documentation
-for more information).  Returns true if the PGN was parsed successfully,
-otherwise false.
+`pgn` should be a string. Options is an optional `object` which may contain
+a string `newline_char` and a boolean `sloppy`.
+
+The `newline_char` is a string representation of a valid RegExp fragment and is
+used to process the PGN. It defaults to `\r?\n`. Special characters
+should not be pre-escaped, but any literal special characters should be escaped
+as is normal for a RegExp.  Keep in mind that backslashes in JavaScript strings
+must themselves be escaped (see `sloppy_pgn` example below). Avoid using
+a `newline_char` that may occur elsewhere in a PGN, such as `.` or `x`, as this
+will result in unexpected behavior.
+
+The `sloppy` flag is a boolean that permits chess.js to parse moves in
+non-standard notations. See `.move` documentation for more information about
+non-SAN notations.
+
+The method will return `true` if the PGN was parsed successfully, otherwise `false`.
 
 ```js
 var chess = new Chess();
@@ -342,10 +352,10 @@ pgn = ['[Event "Casual Game"]',
 chess.load_pgn(pgn.join('\n'));
 // -> true
 
-chess.fen()
+chess.fen();
 // -> 1r3kr1/pbpBBp1p/1b3P2/8/8/2P2q2/P4PPP/3R2K1 b - - 0 24
 
-chess.ascii()
+chess.ascii();
 // -> '  +------------------------+
 //     8 | .  r  .  .  .  k  r  . |
 //     7 | p  b  p  B  B  p  .  p |
@@ -357,6 +367,39 @@ chess.ascii()
 //     1 | .  .  .  R  .  .  K  . |
 //       +------------------------+
 //         a  b  c  d  e  f  g  h'
+
+
+// Parse non-standard move formats and unusual line separators
+var sloppy_pgn = ['[Event "Wijk aan Zee (Netherlands)"]',
+  '[Date "1971.01.26"]',
+  '[Result "1-0"]',
+  '[White "Tigran Vartanovich Petrosian"]',
+  '[Black "Hans Ree"]',
+  '[ECO "A29"]',
+  '',
+  '1. Pc2c4 Pe7e5', // non-standard
+  '2. Nc3 Nf6',
+  '3. Nf3 Nc6',
+  '4. g2g3 Bb4',    // non-standard
+  '5. Nd5 Nxd5',
+  '6. c4xd5 e5-e4', // non-standard
+  '7. dxc6 exf3',
+  '8. Qb3 1-0'
+].join('|');
+
+var options = {
+  newline_char: '\\|', // Literal '|' character escaped
+  sloppy: true
+};
+
+chess.load_pgn(sloppy_pgn);
+// -> false
+
+chess.load_pgn(sloppy_pgn, options);
+// -> true
+
+chess.fen();
+// -> 'r1bqk2r/pppp1ppp/2P5/8/1b6/1Q3pP1/PP1PPP1P/R1B1KB1R b KQkq - 1 8'
 ```
 
 ### .move(move, [ options ])
