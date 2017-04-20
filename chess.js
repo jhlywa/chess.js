@@ -33,21 +33,31 @@
  * https://github.com/jhlywa/chess.js/blob/master/LICENSE
  */
 
+var BLACK = 'b';
+var WHITE = 'w';
+
+var EMPTY = -1;
+
+var PAWN = 'p';
+var KNIGHT = 'n';
+var BISHOP = 'b';
+var ROOK = 'r';
+var QUEEN = 'q';
+var KING = 'k';
+
+var FLAGS = {
+  NORMAL: 'n',
+  CAPTURE: 'c',
+  BIG_PAWN: 'b',
+  EP_CAPTURE: 'e',
+  PROMOTION: 'p',
+  KSIDE_CASTLE: 'k',
+  QSIDE_CASTLE: 'q'
+};
+
 var Chess = function(fen) {
 
   /* jshint indent: false */
-
-  var BLACK = 'b';
-  var WHITE = 'w';
-
-  var EMPTY = -1;
-
-  var PAWN = 'p';
-  var KNIGHT = 'n';
-  var BISHOP = 'b';
-  var ROOK = 'r';
-  var QUEEN = 'q';
-  var KING = 'k';
 
   var SYMBOLS = 'pnbrqkPNBRQK';
 
@@ -105,16 +115,6 @@ var Chess = function(fen) {
   ];
 
   var SHIFTS = { p: 0, n: 1, b: 2, r: 3, q: 4, k: 5 };
-
-  var FLAGS = {
-    NORMAL: 'n',
-    CAPTURE: 'c',
-    BIG_PAWN: 'b',
-    EP_CAPTURE: 'e',
-    PROMOTION: 'p',
-    KSIDE_CASTLE: 'k',
-    QSIDE_CASTLE: 'q'
-  };
 
   var BITS = {
     NORMAL: 1,
@@ -1656,6 +1656,22 @@ var Chess = function(fen) {
 
 /* export Chess object if using node or any other CommonJS compatible
  * environment */
-if (typeof exports !== 'undefined') exports.Chess = Chess;
+if (typeof exports !== 'undefined') {
+    exports.Chess = Chess;
+    exports.constants = {
+        BLACK: BLACK,
+        WHITE: WHITE,
+        EMPTY: EMPTY,
+
+        PAWN: PAWN,
+        KNIGHT: KNIGHT,
+        BISHOP: BISHOP,
+        ROOK: ROOK,
+        QUEEN: QUEEN,
+        KING: KING,
+
+        FLAGS: FLAGS,
+    };
+}
 /* export Chess object for any RequireJS compatible environment */
 if (typeof define !== 'undefined') define( function () { return Chess;  });
