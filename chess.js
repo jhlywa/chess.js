@@ -181,7 +181,7 @@ var Chess = function(fen) {
     half_moves = 0;
     move_number = 1;
     history = [];
-    header = {};
+    if (!('FEN' in header && 'SetUp' in header)) header = {};
     update_setup(generate_fen());
   }
 
