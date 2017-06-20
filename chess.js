@@ -172,9 +172,9 @@ var Chess = function(fen) {
     load(fen);
   }
 
-  function clear(clearHeaders) {
-    if (typeof clearHeaders === 'undefined') {
-      clearHeaders = true;
+  function clear(keep_headers) {
+    if (typeof keep_headers === 'undefined') {
+      keep_headers = false;
     }
 
     board = new Array(128);
@@ -185,7 +185,7 @@ var Chess = function(fen) {
     half_moves = 0;
     move_number = 1;
     history = [];
-    if (clearHeaders) header = {};
+    if (!keep_headers) header = {};
     update_setup(generate_fen());
   }
 
@@ -193,9 +193,9 @@ var Chess = function(fen) {
     load(DEFAULT_POSITION);
   }
 
-  function load(fen, clearHeaders) {
-    if (typeof clearHeaders === 'undefined') {
-      clearHeaders = true;
+  function load(fen, keep_headers) {
+    if (typeof keep_headers === 'undefined') {
+      keep_headers = false;
     }
 
     var tokens = fen.split(/\s+/);
@@ -206,7 +206,7 @@ var Chess = function(fen) {
       return false;
     }
 
-    clear(clearHeaders);
+    clear(keep_headers);
 
     for (var i = 0; i < position.length; i++) {
       var piece = position.charAt(i);
@@ -1476,7 +1476,7 @@ var Chess = function(fen) {
       /* load the starting position indicated by [Setup '1'] and
       * [FEN position] */
       if (headers['SetUp'] === '1') {
-          if (!(('FEN' in headers) && load(headers['FEN'], false ))) { // don't clear the headers on load call
+          if (!(('FEN' in headers) && load(headers['FEN'], true ))) { // second argument to load: don't clear the headers
             return false;
           }
       }
