@@ -15,6 +15,14 @@ To install the stable version:
 ```sh
 npm install --save chess.js
 ```
+(Note: There might be an error -- 
+
+```npm WARN saveError ENOENT: no such file or directory, open '/home/xxx/package.json'
+npm WARN enoent ENOENT: no such file or directory, open '/home/xxx/package.json'
+``` 
+This is due to lack of pakcage.json file and it can be fixed by this command:
+```npm init
+```
 
 chess.js is also available via [CDNJS](https://cdnjs.com/libraries/chess.js):
 
