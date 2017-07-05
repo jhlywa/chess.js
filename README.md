@@ -21,9 +21,9 @@ npm install --save chess.js
 npm WARN enoent ENOENT: no such file or directory, open '/home/xxx/package.json'
 ``` 
 This is due to lack of pakcage.json file and it can be fixed by this command:
-```npm init
 ```
-
+npm init
+```
 chess.js is also available via [CDNJS](https://cdnjs.com/libraries/chess.js):
 
 ```html
