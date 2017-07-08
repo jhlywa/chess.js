@@ -24,7 +24,7 @@
     }
   ],
   "devDependencies": {
-    "mocha": "2.2.4",
+    "mocha": "3.4.2",
     "chai": "2.3.0",
     "uglify-js": "2.4.21"
   },
