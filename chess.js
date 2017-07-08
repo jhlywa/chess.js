@@ -163,17 +163,23 @@ var Chess = function(fen) {
   var history = [];
   var header = {};
 
+  /* A utility method that returns `true` if the argument is defined.
+   */
+  function isDefined(val) {
+    return typeof val !== 'undefined';
+  }
+
   /* if the user passes in a fen string, load it, else default to
    * starting position
    */
-  if (typeof fen === 'undefined') {
+  if (!isDefined(fen)) {
     load(DEFAULT_POSITION);
   } else {
     load(fen);
   }
 
   function clear(keep_headers) {
-    if (typeof keep_headers === 'undefined') {
+    if (!isDefined(keep_headers)) {
       keep_headers = false;
     }
 
@@ -194,7 +200,7 @@ var Chess = function(fen) {
   }
 
   function load(fen, keep_headers) {
-    if (typeof keep_headers === 'undefined') {
+    if (!isDefined(keep_headers)) {
       keep_headers = false;
     }
 
@@ -510,11 +516,11 @@ var Chess = function(fen) {
     var single_square = false;
 
     /* do we want legal moves? */
-    var legal = (typeof options !== 'undefined' && 'legal' in options) ?
+    var legal = (isDefined(options) && 'legal' in options) ?
                 options.legal : true;
 
     /* are we generating moves for a single square? */
-    if (typeof options !== 'undefined' && 'square' in options) {
+    if (isDefined(options) && 'square' in options) {
       if (options.square in SQUARES) {
         first_sq = last_sq = SQUARES[options.square];
         single_square = true;
@@ -1244,8 +1250,7 @@ var Chess = function(fen) {
         /* does the user want a full move object (most likely not), or just
          * SAN
          */
-        if (typeof options !== 'undefined' && 'verbose' in options &&
-            options.verbose) {
+        if (isDefined(options) && 'verbose' in options && options.verbose) {
           moves.push(make_pretty(ugly_moves[i]));
         } else {
           moves.push(move_to_san(ugly_moves[i], false));
@@ -1378,7 +1383,7 @@ var Chess = function(fen) {
       }
 
       /* is there a result? */
-      if (typeof header.Result !== 'undefined') {
+      if (isDefined(header.Result)) {
         moves.push(header.Result);
       }
 
@@ -1416,7 +1421,7 @@ var Chess = function(fen) {
     load_pgn: function(pgn, options) {
       // allow the user to specify the sloppy move parser to work around over
       // disambiguation bugs in Fritz and Chessbase
-      var sloppy = (typeof options !== 'undefined' && 'sloppy' in options) ?
+      var sloppy = (isDefined(options) && 'sloppy' in options) ?
                     options.sloppy : false;
 
       function mask(str) {
@@ -1525,7 +1530,7 @@ var Chess = function(fen) {
       /* examine last move */
       move = moves[moves.length - 1];
       if (POSSIBLE_RESULTS.indexOf(move) > -1) {
-        if (has_keys(header) && typeof header.Result === 'undefined') {
+        if (has_keys(header) && !isDefined(header.Result)) {
           set_header(['Result', move]);
         }
       }
@@ -1565,7 +1570,7 @@ var Chess = function(fen) {
 
       // allow the user to specify the sloppy move parser to work around over
       // disambiguation bugs in Fritz and Chessbase
-      var sloppy = (typeof options !== 'undefined' && 'sloppy' in options) ?
+      var sloppy = (isDefined(options) && 'sloppy' in options) ?
                     options.sloppy : false;
 
       var move_obj = null;
@@ -1639,7 +1644,7 @@ var Chess = function(fen) {
     history: function(options) {
       var reversed_history = [];
       var move_history = [];
-      var verbose = (typeof options !== 'undefined' && 'verbose' in options &&
+      var verbose = (isDefined(options)&& 'verbose' in options &&
                      options.verbose);
 
       while (history.length > 0) {
