@@ -1551,6 +1551,11 @@ var Chess = function(fen) {
     turn: function() {
       return turn;
     },
+	
+	can_play: function(side) {
+		if (side === turn) return true;
+		else return false;
+    },
 
     move: function(move, options) {
       /* The move function can be called with in the following parameters:

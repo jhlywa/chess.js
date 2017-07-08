@@ -585,6 +585,17 @@ chess.turn()
 // -> 'b'
 ```
 
+### .can_play(side)
+Check if a "side" can play
+
+```js
+chess.load('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1')
+chess.can_play('b')
+// -> true
+chess.can_play('w')
+// -> false
+```
+
 ### .undo()
 Takeback the last half-move, returning a move object if successful, otherwise null.
 
