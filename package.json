@@ -29,7 +29,7 @@
     "uglify-js": "2.4.21"
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha",
-    "minify": "./node_modules/.bin/uglifyjs chess.js -c -m --comments 'license' > chess.min.js"
+    "test": "mocha",
+    "minify": "uglifyjs chess.js -c -m --comments 'license' > chess.min.js"
   }
 }
