@@ -1552,9 +1552,9 @@ var Chess = function(fen) {
       return turn;
     },
 	
-	can_play: function(side) {
-		if (side === turn) return true;
-		else return false;
+    can_play: function(side) {
+      if (side === turn) return true;
+      else return false;
     },
 
     move: function(move, options) {
