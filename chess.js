@@ -1097,6 +1097,15 @@ var Chess = function(fen) {
             SQUARES[to] == moves[i].to &&
             (!promotion || promotion.toLowerCase() == moves[i].promotion)) {
           return moves[i];
+        } else { // special case: piece square for pawn left out, no disambiguation needed
+          var disambiguated = get_disambiguator(moves[i], false);
+          var d_san_move = stripped_san(move_to_san(moves[i], false));
+          var d_piece = moves[i].piece;
+          var d_capture = moves[i].captured;
+          if (disambiguated === '' && d_piece === PAWN && d_capture != null && 
+              (d_san_move.substring(1) === clean_move)) {
+          return moves[i];
+              }
         }
       }
     }
