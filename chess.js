@@ -1070,47 +1070,70 @@ var Chess = function(fen) {
   function move_from_san(move, sloppy) {
     // strip off any move decorations: e.g Nf3+?!
     var clean_move = stripped_san(move);
-
-    // if we're using the sloppy parser run a regex to grab piece, to, and from
-    // this should parse invalid SAN like: Pe2-e4, Rc1c4, Qf3xf7
-    if (sloppy) {
-      var matches = clean_move.match(/([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/);
+    var moves = generate_moves();
+    if (! sloppy || is_rochade(clean_move)) {
+      for (var i = 0, len = moves.length; i < len; i++) {
+        if (clean_move === stripped_san(move_to_san(moves[i]))) {
+          return moves[i];
+        }
+      }
+      return null;
+    } else {
+      // if we're using the sloppy parser run a regex to grab piece, to, and from
+      // this should parse invalid SAN like: Pe2-e4, Rc1c4, Qf3xf7
+      // There is a problem with allowing pieces to be lowercase as well: there is no difference between column 'b' and piece 'b'
+      var matches = clean_move.match(/([PNBRQK])?([a-h]?[1-8]?)(x?-?:?)([a-h][1-8])(\=?[qrbnQRBN])?/);
       if (matches) {
         var piece = matches[1];
         var from = matches[2];
-        var to = matches[3];
-        var promotion = matches[4];
-      }
-    }
-
-    var moves = generate_moves();
-    for (var i = 0, len = moves.length; i < len; i++) {
-      // try the strict parser first, then the sloppy parser if requested
-      // by the user
-      if ((clean_move === stripped_san(move_to_san(moves[i]))) ||
-          (sloppy && clean_move === stripped_san(move_to_san(moves[i], true)))) {
-        return moves[i];
-      } else {
-        if (matches &&
-            (!piece || piece.toLowerCase() == moves[i].piece) &&
-            SQUARES[from] == moves[i].from &&
-            SQUARES[to] == moves[i].to &&
-            (!promotion || promotion.toLowerCase() == moves[i].promotion)) {
-          return moves[i];
-        } else { // special case: piece square for pawn left out, no disambiguation needed
-          var disambiguated = get_disambiguator(moves[i], false);
-          var d_san_move = stripped_san(move_to_san(moves[i], false));
-          var d_piece = moves[i].piece;
-          var d_capture = moves[i].captured;
-          if (disambiguated === '' && d_piece === PAWN && d_capture != null && 
-              (d_san_move.substring(1) === clean_move)) {
-          return moves[i];
-              }
+        var divide = matches[3];
+        var to = matches[4];
+        var promotion = matches[5];
+        var candidates = [];
+        for (var i = 0, len = moves.length; i < len; i++) {
+          if ((algebraic(moves[i].to) === to) && (match_move_from(algebraic(moves[i].from), from)) && (match_piece(moves[i].piece, piece)) && (match_promotion(moves[i].promotion, promotion))) {
+            candidates.push(moves[i]);
+          }
         }
+        if (candidates.length == 1) {
+          return candidates[0];
+        } else {
+          // Special case: if more than one move is possible, and the piece is undefined, the pawn move should be taken
+          if (piece === undefined) {
+            return pawn_move_from_candidates(candidates);
+          }
+          return null;
+        }
+      } else {
+        // no match
+        return null;
       }
     }
+  }
 
+  function match_promotion(move_promotion, promotion) {
+    return (move_promotion === promotion) || (promotion && (move_promotion === promotion.toLowerCase()))
+  }
+  
+  function pawn_move_from_candidates(candidates) {
+    for (var i = 0, len = candidates.length; i < len; i++) {
+      if (candidates[i].piece.toLowerCase() === 'p') {
+        return candidates[i];
+      }
+    }
     return null;
+  }
+
+  function is_rochade(move_san) {
+    return (move_san === 'O-O') || (move_san === 'O-O-O')
+  }
+
+  function match_piece(move_piece, piece) {
+    return (piece === undefined) || (move_piece.toLowerCase() === piece.toLowerCase());
+  }
+
+  function match_move_from(move_from, from) {
+    return (move_from === from) || (from === undefined) || (from === '') || (move_from.substring(1,2) === from) || (move_from.substring(0,1) === from);
   }
 
 

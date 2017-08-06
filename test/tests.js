@@ -721,6 +721,32 @@ describe("Load PGN", function() {
       expect: true,
       sloppy: true
     },
+    {pgn: ['e4 e5 Ngf3'],
+     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2',
+      expect: true,
+      sloppy: true
+    },
+    {
+      pgn: ['1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 4. d4 Ne7'],
+      fen: 'r1bqkb1r/ppp1nppp/2np4/1B2p3/3PP3/5N2/PPP2PPP/RNBQK2R w KQkq - 1 5',
+      expect: true,
+      sloppy: true
+    },
+    {
+      pgn: ['1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 4. d4 N6e7'],
+      fen: 'r1bqkb1r/ppp1nppp/2np4/1B2p3/3PP3/5N2/PPP2PPP/RNBQK2R w KQkq - 1 5',
+      expect: false,
+      sloppy: true
+    },
+    
+    {
+      pgn: ['1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 4. d4 N8e7'],
+      fen: 'r1bqkb1r/ppp1nppp/2np4/1B2p3/3PP3/5N2/PPP2PPP/RNBQK2R w KQkq - 1 5',
+      expect: true,
+      sloppy: true
+    },
+    
+    
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
