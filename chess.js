@@ -161,6 +161,7 @@ var Chess = function(fen) {
   var half_moves = 0;
   var move_number = 1;
   var history = [];
+  var fens = []; //Added in sandy98 fork
   var header = {};
 
   /* if the user passes in a fen string, load it, else default to
@@ -185,6 +186,7 @@ var Chess = function(fen) {
     half_moves = 0;
     move_number = 1;
     history = [];
+    fens = []; //Added in sandy98 fork.
     if (!keep_headers) header = {};
     update_setup(generate_fen());
   }
@@ -243,6 +245,9 @@ var Chess = function(fen) {
 
     update_setup(generate_fen());
 
+    console.log('Going to push initial fen: ' + fen);
+    fens.push(fen) //Added in sandy98 fork
+    
     return true;
   }
 
@@ -845,7 +850,7 @@ var Chess = function(fen) {
     var us = turn;
     var them = swap_color(us);
     push(move);
-
+    
     board[move.to] = board[move.from];
     board[move.from] = null;
 
@@ -930,10 +935,13 @@ var Chess = function(fen) {
       move_number++;
     }
     turn = swap_color(turn);
+    fens.push(generate_fen()); //Added in sandy98 fork.
   }
 
   function undo_move() {
     var old = history.pop();
+    var oldFens = fens.length <= 1 ? '' : fens.pop(); //Added in sandy98 fork. Don't erase fen if it is the first one.
+
     if (old == null) { return null; }
 
     var move = old.move;
@@ -1634,6 +1642,11 @@ var Chess = function(fen) {
       }
 
       return null;
+    },
+
+    //Added in sandy98 fork. Function fens, exposes internal fens (positions) array. To be used by board components/widgets which deal with positions. 
+    fens: function() {
+      return fens;
     },
 
     history: function(options) {
