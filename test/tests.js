@@ -524,6 +524,29 @@ describe("Load PGN", function() {
       'Queen.--Fischer} b5 10.Nxb5 cxb5 11.Bxb5+ Nbd7 12.O-O-O Rd8',
       '13.Rxd7 Rxd7 14.Rd1 Qe6 15.Bxd7+ Nxd7 16.Qb8+ Nxb8 17.Rd8# 1-0'],
       expect: true},
+    // Github Issue #134 - Load PGN with comment before first move
+    {fen : 'r1bqk2r/pp1nbppp/2p1pn2/3p4/2PP4/5NP1/PP2PPBP/RNBQ1RK1 w kq - 4 7',
+      pgn: [
+      '[Event "2012 ROCHESTER GRAND WINTER OPEN"]',
+      '[Site "Rochester"]',
+      '[Date "2012.02.04"]',
+      '[Round "1"]',
+      '[White "Jensen, Matthew"]',
+      '[Black "Gaustad, Kevin"]',
+      '[Result "1-0"]',
+      '[ECO "E01"]',
+      '[WhiteElo "2131"]',
+      '[BlackElo "1770"]',
+      '[Annotator "Jensen, Matthew"]',
+      '',
+      '{ Kevin and I go way back.  I checked the USCF player stats and my previous',
+      'record against Kevin was 4 losses and 1 draw out of 5 games.  All of our',
+      'previous games were between 1992-1998. }',
+      '1.d4 Nf6 2.c4 e6 3.g3 { Avrukh says',
+      'to play 3.g3 instead of 3.Nf3 in case the Knight later comes to e2, as in the',
+      'Bogo-Indian. } 3...d5 4.Bg2 c6 5.Nf3 Be7 6.O-O Nbd7',
+      '1-0'],
+      expect: true},
     {pgn: [
       '1. e4 e5 2. f4 exf4 3. Nf3 g5 4. h4 g4 5. Ne5 Nf6 6. Nxg4 Nxe4',
       '7. d3 Ng3 8. Bxf4 Nxh1 9. Qe2+ Qe7 10. Nf6+ Kd8 11. Bxc7+ Kxc7',
@@ -1338,5 +1361,4 @@ describe('Regression Tests', function() {
     };
     assert.deepEqual(chess.header(), expected);
   })
-
 });
