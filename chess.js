@@ -1453,18 +1453,17 @@ var Chess = function(fen) {
       var newline_char = (typeof options === 'object' &&
                           typeof options.newline_char === 'string') ?
                           options.newline_char : '\r?\n';
-      var regex = new RegExp('^(\\[(.|' + mask(newline_char) + ')*\\])' +
-                             '(' + mask(newline_char) + ')*' +
-                             '1.(' + mask(newline_char) + '|.)*$', 'g');
 
-      /* get header part of the PGN file */
-      var header_string = pgn.replace(regex, '$1');
+      // RegExp to split header. Takes advantage of the fact that header and movetext
+      // will always have a blank line between them (ie, two newline_char's).
+      // With default newline_char, will equal: /^(\[((?:\r?\n)|.)*\])(?:\r?\n){2}/
+      var header_regex = new RegExp('^(\\[((?:' + mask(newline_char) + ')|.)*\\])' +
+                              '(?:' + mask(newline_char) + '){2}');
 
-      /* no info part given, begins with moves */
-      if (header_string[0] !== '[') {
-        header_string = '';
-      }
+      // If no header given, begin with moves.
+      var header_string = header_regex.test(pgn) ? header_regex.exec(pgn)[1] : '';
 
+      // Put the board in the starting position
       reset();
 
       /* parse PGN header */
@@ -1488,7 +1487,7 @@ var Chess = function(fen) {
       ms = ms.replace(/(\{[^}]+\})+?/g, '');
 
       /* delete recursive annotation variations */
-      var rav_regex = /(\([^\(\)]+\))+?/g
+      var rav_regex = /(\([^\(\)]+\))+?/g;
       while (rav_regex.test(ms)) {
         ms = ms.replace(rav_regex, '');
       }
