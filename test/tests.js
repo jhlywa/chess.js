@@ -744,6 +744,32 @@ describe("Load PGN", function() {
       expect: true,
       sloppy: true
     },
+    {pgn: ['e4 e5 Ngf3'],
+     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2',
+      expect: true,
+      sloppy: true
+    },
+    {
+      pgn: ['1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 4. d4 Ne7'],
+      fen: 'r1bqkb1r/ppp1nppp/2np4/1B2p3/3PP3/5N2/PPP2PPP/RNBQK2R w KQkq - 1 5',
+      expect: true,
+      sloppy: true
+    },
+    {
+      pgn: ['1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 4. d4 N6e7'],
+      fen: 'r1bqkb1r/ppp1nppp/2np4/1B2p3/3PP3/5N2/PPP2PPP/RNBQK2R w KQkq - 1 5',
+      expect: false,
+      sloppy: true
+    },
+    
+    {
+      pgn: ['1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 4. d4 N8e7'],
+      fen: 'r1bqkb1r/ppp1nppp/2np4/1B2p3/3PP3/5N2/PPP2PPP/RNBQK2R w KQkq - 1 5',
+      expect: true,
+      sloppy: true
+    },
+    
+    
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
@@ -862,7 +888,23 @@ describe("Make Move", function() {
      legal: true,
      sloppy: true,
      move: 'Ne7',
-     next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'}
+     next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'},
+
+     // It should allow as well the missing square when capturing with pawns
+    {fen: 'rnbqkbnr/pppp2pp/8/4p3/4Pp2/2PP4/PP3PPP/RNBQKBNR b KQkq e3 0 1',
+     legal: true,
+     sloppy: true,
+     move: 'xe3',
+     next: 'rnbqkbnr/pppp2pp/8/4p3/8/2PPp3/PP3PPP/RNBQKBNR w KQkq - 0 2',
+     captured: 'p'},
+    {fen: 'rnbqkbnr/ppp1pppp/8/3p4/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
+     legal: true,
+     sloppy: true,
+     move: 'xd5',
+     next: 'rnbqkbnr/ppp1pppp/8/3P4/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 2',
+     captured: 'p'
+    }
+
   ];
 
   positions.forEach(function(position) {
