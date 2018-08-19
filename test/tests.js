@@ -450,7 +450,7 @@ describe("PGN", function() {
 
   positions.forEach(function(position, i) {
 
-    it(i, function() {
+    it(position.fen, function() {
       var chess = ("starting_position" in position) ? new Chess(position.starting_position) : new Chess();
       passed = true;
       error_message = "";
@@ -1129,7 +1129,7 @@ describe("History", function() {
   tests.forEach(function(t, i) {
     var passed = true;
 
-    it(i, function() {
+    it(t.fen + ' ' + '(verbosity: ' + t.verbose + ')', function() {
       chess.reset();
 
       for (var j = 0; j < t.moves.length; j++) {
