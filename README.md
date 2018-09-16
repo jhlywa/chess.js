@@ -26,7 +26,7 @@ chess.js is also available via [CDNJS](https://cdnjs.com/libraries/chess.js):
 The code below plays a complete game of chess ... randomly.
 
 ```js
-var Chess = require('./chess').Chess;
+var Chess = require('./chess.js').Chess;
 var chess = new Chess();
 
 while (!chess.game_over()) {
