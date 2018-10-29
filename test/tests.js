@@ -1377,3 +1377,241 @@ describe('Regression Tests', function() {
     assert.deepEqual(chess.header(), expected);
   })
 });
+
+describe('Defended and attacked pieces', function() {
+  it('GitHub issue #186: find defended pieces', function() {
+    var  fen = '3b4/2q2n2/4N3/8/5B2/8/8/3R4 w - - 0 1';
+    var chess = new Chess();
+    chess.load(fen);
+    var current_fen = chess.fen();
+    var result = chess.defended_pieces();
+    var expected = {
+      'bd8': ['qc7', 'nf7'],
+      'qc7': ['bd8'],
+      'nf7': ['qc7']
+    };
+    assert.deepEqual(result, expected);
+    assert(chess.fen(), current_fen);
+  });
+  
+  it('GitHub issue #186: find defended pieces (other color)', function() {
+    var  fen = '3b4/2q2n2/4N3/8/5B2/8/8/3R4 w - - 0 1';
+    var chess = new Chess();
+    chess.load(fen);
+    var current_fen = chess.fen();
+    var result = chess.defended_pieces(chess.WHITE);
+    var expected = {
+      'bf4': ['ne6'],
+      'ne6': [],
+      'rd1': []
+    };
+    assert.deepEqual(result, expected);
+    assert(chess.fen(), current_fen);
+  });
+  
+  it('GitHub issue #186: find defended pieces (including all squares)', function() {
+    var  fen = '3b4/2q2n2/4N3/8/5B2/8/8/3R4 w - - 0 1';
+    var chess = new Chess();
+    chess.load(fen);
+    var current_fen = chess.fen();
+    var result = chess.defended_pieces(null, true);
+    var expected = {
+      a1: [],
+      a2: [],
+      a3: [],
+      a4: [],
+      a5: ['qc7'],
+      a6: [],
+      a7: ['qc7'],
+      a8: [],
+      b1: [],
+      b2: [],
+      b3: [],
+      b4: [],
+      b5: [],
+      b6: ['qc7'],
+      b7: ['qc7'],
+      b8: ['qc7'],
+      c1: ['qc7'],
+      c2: ['qc7'],
+      c3: ['qc7'],
+      c4: ['qc7'],
+      c5: ['qc7'],
+      c6: ['qc7'],
+      qc7: ['bd8'],
+      c8: ['qc7'],
+      rd1: [],
+      d2: [],
+      d3: [],
+      d4: [],
+      d5: [],
+      d6: ['qc7', 'nf7'],
+      d7: ['qc7'],
+      bd8: ['qc7', 'nf7'],
+      e1: [],
+      e2: [],
+      e3: [],
+      e4: [],
+      e5: ['qc7', 'nf7'],
+      ne6: [],
+      e7: ['bd8', 'qc7'],
+      e8: [],
+      f1: [],
+      f2: [],
+      f3: [],
+      bf4: ['qc7'],
+      f5: [],
+      f6: ['bd8'],
+      nf7: ['qc7'],
+      f8: [],
+      g1: [],
+      g2: [],
+      g3: [],
+      g4: [],
+      g5: ['bd8', 'nf7'],
+      g6: [],
+      g7: [],
+      g8: [],
+      h1: [],
+      h2: [],
+      h3: [],
+      h4: ['bd8'],
+      h5: [],
+      h6: ['nf7'],
+      h7: [],
+      h8: ['nf7']
+    };
+    assert.deepEqual(result, expected);
+    assert(chess.fen(), current_fen);
+  });
+  
+  it('GitHub issue #186: find attacked pieces', function() {
+    var fen = '3b4/2q2n2/4N3/8/5B2/8/8/3R4 w - - 0 1';
+    var chess = new Chess();
+    chess.load(fen);
+    var current_fen = chess.fen();
+    var result = chess.attacked_pieces();
+    var expected = {
+      'bd8': ['ne6', 'rd1'],
+      'qc7': ['ne6', 'bf4'],
+      'nf7': []
+    };
+    assert.deepEqual(result, expected);
+    assert(chess.fen(), current_fen);
+  });
+  
+  it('GitHub issue #186: find attacked pieces (other color)', function() {
+    var fen = '3b4/2q2n2/4N3/8/5B2/8/8/3R4 w - - 0 1';
+    var chess = new Chess();
+    chess.load(fen);
+    var current_fen = chess.fen();
+    var result = chess.attacked_pieces(chess.WHITE);
+    var expected = {
+      'bf4': ['qc7'],
+      'ne6': [],
+      'rd1': []
+    };
+    assert.deepEqual(result, expected);
+    assert(chess.fen(), current_fen);
+  });
+
+  it('GitHub issue #186: find attacked pieces (including all squares)', function() {
+    var fen = '3b4/2q2n2/4N3/8/5B2/8/8/3R4 w - - 0 1';
+    var chess = new Chess();
+    chess.load(fen);
+    var result = chess.attacked_pieces(null, true);
+    var expected = {
+      a1: ['rd1'],
+      a2: [],
+      a3: [],
+      a4: [],
+      a5: [],
+      a6: [],
+      a7: [],
+      a8: [],
+      b1: ['rd1'],
+      b2: [],
+      b3: [],
+      b4: [],
+      b5: [],
+      b6: [],
+      b7: [],
+      b8: [],
+      c1: ['bf4', 'rd1'],
+      c2: [],
+      c3: [],
+      c4: [],
+      c5: ['ne6'],
+      c6: [],
+      qc7: ['ne6', 'bf4'],
+      c8: [],
+      rd1: [],
+      d2: ['bf4', 'rd1'],
+      d3: ['rd1'],
+      d4: ['ne6', 'rd1'],
+      d5: ['rd1'],
+      d6: ['bf4', 'rd1'],
+      d7: ['rd1'],
+      bd8: ['ne6', 'rd1'],
+      e1: ['rd1'],
+      e2: [],
+      e3: ['bf4'],
+      e4: [],
+      e5: ['bf4'],
+      ne6: [],
+      e7: [],
+      e8: [],
+      f1: ['rd1'],
+      f2: [],
+      f3: [],
+      bf4: [],
+      f5: [],
+      f6: [],
+      nf7: [],
+      f8: ['ne6'],
+      g1: ['rd1'],
+      g2: [],
+      g3: ['bf4'],
+      g4: [],
+      g5: ['ne6', 'bf4'],
+      g6: [],
+      g7: ['ne6'],
+      g8: [],
+      h1: ['rd1'],
+      h2: ['bf4'],
+      h3: [],
+      h4: [],
+      h5: [],
+      h6: ['bf4'],
+      h7: [],
+      h8: []
+    };
+    assert.deepEqual(result, expected);
+  });
+
+  xit('GitHub issue #186: find defending pieces (pin)', function() {
+    var fen = 'r1bqkb1r/ppp2ppp/2np1n2/1B2p3/3PP3/5N2/PPP2PPP/RNBQK2R w KQkq - 1 5';
+    var chess = new Chess();
+    chess.load(fen);
+    var result = chess.defended_pieces();
+    var expected = {
+      bc8: [ 'ra8', 'qd8'],
+      bf8: ['ke8', 'rh8'],
+      ke8: ['qd8', 'nf6'],
+      nc6: ['pb7'],
+      nf6: ['qd8', 'pg7'],
+      pa7: ['ra8', 'nc6'], // nc6 is wrong here
+      pb7: ['bc8'],
+      pc7: ['qd8'],
+      pd6: ['qd8', 'bf8', 'pc7'],
+      pe5: ['nc6', 'pd6'], // nc6 is wrong here as well
+      pf7: ['ke8'],
+      pg7: ['bf8'],
+      ph7: ['rh8', 'nf6'],
+      qd8: ['ke8', 'nc6'], // nc6 is wrong here ... pin!!
+      ra8: [],
+      rh8: []
+    };
+    assert.deepEqual(result, expected);
+  })
+});

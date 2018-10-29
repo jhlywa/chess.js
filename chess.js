@@ -543,6 +543,10 @@ var Chess = function(fen) {
       }
     }
 
+    // Allow to add `defending moves` to compute the defencse of squares and pieces
+    var defending_allowed = (typeof options !== 'undefined' && 'defending_allowed' in options) ?
+      	options.defending_allowed : false;
+
     for (var i = first_sq; i <= last_sq; i++) {
       /* did we run off the end of the board */
       if (i & 0x88) {
@@ -577,6 +581,8 @@ var Chess = function(fen) {
             add_move(board, moves, i, square, BITS.CAPTURE);
           } else if (square === ep_square) {
             add_move(board, moves, i, ep_square, BITS.EP_CAPTURE);
+          } else if (board[square] != null && board[square].color === us && defending_allowed) {
+            add_move(board, moves, i, square, BITS.CAPTURE);
           }
         }
       } else {
@@ -591,7 +597,12 @@ var Chess = function(fen) {
             if (board[square] == null) {
               add_move(board, moves, i, square, BITS.NORMAL);
             } else {
-              if (board[square].color === us) break;
+              if (board[square].color === us) {
+                if (defending_allowed) {
+                  add_move(board, moves, i, square, BITS.CAPTURE);
+                }
+                break;
+              }
               add_move(board, moves, i, square, BITS.CAPTURE);
               break;
             }
@@ -660,6 +671,116 @@ var Chess = function(fen) {
 
     return legal_moves;
   }
+
+  function swap_color_in_fen() {
+    // Ensure that the other color is active now
+    var tokens = generate_fen().split(/\s+/);
+    tokens[1] = swap_color(tokens[1]);
+    var new_fen = tokens.join(' ');
+    load(new_fen);
+  }
+
+  /*
+   * Returns a map with keys as all pieces (of the current color) and
+   * an array with defending pieces as value. If a piece is not defended,
+   * the array is empty
+   */
+  function defended_pieces(color_code = null, attack_square = false) {
+    var result = {};
+    // Fill the result with possibly defended pieces
+    var relevant_color;
+    if (color_code) {
+      relevant_color = color_code;
+    } else {
+      relevant_color = swap_color(turn);
+    }
+    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      if ( (board[i]) && (board[i].color === relevant_color)  || attack_square ) {
+        var defended = board[i] ? board[i].type : '';
+        var defended_field = algebraic(i);
+        result[defended + defended_field] = [];
+      }
+      if ((i + 1) & 0x88) {
+        i += 8;
+      }
+    }
+    if (relevant_color !== turn) {
+      swap_color_in_fen();
+    }
+    // Check now all moves (even illegal ones that defend a piece)
+    var moves = generate_moves({ defending_allowed: true, legal: false });
+    for (var index = 0; index < moves.length; index++) {
+      var move = moves[index];
+      var defended;
+      if (attack_square) {
+        defended = move.captured ? move.captured : '';
+      } else {
+        defended = move.captured;
+      }
+      if (move.flags & BITS.EP_CAPTURE) continue;
+      var field_to = algebraic(move.to);
+      //console.log('Field to: ' + field_to);
+      if (attack_square || (defended && (get(field_to).color == relevant_color)) ) {
+        var defender = move.piece;
+        var field_from = algebraic(move.from);
+        var val = defender + field_from;
+        var key = defended + field_to;
+        result[key].push(val); 
+      }
+    }
+    return result;
+
+  }
+
+  /*
+   * Returns a map with keys as all pieces (of the current color) and
+   * an array with attacking pieces as value. If a piece is not attacked,
+   * the array is empty.
+   */
+  function attacked_pieces(color_code = null, attack_square = false) {
+    var result = {};
+    // Fill the result with possibly attacked pieces
+    var relevant_color;
+    if (color_code) {
+      relevant_color = color_code;
+    } else {
+      relevant_color = swap_color(turn);
+    }
+    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      if ( (board[i]) && (board[i].color === relevant_color) || attack_square ) {
+        var attacked = board[i] ? board[i].type : '';
+        var attacked_field = algebraic(i);
+        result[attacked + attacked_field] = [];
+      }
+      if ((i + 1) & 0x88) {
+        i += 8;
+      }
+    }
+    if (relevant_color === turn) {
+      swap_color_in_fen();
+    }
+    // Check now for each possible move, if something is attacked
+    var moves = generate_moves();
+    for (var index = 0; index < moves.length; index++) {
+      var move = moves[index];
+      var attacked;
+      if (attack_square) {
+        attacked = move.captured ? move.captured : '';
+      } else {
+        attacked = move.captured;
+      }
+      if (attack_square || attacked) {
+        var attacker = move.piece;
+        var field_from = algebraic(move.from);
+        var val = attacker + field_from;
+        var field_to = algebraic(move.to);
+        var key = attacked + field_to;
+        result[key].push(val); 
+      }
+    }
+    return result;
+  }
+
 
   /* convert a move from 0x88 coordinates to Standard Algebraic Notation
    * (SAN)
@@ -1304,6 +1425,14 @@ var Chess = function(fen) {
       }
 
       return moves;
+    },
+
+    defended_pieces: function(color_code, attack_square) {
+      return defended_pieces(color_code, attack_square);
+    },
+    
+    attacked_pieces: function(color_code, attack_square) {
+      return attacked_pieces(color_code, attack_square);
     },
 
     in_check: function() {
