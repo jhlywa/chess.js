@@ -29,7 +29,7 @@ The code below plays a complete game of chess ... randomly.
 var Chess = require('./chess').Chess;
 var chess = new Chess();
 
-while (!chess.game_over()) {
+while (!chess.gameOver()) {
   var moves = chess.moves();
   var move = moves[Math.floor(Math.random() * moves.length)];
   chess.move(move);
@@ -155,20 +155,20 @@ chess.fen();
 // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
 ```
 
-### .game_over()
+### .gameOver()
 Returns true if the game has ended via checkmate, stalemate, draw, threefold repetition, or insufficient material. Otherwise, returns false.
 
 ```js
 var chess = new Chess();
-chess.game_over();
+chess.gameOver();
 // -> false
 
 chess.load('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
-chess.game_over();
+chess.gameOver();
 // -> true (stalemate)
 
 chess.load('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
-chess.game_over();
+chess.gameOver();
 // -> true (checkmate)
 ```
 
@@ -207,43 +207,43 @@ chess.history({ verbose: true });
 //     { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }]
 ```
 
-### .in_check()
+### .inCheck()
 Returns true or false if the side to move is in check.
 
 ```js
 var chess = new Chess('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
-chess.in_check();
+chess.inCheck();
 // -> true
 ```
 
-### .in_checkmate()
+### .inCheckmate()
 Returns true or false if the side to move has been checkmated.
 
 ```js
 var chess = new Chess('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3');
-chess.in_checkmate();
+chess.inCheckmate();
 // -> true
 ```
 
-### .in_draw()
+### .inDraw()
 Returns true or false if the game is drawn (50-move rule or insufficient material).
 
 ```js
 var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
-chess.in_draw();
+chess.inDraw();
 // -> true
 ```
 
-### .in_stalemate()
+### .inStalemate()
 Returns true or false if the side to move has been stalemated.
 
 ```js
 var chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78');
-chess.in_stalemate();
+chess.inStalemate();
 // -> true
 ```
 
-### .in_threefold_repetition()
+### .inThreefoldRepetition()
 Returns true or false if the current board position has occurred three or more
 times.
 
@@ -251,17 +251,17 @@ times.
 var chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 // -> true
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 1st time
-chess.in_threefold_repetition();
+chess.inThreefoldRepetition();
 // -> false
 
 chess.move('Nf3'); chess.move('Nf6'); chess.move('Ng1'); chess.move('Ng8');
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 2nd time
-chess.in_threefold_repetition();
+chess.inThreefoldRepetition();
 // -> false
 
 chess.move('Nf3'); chess.move('Nf6'); chess.move('Ng1'); chess.move('Ng8');
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 3rd time
-chess.in_threefold_repetition();
+chess.inThreefoldRepetition();
 // -> true
 ```
 
@@ -285,13 +285,13 @@ chess.header();
 // -> { White: 'Morphy', Black: 'Anderssen', Date: '1858-??-??' }
 ```
 
-### .insufficient_material()
+### .insufficientMaterial()
 Returns true if the game is drawn due to insufficient material (K vs. K,
 K vs. KB, or K vs. KN); otherwise false.
 
 ```js
 var chess = new Chess('k7/8/n7/8/8/8/8/7K b - - 0 1');
-chess.insufficient_material()
+chess.insufficientMaterial()
 // -> true
 ```
 
@@ -308,18 +308,18 @@ chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
 // -> false, bad piece X
 ```
 
-### .load_pgn(pgn, [ options ])
+### .loadPgn(pgn, [ options ])
 Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
 `pgn` should be a string. Options is an optional `object` which may contain
-a string `newline_char` and a boolean `sloppy`.
+a string `newlineChar` and a boolean `sloppy`.
 
-The `newline_char` is a string representation of a valid RegExp fragment and is
+The `newlineChar` is a string representation of a valid RegExp fragment and is
 used to process the PGN. It defaults to `\r?\n`. Special characters
 should not be pre-escaped, but any literal special characters should be escaped
 as is normal for a RegExp.  Keep in mind that backslashes in JavaScript strings
-must themselves be escaped (see `sloppy_pgn` example below). Avoid using
-a `newline_char` that may occur elsewhere in a PGN, such as `.` or `x`, as this
+must themselves be escaped (see `sloppyPgn` example below). Avoid using
+a `newlineChar` that may occur elsewhere in a PGN, such as `.` or `x`, as this
 will result in unexpected behavior.
 
 The `sloppy` flag is a boolean that permits chess.js to parse moves in
@@ -349,7 +349,7 @@ pgn = ['[Event "Casual Game"]',
        'Rg8 19.Rad1 Qxf3 20.Rxe7+ Nxe7 21.Qxd7+ Kxd7 22.Bf5+ Ke8',
        '23.Bd7+ Kf8 24.Bxe7# 1-0'];
 
-chess.load_pgn(pgn.join('\n'));
+chess.loadPgn(pgn.join('\n'));
 // -> true
 
 chess.fen();
@@ -370,7 +370,7 @@ chess.ascii();
 
 
 // Parse non-standard move formats and unusual line separators
-var sloppy_pgn = ['[Event "Wijk aan Zee (Netherlands)"]',
+var sloppyPgn = ['[Event "Wijk aan Zee (Netherlands)"]',
   '[Date "1971.01.26"]',
   '[Result "1-0"]',
   '[White "Tigran Vartanovich Petrosian"]',
@@ -388,14 +388,14 @@ var sloppy_pgn = ['[Event "Wijk aan Zee (Netherlands)"]',
 ].join('|');
 
 var options = {
-  newline_char: '\\|', // Literal '|' character escaped
+  newlineChar: '\\|', // Literal '|' character escaped
   sloppy: true
 };
 
-chess.load_pgn(sloppy_pgn);
+chess.loadPgn(sloppyPgn);
 // -> false
 
-chess.load_pgn(sloppy_pgn, options);
+chess.loadPgn(sloppyPgn, options);
 // -> true
 
 chess.fen();
@@ -509,7 +509,7 @@ chess.move('e5');
 chess.move('Nc3');
 chess.move('Nc6');
 
-chess.pgn({ max_width: 5, newline_char: '<br />' });
+chess.pgn({ maxWidth: 5, newlineChar: '<br />' });
 // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
 ```
 
@@ -563,16 +563,16 @@ chess.remove('e1');
 ### .reset()
 Reset the board to the initial starting position.
 
-### .square_color(square)
+### .squareColor(square)
 Returns the color of the square ('light' or 'dark').
 
 ```js
 var chess = Chess();
-chess.square_color('h1')
+chess.squareColor('h1')
 // -> 'light'
-chess.square_color('a7')
+chess.squareColor('a7')
 // -> 'dark'
-chess.square_color('bogus square')
+chess.squareColor('bogus square')
 // -> null
 ```
 
@@ -605,16 +605,16 @@ chess.undo();
 // -> null
 ```
 
-### .validate_fen(fen):
+### .validateFen(fen):
 Returns a validation object specifying validity or the errors found within the
 FEN string.
 
 ```js
-chess.validate_fen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25');
-// -> { valid: true, error_number: 0, error: 'No errors.' }
+chess.validateFen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25');
+// -> { valid: true, errorNumber: 0, error: 'No errors.' }
 
-chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
-// -> { valid: false, error_number: 9,
+chess.validateFen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
+// -> { valid: false, errorNumber: 9,
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
 
@@ -632,6 +632,5 @@ Musical support provided by:
 ## TODO
 
 - Investigate the use of piece lists (this may shave a few cycles off
-  generate_moves() and attacked()).
-- Refactor API to use camelCase - yuck.
+  generateMoves() and attacked()).
 - Add more robust FEN validation.
