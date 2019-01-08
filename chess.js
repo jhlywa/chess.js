@@ -1559,7 +1559,7 @@ var Chess = function(fen) {
       ms = ms.replace(/(\{[^}]+\})+?/g, '');
 
       /* delete recursive annotation variations */
-      var ravRegex = /(\([^\(\)]+\))+?/g;
+      var ravRegex = /(\([^\(\)]+\))+?/;
       while (ravRegex.test(ms)) {
         ms = ms.replace(ravRegex, '');
       }
