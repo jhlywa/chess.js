@@ -1,9 +1,6 @@
 if (typeof require != "undefined") {
-  var chai = require('chai');
   var Chess = require('../chess').Chess;
 }
-
-var assert = chai.assert;
 
 describe("Perft", function() {
   var perfts = [
@@ -23,7 +20,7 @@ describe("Perft", function() {
 
     it(perft.fen, function() {
       var nodes = chess.perft(perft.depth);
-      assert(nodes == perft.nodes);
+      expect(nodes).toBe(perft.nodes);
     });
 
   });
@@ -77,7 +74,7 @@ describe("Single Square Move Generation", function() {
           }
         }
       }
-      assert(passed);
+      expect(passed).toBe(true);
 
     });
 
@@ -102,7 +99,7 @@ describe("Checkmate", function() {
     chess.load(checkmate);
 
     it(checkmate, function() {
-      assert(chess.in_checkmate());
+      expect(chess.in_checkmate()).toBe(true);
     });
   });
 
@@ -122,7 +119,7 @@ describe("Stalemate", function() {
     chess.load(stalemate);
 
     it(stalemate, function() {
-      assert(chess.in_stalemate())
+      expect(chess.in_stalemate()).toBe(true)
     });
 
   });
@@ -150,9 +147,9 @@ describe("Insufficient Material", function() {
 
     it(position.fen, function() {
       if (position.draw) {
-        assert(chess.insufficient_material() && chess.in_draw());
+        expect(chess.insufficient_material() && chess.in_draw()).toBe(true);
       } else {
-        assert(!chess.insufficient_material() && !chess.in_draw());
+        expect(!chess.insufficient_material() && !chess.in_draw()).toBe(true);
       }
     });
 
@@ -187,7 +184,7 @@ describe("Threefold Repetition", function() {
         chess.move(position.moves[j]);
       }
 
-      assert(passed && chess.in_threefold_repetition() && chess.in_draw());
+      expect(passed && chess.in_threefold_repetition() && chess.in_draw()).toBe(true);
 
     });
 
@@ -253,7 +250,7 @@ describe("Algebraic Notation", function() {
           }
         }
       }
-      assert(passed);
+      expect(passed).toBe(true);
     });
 
   });
@@ -365,7 +362,7 @@ describe("Get/Put/Remove", function() {
        */
       passed = (passed == position.should_pass);
 
-      assert(passed);
+      expect(passed).toBe(true);
     });
 
   });
@@ -396,7 +393,7 @@ describe("FEN", function() {
 
     it(position.fen + ' (' + position.should_pass + ')', function() {
       chess.load(position.fen);
-      assert(chess.fen() == position.fen == position.should_pass);
+      expect(chess.fen() == position.fen == position.should_pass).toBe(true);
     });
 
   });
@@ -450,7 +447,7 @@ describe("PGN", function() {
 
   positions.forEach(function(position, i) {
 
-    it(i, function() {
+    it('Postion: ' + i, function() {
       var chess = ("starting_position" in position) ? new Chess(position.starting_position) : new Chess();
       passed = true;
       error_message = "";
@@ -465,7 +462,7 @@ describe("PGN", function() {
       var pgn = chess.pgn({max_width:position.max_width, newline_char:position.newline_char});
       var fen = chess.fen();
       passed = pgn === position.pgn && fen === position.fen;
-      assert(passed && error_message.length == 0);
+      expect(passed && error_message.length == 0).toBe(true);
     });
 
   });
@@ -764,14 +761,14 @@ describe("Load PGN", function() {
          * (instead of the reconstructed PGN [e.g. test.pgn.join(newline)])
          */
           if ('fen' in t) {
-            assert(result && chess.fen() == t.fen);
+            expect(result && chess.fen() == t.fen).toBe(true);
           } else {
-            assert(result && chess.pgn({ max_width: 65, newline_char: newline }) == t.pgn.join(newline));
+            expect(result && chess.pgn({ max_width: 65, newline_char: newline }) == t.pgn.join(newline)).toBe(true);
           }
 
         } else {
           /* this test should fail, so make sure it does */
-          assert(result == should_pass);
+          expect(result == should_pass).toBe(true);
         }
       });
 
@@ -805,10 +802,10 @@ describe("Load PGN", function() {
          '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0\n';
 
     var result = chess.load_pgn(pgn, { newline_char: '\r?\n' });
-    assert(result);
+    expect(result).toBe(true);
 
-    assert(chess.load_pgn(pgn));
-    assert(chess.pgn().match(/^\[\[/) === null);
+    expect(chess.load_pgn(pgn)).toBe(true);
+    expect(chess.pgn().match(/^\[\[/) === null).toBe(true);
   });
 
 });
@@ -872,11 +869,11 @@ describe("Make Move", function() {
       var sloppy = position.sloppy || false;
       var result = chess.move(position.move, {sloppy: sloppy});
       if (position.legal) {
-        assert(result
+        expect(result
                && chess.fen() == position.next
-               && result.captured == position.captured);
+               && result.captured == position.captured).toBe(true);
       } else {
-        assert(!result);
+        expect(result).toBeNull();
       }
     });
 
@@ -1019,7 +1016,7 @@ describe("Validate FEN", function() {
 
     it(position.fen + ' (valid: ' + (position.error_number  == 0) + ')', function() {
       var result = chess.validate_fen(position.fen);
-      assert(result.error_number == position.error_number, result.error_number);
+      expect(result.error_number == position.error_number).toBe(true);
     });
 
   });
@@ -1129,7 +1126,7 @@ describe("History", function() {
   tests.forEach(function(t, i) {
     var passed = true;
 
-    it(i, function() {
+    it('History ' + i, function() {
       chess.reset();
 
       for (var j = 0; j < t.moves.length; j++) {
@@ -1158,7 +1155,7 @@ describe("History", function() {
           }
         }
       }
-      assert(passed);
+      expect(passed).toBe(true);
     });
 
   });
@@ -1269,7 +1266,7 @@ describe('Board Tests', function() {
   tests.forEach(function(test) {
     it('Board - ' + test.fen, function() {
       var chess = new Chess(test.fen);
-      assert(JSON.stringify(chess.board()) === JSON.stringify(test.board));
+      expect(JSON.stringify(chess.board()) === JSON.stringify(test.board)).toBe(true);
     })
   })
 });
@@ -1278,31 +1275,31 @@ describe('Regression Tests', function() {
   it('Github Issue #32 - castling flag reappearing', function() {
     var chess = new Chess('b3k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qNP/6QK b k - 2 28');
     chess.move({from:'a8', to:'g2'});
-    assert(chess.fen() == '4k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qbP/6QK w k - 0 29');
+    expect(chess.fen() == '4k2r/5p2/4p3/1p5p/6p1/2PR2P1/BP3qbP/6QK w k - 0 29').toBe(true);
   });
 
   it('Github Issue #58 - placing more than one king', function() {
     var chess = new Chess('N3k3/8/8/8/8/8/5b2/4K3 w - - 0 1');
-    assert(chess.put({type: 'k', color: 'w'}, 'a1') == false);
+    expect(chess.put({type: 'k', color: 'w'}, 'a1')).toBe(false);
     chess.put({type: 'q', color: 'w'}, 'a1');
     chess.remove('a1');
-    assert(chess.moves().join(' ') == 'Kd2 Ke2 Kxf2 Kf1 Kd1');
+    expect(chess.moves().join(' ')).toBe('Kd2 Ke2 Kxf2 Kf1 Kd1');
   });
 
   it('Github Issue #85 (white) - SetUp and FEN should be accepted in load_pgn', function() {
        var chess = new Chess();
        var pgn = ['[SetUp "1"]', '[FEN "7k/5K2/4R3/8/8/8/8/8 w KQkq - 0 1"]', "", '1. Rh6#'];
        var result = chess.load_pgn(pgn.join("\n"));
-       assert(result);
-       assert(chess.fen() === '7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1');
+       expect(result).toBe(true);
+       expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1');
   });
 
   it('Github Issue #85 (black) - SetUp and FEN should be accepted in load_pgn', function() {
        var chess = new Chess();
        var pgn = ['[SetUp "1"]', '[FEN "r4r1k/1p4b1/3p3p/5qp1/1RP5/6P1/3NP3/2Q2RKB b KQkq - 0 1"]', "", '1. ... Qc5+'];
        var result = chess.load_pgn(pgn.join("\n"));
-       assert(result);
-       assert(chess.fen() === 'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2');
+       expect(result).toBe(true);
+       expect(chess.fen()).toBe('r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2');
   });
 
   it('Github Issue #98 (white) - Wrong movement number after setting a position via FEN', function () {
@@ -1310,7 +1307,7 @@ describe('Regression Tests', function() {
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45');
     chess.move('f7');
     var result = chess.pgn();
-    assert(result.match(/(45\. f7)$/));
+    expect(result.match(/(45\. f7)$/)[0]).toBe('45. f7')
   })
 
   it('Github Issue #98 (black) - Wrong movement number after setting a position via FEN', function () {
@@ -1318,7 +1315,7 @@ describe('Regression Tests', function() {
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 b - - 1 45');
     chess.move('Rf1+');
     var result = chess.pgn();
-    assert(result.match(/(45\. \.\.\. Rf1\+)$/));
+    expect(result.match(/(45\. \.\.\. Rf1\+)$/)[0]).toBe('45. ... Rf1+');
   })
 
   it('Github Issue #129 load_pgn() should not clear headers if PGN contains SetUp and FEN tags', function () {
@@ -1349,7 +1346,7 @@ describe('Regression Tests', function() {
       FEN: 'rnbqkb1r/1p3ppp/p2ppn2/6B1/3NP3/2N5/PPP2PPP/R2QKB1R w KQkq - 0 1',
       SetUp: '1'
     }
-    assert.deepEqual(chess.header(), expected);
+    expect(chess.header()).toEqual(expected);
   })
 
   it('Github Issue #129 clear() should clear the board and delete all headers with the exception of SetUp and FEN', function () {
@@ -1374,6 +1371,6 @@ describe('Regression Tests', function() {
       FEN: '8/8/8/8/8/8/8/8 w - - 0 1',
       SetUp: '1'
     };
-    assert.deepEqual(chess.header(), expected);
+    expect(chess.header()).toEqual(expected);
   })
 });
