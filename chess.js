@@ -25,14 +25,6 @@
  *
  *----------------------------------------------------------------------------*/
 
-/* minified license below  */
-
-/* @license
- * Copyright (c) 2018, Jeff Hlywa (jhlywa@gmail.com)
- * Released under the BSD license
- * https://github.com/jhlywa/chess.js/blob/master/LICENSE
- */
-
 var Chess = function(fen) {
   var BLACK = 'b'
   var WHITE = 'w'
