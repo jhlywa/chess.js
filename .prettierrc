@@ -1,4 +1,5 @@
 {
   "singleQuote": true,
-  "parser": "babylon"
+  "semi": false,
+  "parser": "babel"
 }
