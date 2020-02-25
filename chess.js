@@ -1492,7 +1492,7 @@ var Chess = function(fen) {
 
         for (var i = 0; i < headers.length; i++) {
           key = headers[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1')
-          value = headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\]$/, '$1')
+          value = headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\ *\]$/, '$1')
           if (trim(key).length > 0) {
             header_obj[key] = value
           }
