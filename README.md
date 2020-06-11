@@ -635,6 +635,99 @@ chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
 
+### .get_comment()
+
+Retrieve the comment for the current position, if it exists.
+
+```js
+const chess = new Chess()
+
+chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+
+chess.get_comment()
+// -> "giuoco piano"
+```
+
+### .set_comment(comment)
+
+Comment on the current position.
+
+```js
+const chess = new Chess()
+
+chess.move("e4")
+chess.set_comment("king's pawn opening")
+
+chess.pgn()
+// -> "1. e4 {king's pawn opening}"
+```
+
+### .delete_comment()
+
+Delete and return the comment for the current position, if it exists.
+
+```js
+const chess = new Chess()
+
+chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+
+chess.get_comment()
+// -> "giuoco piano"
+
+chess.delete_comment()
+// -> "giuoco piano"
+
+chess.get_comment()
+// -> undefined
+```
+
+### .get_comments()
+
+Retrieve comments for all positions.
+
+```js
+const chess = new Chess()
+
+chess.load_pgn("1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+
+chess.get_comments()
+// -> [
+//     {
+//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+//       comment: "king's pawn opening"
+//     },
+//     {
+//       fen: "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+//       comment: "giuoco piano"
+//     }
+//    ]
+```
+
+### .delete_comments()
+
+Delete and return comments for all positions.
+
+```js
+const chess = new Chess()
+
+chess.load_pgn("1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+
+chess.delete_comments()
+// -> [
+//     {
+//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+//       comment: "king's pawn opening"
+//     },
+//     {
+//       fen: "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+//       comment: "giuoco piano"
+//     }
+//    ]
+
+chess.get_comments()
+// -> []
+```
+
 ## Sites Using chess.js
 
 -   [chess.com](http://www.chess.com/)

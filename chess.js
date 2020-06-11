@@ -159,6 +159,7 @@ var Chess = function(fen) {
   var move_number = 1
   var history = []
   var header = {}
+  var comments = {}
 
   /* if the user passes in a fen string, load it, else default to
    * starting position
@@ -183,7 +184,27 @@ var Chess = function(fen) {
     move_number = 1
     history = []
     if (!keep_headers) header = {}
+    comments = {}
     update_setup(generate_fen())
+  }
+
+  function prune_comments() {
+    var reversed_history = [];
+    var current_comments = {};
+    var copy_comment = function(fen) {
+      if (fen in comments) {
+        current_comments[fen] = comments[fen];
+      }
+    };
+    while (history.length > 0) {
+      reversed_history.push(undo_move());
+    }
+    copy_comment(generate_fen());
+    while (reversed_history.length > 0) {
+      make_move(reversed_history.pop());
+      copy_comment(generate_fen());
+    }
+    comments = current_comments;
   }
 
   function reset() {
@@ -1392,6 +1413,15 @@ var Chess = function(fen) {
         result.push(newline)
       }
 
+      var append_comment = function(move_string) {
+        var comment = comments[generate_fen()]
+        if (typeof comment !== 'undefined') {
+          var delimiter = move_string.length > 0 ? ' ' : '';
+          move_string = `${move_string}${delimiter}{${comment}}`
+        }
+        return move_string
+      }
+
       /* pop all of history onto reversed_history */
       var reversed_history = []
       while (history.length > 0) {
@@ -1401,8 +1431,14 @@ var Chess = function(fen) {
       var moves = []
       var move_string = ''
 
+      /* special case of a commented starting position with no moves */
+      if (reversed_history.length === 0) {
+        moves.push(append_comment(''))
+      }
+
       /* build the list of moves.  a move_string looks like: "3. e3 e6" */
       while (reversed_history.length > 0) {
+        move_string = append_comment(move_string)
         var move = reversed_history.pop()
 
         /* if the position started with black to move, start PGN with 1. ... */
@@ -1422,7 +1458,7 @@ var Chess = function(fen) {
 
       /* are there any other leftover moves? */
       if (move_string.length) {
-        moves.push(move_string)
+        moves.push(append_comment(move_string))
       }
 
       /* is there a result? */
@@ -1430,16 +1466,54 @@ var Chess = function(fen) {
         moves.push(header.Result)
       }
 
-      /* history should be back to what is was before we started generating PGN,
+      /* history should be back to what it was before we started generating PGN,
        * so join together moves
        */
       if (max_width === 0) {
         return result.join('') + moves.join(' ')
       }
 
+      var strip = function() {
+        if (result.length > 0 && result[result.length - 1] === ' ') {
+          result.pop();
+          return true;
+        }
+        return false;
+      };
+
+      /* NB: this does not preserve comment whitespace. */
+      var wrap_comment = function(width, move) {
+        for (var token of move.split(' ')) {
+          if (!token) {
+            continue;
+          }
+          if (width + token.length > max_width) {
+            while (strip()) {
+              width--;
+            }
+            result.push(newline);
+            width = 0;
+          }
+          result.push(token);
+          width += token.length;
+          result.push(' ');
+          width++;
+        }
+        if (strip()) {
+          width--;
+        }
+        return width;
+      };
+
       /* wrap the PGN output at max_width */
       var current_width = 0
       for (var i = 0; i < moves.length; i++) {
+        if (current_width + moves[i].length > max_width) {
+          if (moves[i].includes('{')) {
+            current_width = wrap_comment(current_width, moves[i]);
+            continue;
+          }
+        }
         /* if the current move will push past max_width */
         if (current_width + moves[i].length > max_width && i !== 0) {
           /* don't end the line with whitespace */
@@ -1541,13 +1615,59 @@ var Chess = function(fen) {
         }
       }
 
+      /* NB: the regexes below that delete move numbers, recursive
+       * annotations, and numeric annotation glyphs may also match
+       * text in comments. To prevent this, we transform comments
+       * by hex-encoding them in place and decoding them again after
+       * the other tokens have been deleted.
+       *
+       * While the spec states that PGN files should be ASCII encoded,
+       * we use {en,de}codeURIComponent here to support arbitrary UTF8
+       * as a convenience for modern users */
+
+      var to_hex = function(string) {
+        return Array
+          .from(string)
+          .map(function(c) {
+            /* encodeURI doesn't transform most ASCII characters,
+             * so we handle these ourselves */
+            return c.charCodeAt(0) < 128
+              ? c.charCodeAt(0).toString(16)
+              : encodeURIComponent(c).replace(/\%/g, '').toLowerCase()
+          })
+          .join('')
+      }
+
+      var from_hex = function(string) {
+        return string.length == 0
+          ? ''
+          : decodeURIComponent('%' + string.match(/.{1,2}/g).join('%'))
+      }
+
+      var encode_comment = function(string) {
+        string = string.replace(new RegExp(mask(newline_char), 'g'), ' ')
+        return `{${to_hex(string.slice(1, string.length - 1))}}`
+      }
+
+      var decode_comment = function(string) {
+        if (string.startsWith('{') && string.endsWith('}')) {
+          return from_hex(string.slice(1, string.length - 1))
+        }
+      }
+
       /* delete header to get the moves */
       var ms = pgn
         .replace(header_string, '')
+        .replace(
+          /* encode comments so they don't get deleted below */
+          new RegExp(`(\{[^}]*\})+?|;([^${mask(newline_char)}]*)`, 'g'),
+          function(match, bracket, semicolon) {
+            return bracket !== undefined
+              ? encode_comment(bracket)
+              : ' ' + encode_comment(`{${semicolon.slice(1)}}`)
+          }
+        )
         .replace(new RegExp(mask(newline_char), 'g'), ' ')
-
-      /* delete comments */
-      ms = ms.replace(/(\{[^}]+\})+?/g, '')
 
       /* delete recursive annotation variations */
       var rav_regex = /(\([^\(\)]+\))+?/g
@@ -1575,6 +1695,11 @@ var Chess = function(fen) {
       var move = ''
 
       for (var half_move = 0; half_move < moves.length - 1; half_move++) {
+        var comment = decode_comment(moves[half_move])
+        if (comment !== undefined) {
+          comments[generate_fen()] = comment
+          continue
+        }
         move = move_from_san(moves[half_move], sloppy)
 
         /* move not possible! (don't clear the board to examine to show the
@@ -1585,6 +1710,12 @@ var Chess = function(fen) {
         } else {
           make_move(move)
         }
+      }
+
+      comment = decode_comment(moves[moves.length - 1])
+      if (comment !== undefined) {
+        comments[generate_fen()] = comment
+        moves.pop()
       }
 
       /* examine last move */
@@ -1727,6 +1858,37 @@ var Chess = function(fen) {
       }
 
       return move_history
+    },
+
+    get_comment: function() {
+      return comments[generate_fen()];
+    },
+
+    set_comment: function(comment) {
+      comments[generate_fen()] = comment.replace('{', '[').replace('}', ']');
+    },
+
+    delete_comment: function() {
+      var comment = comments[generate_fen()];
+      delete comments[generate_fen()];
+      return comment;
+    },
+
+    get_comments: function() {
+      prune_comments();
+      return Object.keys(comments).map(function(fen) {
+        return {fen: fen, comment: comments[fen]};
+      });
+    },
+
+    delete_comments: function() {
+      prune_comments();
+      return Object.keys(comments)
+        .map(function(fen) {
+          var comment = comments[fen];
+          delete comments[fen];
+          return {fen: fen, comment: comment};
+        });
     }
   }
 }
