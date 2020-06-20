@@ -22,7 +22,7 @@ yarn add chess.js
 
 ## Example Code
 
-The code below plays a complete game of chess ... randomly.
+The code below plays a random game of chess:
 
 ```js
 const { Chess } = require('./chess.js')
@@ -36,10 +36,13 @@ while (!chess.game_over()) {
 console.log(chess.pgn())
 ```
 
-Need a user interface? Try Chris Oakman's excellent
+## User Interface
+
+By design, chess.js is headless and does not include user interface.  Many
+developers have have had success integrating chess.js with the
 [chessboard.js](http://chessboardjs.com) library. See
 [chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for
-an example integration of chess.js with chessboard.js.
+an example.
 
 ## API
 
@@ -126,6 +129,49 @@ chess.fen()
 // -> '8/8/8/8/8/8/8/8 w - - 0 1' <- empty board
 ```
 
+### .delete_comment()
+
+Delete and return the comment for the current position, if it exists.
+
+```js
+const chess = new Chess()
+
+chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+
+chess.get_comment()
+// -> "giuoco piano"
+
+chess.delete_comment()
+// -> "giuoco piano"
+
+chess.get_comment()
+// -> undefined
+```
+
+### .delete_comments()
+
+Delete and return comments for all positions.
+
+```js
+const chess = new Chess()
+
+chess.load_pgn("1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+
+chess.delete_comments()
+// -> [
+//     {
+//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+//       comment: "king's pawn opening"
+//     },
+//     {
+//       fen: "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+//       comment: "giuoco piano"
+//     }
+//    ]
+
+chess.get_comments()
+// -> []
+```
 ### .fen()
 
 Returns the FEN string for the current position.
@@ -174,6 +220,62 @@ chess.get('a5')
 // -> { type: 'p', color: 'b' },
 chess.get('a6')
 // -> null
+```
+
+### .get_comment()
+
+Retrieve the comment for the current position, if it exists.
+
+```js
+const chess = new Chess()
+
+chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+
+chess.get_comment()
+// -> "giuoco piano"
+```
+
+### .get_comments()
+
+Retrieve comments for all positions.
+
+```js
+const chess = new Chess()
+
+chess.load_pgn("1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+
+chess.get_comments()
+// -> [
+//     {
+//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+//       comment: "king's pawn opening"
+//     },
+//     {
+//       fen: "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+//       comment: "giuoco piano"
+//     }
+//    ]
+```
+
+### .header()
+
+Allows header information to be added to PGN output. Any number of key/value
+pairs can be passed to .header().
+
+```js
+chess.header('White', 'Robert James Fischer')
+chess.header('Black', 'Mikhail Tal')
+
+// or
+
+chess.header('White', 'Morphy', 'Black', 'Anderssen', 'Date', '1858-??-??')
+```
+
+Calling .header() without any arguments returns the header information as an object.
+
+```js
+chess.header()
+// -> { White: 'Morphy', Black: 'Anderssen', Date: '1858-??-??' }
 ```
 
 ### .history([ options ])
@@ -264,27 +366,6 @@ chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 3rd time
 chess.in_threefold_repetition()
 // -> true
-```
-
-### .header()
-
-Allows header information to be added to PGN output. Any number of key/value
-pairs can be passed to .header().
-
-```js
-chess.header('White', 'Robert James Fischer')
-chess.header('Black', 'Mikhail Tal')
-
-// or
-
-chess.header('White', 'Morphy', 'Black', 'Anderssen', 'Date', '1858-??-??')
-```
-
-Calling .header() without any arguments returns the header information as an object.
-
-```js
-chess.header()
-// -> { White: 'Morphy', Black: 'Anderssen', Date: '1858-??-??' }
 ```
 
 ### .insufficient_material()
@@ -576,6 +657,20 @@ chess.remove('e1')
 
 Reset the board to the initial starting position.
 
+### .set_comment(comment)
+
+Comment on the current position.
+
+```js
+const chess = new Chess()
+
+chess.move("e4")
+chess.set_comment("king's pawn opening")
+
+chess.pgn()
+// -> "1. e4 {king's pawn opening}"
+```
+
 ### .square_color(square)
 
 Returns the color of the square ('light' or 'dark').
@@ -635,129 +730,13 @@ chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
 
-### .get_comment()
-
-Retrieve the comment for the current position, if it exists.
-
-```js
-const chess = new Chess()
-
-chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
-
-chess.get_comment()
-// -> "giuoco piano"
-```
-
-### .set_comment(comment)
-
-Comment on the current position.
-
-```js
-const chess = new Chess()
-
-chess.move("e4")
-chess.set_comment("king's pawn opening")
-
-chess.pgn()
-// -> "1. e4 {king's pawn opening}"
-```
-
-### .delete_comment()
-
-Delete and return the comment for the current position, if it exists.
-
-```js
-const chess = new Chess()
-
-chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
-
-chess.get_comment()
-// -> "giuoco piano"
-
-chess.delete_comment()
-// -> "giuoco piano"
-
-chess.get_comment()
-// -> undefined
-```
-
-### .get_comments()
-
-Retrieve comments for all positions.
-
-```js
-const chess = new Chess()
-
-chess.load_pgn("1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
-
-chess.get_comments()
-// -> [
-//     {
-//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
-//       comment: "king's pawn opening"
-//     },
-//     {
-//       fen: "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
-//       comment: "giuoco piano"
-//     }
-//    ]
-```
-
-### .delete_comments()
-
-Delete and return comments for all positions.
-
-```js
-const chess = new Chess()
-
-chess.load_pgn("1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
-
-chess.delete_comments()
-// -> [
-//     {
-//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
-//       comment: "king's pawn opening"
-//     },
-//     {
-//       fen: "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
-//       comment: "giuoco piano"
-//     }
-//    ]
-
-chess.get_comments()
-// -> []
-```
-
-## Sites Using chess.js
-
--   [chess.com](http://www.chess.com/)
--   [The Internet Chess Club (ICC)](http://www.chessclub.com/)
--   [lichess](http://lichess.org/tv)
--   [Redbull - Battle for the Queen](http://battleforthequeen.redbull.com/)
--   [Asm.js Chess Battle](https://developer.microsoft.com/en-us/microsoft-edge/testdrive/demos/chess/)
--   [3D Hartwig Chess](http://creativejs.com/2012/12/3d-hartwig-chess/)
--   [Multiplayer Chess](http://chessapp.com/)
--   [Reti Chess](http://retichess.nodejitsu.com/)
--   [Chess Fork](http://www.chessfork.com/)
--   [Lozza](http://op12no2.me/posts/1641)
--   [angular-chess](http://theborakompanioni.github.io/angular-chess)
--   [Chessable](https://www.chessable.com)
--   [SlimChess](https://slimchess.com/now)
-
 ## MUSIC
 
 Musical support provided by:
 
--   [The Grateful Dead](https://www.youtube.com/watch?feature=player_detailpage&v=ANF6qanEB7s#t=2999)
--   [Umphrey's McGee](http://www.youtube.com/watch?v=jh-1fFWkSdw)
+-   [The Grateful Dead](https://www.youtube.com/watch?v=z-D9rdJWfWs)
+-   [Umphrey's McGee](https://www.youtube.com/watch?v=auEfZVcYp64)
 
 ## BUGS
 
 -   The en passant square and castling flags aren't adjusted when using the put/remove functions (workaround: use .load() instead)
-
-## TODO
-
--   Investigate the use of piece lists (this may shave a few cycles off
-    generate_moves() and attacked()).
--   Refactor API to use camelCase - yuck.
--   Add more robust FEN validation.
