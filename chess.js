@@ -510,8 +510,10 @@ var Chess = function(fen) {
 
     if (board[to]) {
       move.captured = board[to].type
+      move.captured_id = board[to].id;
     } else if (flags & BITS.EP_CAPTURE) {
       move.captured = PAWN
+      move.captured_id = board[to + (move.color === "w" ? 16 : -16)].id;
     }
     return move
   }
@@ -1010,7 +1012,7 @@ var Chess = function(fen) {
     board[move.to] = null
 
     if (move.flags & BITS.CAPTURE) {
-      board[move.to] = { type: move.captured, color: them, id: ID_COUNTER++ }
+      board[move.to] = { type: move.captured, color: them, id: move.captured_id }
     } else if (move.flags & BITS.EP_CAPTURE) {
       var index
       if (us === BLACK) {
@@ -1018,7 +1020,7 @@ var Chess = function(fen) {
       } else {
         index = move.to + 16
       }
-      board[index] = { type: PAWN, color: them, id: ID_COUNTER++ }
+      board[index] = { type: PAWN, color: them, id: move.captured_id }
     }
 
     if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
@@ -1147,7 +1149,7 @@ var Chess = function(fen) {
       }
     }
     s += '   +----------------------------------------+\n'
-    s += '     a  b  c  d  e  f  g  h\n'
+    s += '      a    b    c    d    e    f    g    h\n'
 
     return s
   }
