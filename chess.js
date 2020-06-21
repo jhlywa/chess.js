@@ -1120,6 +1120,38 @@ var Chess = function(fen) {
     return s
   }
 
+  function indices() {
+    var s = '   +----------------------------------------+\n'
+    for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
+      /* display the rank */
+      if (file(i) === 0) {
+        s += ' ' + '87654321'[rank(i)] + ' |'
+      }
+
+      /* empty piece */
+      if (board[i] == null) {
+        s += ' ... '
+      } else {
+        var pad = (num, size) => {
+          var s = num.toString()
+          while (s.length < size) s = "0" + s
+          return s
+        }
+        var id = pad(board[i].id, 3)
+        s += ' ' + id + ' '
+      }
+
+      if ((i + 1) & 0x88) {
+        s += '|\n'
+        i += 8
+      }
+    }
+    s += '   +----------------------------------------+\n'
+    s += '     a  b  c  d  e  f  g  h\n'
+
+    return s
+  }
+
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
   function move_from_san(move, sloppy) {
     // strip off any move decorations: e.g Nf3+?!
@@ -1743,6 +1775,10 @@ var Chess = function(fen) {
 
     ascii: function() {
       return ascii()
+    },
+
+    indices: function() {
+      return indices()
     },
 
     turn: function() {
