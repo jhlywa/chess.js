@@ -912,9 +912,9 @@ var Chess = function(fen) {
       }
     }
 
-    /* if pawn promotion, replace with new piece */
+    /* if pawn promotion, replace with new piece (that retains the orignal id) */
     if (move.flags & BITS.PROMOTION) {
-      board[move.to] = { type: move.promotion, color: us, id: board[move.to].id } // while promoting the piece retains its id
+      board[move.to] = { type: move.promotion, color: us, id: board[move.to].id }
     }
 
     /* if we moved the king */
