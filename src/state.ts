@@ -30,7 +30,6 @@ import {
   Color,
   Comments,
   GameHistory,
-  Header,
   HexMove,
   Piece,
   Move,
@@ -229,7 +228,7 @@ export function loadFen(fen: string): State | null {
 
 export function getPgn(
   state: State,
-  header: Header,
+  header: Record<string, string>,
   comments: Comments,
   history: GameHistory[],
   options: { newline_char?: string, max_width?: number } = {}
@@ -382,7 +381,7 @@ export function getPgn(
 export function loadPgn(
   pgn: string,
   options: { newline_char?: string, sloppy?: boolean } = {}
-): [State, Header, Comments, GameHistory[]] | null {
+): [State, Record<string, string>, Comments, GameHistory[]] | null {
   const {
     newline_char = '\r?\n',
     // allow the user to specify the sloppy move parser to work around over
@@ -404,7 +403,7 @@ export function loadPgn(
   const parse_pgn_header = (
     header: string,
     options: { newline_char: string, sloppy: boolean }
-  ): Header => {
+  ): Record<string, string> => {
     const newline_char = options.newline_char
     const header_obj: { [key: string]: string } = {}
     const headers = header.split(new RegExp(mask(newline_char)))

@@ -25,10 +25,9 @@ import {
   Color,
   Comments,
   GameHistory,
-  Header,
   HexMove,
   Move,
-  PgnComment,
+  FenComment,
   Piece,
   State,
 } from './types'
@@ -46,7 +45,7 @@ import {
 export class Chess {
   protected _state: State;
   protected _history: GameHistory[];
-  protected _header: Header;
+  protected _header: Record<string, string>;
   protected _comments: Comments;
 
   constructor(fen: string = DEFAULT_POSITION) {
@@ -323,7 +322,7 @@ export class Chess {
    * @param args List of strings
    * @return Key/value pairs
    */
-  public header(args: string[] = []): Header {
+  public header(args: string[] = []): Record<string, string> {
     for (let i = 0; i < args.length; i += 2) {
       if (typeof args[i] === 'string' && typeof args[i + 1] === 'string') {
         this._header[args[i]] = args[i + 1]
@@ -416,14 +415,14 @@ export class Chess {
     return comment;
   }
 
-  public getComments(): PgnComment[] {
+  public getComments(): FenComment[] {
     this.pruneComments();
     return Object.keys(this._comments).map((fen) => {
       return {fen: fen, comment: this._comments[fen]};
     });
   }
 
-  public deleteComments(): PgnComment[] {
+  public deleteComments(): FenComment[] {
     this.pruneComments();
     return Object.keys(this._comments)
       .map((fen) => {
@@ -433,6 +432,7 @@ export class Chess {
       });
   }
 
+  /** @internal */
   public perft(depth: number): number {
     const moves = generateMoves(this._state, { legal: false })
     let nodes = 0
