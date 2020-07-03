@@ -19,10 +19,12 @@
     "jest": "^26.1.0",
     "ts-jest": "^26.1.1",
     "typedoc": "^0.17.8",
+    "typedoc-plugin-markdown": "^2.3.1",
     "typescript": "^3.9.6"
   },
   "scripts": {
     "build": "tsc",
+    "doc": "typedoc --plugin none",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "jest"
   }
