@@ -1,11 +1,13 @@
-/** Public types */
+/** @public */
 export type Color = 'w' | 'b'
 
+/** @public */
 export type FenComment = {
   fen: string;
   comment: string;
 }
 
+/** @public */
 export type Move = {
   to: string;
   from: string;
@@ -17,11 +19,13 @@ export type Move = {
   promotion?: PieceSymbol;
 }
 
+/** @public */
 export type Piece = {
   color: Color;
   type: PieceSymbol;
 }
 
+/** @public */
 export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
 
 /** Private types */

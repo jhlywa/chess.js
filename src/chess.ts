@@ -42,6 +42,7 @@ import {
   SQUARES,
 } from './constants';
 
+/** @public */
 export class Chess {
   protected _state: State;
   protected _history: GameHistory[];
@@ -62,9 +63,9 @@ export class Chess {
   /**
    * Clears the board and loads the Forsyth–Edwards Notation (FEN) string.
    *
-   * @param fen
-   * @param keep_headers Flag to keep headers
-   * @return True if the position was successfully loaded, otherwise false.
+   * @param fen - FEN string
+   * @param keep_headers - Flag to keep headers
+   * @returns True if the position was successfully loaded, otherwise false.
    */
   public load(fen: string, keep_headers = false): boolean {
     const state = loadFen(fen)
@@ -82,7 +83,7 @@ export class Chess {
   /**
    * Clears the board
    *
-   * @param keep_headers Flag to keep headers
+   * @param keep_headers - Flag to keep headers
    */
   public clear(keep_headers = false): void {
     this._state = defaultState()
@@ -102,8 +103,8 @@ export class Chess {
   /**
    * Returns the piece on the square.
    *
-   * @param square e.g. 'e4'
-   * @return Copy of the piece or null
+   * @param square - e.g. 'e4'
+   * @returns Copy of the piece or null
    */
   public get(square?: string): Piece | null {
     return getPiece(this._state, square)
@@ -113,9 +114,9 @@ export class Chess {
    * Place a piece on a square. Fails when passed an invalid piece or square,
    * or when two or more kings of the same color are placed.
    *
-   * @param piece Object of the form { type: ..., color: ... }
-   * @param square e.g. 'e4'
-   * @return True if placed successfully, otherwise false
+   * @param piece - Object of the form `{ type: 'p', color: 'w' }`
+   * @param square - e.g. `'e4'`
+   * @returns True if placed successfully, otherwise false
    */
   public put(piece: { type?: string, color?: string }, square?: string): boolean {
     const newState = putPiece(this._state, piece, square)
@@ -130,8 +131,8 @@ export class Chess {
   /**
    * Removes and returns the piece on a square.
    *
-   * @param square e.g. 'e4'
-   * @return Piece or null
+   * @param square - e.g. 'e4'
+   * @returns Piece or null
    */
   public remove(square?: string): Piece | null {
     const piece = getPiece(this._state, square)
@@ -150,8 +151,8 @@ export class Chess {
   /**
    * Returns a list of legal moves from the current position.
    *
-   * @param square e.g. 'e4'
-   * @return Piece or null
+   * @param square - e.g. 'e4'
+   * @returns Piece or null
    */
   public moves(options: { square?: string, verbose?: boolean} = {}): (string | Move)[] {
     // The internal representation of a chess move is in 0x88 format, and
@@ -283,9 +284,8 @@ export class Chess {
 
   /**
    * Returns the game in PGN format
-   * @param options.newline_char
-   * @param options.max_width
-   * @return PGN
+   * @param options - Output formatting options
+   * @returns
    */
   public pgn(options: { newline_char?: string, max_width?: number } = {}): string {
     return getPgn(this._state, this._header, this._comments, this._history, options)
@@ -294,9 +294,8 @@ export class Chess {
   /**
    * Load the moves of a game stored in Portable Game Notation (PGN).
    *
-   * @param options.newline_char String representation of a valid RegExp fragment
-   * @param options.sloppy Flag to allow parsing non-standard notations
-   * @return PGN
+   * @param options - Load options
+   * @returns
    */
   public loadPgn(
     pgn: string,
@@ -319,8 +318,8 @@ export class Chess {
    * Adds header information to the PGN output. Calling without any arguments
    * returns the header information as an object.
    *
-   * @param args List of strings
-   * @return Key/value pairs
+   * @param args - List of key values
+   * @returns Key/value pairs
    */
   public header(args: string[] = []): Record<string, string> {
     for (let i = 0; i < args.length; i += 2) {
@@ -342,9 +341,9 @@ export class Chess {
   /**
    * Make a move on the board.
    *
-   * @param move Case-sensitive SAN string or object, e.g. `'Nxb7'` or
+   * @param move - Case-sensitive SAN string or object, e.g. `'Nxb7'` or
    * `{ from: 'h7', to: 'h8', promotion: 'q' }`
-   * @param options.sloppy? Flag to enable parsing of a variety of non-standard
+   * @param options - Options to enable parsing of a variety of non-standard
    * move notations
    */
   public move(
