@@ -2,14 +2,15 @@
   "name": "chess.js",
   "version": "0.11.0",
   "license": "BSD-2-Clause",
-  "main": "chess.js",
-  "homepage": "https://github.com/jhlywa/chess.js",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "homepage": "https://github.com/lubert/chess.ts",
   "keywords": [
     "chess"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/jhlywa/chess.js.git"
+    "url": "https://github.com/lubert/chess.ts.git"
   },
   "devDependencies": {
     "@types/jest": "^26.0.3",
@@ -18,13 +19,10 @@
     "eslint": "^7.3.1",
     "jest": "^26.1.0",
     "ts-jest": "^26.1.1",
-    "typedoc": "^0.17.8",
-    "typedoc-plugin-markdown": "^2.3.1",
     "typescript": "^3.9.6"
   },
   "scripts": {
     "build": "tsc",
-    "doc": "typedoc --plugin none",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "jest"
   }
