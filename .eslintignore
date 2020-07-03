@@ -1,0 +1,6 @@
+jest.config.js
+.*
+__tests__
+node_modules
+dist
+coverage

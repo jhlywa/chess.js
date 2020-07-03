@@ -1,5 +1,31 @@
-if (typeof require != "undefined") {
-  var Chess = require('../chess').Chess;
+const { Chess } = require('../src/chess');
+const {
+  SQUARES,
+  PAWN,
+  BISHOP,
+  KNIGHT,
+  ROOK,
+  QUEEN,
+  KING,
+  WHITE,
+  BLACK,
+} = require('../src/constants');
+const { algebraic, validateFen } = require('../src/utils');
+
+/* from the ECMA-262 spec (section 12.6.4):
+ * "The mechanics of enumerating the properties ... is
+ * implementation dependent"
+ * so: for (var sq in SQUARES) { keys.push(sq); } might not be
+ * ordered correctly
+ */
+
+const SQUARES_LIST = []
+for (let i = SQUARES.a8; i <= SQUARES.h1; i++) {
+  if (i & 0x88) {
+    i += 7
+    continue
+  }
+  SQUARES_LIST.push(algebraic(i))
 }
 
 describe("Perft", function() {
@@ -99,7 +125,7 @@ describe("Checkmate", function() {
     chess.load(checkmate);
 
     it(checkmate, function() {
-      expect(chess.in_checkmate()).toBe(true);
+      expect(chess.inCheckmate()).toBe(true);
     });
   });
 
@@ -119,7 +145,7 @@ describe("Stalemate", function() {
     chess.load(stalemate);
 
     it(stalemate, function() {
-      expect(chess.in_stalemate()).toBe(true)
+      expect(chess.inStalemate()).toBe(true)
     });
 
   });
@@ -147,9 +173,9 @@ describe("Insufficient Material", function() {
 
     it(position.fen, function() {
       if (position.draw) {
-        expect(chess.insufficient_material() && chess.in_draw()).toBe(true);
+        expect(chess.insufficientMaterial() && chess.inDraw()).toBe(true);
       } else {
-        expect(!chess.insufficient_material() && !chess.in_draw()).toBe(true);
+        expect(!chess.insufficientMaterial() && !chess.inDraw()).toBe(true);
       }
     });
 
@@ -177,14 +203,14 @@ describe("Threefold Repetition", function() {
 
       var passed = true;
       for (var j = 0; j < position.moves.length; j++) {
-        if (chess.in_threefold_repetition()) {
+        if (chess.inThreefoldRepetition()) {
           passed = false;
           break;
         }
         chess.move(position.moves[j]);
       }
 
-      expect(passed && chess.in_threefold_repetition() && chess.in_draw()).toBe(true);
+      expect(passed && chess.inThreefoldRepetition() && chess.inDraw()).toBe(true);
 
     });
 
@@ -263,42 +289,42 @@ describe("Get/Put/Remove", function() {
   var chess = new Chess();
   var passed = true;
   var positions = [
-    {pieces: {a7: {type: chess.PAWN, color: chess.WHITE},
-              b7: {type: chess.PAWN, color: chess.BLACK},
-              c7: {type: chess.KNIGHT, color: chess.WHITE},
-              d7: {type: chess.KNIGHT, color: chess.BLACK},
-              e7: {type: chess.BISHOP, color: chess.WHITE},
-              f7: {type: chess.BISHOP, color: chess.BLACK},
-              g7: {type: chess.ROOK, color: chess.WHITE},
-              h7: {type: chess.ROOK, color: chess.BLACK},
-              a6: {type: chess.QUEEN, color: chess.WHITE},
-              b6: {type: chess.QUEEN, color: chess.BLACK},
-              a4: {type: chess.KING, color: chess.WHITE},
-              h4: {type: chess.KING, color: chess.BLACK}},
+    {pieces: {a7: {type: PAWN, color: WHITE},
+              b7: {type: PAWN, color: BLACK},
+              c7: {type: KNIGHT, color: WHITE},
+              d7: {type: KNIGHT, color: BLACK},
+              e7: {type: BISHOP, color: WHITE},
+              f7: {type: BISHOP, color: BLACK},
+              g7: {type: ROOK, color: WHITE},
+              h7: {type: ROOK, color: BLACK},
+              a6: {type: QUEEN, color: WHITE},
+              b6: {type: QUEEN, color: BLACK},
+              a4: {type: KING, color: WHITE},
+              h4: {type: KING, color: BLACK}},
      should_pass: true},
 
-    {pieces: {a7: {type: 'z', color: chess.WHTIE}}, // bad piece
+    {pieces: {a7: {type: 'z', color: null}}, // bad piece
      should_pass: false},
 
-    {pieces: {j4: {type: chess.PAWN, color: chess.WHTIE}}, // bad square
+    {pieces: {j4: {type: PAWN, color: null}}, // bad square
      should_pass: false},
 
     /* disallow two kings (black) */
-    {pieces: {a7: {type: chess.KING, color: chess.BLACK},
-              h2: {type: chess.KING, color: chess.WHITE},
-              a8: {type: chess.KING, color: chess.BLACK}},
+    {pieces: {a7: {type: KING, color: BLACK},
+              h2: {type: KING, color: WHITE},
+              a8: {type: KING, color: BLACK}},
       should_pass: false},
 
     /* disallow two kings (white) */
-    {pieces: {a7: {type: chess.KING, color: chess.BLACK},
-              h2: {type: chess.KING, color: chess.WHITE},
-              h1: {type: chess.KING, color: chess.WHITE}},
+    {pieces: {a7: {type: KING, color: BLACK},
+              h2: {type: KING, color: WHITE},
+              h1: {type: KING, color: WHITE}},
       should_pass: false},
 
     /* allow two kings if overwriting the exact same square */
-    {pieces: {a7: {type: chess.KING, color: chess.BLACK},
-              h2: {type: chess.KING, color: chess.WHITE},
-              h2: {type: chess.KING, color: chess.WHITE}},
+    {pieces: {a7: {type: KING, color: BLACK},
+              h2: {type: KING, color: WHITE},
+              h2: {type: KING, color: WHITE}},
       should_pass: true},
   ];
 
@@ -317,8 +343,8 @@ describe("Get/Put/Remove", function() {
       /* iterate over every square to make sure get returns the proper
        * piece values/color
        */
-      for (var j = 0; j < chess.SQUARES.length; j++) {
-        var square = chess.SQUARES[j];
+      for (var j = 0; j < SQUARES_LIST.length; j++) {
+        var square = SQUARES_LIST[j];
         if (!(square in position.pieces)) {
           if (chess.get(square)) {
             passed = false;
@@ -337,8 +363,8 @@ describe("Get/Put/Remove", function() {
 
       if (passed) {
         /* remove the pieces */
-        for (var j = 0; j < chess.SQUARES.length; j++) {
-          var square = chess.SQUARES[j];
+        for (var j = 0; j < SQUARES_LIST.length; j++) {
+          var square = SQUARES_LIST[j];
           var piece = chess.remove(square);
           if ((!(square in position.pieces)) && piece) {
             passed = false;
@@ -447,7 +473,7 @@ describe("PGN", function() {
 
   positions.forEach(function(position, i) {
 
-    it('Postion: ' + i, function() {
+    it('Position: ' + i, function() {
       var chess = ("starting_position" in position) ? new Chess(position.starting_position) : new Chess();
       passed = true;
       error_message = "";
@@ -458,7 +484,7 @@ describe("PGN", function() {
         }
       }
 
-      chess.header.apply(null, position.header);
+      chess.header(position.header);
       var pgn = chess.pgn({max_width:position.max_width, newline_char:position.newline_char});
       var fen = chess.fen();
       passed = pgn === position.pgn && fen === position.fen;
@@ -749,7 +775,7 @@ describe("Load PGN", function() {
     newline_chars.forEach(function(newline, j) {
       it(i + String.fromCharCode(97 + j), function() {
         var sloppy = t.sloppy || false;
-        var result = chess.load_pgn(t.pgn.join(newline), {sloppy: sloppy,
+        var result = chess.loadPgn(t.pgn.join(newline), {sloppy: sloppy,
                                                           newline_char: newline});
         var should_pass = t.expect;
 
@@ -801,10 +827,10 @@ describe("Load PGN", function() {
          '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8\n' +
          '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0\n';
 
-    var result = chess.load_pgn(pgn, { newline_char: '\r?\n' });
+    var result = chess.loadPgn(pgn, { newline_char: '\r?\n' });
     expect(result).toBe(true);
 
-    expect(chess.load_pgn(pgn)).toBe(true);
+    expect(chess.loadPgn(pgn)).toBe(true);
     expect(chess.pgn().match(/^\[\[/) === null).toBe(true);
   });
 
@@ -822,14 +848,14 @@ describe("Manipulate Comments", function() {
 
   it('no comments', function() {
     var chess = new Chess();
-    expect(chess.get_comment())
+    expect(chess.getComment())
       .toBeUndefined();
-    expect(chess.get_comments())
+    expect(chess.getComments())
       .toEqual([]);
     chess.move('e4');
-    expect(chess.get_comment())
+    expect(chess.getComment())
       .toBeUndefined();
-    expect(chess.get_comments())
+    expect(chess.getComments())
       .toEqual([]);
     expect(chess.pgn())
       .toEqual('1. e4');
@@ -837,10 +863,10 @@ describe("Manipulate Comments", function() {
 
   it('comment for initial position', function() {
     var chess = new Chess();
-    chess.set_comment('starting position');
-    expect(chess.get_comment())
+    chess.setComment('starting position');
+    expect(chess.getComment())
       .toEqual('starting position');
-    expect(chess.get_comments())
+    expect(chess.getComments())
       .toEqual([{fen: chess.fen(), comment: 'starting position'}]);
     expect(chess.pgn())
       .toEqual('{starting position}');
@@ -850,15 +876,15 @@ describe("Manipulate Comments", function() {
     var chess = new Chess();
     chess.move('e4');
     var e4 = chess.fen();
-    chess.set_comment('good move');
-    expect(chess.get_comment())
+    chess.setComment('good move');
+    expect(chess.getComment())
       .toEqual('good move');
-    expect(chess.get_comments())
+    expect(chess.getComments())
       .toEqual([{fen: e4, comment: 'good move'}]);
     chess.move('e5');
-    expect(chess.get_comment())
+    expect(chess.getComment())
       .toBeUndefined();
-    expect(chess.get_comments())
+    expect(chess.getComments())
       .toEqual([{fen: e4, comment: 'good move'}]);
     expect(chess.pgn())
       .toEqual('1. e4 {good move} e5');
@@ -868,10 +894,10 @@ describe("Manipulate Comments", function() {
     var chess = new Chess();
     chess.move('e4');
     chess.move('e6');
-    chess.set_comment('dubious move');
-    expect(chess.get_comment())
+    chess.setComment('dubious move');
+    expect(chess.getComment())
       .toEqual('dubious move');
-    expect(chess.get_comments())
+    expect(chess.getComments())
       .toEqual([{fen: chess.fen(), comment: 'dubious move'}]);
     expect(chess.pgn())
       .toEqual('1. e4 e6 {dubious move}');
@@ -879,8 +905,8 @@ describe("Manipulate Comments", function() {
 
   it('comment with brackets', function() {
     var chess = new Chess();
-    chess.set_comment('{starting position}');
-    expect(chess.get_comment())
+    chess.setComment('{starting position}');
+    expect(chess.getComment())
       .toEqual('[starting position]');
   });
 
@@ -888,20 +914,20 @@ describe("Manipulate Comments", function() {
     var chess = new Chess();
 
     var initial = chess.fen();
-    chess.set_comment('starting position');
-    expect(chess.get_comment())
+    chess.setComment('starting position');
+    expect(chess.getComment())
       .toEqual('starting position');
-    expect(chess.get_comments())
+    expect(chess.getComments())
       .toEqual([{fen: initial, comment: 'starting position'}]);
     expect(chess.pgn())
       .toEqual('{starting position}');
 
     chess.move('e4');
     var e4 = chess.fen();
-    chess.set_comment('good move');
-    expect(chess.get_comment())
+    chess.setComment('good move');
+    expect(chess.getComment())
       .toEqual('good move');
-    expect(chess.get_comments())
+    expect(chess.getComments())
       .toEqual([
         {fen: initial, comment: 'starting position'},
         {fen: e4, comment: 'good move'}
@@ -911,10 +937,10 @@ describe("Manipulate Comments", function() {
 
     chess.move('e6');
     var e6 = chess.fen();
-    chess.set_comment('dubious move');
-    expect(chess.get_comment())
+    chess.setComment('dubious move');
+    expect(chess.getComment())
       .toEqual('dubious move');
-    expect(chess.get_comments())
+    expect(chess.getComments())
       .toEqual([
         {fen: initial, comment: 'starting position'},
         {fen: e4, comment: 'good move'},
@@ -926,31 +952,31 @@ describe("Manipulate Comments", function() {
 
   it('delete comments', function() {
     var chess = new Chess();
-    expect(chess.delete_comment())
+    expect(chess.deleteComment())
       .toBeUndefined();
-    expect(chess.delete_comments())
+    expect(chess.deleteComments())
       .toEqual([]);
     var initial = chess.fen();
-    chess.set_comment('starting position');
+    chess.setComment('starting position');
     chess.move('e4');
     var e4 = chess.fen();
-    chess.set_comment('good move');
+    chess.setComment('good move');
     chess.move('e6');
     var e6 = chess.fen();
-    chess.set_comment('dubious move');
-    expect(chess.get_comments())
+    chess.setComment('dubious move');
+    expect(chess.getComments())
       .toEqual([
         {fen: initial, comment: 'starting position'},
         {fen: e4, comment: 'good move'},
         {fen: e6, comment: 'dubious move'}
       ]);
-    expect(chess.delete_comment())
+    expect(chess.deleteComment())
       .toEqual('dubious move');
     expect(chess.pgn())
       .toEqual('{starting position} 1. e4 {good move} e6');
-    expect(chess.delete_comment())
+    expect(chess.deleteComment())
       .toBeUndefined();
-    expect(chess.delete_comments())
+    expect(chess.deleteComments())
       .toEqual([
         {fen: initial, comment: 'starting position'},
         {fen: e4, comment: 'good move'}
@@ -962,11 +988,11 @@ describe("Manipulate Comments", function() {
   it('prune comments', function() {
     var chess = new Chess();
     chess.move('e4');
-    chess.set_comment('tactical');
+    chess.setComment('tactical');
     chess.undo();
     chess.move('d4');
-    chess.set_comment('positional');
-    expect(chess.get_comments())
+    chess.setComment('positional');
+    expect(chess.getComments())
       .toEqual([{fen: chess.fen(), comment: 'positional'}]);
     expect(chess.pgn())
       .toEqual('1. d4 {positional}');
@@ -976,17 +1002,17 @@ describe("Manipulate Comments", function() {
     var test = function(fn) {
       var chess = new Chess();
       chess.move('e4');
-      chess.set_comment('good move');
-      expect(chess.get_comments())
+      chess.setComment('good move');
+      expect(chess.getComments())
         .toEqual([{fen: chess.fen(), comment: 'good move'}]);
       fn(chess);
-      expect(chess.get_comments())
+      expect(chess.getComments())
         .toEqual([]);
     };
     test(function(chess) { chess.reset(); });
     test(function(chess) { chess.clear(); });
     test(function(chess) { chess.load(chess.fen()); });
-    test(function(chess) { chess.load_pgn('1. e4'); });
+    test(function(chess) { chess.loadPgn('1. e4'); });
   });
 
 });
@@ -995,9 +1021,9 @@ describe('Format Comments', function() {
   it('wrap comments', function() {
     var chess = new Chess();
     chess.move('e4');
-    chess.set_comment('good   move');
+    chess.setComment('good   move');
     chess.move('e5');
-    chess.set_comment('classical response');
+    chess.setComment('classical response');
     expect(chess.pgn())
       .toEqual('1. e4 {good   move} e5 {classical response}');
     expect(chess.pgn({max_width: 16}))
@@ -1087,7 +1113,7 @@ describe('Load Comments', function() {
   tests.forEach(function(test) {
     it(`load ${test.name}`, function() {
       var chess = new Chess();
-      chess.load_pgn(test.input);
+      chess.loadPgn(test.input);
       expect(chess.pgn())
         .toEqual(test.output);
     });
@@ -1298,7 +1324,7 @@ describe("Validate FEN", function() {
   positions.forEach(function(position) {
 
     it(position.fen + ' (valid: ' + (position.error_number  == 0) + ')', function() {
-      var result = chess.validate_fen(position.fen);
+      var result = validateFen(position.fen);
       expect(result.error_number == position.error_number).toBe(true);
     });
 
@@ -1580,7 +1606,7 @@ describe('Parse PGN Headers', function() {
       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0'
     ];
     var chess = new Chess();
-    chess.load_pgn(pgn.join('\n'));
+    chess.loadPgn(pgn.join('\n'));
     expect(chess.header()['Date']).toBe('1972.01.07');
 
   });
@@ -1601,18 +1627,18 @@ describe('Regression Tests', function() {
     expect(chess.moves().join(' ')).toBe('Kd2 Ke2 Kxf2 Kf1 Kd1');
   });
 
-  it('Github Issue #85 (white) - SetUp and FEN should be accepted in load_pgn', function() {
+  it('Github Issue #85 (white) - SetUp and FEN should be accepted in loadPgn', function() {
        var chess = new Chess();
        var pgn = ['[SetUp "1"]', '[FEN "7k/5K2/4R3/8/8/8/8/8 w KQkq - 0 1"]', "", '1. Rh6#'];
-       var result = chess.load_pgn(pgn.join("\n"));
+       var result = chess.loadPgn(pgn.join("\n"));
        expect(result).toBe(true);
        expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1');
   });
 
-  it('Github Issue #85 (black) - SetUp and FEN should be accepted in load_pgn', function() {
+  it('Github Issue #85 (black) - SetUp and FEN should be accepted in loadPgn', function() {
        var chess = new Chess();
        var pgn = ['[SetUp "1"]', '[FEN "r4r1k/1p4b1/3p3p/5qp1/1RP5/6P1/3NP3/2Q2RKB b KQkq - 0 1"]', "", '1. ... Qc5+'];
-       var result = chess.load_pgn(pgn.join("\n"));
+       var result = chess.loadPgn(pgn.join("\n"));
        expect(result).toBe(true);
        expect(chess.fen()).toBe('r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2');
   });
@@ -1633,7 +1659,7 @@ describe('Regression Tests', function() {
     expect(result.match(/(45\. \.\.\. Rf1\+)$/)[0]).toBe('45. ... Rf1+');
   })
 
-  it('Github Issue #129 load_pgn() should not clear headers if PGN contains SetUp and FEN tags', function () {
+  it('Github Issue #129 loadPgn() should not clear headers if PGN contains SetUp and FEN tags', function () {
     var pgn = [
       '[Event "Test Olympiad"]',
       '[Site "Earth"]',
@@ -1649,7 +1675,7 @@ describe('Regression Tests', function() {
     ];
 
     var chess = new Chess();
-    var result = chess.load_pgn(pgn.join('\n'));
+    var result = chess.loadPgn(pgn.join('\n'));
     var expected = {
       Event: 'Test Olympiad',
       Site: 'Earth',
@@ -1680,7 +1706,7 @@ describe('Regression Tests', function() {
     ];
 
     var chess = new Chess();
-    var result = chess.load_pgn(pgn.join('\n'));
+    var result = chess.loadPgn(pgn.join('\n'));
     chess.clear();
     var expected = {
       FEN: '8/8/8/8/8/8/8/8 w - - 0 1',
