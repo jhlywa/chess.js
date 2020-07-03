@@ -1,7 +1,15 @@
 import {
   BLACK,
   WHITE,
-} from "./constants"
+} from './constants'
+import {
+  Color,
+  FlagKey,
+  Piece,
+  PieceSymbol,
+  Square,
+  Validation,
+} from "./types"
 
 /**
  * Extracts the zero-based rank of an 0x88 square.

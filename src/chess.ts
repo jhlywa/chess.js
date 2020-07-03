@@ -20,17 +20,28 @@ import {
   ascii,
   getBoard,
   validateMove,
-} from "./state"
+} from './state'
+import {
+  Color,
+  Comments,
+  GameHistory,
+  Header,
+  HexMove,
+  Move,
+  PgnComment,
+  Piece,
+  State,
+} from './types'
 import {
   file,
   isSquare,
   rank,
   swapColor,
-} from "./utils";
+} from './utils';
 import {
   DEFAULT_POSITION,
   SQUARES,
-} from "./constants";
+} from './constants';
 
 export class Chess {
   protected _state: State;
@@ -143,7 +154,7 @@ export class Chess {
    * @param square e.g. 'e4'
    * @return Piece or null
    */
-  public moves(options: { square?: string, verbose?: boolean} = {}): (string | PrettyMove)[] {
+  public moves(options: { square?: string, verbose?: boolean} = {}): (string | Move)[] {
     // The internal representation of a chess move is in 0x88 format, and
     // not meant to be human-readable.  The code below converts the 0x88
     // square coordinates to algebraic coordinates.  It also prunes an
@@ -209,7 +220,7 @@ export class Chess {
      * Zobrist key would be maintained in the make_move/undo_move functions,
      * avoiding the costly that we do below.
      */
-    const moves: Move[] = []
+    const moves: HexMove[] = []
     const positions: { [key: string]: number } = {}
     let repetition = false
 
@@ -236,7 +247,7 @@ export class Chess {
       if (!moves.length) {
         break
       }
-      this.makeMove(moves.pop() as Move)
+      this.makeMove(moves.pop() as HexMove)
     }
 
     return repetition
@@ -338,9 +349,9 @@ export class Chess {
    * move notations
    */
   public move(
-    move: string | PrettyMove,
+    move: string | Move,
     options: { sloppy?: boolean }
-  ): PrettyMove | null {
+  ): Move | null {
     const validMove = validateMove(this._state, move, options)
 
     if (!validMove) {
@@ -353,7 +364,7 @@ export class Chess {
     return prettyMove
   }
 
-  public undo(): PrettyMove | null {
+  public undo(): Move | null {
     const move = this.undoMove()
     return move ? makePretty(this._state, move) : null
   }
@@ -367,8 +378,8 @@ export class Chess {
     return null
   }
 
-  public history(options: { verbose?: boolean } = {}): (string | PrettyMove)[] {
-    const moveHistory: Array<string | PrettyMove> = []
+  public history(options: { verbose?: boolean } = {}): (string | Move)[] {
+    const moveHistory: Array<string | Move> = []
     const { verbose = false } = options;
 
     if (!this._history.length) {
@@ -462,7 +473,7 @@ export class Chess {
   }
 
   protected pruneComments(): void {
-    const reversed_history: Move[] = [];
+    const reversed_history: HexMove[] = [];
     const current_comments: Comments = {};
     const copy_comment = (fen: string) => {
       if (fen in this._comments) {
@@ -470,11 +481,11 @@ export class Chess {
       }
     };
     while (this._history.length > 0) {
-      reversed_history.push(this.undoMove() as Move);
+      reversed_history.push(this.undoMove() as HexMove);
     }
     copy_comment(this.fen());
     while (reversed_history.length > 0) {
-      this.makeMove(reversed_history.pop() as Move);
+      this.makeMove(reversed_history.pop() as HexMove);
       copy_comment(this.fen());
     }
     this._comments = current_comments;
@@ -493,7 +504,7 @@ export class Chess {
     return this.attacked(swapColor(color), this._state.kings[color])
   }
 
-  protected makeMove(move: Move): void {
+  protected makeMove(move: HexMove): void {
     this._history.push({
       move: move,
       state: this._state,
@@ -501,7 +512,7 @@ export class Chess {
     this._state = makeMove(this._state, move)
   }
 
-  protected undoMove(): Move | null {
+  protected undoMove(): HexMove | null {
     const prev = this._history.pop()
     if (prev == null) {
       return null
@@ -511,7 +522,7 @@ export class Chess {
   }
 
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
-  protected sanToMove(move: string, sloppy: boolean): Move | null {
+  protected sanToMove(move: string, sloppy: boolean): HexMove | null {
     return sanToMove(this._state, move, sloppy)
   }
 }

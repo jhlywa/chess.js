@@ -1,3 +1,11 @@
+import {
+  Color,
+  FlagKey,
+  PieceSymbol,
+  Square,
+} from './types'
+
+
 export const WHITE: Color = 'w'
 export const BLACK: Color = 'b'
 export const PAWN: PieceSymbol = 'p'
