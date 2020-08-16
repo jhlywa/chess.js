@@ -864,7 +864,7 @@ var Chess = function(fen) {
         .slice(0, 4)
         .join(' ')
 
-      /* has the position occurred three or move times */
+      /* has the position occurred three or more times */
       positions[fen] = fen in positions ? positions[fen] + 1 : 1
       if (positions[fen] >= 3) {
         repetition = true
