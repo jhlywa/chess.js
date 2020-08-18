@@ -150,14 +150,133 @@ var Chess = function(fen) {
     ]
   }
 
-  var board = new Array(128)
-  var kings = { w: EMPTY, b: EMPTY }
-  var turn = WHITE
-  var castling = { w: 0, b: 0 }
-  var ep_square = EMPTY
-  var half_moves = 0
-  var move_number = 1
-  var history = []
+  // var Test = function() {
+  //   return {
+  //     a:out,
+  //     test: function() {
+  //       console.log(this)
+  //     }
+  //   }
+  // }
+
+  var GameNode = function(move, parent) {
+
+    if (typeof move === 'undefined') {
+      move = null;
+    }
+
+    if (typeof parent === 'undefined') {
+      parent = null;
+    }
+
+    return {
+      move: move, // should be "ugly" move leading to this node, or null if this is the root
+      kings: { b: kings.b, w: kings.w },
+      turn: turn,
+      castling: { b: castling.b, w: castling.w },
+      ep_square: ep_square,
+      half_moves: half_moves,
+      move_number: move_number,
+      parent: parent, // null if this is the root
+      variations: [], // list of child GameNodes
+      board: clone(board),
+      history: clone(history),
+      repetition_counter: clone(repetition_counter),
+
+      san: function() {
+        return "san formatted move leading to this move"
+      },
+      uci: function() {
+        return "uci formatted move leading to this move"
+      },
+      root: function() {
+        node = this
+        for (; node.parent != null;) {
+          node = node.parent
+        }
+        return node
+      },
+      is_end: function() {
+        return variations.length == 0;
+      },
+      is_mainline: function() {
+        return "bool if it is in the mainline"
+      },
+      is_variation: function(move) {
+        for (i=0; i<variations.length; i++) {
+          if (isEquivalent(move, variations[i].move)) {
+            return true
+          }
+        }
+        return false
+      },
+      add_variation: function(move) {
+        var n = new GameNode(move, this)
+        variations.push(n)
+        return n;
+      },
+      remove_variation: function(move) {
+        for (i = 0; i<variations.length; i++) {
+          if (objects_equal(move, variations[i].move)) {
+            v = variations.splice(i, 1)
+            return v
+          }
+        }
+        return null
+      },
+      promote_to_main: function(move) {
+        for (i = 1; i<variations.length; i++) {
+          if (objects_equal(move, variations[i].move)) {
+            tmp = variations[0]
+            variations[0] = variations[i]
+            variation[i] = tmp
+            return true
+          }
+        }
+        return false
+      },
+      mainline: function() {
+        var line = [];
+        for (i = this; i.variations.length > 0; i = i.variations[0]) {
+          line.append(i)
+        }
+        return line
+      },
+      mainline_moves: function() {
+        ml = mainline()
+        if (ml[0].move == null) {
+          ml = ml.slice(1, ml.length)
+        }
+        var moves = [];
+        for (i in ml) {
+          moves.append(i.move)
+        }
+        return moves
+      }
+    }
+  }
+      // board - i added 
+      // move: move,
+      // kings: { b: kings.b, w: kings.w },
+      // turn: turn,
+      // castling: { b: castling.b, w: castling.w },
+      // ep_square: ep_square,
+      // half_moves: half_moves,
+      // move_number: move_number
+      // history
+      // repetition_counter
+
+  var board = new Array(128) // GameState
+  var kings = { w: EMPTY, b: EMPTY } // GameState
+  var turn = WHITE // GameState
+  var castling = { w: 0, b: 0 } // GameState
+  var ep_square = EMPTY // GameState
+  var half_moves = 0 // GameState
+  var move_number = 1 // GameState
+  var repetition_counter = {} // GameState
+  // connections between GameState
+  var history = [] // GameState??
+  var game_node = null // root node - empty until updated
   var header = {}
   var comments = {}
 
@@ -168,6 +287,35 @@ var Chess = function(fen) {
     load(DEFAULT_POSITION)
   } else {
     load(fen)
+  }
+  game_node = new GameNode()
+
+  increment_repetitions(repetition_fen());
+
+  function objects_equal(a, b) {
+    // Create arrays of property names
+    var aProps = Object.getOwnPropertyNames(a);
+    var bProps = Object.getOwnPropertyNames(b);
+
+    // If number of properties is different,
+    // objects are not equivalent
+    if (aProps.length != bProps.length) {
+        return false;
+    }
+
+    for (var i = 0; i < aProps.length; i++) {
+        var propName = aProps[i];
+
+        // If values of same property are not equal,
+        // objects are not equivalent
+        if (a[propName] !== b[propName]) {
+            return false;
+        }
+    }
+
+    // If we made it this far, objects
+    // are considered equivalent
+    return true;
   }
 
   function clear(keep_headers) {
@@ -182,6 +330,7 @@ var Chess = function(fen) {
     ep_square = EMPTY
     half_moves = 0
     move_number = 1
+    game_node = new GameNode() 
     history = []
     if (!keep_headers) header = {}
     comments = {}
@@ -359,7 +508,7 @@ var Chess = function(fen) {
     return { valid: true, error_number: 0, error: errors[0] }
   }
 
-  function generate_fen() {
+  function generate_fen() { // WARNING GLOBAL STATE RELIANCE board
     var empty = 0
     var fen = ''
 
@@ -530,6 +679,8 @@ var Chess = function(fen) {
       }
     }
 
+    var board_clone = clone(board)
+    var history_clone = clone(history)
     var moves = []
     var us = turn
     var them = swap_color(us)
@@ -563,7 +714,7 @@ var Chess = function(fen) {
         continue
       }
 
-      var piece = board[i]
+      var piece = board_clone[i]
       if (piece == null || piece.color !== us) {
         continue
       }
@@ -571,13 +722,13 @@ var Chess = function(fen) {
       if (piece.type === PAWN) {
         /* single square, non-capturing */
         var square = i + PAWN_OFFSETS[us][0]
-        if (board[square] == null) {
-          add_move(board, moves, i, square, BITS.NORMAL)
+        if (board_clone[square] == null) {
+          add_move(board_clone, moves, i, square, BITS.NORMAL)
 
           /* double square */
           var square = i + PAWN_OFFSETS[us][1]
-          if (second_rank[us] === rank(i) && board[square] == null) {
-            add_move(board, moves, i, square, BITS.BIG_PAWN)
+          if (second_rank[us] === rank(i) && board_clone[square] == null) {
+            add_move(board_clone, moves, i, square, BITS.BIG_PAWN)
           }
         }
 
@@ -586,10 +737,10 @@ var Chess = function(fen) {
           var square = i + PAWN_OFFSETS[us][j]
           if (square & 0x88) continue
 
-          if (board[square] != null && board[square].color === them) {
-            add_move(board, moves, i, square, BITS.CAPTURE)
+          if (board_clone[square] != null && board_clone[square].color === them) {
+            add_move(board_clone, moves, i, square, BITS.CAPTURE)
           } else if (square === ep_square) {
-            add_move(board, moves, i, ep_square, BITS.EP_CAPTURE)
+            add_move(board_clone, moves, i, ep_square, BITS.EP_CAPTURE)
           }
         }
       } else {
@@ -601,11 +752,11 @@ var Chess = function(fen) {
             square += offset
             if (square & 0x88) break
 
-            if (board[square] == null) {
-              add_move(board, moves, i, square, BITS.NORMAL)
+            if (board_clone[square] == null) {
+              add_move(board_clone, moves, i, square, BITS.NORMAL)
             } else {
-              if (board[square].color === us) break
-              add_move(board, moves, i, square, BITS.CAPTURE)
+              if (board_clone[square].color === us) break
+              add_move(board_clone, moves, i, square, BITS.CAPTURE)
               break
             }
 
@@ -626,13 +777,13 @@ var Chess = function(fen) {
         var castling_to = castling_from + 2
 
         if (
-          board[castling_from + 1] == null &&
-          board[castling_to] == null &&
+          board_clone[castling_from + 1] == null &&
+          board_clone[castling_to] == null &&
           !attacked(them, kings[us]) &&
           !attacked(them, castling_from + 1) &&
           !attacked(them, castling_to)
         ) {
-          add_move(board, moves, kings[us], castling_to, BITS.KSIDE_CASTLE)
+          add_move(board_clone, moves, kings[us], castling_to, BITS.KSIDE_CASTLE)
         }
       }
 
@@ -642,14 +793,14 @@ var Chess = function(fen) {
         var castling_to = castling_from - 2
 
         if (
-          board[castling_from - 1] == null &&
-          board[castling_from - 2] == null &&
-          board[castling_from - 3] == null &&
+          board_clone[castling_from - 1] == null &&
+          board_clone[castling_from - 2] == null &&
+          board_clone[castling_from - 3] == null &&
           !attacked(them, kings[us]) &&
           !attacked(them, castling_from - 1) &&
           !attacked(them, castling_to)
         ) {
-          add_move(board, moves, kings[us], castling_to, BITS.QSIDE_CASTLE)
+          add_move(board_clone, moves, kings[us], castling_to, BITS.QSIDE_CASTLE)
         }
       }
     }
@@ -664,11 +815,11 @@ var Chess = function(fen) {
     /* filter out illegal moves */
     var legal_moves = []
     for (var i = 0, len = moves.length; i < len; i++) {
-      make_move(moves[i])
+      make_move(moves[i], board_clone, history_clone)
       if (!king_attacked(us)) {
         legal_moves.push(moves[i])
       }
-      undo_move()
+      undo_move(board_clone, history_clone)
     }
 
     return legal_moves
@@ -684,7 +835,17 @@ var Chess = function(fen) {
    * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
    * 4. ... Ne7 is technically the valid SAN
    */
-  function move_to_san(move, sloppy) {
+  function move_to_san(move, sloppy, this_board, this_history) {
+
+
+    if (typeof this_board === 'undefined') {
+      this_board = clone(board);
+    }
+
+    if (typeof this_history === 'undefined') {
+      this_history = clone(history);
+    }
+
     var output = ''
 
     if (move.flags & BITS.KSIDE_CASTLE) {
@@ -712,7 +873,7 @@ var Chess = function(fen) {
       }
     }
 
-    make_move(move)
+    make_move(move, this_board, this_history)
     if (in_check()) {
       if (in_checkmate()) {
         output += '#'
@@ -720,7 +881,7 @@ var Chess = function(fen) {
         output += '+'
       }
     }
-    undo_move()
+    undo_move(this_board, this_history)
 
     return output
   }
@@ -840,94 +1001,116 @@ var Chess = function(fen) {
     return false
   }
 
-  function in_threefold_repetition() {
-    /* TODO: while this function is fine for casual use, a better
-     * implementation would use a Zobrist key (instead of FEN). the
-     * Zobrist key would be maintained in the make_move/undo_move functions,
-     * avoiding the costly that we do below.
-     */
-    var moves = []
-    var positions = {}
-    var repetition = false
-
-    while (true) {
-      var move = undo_move()
-      if (!move) break
-      moves.push(move)
-    }
-
-    while (true) {
-      /* remove the last two fields in the FEN string, they're not needed
-       * when checking for draw by rep */
-      var fen = generate_fen()
-        .split(' ')
-        .slice(0, 4)
-        .join(' ')
-
-      /* has the position occurred three or move times */
-      positions[fen] = fen in positions ? positions[fen] + 1 : 1
-      if (positions[fen] >= 3) {
-        repetition = true
-      }
-
-      if (!moves.length) {
-        break
-      }
-      make_move(moves.pop())
-    }
-
-    return repetition
+  function repetition_fen() {
+    /* In chess, in order for a position to be considered the same, each player 
+     * must have the same set of legal moves each time, including the possible 
+     * rights to castle and capture en passant. therefore, exactly the first four fields
+     * of a FEN string are relevant.
+    */
+    return generate_fen()
+      .split(' ')
+      .slice(0, 4)
+      .join(' ')
   }
 
-  function push(move) {
-    history.push({
+  function in_threefold_repetition() {
+    return repetition_counter[repetition_fen()] >= 3;
+  }
+
+  function back() {
+    if (game_node.parent == null) {
+      return
+    }
+    tmp = game_node.parent
+    board = clone(tmp.board)
+    move = tmp.move
+    kings = clone(tmp.kings)
+    turn = tmp.turn
+    castling = tmp.castling
+    ep_square = tmp.ep_square
+    half_moves = tmp.half_moves
+    move_number = tmp.move_number
+    history = clone(tmp.history)
+    repetition_counter = clone(tmp.repetition_counter)
+    game_node = tmp
+  }
+
+  function next() {
+    if (game_node.variations.length == 0) {
+      return
+    }
+    tmp = game_node.variations[0]
+    board = clone(tmp.board)
+    move = tmp.move
+    kings = clone(tmp.kings)
+    turn = tmp.turn
+    castling = tmp.castling
+    ep_square = tmp.ep_square
+    half_moves = tmp.half_moves
+    move_number = tmp.move_number
+    history = clone(tmp.history)
+    repetition_counter = clone(tmp.repetition_counter)
+    game_node = tmp
+  }
+
+  function make_move(move, this_board, this_history) {
+    var real_move = false;
+    if (typeof this_board === 'undefined') {
+      this_board = board
+      real_move = true
+    }
+    if (typeof this_history === 'undefined') {
+      this_history = history
+    }
+    var us = turn
+    var them = swap_color(us)
+
+
+    move_record = {
       move: move,
       kings: { b: kings.b, w: kings.w },
       turn: turn,
       castling: { b: castling.b, w: castling.w },
       ep_square: ep_square,
       half_moves: half_moves,
-      move_number: move_number
-    })
-  }
+      move_number: move_number,
+      repetition_counter: repetition_counter
+    }
+    this_history.push(move_record)
 
-  function make_move(move) {
-    var us = turn
-    var them = swap_color(us)
-    push(move)
 
-    board[move.to] = board[move.from]
-    board[move.from] = null
+    this_board[move.to] = this_board[move.from]
+    this_board[move.from] = null
 
     /* if ep capture, remove the captured pawn */
     if (move.flags & BITS.EP_CAPTURE) {
       if (turn === BLACK) {
-        board[move.to - 16] = null
+        this_board[move.to - 16] = null
       } else {
-        board[move.to + 16] = null
+        this_board[move.to + 16] = null
       }
     }
 
     /* if pawn promotion, replace with new piece */
     if (move.flags & BITS.PROMOTION) {
-      board[move.to] = { type: move.promotion, color: us }
+      this_board[move.to] = { type: move.promotion, color: us }
     }
 
     /* if we moved the king */
-    if (board[move.to].type === KING) {
-      kings[board[move.to].color] = move.to
+    if (this_board[move.to].type === KING) {
+      kings[this_board[move.to].color] = move.to
 
       /* if we castled, move the rook next to the king */
       if (move.flags & BITS.KSIDE_CASTLE) {
         var castling_to = move.to - 1
         var castling_from = move.to + 1
-        board[castling_to] = board[castling_from]
-        board[castling_from] = null
+        this_board[castling_to] = this_board[castling_from]
+        this_board[castling_from] = null
       } else if (move.flags & BITS.QSIDE_CASTLE) {
         var castling_to = move.to + 1
         var castling_from = move.to - 2
-        board[castling_to] = board[castling_from]
-        board[castling_from] = null
+        this_board[castling_to] = this_board[castling_from]
+        this_board[castling_from] = null
       }
 
       /* turn off castling */
@@ -984,10 +1167,29 @@ var Chess = function(fen) {
       move_number++
     }
     turn = swap_color(turn)
+    if (real_move) {
+      increment_repetitions(repetition_fen())
+      // console.log(move)
+      tmp = new GameNode(move, game_node)
+      game_node.variations[0] = tmp
+      game_node = tmp
+      // console.log(game_node)
+    } // THE ROOT OF ALL EVIL
   }
 
-  function undo_move() {
-    var old = history.pop()
+  function undo_move(this_board, this_history) {
+    var real_move = false;
+    if (typeof this_board === 'undefined') {
+      this_board = board
+      real_move = true;
+    }
+    if (typeof this_history === 'undefined') {
+      this_history = history
+    }
+    if (real_move) {
+      decrement_repetitions(repetition_fen())
+    }
+    var old = this_history.pop()
     if (old == null) {
       return null
     }
@@ -1003,12 +1205,12 @@ var Chess = function(fen) {
     var us = turn
     var them = swap_color(turn)
 
-    board[move.from] = board[move.to]
-    board[move.from].type = move.piece // to undo any promotions
-    board[move.to] = null
+    this_board[move.from] = this_board[move.to]
+    this_board[move.from].type = move.piece // to undo any promotions
+    this_board[move.to] = null
 
     if (move.flags & BITS.CAPTURE) {
-      board[move.to] = { type: move.captured, color: them }
+      this_board[move.to] = { type: move.captured, color: them }
     } else if (move.flags & BITS.EP_CAPTURE) {
       var index
       if (us === BLACK) {
@@ -1016,7 +1218,7 @@ var Chess = function(fen) {
       } else {
         index = move.to + 16
       }
-      board[index] = { type: PAWN, color: them }
+      this_board[index] = { type: PAWN, color: them }
     }
 
     if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
@@ -1029,11 +1231,11 @@ var Chess = function(fen) {
         castling_from = move.to + 1
       }
 
-      board[castling_to] = board[castling_from]
-      board[castling_from] = null
+      this_board[castling_to] = this_board[castling_from]
+      this_board[castling_from] = null
     }
 
-    return move
+    return move // THE ROOT OF ALL EVIL
   }
 
   /* this function is used to uniquely identify ambiguous moves */
@@ -1118,8 +1320,20 @@ var Chess = function(fen) {
     return s
   }
 
+  function increment_repetitions(fen) {
+    if (fen in repetition_counter) {
+      repetition_counter[fen] += 1;
+    } else {
+      repetition_counter[fen] = 1
+    }
+  }
+
+  function decrement_repetitions(fen) {
+    repetition_counter[fen] -= 1;
+  }
+
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
-  function move_from_san(move, sloppy) {
+  function move_from_san(move, sloppy) { // GLOBAL STATE MANIPULATION FIXED? 
     // strip off any move decorations: e.g Nf3+?!
     var clean_move = stripped_san(move)
 
@@ -1188,7 +1402,7 @@ var Chess = function(fen) {
   }
 
   /* pretty = external move object */
-  function make_pretty(ugly_move) {
+  function make_pretty(ugly_move) { // GLOBAL STATE MANIPULATION FIXED?
     var move = clone(ugly_move)
     move.san = move_to_san(move, false)
     move.to = algebraic(move.to)
@@ -1206,18 +1420,54 @@ var Chess = function(fen) {
     return move
   }
 
-  function clone(obj) {
-    var dupe = obj instanceof Array ? [] : {}
+  function isEquivalent(a, b) {
+    // Create arrays of property names
+    var aProps = Object.getOwnPropertyNames(a);
+    var bProps = Object.getOwnPropertyNames(b);
 
-    for (var property in obj) {
-      if (typeof property === 'object') {
-        dupe[property] = clone(obj[property])
-      } else {
-        dupe[property] = obj[property]
-      }
+    // If number of properties is different,
+    // objects are not equivalent
+    if (aProps.length != bProps.length) {
+        return false;
     }
 
-    return dupe
+    for (var i = 0; i < aProps.length; i++) {
+        var propName = aProps[i];
+        // If values of same property are not equal,
+        // objects are not equivalent
+        if (a[propName] !== b[propName]) {
+            return false;
+        }
+    }
+
+    // If we made it this far, objects
+    // are considered equivalent
+    return true;
+  }
+
+  function clone(obj){
+    // If the obj isn't an Object or Array, throw an error.
+    if ( !(obj instanceof Object) || obj instanceof Date || obj instanceof String) {
+      throw 'Only Objects or Arrays are supported.'
+    }
+    
+    // Set the target data type before copying.
+    var target = obj instanceof Array ? [] : {};
+    
+    for (let prop in obj){
+      // Make sure the property isn't on the protoype
+      if ( obj instanceof Object && !(obj instanceof Array) && !(obj.hasOwnProperty(prop)) ) {
+        continue;
+      }
+      
+      // If the current property is an Array or Object, recursively clone it, else copy it's value
+      if ( obj[prop] instanceof Object && !(obj[prop] instanceof Date) && !(obj[prop] instanceof String) )  {
+        target[prop] = clone(obj[prop])
+      } else {
+        target[prop] = obj[prop]
+      }
+    }
+    return target;
   }
 
   function trim(str) {
@@ -1227,13 +1477,15 @@ var Chess = function(fen) {
   /*****************************************************************************
    * DEBUGGING UTILITIES
    ****************************************************************************/
-  function perft(depth) {
+  function perft(depth) { // GLOBAL STATE MANIPULATION FIXED
     var moves = generate_moves({ legal: false })
     var nodes = 0
     var color = turn
+    var board_clone = clone(board)
+    var history_clone = clone(history)
 
     for (var i = 0, len = moves.length; i < len; i++) {
-      make_move(moves[i])
+      make_move(moves[i], board_clone, history_clone)
       if (!king_attacked(color)) {
         if (depth - 1 > 0) {
           var child_nodes = perft(depth - 1)
@@ -1242,7 +1494,7 @@ var Chess = function(fen) {
           nodes++
         }
       }
-      undo_move()
+      undo_move(board_clone, history_clone)
     }
 
     return nodes
@@ -1290,7 +1542,7 @@ var Chess = function(fen) {
       return reset()
     },
 
-    moves: function(options) {
+    moves: function(options) { // GLOBAL STATE MANIPULATION FIXED?
       /* The internal representation of a chess move is in 0x88 format, and
        * not meant to be human-readable.  The code below converts the 0x88
        * square coordinates to algebraic coordinates.  It also prunes an
@@ -1385,7 +1637,8 @@ var Chess = function(fen) {
       return output
     },
 
-    pgn: function(options) {
+    pgn: function(options) {  // WARNING INHERITS GLOBAL STATE MANIPULATION make_move
+      // WARNING CONT: also directly uses make_move/undo_move
       /* using the specification from http://www.chessclub.com/help/PGN-spec
        * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })
        */
@@ -1423,9 +1676,12 @@ var Chess = function(fen) {
       }
 
       /* pop all of history onto reversed_history */
+      var board_clone = clone(board)
+      var history_clone = clone(history)
       var reversed_history = []
-      while (history.length > 0) {
-        reversed_history.push(undo_move())
+      while (history_clone.length > 0) {
+        // reversed_history.push(undo_move())
+        reversed_history.push(undo_move(board_clone, history_clone))
       }
 
       var moves = []
@@ -1442,7 +1698,7 @@ var Chess = function(fen) {
         var move = reversed_history.pop()
 
         /* if the position started with black to move, start PGN with 1. ... */
-        if (!history.length && move.color === 'b') {
+        if (!history_clone.length && move.color === 'b') {
           move_string = move_number + '. ...'
         } else if (move.color === 'w') {
           /* store the previous generated move_string if we have one */
@@ -1452,8 +1708,9 @@ var Chess = function(fen) {
           move_string = move_number + '.'
         }
 
-        move_string = move_string + ' ' + move_to_san(move, false)
-        make_move(move)
+        move_string = move_string + ' ' + move_to_san(move, false, board_clone, history_clone)
+        // make_move(move)
+        make_move(move, board_clone, history_clone)
       }
 
       /* are there any other leftover moves? */
@@ -1747,7 +2004,7 @@ var Chess = function(fen) {
       return turn
     },
 
-    move: function(move, options) {
+    move: function(move, options) { // WARNING INHERITS GLOBAL STATE MANIPULATION make_move make_pretty
       /* The move function can be called with in the following parameters:
        *
        * .move('Nxb7')      <- where 'move' is a case-sensitive SAN string
@@ -1801,9 +2058,17 @@ var Chess = function(fen) {
       return pretty_move
     },
 
-    undo: function() {
+    undo: function() { // WARNING INHERITS GLOBAL STATE MANIPULATION undo_move make_pretty
       var move = undo_move()
       return move ? make_pretty(move) : null
+    },
+
+    back: function() {
+      return back()
+    },
+
+    next: function() {
+      return next()
     },
 
     clear: function() {
@@ -1835,7 +2100,7 @@ var Chess = function(fen) {
       return null
     },
 
-    history: function(options) {
+    history: function(options) {  // WARNING INHERITS GLOBAL STATE MANIPULATION make_pretty move_to_san make_move
       var reversed_history = []
       var move_history = []
       var verbose =
