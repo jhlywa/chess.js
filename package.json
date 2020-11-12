@@ -1,6 +1,6 @@
 {
   "name": "chess.js",
-  "version": "0.11.0",
+  "version": "0.11.1",
   "license": "BSD-2-Clause",
   "main": "chess.js",
   "homepage": "https://github.com/jhlywa/chess.js",
@@ -15,6 +15,6 @@
     "test": "jest"
   },
   "publishConfig": {
-    "registry":"https://npm.pkg.github.com/"
+    "registry": "https://npm.pkg.github.com/"
   }
 }
