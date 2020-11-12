@@ -7,14 +7,14 @@
   "keywords": [
     "chess"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jhlywa/chess.js.git"
-  },
+  "repository": "git://github.com/deep-stack/chess.js.git",
   "devDependencies": {
     "jest": "^25.1.0"
   },
   "scripts": {
     "test": "jest"
+  },
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com/"
   }
 }
