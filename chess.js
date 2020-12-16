@@ -25,7 +25,7 @@
  *
  *----------------------------------------------------------------------------*/
 
-var Chess = function(fen = '', as_960 = false) {
+var Chess = function(fen = '', variant = 'Standard') {
   var BLACK = 'b'
   var WHITE = 'w'
 
@@ -164,7 +164,7 @@ var Chess = function(fen = '', as_960 = false) {
   var history = []
   var header = {}
   var comments = {}
-  var is_960 = as_960
+  var is_960 = variant.indexOf('960') >= 0
 
   /* if the user passes in a fen string, load it, else default to
    * starting position based on the is_960 setting
