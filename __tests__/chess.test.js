@@ -377,6 +377,8 @@ describe("FEN", function() {
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1', should_pass: true},
     {fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1', should_pass: true},
     {fen: '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQKBN1 b - - 1 2', should_pass: true},
+    {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w HAha - 0 1', should_pass: true}, /* Chess960 */
+    {fen: 'bnrqkbnr/pppppppp/8/8/8/8/PPPPPPPP/BNRQKBNR w HChc - 0 1', should_pass: true}, /* Chess960 */
 
     /* incomplete FEN string */
     {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBN w KQkq - 0 1', should_pass: false},
@@ -442,7 +444,32 @@ describe("PGN", function() {
      max_width:20,
      pgn: '[SetUp "1"]\n[FEN "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 1"]\n\n1. ... Ba5 2. O-O d6\n3. d4',
      starting_position: 'r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 1',
-     fen: 'r1bqk1nr/ppp2ppp/2np4/b3p3/2BPP3/2P2N2/P4PPP/RNBQ1RK1 b kq d3 0 3'}
+     fen: 'r1bqk1nr/ppp2ppp/2np4/b3p3/2BPP3/2P2N2/P4PPP/RNBQ1RK1 b kq d3 0 3'},
+     {moves: ['d4', 'g6', 'Nab3', 'Nab6', 'e4', 'd5', 'exd5', 'Bb5+', 'Be2', 'Bxe2+', 'Nxe2', 'Nxd5', 'g3', 'c6', // testing chess 960
+              'c4', 'Nf6', 'Qf3', 'Nd6', 'Rc1', 'O-O', 'O-O', 'Qg7', 'Nc5', 'Re8', 'b3', 'g5', 'Bb4', 'Qg6',
+              'Nc3', 'Rc8', 'Nd3', 'Qf5', 'Qe2', 'h5', 'Ne5', 'Nde4', 'f3', 'Nxc3', 'Bxc3', 'Qe6', 'f4',
+              'Qf5', 'fxg5', 'Qxg5', 'Bd2', 'Qg7', 'Rf5', 'Nh7', 'Rxf7'],
+      header: ["Event", "GM Blitz Battle Chp - chess 960",
+               "Site", "Chess.com",
+               "Date", "2016.08.23",
+               "Round", "?",
+               "White", "MagnusCarlsen",
+               "Black", "Grischuk",
+               "Result", "1-0",
+               "ECO", "A40",
+               "WhiteElo", "2840",
+               "BlackElo", "2816",
+               "Variant", "chess 960",
+               "SetUp", "1",
+               "FEN", "nrnbbkrq/pppppppp/8/8/8/8/PPPPPPPP/NRNBBKRQ w GBgb - 0 1",
+               "PlyCount", "49",
+               "EventDate", "2016.??.??",
+               "TimeControl", "60+1"],
+      max_width: 125,
+      starting_position: 'nrnbbkrq/pppppppp/8/8/8/8/PPPPPPPP/NRNBBKRQ w GBgb - 0 1',
+      pgn: '[SetUp "1"]\n[FEN "nrnbbkrq/pppppppp/8/8/8/8/PPPPPPPP/NRNBBKRQ w GBgb - 0 1"]\n[Event "GM Blitz Battle Chp - chess 960"]\n[Site "Chess.com"]\n[Date "2016.08.23"]\n[Round "?"]\n[White "MagnusCarlsen"]\n[Black "Grischuk"]\n[Result "1-0"]\n[ECO "A40"]\n[WhiteElo "2840"]\n[BlackElo "2816"]\n[Variant "chess 960"]\n[PlyCount "49"]\n[EventDate "2016.??.??"]\n[TimeControl "60+1"]\n\n1. d4 g6 2. Nab3 Nab6 3. e4 d5 4. exd5 Bb5+ 5. Be2 Bxe2+ 6. Nxe2 Nxd5 7. g3 c6 8. c4 Nf6 9. Qf3 Nd6 10. Rc1 O-O 11. O-O Qg7\n12. Nc5 Re8 13. b3 g5 14. Bb4 Qg6 15. Nc3 Rc8 16. Nd3 Qf5 17. Qe2 h5 18. Ne5 Nde4 19. f3 Nxc3 20. Bxc3 Qe6 21. f4 Qf5\n22. fxg5 Qxg5 23. Bd2 Qg7 24. Rf5 Nh7 25. Rxf7 1-0',
+      fen: '2rbr1k1/pp2pRqn/2p5/4N2p/2PP4/1P4P1/P2BQ2P/2R3K1 b - - 0 25'
+     }
     ];
 
   positions.forEach(function(position, i) {
@@ -472,7 +499,6 @@ describe("PGN", function() {
 
 describe("Load PGN", function() {
 
-  var chess = new Chess();
   var tests = [
      {pgn: [
        '[Event "Reykjavik WCh"]',
@@ -741,11 +767,26 @@ describe("Load PGN", function() {
       expect: true,
       sloppy: true
     },
+    // sloppy parse Chess 960 game (with castling)
+    {pgn: ['[Variant "chess 960"]',
+           '[SetUp "1"]',
+           '[FEN "nqrkbbrn/pppppppp/8/8/8/8/PPPPPPPP/NQRKBBRN w GCgc - 0 1"]',
+           '',
+           '1. c4 Ng6 2. f4 c5 3. g3 e6 4. Bg2 Nb6 5. Nb3 d5 6. cxd5 exd5 7. Bf2 d4 8. O-O',
+           'Be7 9. Qf5 Qd6 10. Na5 Rc7 11. b4 c4 12. Nxb7+ Rxb7 13. Bxb7 Bd7 14. Qe4 Bf6',
+           '15. Qg2 Re8 16. e4 dxe3 17. dxe3 Qxb4 18. Bc6 c3 19. Rfd1 Kc7 20. Bxd7 Nxd7 21.',
+           'g4 h6 22. Ng3 Nb6 23. Nh5 Nh4 24. Bxh4 Bxh4 25. Qd2 Kb7 26. Qxc3 Qe4 27. Qc7+',
+           'Ka8 28. Qc6+ Qxc6 29. Rxc6 Kb7 30. Nxg7 1-0'],
+     fen: '4r3/pk3pN1/1nR4p/8/5PPb/4P3/P6P/3R2K1 b - - 0 30',
+     expect: true,
+     sloppy :true
+    }
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
 
   tests.forEach(function(t, i) {
+    var chess = new Chess();
     newline_chars.forEach(function(newline, j) {
       it(i + String.fromCharCode(97 + j), function() {
         var sloppy = t.sloppy || false;
@@ -778,6 +819,7 @@ describe("Load PGN", function() {
 
   // special case dirty file containing a mix of \n and \r\n
   it('dirty pgn', function() {
+    var chess = new Chess();
     var pgn =
          '[Event "Reykjavik WCh"]\n' +
          '[Site "Reykjavik WCh"]\n' +
@@ -1142,7 +1184,19 @@ describe("Make Move", function() {
      legal: true,
      sloppy: true,
      move: 'Ne7',
-     next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'}
+     next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'},
+     // handle king side chess 960 castling
+     {fen: '1qrkbbr1/pp3ppp/1n4n1/2p5/3p1P2/1N4P1/PP1PPBBP/1QRK2RK w GCgc - 0 7',
+     legal: true,
+     move: 'O-O',
+     next: '1qrkbbr1/pp3ppp/1n4n1/2p5/3p1P2/1N4P1/PP1PPBBP/1QR2RK1 b gc - 1 7',
+     captured: 'r'}, // some chess 960 castling looks like we captured our own rook!
+     // handle queen side chess 960 castling
+     {fen: 'r1k1b1r1/pp3ppp/2n1p1n1/2bp3N/8/2NBP3/PPP2PPP/R1K1B1R1 w GAga - 0 8',
+     legal: true,
+     move: 'O-O-O',
+     next: 'r1k1b1r1/pp3ppp/2n1p1n1/2bp3N/8/2NBP3/PPP2PPP/2KRB1R1 b ga - 1 8',
+     captured: 'k'} // some chess 960 castling looks like we captured our own king!
   ];
 
   positions.forEach(function(position) {
@@ -1293,6 +1347,8 @@ describe("Validate FEN", function() {
     {fen: 'r3k2r/8/p4p2/3p2p1/4b3/2R2PP1/P6P/4R1K1 b kq - 0 27', error_number: 0},
     {fen: 'r1rb2k1/5ppp/pqp5/3pPb2/QB1P4/2R2N2/P4PPP/2R3K1 b - - 7 23', error_number: 0},
     {fen: '3r1r2/3P2pk/1p1R3p/1Bp2p2/6q1/4Q3/PP3P1P/7K w - - 4 30', error_number: 0},
+    {fen: 'r1k1b1r1/pp3ppp/2n1p1n1/2bp3N/8/2NBP3/PPP2PPP/R1K1B1R1 w GAga - 0 8', error_number: 0},
+    {fen: '1qrkbbr1/pp3ppp/1n4n1/2p5/3p1P2/1N4P1/PP1PPBBP/1QR2RK1 b gc - 1 7', error_number: 0}
   ];
 
   positions.forEach(function(position) {
