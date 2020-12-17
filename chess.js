@@ -879,6 +879,22 @@ var Chess = function(fen) {
     return repetition
   }
 
+  function has_checkmate() {
+    var moves = generate_moves()
+    var winning_move = null
+    for (let index = 0; index < moves.length; index++) {
+      const move = moves[index]
+      make_move(move)
+      if (in_checkmate()) {
+        winning_move = move
+        undo_move()
+        break
+      }
+      undo_move()
+    }
+    return winning_move
+  }
+
   function push(move) {
     history.push({
       move: move,
@@ -1355,6 +1371,10 @@ var Chess = function(fen) {
         insufficient_material() ||
         in_threefold_repetition()
       )
+    },
+
+    has_checkmate: function() {
+      return has_checkmate()
     },
 
     validate_fen: function(fen) {
