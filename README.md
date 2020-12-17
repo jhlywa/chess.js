@@ -378,6 +378,17 @@ const chess = new Chess('k7/8/n7/8/8/8/8/7K b - - 0 1')
 chess.insufficient_material()
 // -> true
 ```
+### .has_checkmate()
+
+Returns wining move if there is checkmate otherwise null.
+
+```js
+const chess = new Chess(
+    'r1b1kbnr/pppp1Npp/8/8/3nq3/8/PPPPBP1P/RNBQKR2 b Qkq - 1 7'
+)
+chess.has_checkmate()
+// -> { color: 'b', from: 67, to: 85, flags: 1, piece: 'n' }'
+
 
 ### .load(fen)
 
