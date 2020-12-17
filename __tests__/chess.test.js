@@ -210,12 +210,12 @@ describe('Has Checkmate In One Move ', function () {
 })
 
 describe('Does not have Checkmate In One', function () {
-  var chess = new Chess()
   var noCheckmateInOne = [
     'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
     ]
 
   noCheckmateInOne.forEach(function (checkmateInOne) {
+    var chess = new Chess()
     chess.load(checkmateInOne)
 
     it(checkmateInOne, function () {
