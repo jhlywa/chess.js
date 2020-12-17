@@ -192,6 +192,37 @@ describe("Threefold Repetition", function() {
 
 });
 
+describe('Has Checkmate In One Move ', function () {
+ 
+  var checkmateInOne = [
+    'rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b KQkq - 0 2',
+    'r1b1kbnr/pppp1Npp/8/8/3nq3/8/PPPPBP1P/RNBQKR2 b Qkq - 1 7'
+  ]
+
+  checkmateInOne.forEach(function (checkmateInOne) {
+    var chess = new Chess()
+    chess.load(checkmateInOne)
+
+    it(checkmateInOne, function () {
+      expect(chess.has_checkmate()).not.toBeNull()
+    })
+  })
+})
+
+describe('Does not have Checkmate In One', function () {
+  var chess = new Chess()
+  var noCheckmateInOne = [
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+    ]
+
+  noCheckmateInOne.forEach(function (checkmateInOne) {
+    chess.load(checkmateInOne)
+
+    it(checkmateInOne, function () {
+      expect(chess.has_checkmate()).toBeNull()
+    })
+  })
+})
 
 describe("Algebraic Notation", function() {
 
