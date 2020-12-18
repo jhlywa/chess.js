@@ -697,7 +697,13 @@ var Chess = function(fen = '', variant = 'Standard') {
           (board[castling_to - 1] == null || board[castling_to - 1].type == KING)) {
           var ok = true
           for (var i = castling_from; i != castling_to; (castling_to >= castling_from) ? i++ : i--) {
-            if ((board[i] != null && board[i].type != ROOK && board[i].type != KING) || attacked(them, i)) {
+            if ((board[i] != null && board[i].type != ROOK && board[i].type != KING) || attacked(them, i)) { // king's path should be safe and clear
+              ok = false
+              break
+            }
+          }
+          for (var i = ROOKS[us][KSIDE_CASTLE_INDEX].square; ok && i >= castling_to - 1; i--) {
+            if (board[i] != null && board[i].type != ROOK && board[i].type != KING) { // rook's path should be clear of other pieces
               ok = false
               break
             }
@@ -734,7 +740,13 @@ var Chess = function(fen = '', variant = 'Standard') {
           (board[castling_to + 1] == null || board[castling_to + 1].type == KING)) {
           var ok = true
           for (var i = castling_from; i != castling_to; (castling_to <= castling_from) ? i-- : i++) {
-            if ((board[i] != null && board[i].type != ROOK && board[i].type != KING) || attacked(them, i)) {
+            if ((board[i] != null && board[i].type != ROOK && board[i].type != KING) || attacked(them, i)) { // king's path should be safe and clear
+              ok = false
+              break
+            }
+          }
+          for (var i = ROOKS[us][QSIDE_CASTLE_INDEX].square; ok && i <= castling_to; i++) {
+            if (board[i] != null && board[i].type != ROOK && board[i].type != KING) { // rook's path should be clear of other pieces
               ok = false
               break
             }
