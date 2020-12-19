@@ -1611,7 +1611,7 @@ describe('Regression Tests', function() {
 
   it('Github Issue #85 (black) - SetUp and FEN should be accepted in load_pgn', function() {
        var chess = new Chess();
-       var pgn = ['[SetUp "1"]', '[FEN "r4r1k/1p4b1/3p3p/5qp1/1RP5/6P1/3NP3/2Q2RKB b KQkq - 0 1"]', "", '1. ... Qc5+'];
+       var pgn = ['[SetUp "1"]', '[FEN "r4r1k/1p4b1/3p3p/5qp1/1RP5/6P1/3NP3/2Q2RKB b KQkq - 0 1"]', "", '1... Qc5+'];
        var result = chess.load_pgn(pgn.join("\n"));
        expect(result).toBe(true);
        expect(chess.fen()).toBe('r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2');
@@ -1630,7 +1630,7 @@ describe('Regression Tests', function() {
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 b - - 1 45');
     chess.move('Rf1+');
     var result = chess.pgn();
-    expect(result.match(/(45\. \.\.\. Rf1\+)$/)[0]).toBe('45. ... Rf1+');
+    expect(result.match(/(45\.\.\. Rf1\+)$/)[0]).toBe('45... Rf1+');
   })
 
   it('Github Issue #129 load_pgn() should not clear headers if PGN contains SetUp and FEN tags', function () {
