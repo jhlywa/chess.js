@@ -694,7 +694,7 @@ var Chess = function(fen = '', variant = 'Standard') {
           !attacked(them, kings[us]) &&
           !attacked(them, castling_to) &&
           (board[castling_to] == null || board[castling_to].type == ROOK || board[castling_to].type == KING) &&
-          (board[castling_to - 1] == null || board[castling_to - 1].type == KING)) {
+          (board[castling_to - 1] == null || board[castling_to - 1].type == ROOK || board[castling_to - 1].type == KING)) {
           var ok = true
           for (var i = castling_from; i != castling_to; (castling_to >= castling_from) ? i++ : i--) {
             if ((board[i] != null && board[i].type != ROOK && board[i].type != KING) || attacked(them, i)) { // king's path should be safe and clear
@@ -737,7 +737,7 @@ var Chess = function(fen = '', variant = 'Standard') {
           !attacked(them, kings[us]) &&
           !attacked(them, castling_to) &&
           (board[castling_to] == null || board[castling_to].type == ROOK || board[castling_to].type == KING) &&
-          (board[castling_to + 1] == null || board[castling_to + 1].type == KING)) {
+          (board[castling_to + 1] == null || board[castling_to + 1].type == ROOK || board[castling_to + 1].type == KING)) {
           var ok = true
           for (var i = castling_from; i != castling_to; (castling_to <= castling_from) ? i-- : i++) {
             if ((board[i] != null && board[i].type != ROOK && board[i].type != KING) || attacked(them, i)) { // king's path should be safe and clear
@@ -1030,7 +1030,7 @@ var Chess = function(fen = '', variant = 'Standard') {
         if (is_960) {
           castling_from = ROOKS[us][KSIDE_CASTLE_INDEX].square
           board[castling_to] = { type: ROOK, color: us }
-          if (board[castling_from].type != KING) {
+          if (castling_from != castling_to && board[castling_from].type != KING) {
             board[castling_from] = null
           }
         } else {
@@ -1043,7 +1043,7 @@ var Chess = function(fen = '', variant = 'Standard') {
         if (is_960) {
           castling_from = ROOKS[us][QSIDE_CASTLE_INDEX].square
           board[castling_to] = { type: ROOK, color: us }
-          if (board[castling_from].type != KING) {
+          if (castling_from != castling_to && board[castling_from].type != KING) {
             board[castling_from] = null
           }
         } else {
@@ -1161,7 +1161,7 @@ var Chess = function(fen = '', variant = 'Standard') {
 
       if (is_960) {
         board[castling_to] = { type: ROOK, color: us }
-        if (board[castling_from].type != KING) {
+        if (castling_to != castling_from && board[castling_from].type != KING) {
           board[castling_from] = null
         }
       } else {

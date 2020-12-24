@@ -577,8 +577,8 @@ describe("Load PGN", function() {
       '17. Kd2 Re8 18. Na3 Na6 19. Qh5 Bf6 20. Qxh1 Bxb2 21. Qh4+ Kd7',
       '22. Rb1 Bxa3 23. Qa4+'],
       expect: true},
-    /* regression test - broken PGN parser ended up here:
-     * fen = rnbqk2r/pp1p1ppp/4pn2/1N6/1bPN4/8/PP2PPPP/R1BQKB1R b KQkq - 2 6 */
+    // regression test - broken PGN parser ended up here:
+    // fen = rnbqk2r/pp1p1ppp/4pn2/1N6/1bPN4/8/PP2PPPP/R1BQKB1R b KQkq - 2 6
     {pgn: ['1. d4 Nf6 2. c4 e6 3. Nf3 c5 4. Nc3 cxd4 5. Nxd4 Bb4 6. Nb5'],
      fen: 'rnbqk2r/pp1p1ppp/4pn2/1N6/1bP5/2N5/PP2PPPP/R1BQKB1R b KQkq - 2 6',
      expect: true},
@@ -778,6 +778,16 @@ describe("Load PGN", function() {
            'g4 h6 22. Ng3 Nb6 23. Nh5 Nh4 24. Bxh4 Bxh4 25. Qd2 Kb7 26. Qxc3 Qe4 27. Qc7+',
            'Ka8 28. Qc6+ Qxc6 29. Rxc6 Kb7 30. Nxg7 1-0'],
      fen: '4r3/pk3pN1/1nR4p/8/5PPb/4P3/P6P/3R2K1 b - - 0 30',
+     expect: true,
+     sloppy :true
+    },
+    // sloppy parse Chess 960 game (with castling)
+    {pgn: ['[Variant "chess 960"]',
+           '[SetUp "1"]',
+           '[FEN "bbqr1k1r/p2ppppB/1p6/2p5/2P2n2/1P4N1/P1QPPPPP/B2RK1R1 w GD - 3 9"]',
+           '',
+           '9. O-O-O'],
+     fen: 'bbqr1k1r/p2ppppB/1p6/2p5/2P2n2/1P4N1/P1QPPPPP/B1KR2R1 b - - 4 9',
      expect: true,
      sloppy :true
     }
