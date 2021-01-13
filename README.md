@@ -25,7 +25,7 @@ yarn add chess.js
 The code below plays a random game of chess:
 
 ```js
-const { Chess } = require('./chess.js')
+const { Chess } = require('chess.js')
 const chess = new Chess()
 
 while (!chess.game_over()) {
