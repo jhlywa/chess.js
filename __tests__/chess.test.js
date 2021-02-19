@@ -741,6 +741,16 @@ describe("Load PGN", function() {
       expect: true,
       sloppy: true
     },
+
+    // parse should succeed with missing blank line after headers
+    {pgn: [
+      '[Round "1"]',
+      '1. e4 c5 2. Nf3 d6 3. d4 cxd4',
+      ],
+      fen: 'rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4',
+      expect: true,
+      sloppy: true
+    },
   ];
 
   var newline_chars = ['\n', '<br />', '\r\n', 'BLAH'];
