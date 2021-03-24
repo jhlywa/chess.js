@@ -544,7 +544,7 @@ var Chess = function(fen) {
       typeof options !== 'undefined' && 'legal' in options
         ? options.legal
         : true
-      var piece_type = typeof options !== 'undefined' && 'piece' in options
+      var piece_type = typeof options !== 'undefined' && 'piece' in options && typeof options.piece === "string"
         ? options.piece.toLowerCase()
         : true
     
@@ -1139,8 +1139,19 @@ var Chess = function(fen) {
         var promotion = matches[4]
       }
     }
-
-    var moves = generate_moves({piece: piece ? piece : clean_move.charAt(0)})
+    var piece_type=clean_move.charAt(0)
+    if(piece_type >='a' && piece_type<='h') {
+      var matches=clean_move.match(
+        /[a-h]\d.*[a-h]\d/ 
+        )
+      if(matches)  {
+        piece_type=undefined
+      } else {
+        piece_type='p'
+      }
+    }
+  
+    var moves = generate_moves({piece: piece ? piece : piece_type})
     for (var i = 0, len = moves.length; i < len; i++) {
       // try the strict parser first, then the sloppy parser if requested
       // by the user
@@ -1704,7 +1715,7 @@ var Chess = function(fen) {
           continue
         }
         move = move_from_san(moves[half_move], sloppy)
-
+      
         /* move not possible! (don't clear the board to examine to show the
          * latest valid position)
          */
