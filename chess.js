@@ -544,7 +544,10 @@ var Chess = function(fen) {
       typeof options !== 'undefined' && 'legal' in options
         ? options.legal
         : true
-
+      var piece_type = typeof options !== 'undefined' && 'piece' in options
+        ? options.piece.toLowerCase()
+        : true
+    
     /* are we generating moves for a single square? */
     if (typeof options !== 'undefined' && 'square' in options) {
       if (options.square in SQUARES) {
@@ -568,7 +571,7 @@ var Chess = function(fen) {
         continue
       }
 
-      if (piece.type === PAWN) {
+      if (piece.type === PAWN && (piece_type===true || piece_type===PAWN)) {
         /* single square, non-capturing */
         var square = i + PAWN_OFFSETS[us][0]
         if (board[square] == null) {
@@ -592,7 +595,7 @@ var Chess = function(fen) {
             add_move(board, moves, i, ep_square, BITS.EP_CAPTURE)
           }
         }
-      } else {
+      } else if(piece_type===true || piece_type===piece.type ) {
         for (var j = 0, len = PIECE_OFFSETS[piece.type].length; j < len; j++) {
           var offset = PIECE_OFFSETS[piece.type][j]
           var square = i
@@ -1137,7 +1140,7 @@ var Chess = function(fen) {
       }
     }
 
-    var moves = generate_moves()
+    var moves = generate_moves({piece: piece ? piece : clean_move.charAt(0)})
     for (var i = 0, len = moves.length; i < len; i++) {
       // try the strict parser first, then the sloppy parser if requested
       // by the user
