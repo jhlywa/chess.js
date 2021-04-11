@@ -1091,10 +1091,10 @@ var Chess = function (fen) {
     return ''
   }
 
-  function get_piece_type(clean_move) {
-    var piece_type = clean_move.charAt(0)
+  function infer_piece_type(san) {
+    var piece_type = san.charAt(0)
     if (piece_type >= 'a' && piece_type <= 'h') {
-      var matches = clean_move.match(/[a-h]\d.*[a-h]\d/)
+      var matches = san.match(/[a-h]\d.*[a-h]\d/)
       if (matches) {
         piece_type = undefined
       } else {
@@ -1150,7 +1150,7 @@ var Chess = function (fen) {
         var promotion = matches[4]
       }
     }
-    var piece_type = get_piece_type(clean_move)
+    var piece_type = infer_piece_type(clean_move)
     var moves = null
     var legalMoves = generate_moves({
       legal: true,
