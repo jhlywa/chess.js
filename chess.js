@@ -169,7 +169,7 @@ var Chess = function (fen) {
   } else {
     load(fen)
   }
-  
+
   function clear(keep_headers) {
     if (typeof keep_headers === 'undefined') {
       keep_headers = false
@@ -545,7 +545,10 @@ var Chess = function (fen) {
         ? options.legal
         : true
 
-    var piece_type = typeof options !== 'undefined' && 'piece' in options && typeof options.piece === "string"
+    var piece_type =
+      typeof options !== 'undefined' &&
+      'piece' in options &&
+      typeof options.piece === 'string'
         ? options.piece.toLowerCase()
         : true
 
@@ -572,7 +575,7 @@ var Chess = function (fen) {
         continue
       }
 
-      if (piece.type === PAWN && (piece_type===true || piece_type===PAWN)) {
+      if (piece.type === PAWN && (piece_type === true || piece_type === PAWN)) {
         /* single square, non-capturing */
         var square = i + PAWN_OFFSETS[us][0]
         if (board[square] == null) {
@@ -596,7 +599,7 @@ var Chess = function (fen) {
             add_move(board, moves, i, ep_square, BITS.EP_CAPTURE)
           }
         }
-      } else if(piece_type===true || piece_type===piece.type ) {
+      } else if (piece_type === true || piece_type === piece.type) {
         for (var j = 0, len = PIECE_OFFSETS[piece.type].length; j < len; j++) {
           var offset = PIECE_OFFSETS[piece.type][j]
           var square = i
@@ -623,7 +626,7 @@ var Chess = function (fen) {
     /* check for castling if: a) we're generating all moves, or b) we're doing
      * single square move generation on the king's square
      */
-    if(piece_type===true || piece_type==='o') {
+    if (piece_type === true || piece_type === 'o') {
       if (!single_square || last_sq === kings[us]) {
         /* king-side castling */
         if (castling[us] & BITS.KSIDE_CASTLE) {
@@ -658,7 +661,7 @@ var Chess = function (fen) {
           }
         }
       }
-  }
+    }
 
     /* return all pseudo-legal moves (this includes moves that allow the king
      * to be captured)
@@ -698,7 +701,6 @@ var Chess = function (fen) {
     } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O'
     } else {
-
       if (move.piece !== PAWN) {
         var disambiguator = get_disambiguator(move, moves)
         output += move.piece.toUpperCase() + disambiguator
@@ -1039,67 +1041,64 @@ var Chess = function (fen) {
   }
 
   /* this function is used to uniquely identify ambiguous moves */
-    function get_disambiguator(move, moves) {  
-      var from = move.from
-      var to = move.to
-      var piece = move.piece
-  
-      var ambiguities = 0
-      var same_rank = 0
-      var same_file = 0
-  
-      for (var i = 0, len = moves.length; i < len; i++) {
-        var ambig_from = moves[i].from
-        var ambig_to = moves[i].to
-        var ambig_piece = moves[i].piece
-  
-        /* if a move of the same piece type ends on the same to square, we'll
-         * need to add a disambiguator to the algebraic notation
-         */
-        if (piece === ambig_piece && from !== ambig_from && to === ambig_to) {
-          ambiguities++
-  
-          if (rank(from) === rank(ambig_from)) {
-            same_rank++
-          }
-  
-          if (file(from) === file(ambig_from)) {
-            same_file++
-          }
+  function get_disambiguator(move, moves) {
+    var from = move.from
+    var to = move.to
+    var piece = move.piece
+
+    var ambiguities = 0
+    var same_rank = 0
+    var same_file = 0
+
+    for (var i = 0, len = moves.length; i < len; i++) {
+      var ambig_from = moves[i].from
+      var ambig_to = moves[i].to
+      var ambig_piece = moves[i].piece
+
+      /* if a move of the same piece type ends on the same to square, we'll
+       * need to add a disambiguator to the algebraic notation
+       */
+      if (piece === ambig_piece && from !== ambig_from && to === ambig_to) {
+        ambiguities++
+
+        if (rank(from) === rank(ambig_from)) {
+          same_rank++
+        }
+
+        if (file(from) === file(ambig_from)) {
+          same_file++
         }
       }
-  
-      if (ambiguities > 0) {
-        /* if there exists a similar moving piece on the same rank and file as
-         * the move in question, use the square as the disambiguator
-         */
-        if (same_rank > 0 && same_file > 0) {
-          return algebraic(from)
-        } else if (same_file > 0) {
-          /* if the moving piece rests on the same file, use the rank symbol as the
-           * disambiguator
-           */
-          return algebraic(from).charAt(1)
-        } else {
-          /* else use the file symbol */
-          return algebraic(from).charAt(0)
-        }
-      }
-  
-      return ''
     }
-  
+
+    if (ambiguities > 0) {
+      /* if there exists a similar moving piece on the same rank and file as
+       * the move in question, use the square as the disambiguator
+       */
+      if (same_rank > 0 && same_file > 0) {
+        return algebraic(from)
+      } else if (same_file > 0) {
+        /* if the moving piece rests on the same file, use the rank symbol as the
+         * disambiguator
+         */
+        return algebraic(from).charAt(1)
+      } else {
+        /* else use the file symbol */
+        return algebraic(from).charAt(0)
+      }
+    }
+
+    return ''
+  }
 
   function get_piece_type(clean_move) {
-    var piece_type=clean_move.charAt(0)
-    if(piece_type >='a' && piece_type<='h') {
-      var matches=clean_move.match(
-        /[a-h]\d.*[a-h]\d/ 
-        )
-      if(matches)  {
-        piece_type=undefined
+    var piece_type = clean_move.charAt(0)
+    if (piece_type >= 'a' && piece_type <= 'h') {
+      var matches = clean_move.match(/[a-h]\d.*[a-h]\d/)
+      if (matches) {
+        piece_type = undefined
       } else {
-        piece_type='p'
+        piece_type = 'p'
       }
     }
     return piece_type
@@ -1151,21 +1150,28 @@ var Chess = function (fen) {
         var promotion = matches[4]
       }
     }
-    var piece_type=get_piece_type(clean_move)
-    var moves=null;
-    var legalMoves = generate_moves({legal: true, piece: piece ? piece : piece_type})
-    moves=legalMoves
-    if(sloppy) {
-      var illegalMoves = generate_moves({legal: false, piece: piece ? piece : piece_type})
-      moves=illegalMoves
-    } 
+    var piece_type = get_piece_type(clean_move)
+    var moves = null
+    var legalMoves = generate_moves({
+      legal: true,
+      piece: piece ? piece : piece_type,
+    })
+    moves = legalMoves
+    if (sloppy) {
+      var illegalMoves = generate_moves({
+        legal: false,
+        piece: piece ? piece : piece_type,
+      })
+      moves = illegalMoves
+    }
 
     for (var i = 0, len = moves.length; i < len; i++) {
       // try the strict parser first, then the sloppy parser if requested
       // by the user
       if (
         clean_move === stripped_san(move_to_san(moves[i], legalMoves)) ||
-        (sloppy && clean_move === stripped_san(move_to_san(moves[i], illegalMoves)))
+        (sloppy &&
+          clean_move === stripped_san(move_to_san(moves[i], illegalMoves)))
       ) {
         return moves[i]
       } else {
@@ -1212,7 +1218,7 @@ var Chess = function (fen) {
   /* pretty = external move object */
   function make_pretty(ugly_move) {
     var move = clone(ugly_move)
-    move.san = move_to_san(move, generate_moves({legal: true}))
+    move.san = move_to_san(move, generate_moves({ legal: true }))
     move.to = algebraic(move.to)
     move.from = algebraic(move.from)
 
@@ -1333,7 +1339,9 @@ var Chess = function (fen) {
         ) {
           moves.push(make_pretty(ugly_moves[i]))
         } else {
-          moves.push(move_to_san(ugly_moves[i], generate_moves({legal: true})))
+          moves.push(
+            move_to_san(ugly_moves[i], generate_moves({ legal: true }))
+          )
         }
       }
 
@@ -1474,7 +1482,10 @@ var Chess = function (fen) {
           move_string = move_number + '.'
         }
 
-        move_string = move_string + ' ' + move_to_san(move, generate_moves({legal: false}))
+        move_string =
+          move_string +
+          ' ' +
+          move_to_san(move, generate_moves({ legal: false }))
         make_move(move)
       }
 
@@ -1719,7 +1730,7 @@ var Chess = function (fen) {
           continue
         }
         move = move_from_san(moves[half_move], sloppy)
-      
+
         /* move not possible! (don't clear the board to examine to show the
          * latest valid position)
          */
@@ -1870,7 +1881,7 @@ var Chess = function (fen) {
         if (verbose) {
           move_history.push(make_pretty(move))
         } else {
-          move_history.push(move_to_san(move, generate_moves({legal: true})))
+          move_history.push(move_to_san(move, generate_moves({ legal: true })))
         }
         make_move(move)
       }
