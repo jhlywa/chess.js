@@ -626,7 +626,7 @@ var Chess = function (fen) {
     /* check for castling if: a) we're generating all moves, or b) we're doing
      * single square move generation on the king's square
      */
-    if (piece_type === true || piece_type === 'o') {
+    if (piece_type === true || piece_type === KING) {
       if (!single_square || last_sq === kings[us]) {
         /* king-side castling */
         if (castling[us] & BITS.KSIDE_CASTLE) {
@@ -1096,10 +1096,13 @@ var Chess = function (fen) {
     if (piece_type >= 'a' && piece_type <= 'h') {
       var matches = san.match(/[a-h]\d.*[a-h]\d/)
       if (matches) {
-        piece_type = undefined
-      } else {
-        piece_type = 'p'
+        return undefined
       }
+      return PAWN
+    }
+    piece_type=piece_type.toLowerCase()
+    if(piece_type==='o') {
+      return KING;
     }
     return piece_type
   }
