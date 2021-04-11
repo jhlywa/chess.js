@@ -25,7 +25,7 @@
  *
  *----------------------------------------------------------------------------*/
 
-var Chess = function(fen) {
+var Chess = function (fen) {
   var BLACK = 'b'
   var WHITE = 'w'
 
@@ -47,7 +47,7 @@ var Chess = function(fen) {
 
   var PAWN_OFFSETS = {
     b: [16, 32, 17, 15],
-    w: [-16, -32, -17, -15]
+    w: [-16, -32, -17, -15],
   }
 
   var PIECE_OFFSETS = {
@@ -55,7 +55,7 @@ var Chess = function(fen) {
     b: [-17, -15, 17, 15],
     r: [-16, 1, 16, -1],
     q: [-17, -16, -15, 1, 17, 16, 15, -1],
-    k: [-17, -16, -15, 1, 17, 16, 15, -1]
+    k: [-17, -16, -15, 1, 17, 16, 15, -1],
   }
 
   // prettier-ignore
@@ -105,7 +105,7 @@ var Chess = function(fen) {
     EP_CAPTURE: 'e',
     PROMOTION: 'p',
     KSIDE_CASTLE: 'k',
-    QSIDE_CASTLE: 'q'
+    QSIDE_CASTLE: 'q',
   }
 
   var BITS = {
@@ -115,7 +115,7 @@ var Chess = function(fen) {
     EP_CAPTURE: 8,
     PROMOTION: 16,
     KSIDE_CASTLE: 32,
-    QSIDE_CASTLE: 64
+    QSIDE_CASTLE: 64,
   }
 
   var RANK_1 = 7
@@ -142,12 +142,12 @@ var Chess = function(fen) {
   var ROOKS = {
     w: [
       { square: SQUARES.a1, flag: BITS.QSIDE_CASTLE },
-      { square: SQUARES.h1, flag: BITS.KSIDE_CASTLE }
+      { square: SQUARES.h1, flag: BITS.KSIDE_CASTLE },
     ],
     b: [
       { square: SQUARES.a8, flag: BITS.QSIDE_CASTLE },
-      { square: SQUARES.h8, flag: BITS.KSIDE_CASTLE }
-    ]
+      { square: SQUARES.h8, flag: BITS.KSIDE_CASTLE },
+    ],
   }
 
   var board = new Array(128)
@@ -189,22 +189,22 @@ var Chess = function(fen) {
   }
 
   function prune_comments() {
-    var reversed_history = [];
-    var current_comments = {};
-    var copy_comment = function(fen) {
+    var reversed_history = []
+    var current_comments = {}
+    var copy_comment = function (fen) {
       if (fen in comments) {
-        current_comments[fen] = comments[fen];
+        current_comments[fen] = comments[fen]
       }
-    };
+    }
     while (history.length > 0) {
-      reversed_history.push(undo_move());
+      reversed_history.push(undo_move())
     }
-    copy_comment(generate_fen());
+    copy_comment(generate_fen())
     while (reversed_history.length > 0) {
-      make_move(reversed_history.pop());
-      copy_comment(generate_fen());
+      make_move(reversed_history.pop())
+      copy_comment(generate_fen())
     }
-    comments = current_comments;
+    comments = current_comments
   }
 
   function reset() {
@@ -282,7 +282,7 @@ var Chess = function(fen) {
       8: '1st field (piece positions) is invalid [consecutive numbers].',
       9: '1st field (piece positions) is invalid [invalid piece].',
       10: '1st field (piece positions) is invalid [row too large].',
-      11: 'Illegal en-passant square'
+      11: 'Illegal en-passant square',
     }
 
     /* 1st criterion: 6 space-seperated fields? */
@@ -498,7 +498,7 @@ var Chess = function(fen) {
       from: from,
       to: to,
       flags: flags,
-      piece: board[from].type
+      piece: board[from].type,
     }
 
     if (promotion) {
@@ -864,10 +864,7 @@ var Chess = function(fen) {
     while (true) {
       /* remove the last two fields in the FEN string, they're not needed
        * when checking for draw by rep */
-      var fen = generate_fen()
-        .split(' ')
-        .slice(0, 4)
-        .join(' ')
+      var fen = generate_fen().split(' ').slice(0, 4).join(' ')
 
       /* has the position occurred three or move times */
       positions[fen] = fen in positions ? positions[fen] + 1 : 1
@@ -892,7 +889,7 @@ var Chess = function(fen) {
       castling: { b: castling.b, w: castling.w },
       ep_square: ep_square,
       half_moves: half_moves,
-      move_number: move_number
+      move_number: move_number,
     })
   }
 
@@ -1285,7 +1282,7 @@ var Chess = function(fen) {
     ROOK: ROOK,
     QUEEN: QUEEN,
     KING: KING,
-    SQUARES: (function() {
+    SQUARES: (function () {
       /* from the ECMA-262 spec (section 12.6.4):
        * "The mechanics of enumerating the properties ... is
        * implementation dependent"
@@ -1307,15 +1304,15 @@ var Chess = function(fen) {
     /***************************************************************************
      * PUBLIC API
      **************************************************************************/
-    load: function(fen) {
+    load: function (fen) {
       return load(fen)
     },
 
-    reset: function() {
+    reset: function () {
       return reset()
     },
 
-    moves: function(options) {
+    moves: function (options) {
       /* The internal representation of a chess move is in 0x88 format, and
        * not meant to be human-readable.  The code below converts the 0x88
        * square coordinates to algebraic coordinates.  It also prunes an
@@ -1343,19 +1340,19 @@ var Chess = function(fen) {
       return moves
     },
 
-    in_check: function() {
+    in_check: function () {
       return in_check()
     },
 
-    in_checkmate: function() {
+    in_checkmate: function () {
       return in_checkmate()
     },
 
-    in_stalemate: function() {
+    in_stalemate: function () {
       return in_stalemate()
     },
 
-    in_draw: function() {
+    in_draw: function () {
       return (
         half_moves >= 100 ||
         in_stalemate() ||
@@ -1364,15 +1361,15 @@ var Chess = function(fen) {
       )
     },
 
-    insufficient_material: function() {
+    insufficient_material: function () {
       return insufficient_material()
     },
 
-    in_threefold_repetition: function() {
+    in_threefold_repetition: function () {
       return in_threefold_repetition()
     },
 
-    game_over: function() {
+    game_over: function () {
       return (
         half_moves >= 100 ||
         in_checkmate() ||
@@ -1382,15 +1379,15 @@ var Chess = function(fen) {
       )
     },
 
-    validate_fen: function(fen) {
+    validate_fen: function (fen) {
       return validate_fen(fen)
     },
 
-    fen: function() {
+    fen: function () {
       return generate_fen()
     },
 
-    board: function() {
+    board: function () {
       var output = [],
         row = []
 
@@ -1410,7 +1407,7 @@ var Chess = function(fen) {
       return output
     },
 
-    pgn: function(options) {
+    pgn: function (options) {
       /* using the specification from http://www.chessclub.com/help/PGN-spec
        * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })
        */
@@ -1438,10 +1435,10 @@ var Chess = function(fen) {
         result.push(newline)
       }
 
-      var append_comment = function(move_string) {
+      var append_comment = function (move_string) {
         var comment = comments[generate_fen()]
         if (typeof comment !== 'undefined') {
-          var delimiter = move_string.length > 0 ? ' ' : '';
+          var delimiter = move_string.length > 0 ? ' ' : ''
           move_string = `${move_string}${delimiter}{${comment}}`
         }
         return move_string
@@ -1498,45 +1495,45 @@ var Chess = function(fen) {
         return result.join('') + moves.join(' ')
       }
 
-      var strip = function() {
+      var strip = function () {
         if (result.length > 0 && result[result.length - 1] === ' ') {
-          result.pop();
-          return true;
+          result.pop()
+          return true
         }
-        return false;
-      };
+        return false
+      }
 
       /* NB: this does not preserve comment whitespace. */
-      var wrap_comment = function(width, move) {
+      var wrap_comment = function (width, move) {
         for (var token of move.split(' ')) {
           if (!token) {
-            continue;
+            continue
           }
           if (width + token.length > max_width) {
             while (strip()) {
-              width--;
+              width--
             }
-            result.push(newline);
-            width = 0;
+            result.push(newline)
+            width = 0
           }
-          result.push(token);
-          width += token.length;
-          result.push(' ');
-          width++;
+          result.push(token)
+          width += token.length
+          result.push(' ')
+          width++
         }
         if (strip()) {
-          width--;
+          width--
         }
-        return width;
-      };
+        return width
+      }
 
       /* wrap the PGN output at max_width */
       var current_width = 0
       for (var i = 0; i < moves.length; i++) {
         if (current_width + moves[i].length > max_width) {
           if (moves[i].includes('{')) {
-            current_width = wrap_comment(current_width, moves[i]);
-            continue;
+            current_width = wrap_comment(current_width, moves[i])
+            continue
           }
         }
         /* if the current move will push past max_width */
@@ -1559,7 +1556,7 @@ var Chess = function(fen) {
       return result.join('')
     },
 
-    load_pgn: function(pgn, options) {
+    load_pgn: function (pgn, options) {
       // allow the user to specify the sloppy move parser to work around over
       // disambiguation bugs in Fritz and Chessbase
       var sloppy =
@@ -1650,10 +1647,9 @@ var Chess = function(fen) {
        * we use {en,de}codeURIComponent here to support arbitrary UTF8
        * as a convenience for modern users */
 
-      var to_hex = function(string) {
-        return Array
-          .from(string)
-          .map(function(c) {
+      var to_hex = function (string) {
+        return Array.from(string)
+          .map(function (c) {
             /* encodeURI doesn't transform most ASCII characters,
              * so we handle these ourselves */
             return c.charCodeAt(0) < 128
@@ -1663,18 +1659,18 @@ var Chess = function(fen) {
           .join('')
       }
 
-      var from_hex = function(string) {
+      var from_hex = function (string) {
         return string.length == 0
           ? ''
           : decodeURIComponent('%' + string.match(/.{1,2}/g).join('%'))
       }
 
-      var encode_comment = function(string) {
+      var encode_comment = function (string) {
         string = string.replace(new RegExp(mask(newline_char), 'g'), ' ')
         return `{${to_hex(string.slice(1, string.length - 1))}}`
       }
 
-      var decode_comment = function(string) {
+      var decode_comment = function (string) {
         if (string.startsWith('{') && string.endsWith('}')) {
           return from_hex(string.slice(1, string.length - 1))
         }
@@ -1686,7 +1682,7 @@ var Chess = function(fen) {
         .replace(
           /* encode comments so they don't get deleted below */
           new RegExp(`(\{[^}]*\})+?|;([^${mask(newline_char)}]*)`, 'g'),
-          function(match, bracket, semicolon) {
+          function (match, bracket, semicolon) {
             return bracket !== undefined
               ? encode_comment(bracket)
               : ' ' + encode_comment(`{${semicolon.slice(1)}}`)
@@ -1713,10 +1709,7 @@ var Chess = function(fen) {
       var moves = trim(ms).split(new RegExp(/\s+/))
 
       /* delete empty entries */
-      moves = moves
-        .join(',')
-        .replace(/,,+/g, ',')
-        .split(',')
+      moves = moves.join(',').replace(/,,+/g, ',').split(',')
       var move = ''
 
       for (var half_move = 0; half_move < moves.length - 1; half_move++) {
@@ -1760,19 +1753,19 @@ var Chess = function(fen) {
       return true
     },
 
-    header: function() {
+    header: function () {
       return set_header(arguments)
     },
 
-    ascii: function() {
+    ascii: function () {
       return ascii()
     },
 
-    turn: function() {
+    turn: function () {
       return turn
     },
 
-    move: function(move, options) {
+    move: function (move, options) {
       /* The move function can be called with in the following parameters:
        *
        * .move('Nxb7')      <- where 'move' is a case-sensitive SAN string
@@ -1826,32 +1819,32 @@ var Chess = function(fen) {
       return pretty_move
     },
 
-    undo: function() {
+    undo: function () {
       var move = undo_move()
       return move ? make_pretty(move) : null
     },
 
-    clear: function() {
+    clear: function () {
       return clear()
     },
 
-    put: function(piece, square) {
+    put: function (piece, square) {
       return put(piece, square)
     },
 
-    get: function(square) {
+    get: function (square) {
       return get(square)
     },
 
-    remove: function(square) {
+    remove: function (square) {
       return remove(square)
     },
 
-    perft: function(depth) {
+    perft: function (depth) {
       return perft(depth)
     },
 
-    square_color: function(square) {
+    square_color: function (square) {
       if (square in SQUARES) {
         var sq_0x88 = SQUARES[square]
         return (rank(sq_0x88) + file(sq_0x88)) % 2 === 0 ? 'light' : 'dark'
@@ -1860,7 +1853,7 @@ var Chess = function(fen) {
       return null
     },
 
-    history: function(options) {
+    history: function (options) {
       var reversed_history = []
       var move_history = []
       var verbose =
@@ -1884,36 +1877,36 @@ var Chess = function(fen) {
 
       return move_history
     },
-    get_comment: function() {
-      return comments[generate_fen()];
+
+    get_comment: function () {
+      return comments[generate_fen()]
     },
 
-    set_comment: function(comment) {
-      comments[generate_fen()] = comment.replace('{', '[').replace('}', ']');
+    set_comment: function (comment) {
+      comments[generate_fen()] = comment.replace('{', '[').replace('}', ']')
     },
 
-    delete_comment: function() {
-      var comment = comments[generate_fen()];
-      delete comments[generate_fen()];
-      return comment;
+    delete_comment: function () {
+      var comment = comments[generate_fen()]
+      delete comments[generate_fen()]
+      return comment
     },
 
-    get_comments: function() {
-      prune_comments();
-      return Object.keys(comments).map(function(fen) {
-        return {fen: fen, comment: comments[fen]};
-      });
+    get_comments: function () {
+      prune_comments()
+      return Object.keys(comments).map(function (fen) {
+        return { fen: fen, comment: comments[fen] }
+      })
     },
 
-    delete_comments: function() {
-      prune_comments();
-      return Object.keys(comments)
-        .map(function(fen) {
-          var comment = comments[fen];
-          delete comments[fen];
-          return {fen: fen, comment: comment};
-        });
-    }
+    delete_comments: function () {
+      prune_comments()
+      return Object.keys(comments).map(function (fen) {
+        var comment = comments[fen]
+        delete comments[fen]
+        return { fen: fen, comment: comment }
+      })
+    },
   }
 }
 
@@ -1922,6 +1915,6 @@ var Chess = function(fen) {
 if (typeof exports !== 'undefined') exports.Chess = Chess
 /* export Chess object for any RequireJS compatible environment */
 if (typeof define !== 'undefined')
-  define(function() {
+  define(function () {
     return Chess
   })
