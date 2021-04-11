@@ -1100,9 +1100,9 @@ var Chess = function (fen) {
       }
       return PAWN
     }
-    piece_type=piece_type.toLowerCase()
-    if(piece_type==='o') {
-      return KING;
+    piece_type = piece_type.toLowerCase()
+    if (piece_type === 'o') {
+      return KING
     }
     return piece_type
   }
