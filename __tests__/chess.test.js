@@ -275,7 +275,8 @@ describe("Get/Put/Remove", function() {
               b6: {type: chess.QUEEN, color: chess.BLACK},
               a4: {type: chess.KING, color: chess.WHITE},
               h4: {type: chess.KING, color: chess.BLACK}},
-     should_pass: true},
+     
+      should_pass: true},
 
     {pieces: {a7: {type: 'z', color: chess.WHTIE}}, // bad piece
      should_pass: false},
