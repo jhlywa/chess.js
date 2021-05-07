@@ -1578,10 +1578,6 @@ var Chess = function (fen) {
           ? options.sloppy
           : false
 
-      function mask(str) {
-        return str.replace(/\\/g, '\\')
-      }
-
       function has_keys(object) {
         for (var key in object) {
           return true
@@ -1596,7 +1592,7 @@ var Chess = function (fen) {
             ? options.newline_char
             : '\r?\n'
         var header_obj = {}
-        var headers = header.split(new RegExp(mask(newline_char)))
+        var headers = header.split(new RegExp(newline_char))
         var key = ''
         var value = ''
 
@@ -1621,10 +1617,10 @@ var Chess = function (fen) {
       // With default newline_char, will equal: /^(\[((?:\r?\n)|.)*\])(?:\r?\n){2}/
       var header_regex = new RegExp(
         '^(\\[((?:' +
-          mask(newline_char) +
+          newline_char +
           ')|.)*\\])' +
           '(?:' +
-          mask(newline_char) +
+          newline_char +
           '){2}'
       )
 
@@ -1680,7 +1676,7 @@ var Chess = function (fen) {
       }
 
       var encode_comment = function (string) {
-        string = string.replace(new RegExp(mask(newline_char), 'g'), ' ')
+        string = string.replace(new RegExp(newline_char, 'g'), ' ')
         return `{${to_hex(string.slice(1, string.length - 1))}}`
       }
 
@@ -1695,14 +1691,14 @@ var Chess = function (fen) {
         .replace(header_string, '')
         .replace(
           /* encode comments so they don't get deleted below */
-          new RegExp(`(\{[^}]*\})+?|;([^${mask(newline_char)}]*)`, 'g'),
+          new RegExp(`(\{[^}]*\})+?|;([^${newline_char}]*)`, 'g'),
           function (match, bracket, semicolon) {
             return bracket !== undefined
               ? encode_comment(bracket)
               : ' ' + encode_comment(`{${semicolon.slice(1)}}`)
           }
         )
-        .replace(new RegExp(mask(newline_char), 'g'), ' ')
+        .replace(new RegExp(newline_char, 'g'), ' ')
 
       /* delete recursive annotation variations */
       var rav_regex = /(\([^\(\)]+\))+?/g
