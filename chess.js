@@ -1406,7 +1406,7 @@ var Chess = function (fen) {
       )
     },
 
-    has_checkmate: function() {
+    has_checkmate: function () {
       return has_checkmate()
     },
 
