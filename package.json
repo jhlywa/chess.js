@@ -4,9 +4,7 @@
   "license": "BSD-2-Clause",
   "main": "chess.js",
   "homepage": "https://github.com/jhlywa/chess.js",
-  "keywords": [
-    "chess"
-  ],
+  "keywords": ["chess"],
   "repository": {
     "type": "git",
     "url": "https://github.com/jhlywa/chess.js.git"
@@ -17,6 +15,8 @@
   },
   "scripts": {
     "test": "jest",
-    "format": "prettier --write chess.js"
+    "format": "prettier --write chess.js",
+    "preversion": "yarn test",
+    "postversion": "git push --tags && yarn publish . --tag $npm_package_version && git push && echo \"Successfully released version $npm_package_version!\""
   }
 }
