@@ -1689,4 +1689,10 @@ describe('Regression Tests', function() {
     };
     expect(chess.header()).toEqual(expected);
   })
+
+  it('Github Issue #284 - sloppy settings allows illegal moves', function() {
+    var chess = new Chess('4k3/8/8/8/8/4p3/8/4K3 w - - 0 1');
+    expect(chess.move('e1f2', { sloppy: true })).toBeNull()
+  });
+
 });
