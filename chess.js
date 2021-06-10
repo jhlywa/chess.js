@@ -1516,9 +1516,9 @@ var Chess = function (fen) {
         move_string = append_comment(move_string)
         var move = reversed_history.pop()
 
-        /* if the position started with black to move, start PGN with 1. ... */
+        /* if the position started with black to move, start PGN with 1... */
         if (!history.length && move.color === 'b') {
-          move_string = move_number + '. ...'
+          move_string = move_number + '...'
         } else if (move.color === 'w') {
           /* store the previous generated move_string if we have one */
           if (move_string.length) {
