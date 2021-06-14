@@ -1695,4 +1695,8 @@ describe('Regression Tests', function() {
     expect(chess.move('e1f2', { sloppy: true })).toBeNull()
   });
 
+  it('Github Issue #282 - playing a move on an empty board throws an error', function() {
+    var chess = new Chess('8/8/8/8/8/8/8/8 w KQkq - 0 1');
+    expect(chess.move('e4')).toBeNull()
+  });
 });
