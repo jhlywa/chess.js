@@ -43,7 +43,7 @@ var Chess = function (fen) {
   var DEFAULT_POSITION =
     'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
-  var POSSIBLE_RESULTS = ['1-0', '0-1', '1/2-1/2', '*']
+  var TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
 
   var PAWN_OFFSETS = {
     b: [16, 32, 17, 15],
@@ -1768,44 +1768,40 @@ var Chess = function (fen) {
       moves = moves.join(',').replace(/,,+/g, ',').split(',')
       var move = ''
 
-      for (var half_move = 0; half_move < moves.length - 1; half_move++) {
+      var result = ''
+
+      for (var half_move = 0; half_move < moves.length; half_move++) {
         var comment = decode_comment(moves[half_move])
         if (comment !== undefined) {
           comments[generate_fen()] = comment
           continue
         }
+
         move = move_from_san(moves[half_move], sloppy)
 
-        /* move not possible! (don't clear the board to examine to show the
-         * latest valid position)
-         */
+        /* invalid move */
         if (move == null) {
-          return false
+          /* was the move an end of game marker */
+          if (TERMINATION_MARKERS.indexOf(moves[half_move]) > -1) {
+            result = moves[half_move]
+          } else {
+            return false
+          }
         } else {
+          /* reset the end of game marker if making a valid move */
+          result = ''
           make_move(move)
         }
       }
 
-      comment = decode_comment(moves[moves.length - 1])
-      if (comment !== undefined) {
-        comments[generate_fen()] = comment
-        moves.pop()
+      /* Per section 8.2.6 of the PGN spec, the Result tag pair must match
+       * match the termination marker. Only do this when headers are present,
+       * but the result tag is missing
+       */
+      if (result && Object.keys(header).length && !header['Result']) {
+        set_header(['Result', result])
       }
 
-      /* examine last move */
-      move = moves[moves.length - 1]
-      if (POSSIBLE_RESULTS.indexOf(move) > -1) {
-        if (has_keys(header) && typeof header.Result === 'undefined') {
-          set_header(['Result', move])
-        }
-      } else {
-        move = move_from_san(move, sloppy)
-        if (move == null) {
-          return false
-        } else {
-          make_move(move)
-        }
-      }
       return true
     },
 

@@ -1663,4 +1663,57 @@ describe('Regression Tests', () => {
     const chess = new Chess('8/8/8/8/8/8/8/8 w KQkq - 0 1');
     expect(chess.move('e4')).toBeNull()
   });
+
+  it('Github Issue #279 - load_pgn duplicate last move if it has a comment',
+    () => {
+      const history =  ['e4',  'e5',   'Nf3', 'Nc6', 'Bb5',  'd6',
+                        'd4',  'Bd7',  'Nc3', 'Nf6', 'Bxc6'];
+
+      // trailing comment - no end of game marker
+      const chess = new Chess();
+      let result = chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 " +
+                                  "4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment}")
+      expect(result).toBe(true)
+      expect(chess.history()).toEqual(history)
+      expect(chess.header()['Result']).toBeUndefined()
+
+      // trailing comment - end of game marker after comment
+      result = chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 " +
+                              "4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment} *")
+      expect(result).toBe(true)
+      expect(chess.history()).toEqual(history)
+      expect(chess.header()['Result']).toBeUndefined()
+
+      // trailing comment - end of game marker before comment
+      result = chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 " +
+                              "4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 * {comment}")
+      expect(result).toBe(true)
+      expect(chess.history()).toEqual(history)
+      expect(chess.header()['Result']).toBeUndefined()
+
+      // trailing comment with PGN header - no end of game marker
+      result = chess.load_pgn("[White \"name\"]\n\n" +
+                              "1. e4 e5 2. Nf3 Nc6 " +
+                              "3. Bb5 d6 " + "4. d4 Bd7 5. Nc3 Nf6 " +
+                              "6. Bxc6 {comment}")
+      expect(result).toBe(true)
+      expect(chess.history()).toEqual(history)
+      expect(chess.header()['Result']).toBeUndefined()
+
+      // trailing comment with result header - end of game marker after comment
+      result = chess.load_pgn("[White \"name\"]\n\n" +
+                              "1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 " +
+                              "4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment} *")
+      expect(result).toBe(true)
+      expect(chess.history()).toEqual(history)
+      expect(chess.header()['Result']).toBe('*')
+
+      // trailing comment with result header - end of game marker before comment
+      result = chess.load_pgn("[White \"name\"]\n\n" +
+                              "1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 " +
+                              "4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 1/2-1/2 {comment}")
+      expect(result).toBe(true)
+      expect(chess.history()).toEqual(history)
+      expect(chess.header()['Result']).toBe('1/2-1/2')
+    });
 });
