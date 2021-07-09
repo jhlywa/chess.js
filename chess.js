@@ -1658,16 +1658,10 @@ var Chess = function (fen) {
           ? options.newline_char
           : '\r?\n'
 
-      // RegExp to split header. Takes advantage of the fact that header and movetext
-      // will always have a blank line between them (ie, two newline_char's).
-      // With default newline_char, will equal: /^(\[((?:\r?\n)|.)*\])(?:\r?\n){2}/
+      // RegExp to split header.  This assumes that the header is the initial
+      // set of lines which begin with [ and end with ].
       var header_regex = new RegExp(
-        '^(\\[((?:' +
-          mask(newline_char) +
-          ')|.)*\\])' +
-          '(?:' +
-          mask(newline_char) +
-          '){2}'
+        '^((?:\\[.*\\]' + mask(newline_char) + ')+)'
       )
 
       // If no header given, begin with moves.
