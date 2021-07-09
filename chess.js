@@ -1530,7 +1530,7 @@ var Chess = function (fen) {
         move_string =
           move_string +
           ' ' +
-          move_to_san(move, generate_moves({ legal: false }))
+          move_to_san(move, generate_moves({ legal: true }))
         make_move(move)
       }
 

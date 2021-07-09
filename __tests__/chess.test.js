@@ -1716,4 +1716,11 @@ describe('Regression Tests', () => {
       expect(chess.history()).toEqual(history)
       expect(chess.header()['Result']).toBe('1/2-1/2')
     });
+  
+  it('Github Issue #286 - pgn should not generate sloppy moves',
+    () => {
+      const chess = new Chess()
+      chess.load_pgn('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
+      expect(chess.pgn()).toBe('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
+    });
 });
