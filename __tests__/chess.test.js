@@ -1131,6 +1131,38 @@ describe("Make Move", () => {
 
 });
 
+describe("Validate move for default initial configuration", () => {
+
+  const chess = new Chess();
+
+  it("Should return false for a invalid move(d3 => d4)", () => {
+    var isValid = chess.is_valid_move({ from: "d3", to: "d4"});
+    expect(isValid).toBe(false);
+  });
+
+  it("Should return true for a valid move(d2 => d3)", () => {
+    var isValid = chess.is_valid_move({ from: "d2", to: "d3"});
+    expect(isValid).toBe(true);
+  });
+
+});
+
+describe("Get move objects for default initial configuration", () => {
+
+  const chess = new Chess();
+
+  it("Should return undefined move_obj for a invalid move(d3 => d4)", () => {
+    var move_obj = chess.get_move_obj({ from: "d3", to: "d4"});
+    expect(move_obj).toBeUndefined;
+  });
+
+  it("Should return a defined move_obj for a valid move(d2 => d3)", () => {
+    var move_obj = chess.get_move_obj({ from: "d2", to: "d3"});
+    expect(move_obj).not.toBeUndefined;
+  });
+
+});
+
 
 describe("Validate FEN", () => {
 

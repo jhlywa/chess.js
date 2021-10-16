@@ -1817,7 +1817,7 @@ var Chess = function (fen) {
       return turn
     },
 
-    move: function (move, options) {
+    get_move_obj: function (move, options) {
       /* The move function can be called with in the following parameters:
        *
        * .move('Nxb7')      <- where 'move' is a case-sensitive SAN string
@@ -1855,6 +1855,18 @@ var Chess = function (fen) {
           }
         }
       }
+
+      return move_obj;
+    },
+
+    is_valid_move: function(move, options) {
+      var move_obj = this.get_move_obj(move, options);
+      return move_obj ? true : false;
+    },
+
+    move: function (move, options) {
+
+      var move_obj = this.get_move_obj(move, options);
 
       /* failed to find move */
       if (!move_obj) {
