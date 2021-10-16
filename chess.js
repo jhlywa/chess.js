@@ -1859,7 +1859,7 @@ var Chess = function (fen) {
       return move_obj;
     },
 
-    is_valid_move(move, options) {
+    is_valid_move: function(move, options) {
       var move_obj = this.get_move_obj(move, options);
       return move_obj ? true : false;
     },
