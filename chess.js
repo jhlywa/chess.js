@@ -732,6 +732,48 @@ var Chess = function (fen) {
 
     return output
   }
+
+  /* convert a move from 0x88 coordinates to Grid Algebraic Notation
+      * (GAN)
+      *
+      * displays move in the form of p1p2, p1 as the starting position and p2 as the destination position
+      * displays promotion move in the form of p1p2<lowercase-piece-type>
+      * displays p1p2+ if move creates a check 
+      * displays p1p2# if move creates a checkmate 
+      * 
+      */
+  function move_to_gan(move, moves) {
+    var output = ''
+    if (move.flags & BITS.KSIDE_CASTLE) {
+      output = 'O-O'
+    } else if (move.flags & BITS.QSIDE_CASTLE) {
+      output = 'O-O-O'
+    } else {
+      if (move.piece !== PAWN) {
+        var disambiguator = get_disambiguator(move, moves)
+        output += disambiguator
+      }
+      output += algebraic(move.from)
+      output += algebraic(move.to)
+
+      if (move.flags & BITS.PROMOTION) {
+        output += move.promotion.toLowerCase()
+      }
+    }
+
+    make_move(move)
+    if (in_check()) {
+      if (in_checkmate()) {
+        output += '#'
+      } else {
+        output += '+'
+      }
+    }
+    undo_move()
+
+    return output
+  } 
+
   // parses all of the decorators out of a SAN string
   function stripped_san(move) {
     return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
