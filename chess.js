@@ -742,17 +742,11 @@ var Chess = function (fen) {
      */
  function move_to_gan(move) {
   var output = ''
-  if (move.flags & BITS.KSIDE_CASTLE) {
-    output = 'O-O'
-  } else if (move.flags & BITS.QSIDE_CASTLE) {
-    output = 'O-O-O'
-  } else {
     output += algebraic(move.from)
     output += algebraic(move.to)
     if (move.flags & BITS.PROMOTION) {
       output += move.promotion.toLowerCase()
     }
-  }
   return output
 }
 
