@@ -733,14 +733,14 @@ var Chess = function (fen) {
     return output
   }
   
- /* convert a move from 0x88 coordinates to Grid Algebraic Notation
-     * (GAN)
+ /* convert a move from 0x88 coordinates to Universal Chess Interface
+     * (UCI)
      *
      * displays move in the form of p1p2, p1 as the starting position and p2 as the destination position
      * displays promotion move in the form of p1p2<lowercase-piece-type>
      * 
      */
- function move_to_gan(move) {
+ function move_to_uci(move) {
   var output = ''
     output += algebraic(move.from)
     output += algebraic(move.to)
