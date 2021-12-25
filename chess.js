@@ -282,7 +282,8 @@ var Chess = function (fen) {
       8: '1st field (piece positions) is invalid [consecutive numbers].',
       9: '1st field (piece positions) is invalid [invalid piece].',
       10: '1st field (piece positions) is invalid [row too large].',
-      11: 'Illegal en-passant square',
+      11: '1st field (piece positions) is invalid [invalid number of kings].',
+      12: 'Illegal en-passant square',
     }
 
     /* 1st criterion: 6 space-seperated fields? */
@@ -348,11 +349,25 @@ var Chess = function (fen) {
       }
     }
 
+    /* 11th criterion: valid number of kings? */
+    var wk_count = 0;
+    var bk_count = 0;
+    for (var i = 0, l = tokens[0].length; i < l; i++) {
+      if (tokens[0][i] === 'K') {
+        wk_count += 1;
+      } else if (tokens[0][i] === 'k') {
+        bk_count += 1;
+      }
+    }
+    if (wk_count > 1 || bk_count > 1) {
+      return { valid: false, error_number: 11, error: errors[11] }
+    }
+
     if (
       (tokens[3][1] == '3' && tokens[1] == 'w') ||
       (tokens[3][1] == '6' && tokens[1] == 'b')
     ) {
-      return { valid: false, error_number: 11, error: errors[11] }
+      return { valid: false, error_number: 12, error: errors[12] }
     }
 
     /* everything's okay! */
