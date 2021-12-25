@@ -350,13 +350,13 @@ var Chess = function (fen) {
     }
 
     /* 11th criterion: valid number of kings? */
-    var wk_count = 0;
-    var bk_count = 0;
+    var wk_count = 0
+    var bk_count = 0
     for (var i = 0, l = tokens[0].length; i < l; i++) {
       if (tokens[0][i] === 'K') {
-        wk_count += 1;
+        wk_count += 1
       } else if (tokens[0][i] === 'k') {
-        bk_count += 1;
+        bk_count += 1
       }
     }
     if (wk_count > 1 || bk_count > 1) {
@@ -1543,9 +1543,7 @@ var Chess = function (fen) {
         }
 
         move_string =
-          move_string +
-          ' ' +
-          move_to_san(move, generate_moves({ legal: true }))
+          move_string + ' ' + move_to_san(move, generate_moves({ legal: true }))
         make_move(move)
       }
 
