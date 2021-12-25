@@ -1,3 +1,7 @@
+name: Run unit tests
+on:
+  push:
+  pull_request:
 jobs:
   run-tests:
     name: Run unit tests
