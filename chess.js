@@ -531,8 +531,19 @@ var Chess = function (fen) {
     }
 
     var moves = []
+
     var us = turn
     var them = swap_color(us)
+
+    if (
+      typeof options !== 'undefined' &&
+      'opponent' in options &&
+      options.opponent
+    ) {
+      us = swap_color(turn)
+      them = swap_color(us)
+    }
+
     var second_rank = { b: RANK_7, w: RANK_2 }
 
     var first_sq = SQUARES.a8
@@ -595,7 +606,7 @@ var Chess = function (fen) {
 
           if (board[square] != null && board[square].color === them) {
             add_move(board, moves, i, square, BITS.CAPTURE)
-          } else if (square === ep_square) {
+          } else if (square === ep_square && us === turn) {
             add_move(board, moves, i, ep_square, BITS.EP_CAPTURE)
           }
         }
