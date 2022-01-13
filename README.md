@@ -571,10 +571,16 @@ chess.moves({ verbose: true })
 //     },
 //     ...
 //     ]
+
+chess.moves({ opponent: true })
+
+chess.moves({ defensive: true })
 ```
 
 The _piece_, _captured_, and _promotion_ fields contain the lowercase
 representation of the applicable piece.
+
+In case of defensive option, _captured_ indicates the type of the defended piece
 
 The _flags_ field in verbose mode may contain one or more of the following values:
 
@@ -585,6 +591,7 @@ The _flags_ field in verbose mode may contain one or more of the following value
 -   'p' - a promotion
 -   'k' - kingside castling
 -   'q' - queenside castling
+-   'd' - a defensive move
 
 A flag of 'pc' would mean that a pawn captured a piece on the 8th rank and promoted.
 
