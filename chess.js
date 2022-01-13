@@ -106,6 +106,7 @@ var Chess = function (fen) {
     PROMOTION: 'p',
     KSIDE_CASTLE: 'k',
     QSIDE_CASTLE: 'q',
+    DEFENSIVE: 'd',
   }
 
   var BITS = {
@@ -116,6 +117,7 @@ var Chess = function (fen) {
     PROMOTION: 16,
     KSIDE_CASTLE: 32,
     QSIDE_CASTLE: 64,
+    DEFENSIVE: 128,
   }
 
   var RANK_1 = 7
@@ -531,10 +533,12 @@ var Chess = function (fen) {
     }
 
     var moves = []
+    var defensives = []
 
     var us = turn
     var them = swap_color(us)
 
+    /* do we want opponent moves? */
     if (
       typeof options !== 'undefined' &&
       'opponent' in options &&
@@ -544,17 +548,23 @@ var Chess = function (fen) {
       them = swap_color(us)
     }
 
-    var second_rank = { b: RANK_7, w: RANK_2 }
-
-    var first_sq = SQUARES.a8
-    var last_sq = SQUARES.h1
-    var single_square = false
+    /* do we want defensive moves? */
+    var defensive =
+      typeof options !== 'undefined' && 'defensive' in options
+        ? options.defensive
+        : false
 
     /* do we want legal moves? */
     var legal =
       typeof options !== 'undefined' && 'legal' in options
         ? options.legal
         : true
+
+    var second_rank = { b: RANK_7, w: RANK_2 }
+
+    var first_sq = SQUARES.a8
+    var last_sq = SQUARES.h1
+    var single_square = false
 
     var piece_type =
       typeof options !== 'undefined' &&
@@ -608,6 +618,9 @@ var Chess = function (fen) {
             add_move(board, moves, i, square, BITS.CAPTURE)
           } else if (square === ep_square && us === turn) {
             add_move(board, moves, i, ep_square, BITS.EP_CAPTURE)
+          } else if (board[square] != null && board[square].color === us) {
+            if (defensive && board[square].type !== KING)
+              add_move(board, defensives, i, square, BITS.DEFENSIVE)
           }
         }
       } else if (piece_type === true || piece_type === piece.type) {
@@ -622,7 +635,11 @@ var Chess = function (fen) {
             if (board[square] == null) {
               add_move(board, moves, i, square, BITS.NORMAL)
             } else {
-              if (board[square].color === us) break
+              if (board[square].color === us) {
+                if (defensive && board[square].type !== KING)
+                  add_move(board, defensives, i, square, BITS.DEFENSIVE)
+                else break
+              }
               add_move(board, moves, i, square, BITS.CAPTURE)
               break
             }
@@ -673,6 +690,8 @@ var Chess = function (fen) {
         }
       }
     }
+
+    if (defensive) moves = defensives
 
     /* return all pseudo-legal moves (this includes moves that allow the king
      * to be captured)
@@ -1022,6 +1041,10 @@ var Chess = function (fen) {
     board[move.from] = board[move.to]
     board[move.from].type = move.piece // to undo any promotions
     board[move.to] = null
+
+    if (move.flags & BITS.DEFENSIVE) {
+      board[move.to] = { type: move.captured, color: us }
+    }
 
     if (move.flags & BITS.CAPTURE) {
       board[move.to] = { type: move.captured, color: them }
