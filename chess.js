@@ -494,7 +494,7 @@ var Chess = function (fen) {
 
   function build_move(board, from, to, flags, promotion) {
     var move = {
-      color: turn,
+      color: board[from].color,
       from: from,
       to: to,
       flags: flags,
@@ -897,7 +897,7 @@ var Chess = function (fen) {
   }
 
   function make_move(move) {
-    var us = turn
+    var us = move.color
     var them = swap_color(us)
     push(move)
 
@@ -906,7 +906,7 @@ var Chess = function (fen) {
 
     /* if ep capture, remove the captured pawn */
     if (move.flags & BITS.EP_CAPTURE) {
-      if (turn === BLACK) {
+      if (us === BLACK) {
         board[move.to - 16] = null
       } else {
         board[move.to + 16] = null
@@ -967,7 +967,7 @@ var Chess = function (fen) {
 
     /* if big pawn move, update the en passant square */
     if (move.flags & BITS.BIG_PAWN) {
-      if (turn === BLACK) {
+      if (us === BLACK) {
         ep_square = move.to - 16
       } else {
         ep_square = move.to + 16
@@ -1005,8 +1005,8 @@ var Chess = function (fen) {
     half_moves = old.half_moves
     move_number = old.move_number
 
-    var us = turn
-    var them = swap_color(turn)
+    var us = move.color
+    var them = swap_color(us)
 
     board[move.from] = board[move.to]
     board[move.from].type = move.piece // to undo any promotions
