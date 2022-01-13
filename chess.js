@@ -422,7 +422,7 @@ var Chess = function (fen) {
   }
 
   /* called when the initial board setup is changed with put() or remove().
-   * modifies the SetUp and FEN properties of the header object.  if the FEN is
+   * modifies the SetUp and FEN properties of the header object. if the FEN is
    * equal to the default position, the SetUp and FEN are deleted
    * the setup is only updated if history.length is zero, ie moves haven't been
    * made.
@@ -464,8 +464,8 @@ var Chess = function (fen) {
 
     /* don't let the user place more than one king */
     if (
-      piece.type == KING &&
-      !(kings[piece.color] == EMPTY || kings[piece.color] == sq)
+      piece.type === KING &&
+      !(kings[piece.color] === EMPTY || kings[piece.color] == sq)
     ) {
       return false
     }
@@ -617,7 +617,7 @@ var Chess = function (fen) {
             }
 
             /* break, if knight or king */
-            if (piece.type === 'n' || piece.type === 'k') break
+            if (piece.type === KNIGHT || piece.type === KING) break
           }
         }
       }
@@ -687,7 +687,7 @@ var Chess = function (fen) {
    * (SAN)
    *
    * @param {boolean} sloppy Use the sloppy SAN generator to work around over
-   * disambiguation bugs in Fritz and Chessbase.  See below:
+   * disambiguation bugs in Fritz and Chessbase. See below:
    *
    * r1bqkbnr/ppp2ppp/2n5/1B1pP3/4P3/8/PPPP2PP/RNBQK1NR b KQkq - 2 4
    * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
@@ -732,6 +732,7 @@ var Chess = function (fen) {
 
     return output
   }
+
   // parses all of the decorators out of a SAN string
   function stripped_san(move) {
     return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
@@ -763,7 +764,7 @@ var Chess = function (fen) {
         }
 
         /* if the piece is a knight or a king */
-        if (piece.type === 'n' || piece.type === 'k') return true
+        if (piece.type === KNIGHT || piece.type === KING) return true
 
         var offset = RAYS[index]
         var j = i + offset
@@ -868,7 +869,7 @@ var Chess = function (fen) {
        * when checking for draw by rep */
       var fen = generate_fen().split(' ').slice(0, 4).join(' ')
 
-      /* has the position occurred three or move times */
+      /* has the position occurred three or more times */
       positions[fen] = fen in positions ? positions[fen] + 1 : 1
       if (positions[fen] >= 3) {
         repetition = true
@@ -966,7 +967,7 @@ var Chess = function (fen) {
 
     /* if big pawn move, update the en passant square */
     if (move.flags & BITS.BIG_PAWN) {
-      if (turn === 'b') {
+      if (turn === BLACK) {
         ep_square = move.to - 16
       } else {
         ep_square = move.to + 16
@@ -1106,6 +1107,7 @@ var Chess = function (fen) {
     }
     return piece_type
   }
+
   function ascii() {
     var s = '   +------------------------+\n'
     for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
@@ -1217,7 +1219,7 @@ var Chess = function (fen) {
             return moves[i]
           } else if (overly_disambiguated) {
             // SPECIAL CASE: we parsed a move string that may have an unneeded
-            // rank/file disambiguator (e.g. Nge7).  The 'from' variable will
+            // rank/file disambiguator (e.g. Nge7). The 'from' variable will
             var square = algebraic(moves[i].from)
             if (
               (!piece || piece.toLowerCase() == moves[i].piece) &&
@@ -1365,8 +1367,8 @@ var Chess = function (fen) {
 
     moves: function (options) {
       /* The internal representation of a chess move is in 0x88 format, and
-       * not meant to be human-readable.  The code below converts the 0x88
-       * square coordinates to algebraic coordinates.  It also prunes an
+       * not meant to be human-readable. The code below converts the 0x88
+       * square coordinates to algebraic coordinates. It also prunes an
        * unnecessary move keys resulting from a verbose call.
        */
 
@@ -1511,15 +1513,15 @@ var Chess = function (fen) {
         moves.push(append_comment(''))
       }
 
-      /* build the list of moves.  a move_string looks like: "3. e3 e6" */
+      /* build the list of moves. a move_string looks like: "3. e3 e6" */
       while (reversed_history.length > 0) {
         move_string = append_comment(move_string)
         var move = reversed_history.pop()
 
         /* if the position started with black to move, start PGN with 1. ... */
-        if (!history.length && move.color === 'b') {
+        if (!history.length && move.color === BLACK) {
           move_string = move_number + '. ...'
-        } else if (move.color === 'w') {
+        } else if (move.color === WHITE) {
           /* store the previous generated move_string if we have one */
           if (move_string.length) {
             moves.push(move_string)
