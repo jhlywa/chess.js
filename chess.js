@@ -1408,6 +1408,10 @@ var Chess = function (fen) {
        */
 
       var ugly_moves = generate_moves(options)
+      if (typeof options !== 'undefined' && 'legal' in options) {
+        options.legal = true
+      }
+      var legal_moves = generate_moves(options)
       var moves = []
 
       for (var i = 0, len = ugly_moves.length; i < len; i++) {
@@ -1421,9 +1425,7 @@ var Chess = function (fen) {
         ) {
           moves.push(make_pretty(ugly_moves[i]))
         } else {
-          moves.push(
-            move_to_san(ugly_moves[i], generate_moves({ legal: true }))
-          )
+          moves.push(move_to_san(ugly_moves[i], legal_moves))
         }
       }
 
