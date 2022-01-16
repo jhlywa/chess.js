@@ -751,8 +751,9 @@ var Chess = function (fen) {
     }
 
     make_move(move)
-    if (in_check()) {
-      if (in_checkmate()) {
+    if (king_attacked(swap_color(move.color))) {
+      var options = move.color === turn ? {opponent: true} : {}
+      if (king_attacked(swap_color(move.color)) && generate_moves(options).length === 0) {
         output += '#'
       } else {
         output += '+'
