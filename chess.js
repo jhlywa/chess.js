@@ -1408,7 +1408,7 @@ var Chess = function (fen) {
        */
 
       var ugly_moves = generate_moves(options)
-      if (typeof options !== 'undefined' && 'legal' in options) {
+      if (typeof options !== 'undefined') {
         options.legal = true
       }
       var legal_moves = generate_moves(options)
