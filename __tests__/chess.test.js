@@ -334,6 +334,38 @@ describe("Get/Put/Remove", () => {
 });
 
 
+describe("Opponent Moves", () => {
+
+  var positions = [
+    {fen: '4k3/8/8/3p4/8/4K3/8/8', player: 'w'},
+    {fen: '4k3/8/8/3p4/8/4K3/8/8', player: 'b'},
+    {fen: '8/8/4k3/8/3P4/8/8/4K3', player: 'w'},
+    {fen: '8/8/4k3/8/3P4/8/8/4K3', player: 'b'},
+    {fen: 'r1b1kbnr/pppp1Npp/8/8/3nq3/8/PPPPBP1P/RNBQKR2', player: 'w'},
+    {fen: 'r1b1kbnr/pppp1Npp/8/8/3nq3/8/PPPPBP1P/RNBQKR2', player: 'b'},
+  ];
+
+  endFen = '- - 0 1';
+
+  positions.forEach(function(position) {
+  reversedPlayer = position.player === 'w' ? 'b' : 'w'
+
+  var chess = new Chess(position.fen+' '+position.player+' '+endFen);
+  var reversedChess = new Chess(position.fen+' '+reversedPlayer+' '+endFen);
+
+  it(position.fen, function() {
+  
+      moves = chess.moves();
+      reversedMoves = reversedChess.moves({opponent: true});
+
+      expect(JSON.stringify(moves) === JSON.stringify(reversedMoves)).toBe(true);
+    });
+
+  });
+
+});
+
+
 describe("FEN", () => {
 
   const validPositions = [
