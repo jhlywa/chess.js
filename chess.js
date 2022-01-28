@@ -663,10 +663,10 @@ var Chess = function (fen) {
 
           if (
             board[castling_from + 1] == null &&
-            board[castling_to] == null &&
-            !attacked(them, kings[us]) &&
-            !attacked(them, castling_from + 1) &&
-            !attacked(them, castling_to)
+            board[castling_from + 2] == null &&
+            attacked(them, kings[us]) === 0 &&
+            attacked(them, castling_from + 1) === 0 &&
+            attacked(them, castling_to) === 0
           ) {
             add_move(board, moves, kings[us], castling_to, BITS.KSIDE_CASTLE)
           }
@@ -681,9 +681,9 @@ var Chess = function (fen) {
             board[castling_from - 1] == null &&
             board[castling_from - 2] == null &&
             board[castling_from - 3] == null &&
-            !attacked(them, kings[us]) &&
-            !attacked(them, castling_from - 1) &&
-            !attacked(them, castling_to)
+            attacked(them, kings[us]) === 0 &&
+            attacked(them, castling_from - 1) === 0 &&
+            attacked(them, castling_to) === 0
           ) {
             add_move(board, moves, kings[us], castling_to, BITS.QSIDE_CASTLE)
           }
@@ -759,6 +759,7 @@ var Chess = function (fen) {
         output += '+'
       }
     }
+
     undo_move()
 
     return output
@@ -770,6 +771,7 @@ var Chess = function (fen) {
   }
 
   function attacked(color, square) {
+    var attack_count = 0
     for (var i = SQUARES.a8; i <= SQUARES.h1; i++) {
       /* did we run off the end of the board */
       if (i & 0x88) {
@@ -787,15 +789,15 @@ var Chess = function (fen) {
       if (ATTACKS[index] & (1 << SHIFTS[piece.type])) {
         if (piece.type === PAWN) {
           if (difference > 0) {
-            if (piece.color === WHITE) return true
+            if (piece.color === WHITE) attack_count++
           } else {
-            if (piece.color === BLACK) return true
+            if (piece.color === BLACK) attack_count++
           }
           continue
         }
 
-        /* if the piece is a knight or a king */
-        if (piece.type === KNIGHT || piece.type === KING) return true
+        /* if the piece is a knight */
+        if (piece.type === KNIGHT) attack_count++
 
         var offset = RAYS[index]
         var j = i + offset
@@ -809,15 +811,15 @@ var Chess = function (fen) {
           j += offset
         }
 
-        if (!blocked) return true
+        if (!blocked) attack_count++
       }
     }
 
-    return false
+    return attack_count
   }
 
   function king_attacked(color) {
-    return attacked(swap_color(color), kings[color])
+    return (attacked(swap_color(color), kings[color]) > 0)
   }
 
   function in_check() {
