@@ -704,8 +704,18 @@ var Chess = function (fen) {
     var legal_moves = []
     for (var i = 0, len = moves.length; i < len; i++) {
       make_move(moves[i])
-      if (!king_attacked(us)) {
-        legal_moves.push(moves[i])
+      if(defensive) {
+        if(moves[i].piece === KING) {
+          if(attacked(them, kings[us]) < 2) {
+            legal_moves.push(moves[i])
+          }
+        } else {
+            legal_moves.push(moves[i])
+        }
+      } else {
+        if(!king_attacked(us)) {
+          legal_moves.push(moves[i])
+        }
       }
       undo_move()
     }
