@@ -1,7 +1,7 @@
 # chess.js
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jhlywa/chess.js/Node.js%20CI)
-![npm](https://img.shields.io/npm/v/chess.js)
+![npm](https://img.shields.io/npm/v/chess.js?color=blue)
 ![npm](https://img.shields.io/npm/dm/chess.js)
 
 chess.js is a Javascript chess library that is used for chess move
