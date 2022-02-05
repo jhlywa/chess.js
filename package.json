@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "jest": "^27.0.1",
-    "prettier": "^2.2.1"
+    "prettier": "^2.5.1"
   },
   "scripts": {
     "test": "jest",
