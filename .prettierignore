@@ -1,1 +1,2 @@
-test/
+coverage/
+package-lock.json
