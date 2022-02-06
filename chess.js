@@ -760,17 +760,20 @@ var Chess = function (fen) {
       }
     }
 
-    make_move(move)
-    if (king_attacked(swap_color(move.color))) {
-      var options = move.color === turn ? {opponent: true} : {}
-      if (king_attacked(swap_color(move.color)) && generate_moves(options).length === 0) {
-        output += '#'
-      } else {
-        output += '+'
-      }
-    }
+    if (!(move.flags & BITS.DEFENSIVE)) {
+      make_move(move)
 
-    undo_move()
+      if (king_attacked(swap_color(move.color))) {
+        var options = move.color === turn ? {opponent: true} : {}
+        if (king_attacked(swap_color(move.color)) && generate_moves(options).length === 0) {
+          output += '#'
+        } else {
+          output += '+'
+        }
+      }
+  
+      undo_move()
+    }
 
     return output
   }
