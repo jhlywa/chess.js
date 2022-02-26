@@ -967,9 +967,9 @@ var Chess = function (fen) {
     /* if big pawn move, update the en passant square */
     if (move.flags & BITS.BIG_PAWN) {
       if (turn === 'b') {
-        ep_square = move.to - 16
+        ep_square = move.to - 32
       } else {
-        ep_square = move.to + 16
+        ep_square = move.to + 32
       }
     } else {
       ep_square = EMPTY
