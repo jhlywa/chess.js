@@ -98,27 +98,27 @@ represented by `null`.
 const chess = new Chess()
 
 chess.board()
-// -> [[{type: 'r', color: 'b'},
-        {type: 'n', color: 'b'},
-        {type: 'b', color: 'b'},
-        {type: 'q', color: 'b'},
-        {type: 'k', color: 'b'},
-        {type: 'b', color: 'b'},
-        {type: 'n', color: 'b'},
-        {type: 'r', color: 'b'}],
+// -> [[{square: 'a8', type: 'r', color: 'b'},
+        {square: 'b8', type: 'n', color: 'b'},
+        {square: 'c8', type: 'b', color: 'b'},
+        {square: 'd8', type: 'q', color: 'b'},
+        {square: 'e8', type: 'k', color: 'b'},
+        {square: 'f8', type: 'b', color: 'b'},
+        {square: 'g8', type: 'n', color: 'b'},
+        {square: 'h8', type: 'r', color: 'b'}],
         [...],
         [...],
         [...],
         [...],
         [...],
-        [{type: 'r', color: 'w'},
-         {type: 'n', color: 'w'},
-         {type: 'b', color: 'w'},
-         {type: 'q', color: 'w'},
-         {type: 'k', color: 'w'},
-         {type: 'b', color: 'w'},
-         {type: 'n', color: 'w'},
-         {type: 'r', color: 'w'}]]
+        [{square: 'a1', type: 'r', color: 'w'},
+         {square: 'b1', type: 'n', color: 'w'},
+         {square: 'c1', type: 'b', color: 'w'},
+         {square: 'd1', type: 'q', color: 'w'},
+         {square: 'e1', type: 'k', color: 'w'},
+         {square: 'f1', type: 'b', color: 'w'},
+         {square: 'g1', type: 'n', color: 'w'},
+         {square: 'h1', type: 'r', color: 'w'}]]
 ```
 
 ### .clear()
