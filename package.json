@@ -2,6 +2,7 @@
   "name": "chess.js",
   "version": "0.12.1",
   "license": "BSD-2-Clause",
+  "type": "module",
   "main": "chess.js",
   "homepage": "https://github.com/jhlywa/chess.js",
   "keywords": ["chess"],
@@ -14,7 +15,7 @@
     "prettier": "^2.6.0"
   },
   "scripts": {
-    "test": "jest",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "format": "prettier --write **/*.{js,json}"
   }
 }
