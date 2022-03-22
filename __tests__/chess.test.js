@@ -1,4 +1,4 @@
-import { Chess } from '../chess.js'
+import { Chess, WHITE, BLACK, PAWN, KNIGHT, BISHOP, ROOK, KING, QUEEN, SQUARES } from '../chess.js'
 
 describe('Perft', () => {
   const perfts = [
@@ -295,38 +295,38 @@ describe('Get/Put/Remove', () => {
   const positions = [
     {
       pieces: {
-        a7: { type: chess.PAWN, color: chess.WHITE },
-        b7: { type: chess.PAWN, color: chess.BLACK },
-        c7: { type: chess.KNIGHT, color: chess.WHITE },
-        d7: { type: chess.KNIGHT, color: chess.BLACK },
-        e7: { type: chess.BISHOP, color: chess.WHITE },
-        f7: { type: chess.BISHOP, color: chess.BLACK },
-        g7: { type: chess.ROOK, color: chess.WHITE },
-        h7: { type: chess.ROOK, color: chess.BLACK },
-        a6: { type: chess.QUEEN, color: chess.WHITE },
-        b6: { type: chess.QUEEN, color: chess.BLACK },
-        a4: { type: chess.KING, color: chess.WHITE },
-        h4: { type: chess.KING, color: chess.BLACK },
+        a7: { type: PAWN, color: WHITE },
+        b7: { type: PAWN, color: BLACK },
+        c7: { type: KNIGHT, color: WHITE },
+        d7: { type: KNIGHT, color: BLACK },
+        e7: { type: BISHOP, color: WHITE },
+        f7: { type: BISHOP, color: BLACK },
+        g7: { type: ROOK, color: WHITE },
+        h7: { type: ROOK, color: BLACK },
+        a6: { type: QUEEN, color: WHITE },
+        b6: { type: QUEEN, color: BLACK },
+        a4: { type: KING, color: WHITE },
+        h4: { type: KING, color: BLACK },
       },
       should_pass: true,
     },
 
     {
-      pieces: { a7: { type: 'z', color: chess.WHTIE } }, // bad piece
+      pieces: { a7: { type: 'z', color: WHITE } }, // bad piece
       should_pass: false,
     },
 
     {
-      pieces: { j4: { type: chess.PAWN, color: chess.WHTIE } }, // bad square
+      pieces: { j4: { type: PAWN, color: WHITE } }, // bad square
       should_pass: false,
     },
 
     /* disallow two kings (black) */
     {
       pieces: {
-        a7: { type: chess.KING, color: chess.BLACK },
-        h2: { type: chess.KING, color: chess.WHITE },
-        a8: { type: chess.KING, color: chess.BLACK },
+        a7: { type: KING, color: BLACK },
+        h2: { type: KING, color: WHITE },
+        a8: { type: KING, color: BLACK },
       },
       should_pass: false,
     },
@@ -334,9 +334,9 @@ describe('Get/Put/Remove', () => {
     /* disallow two kings (white) */
     {
       pieces: {
-        a7: { type: chess.KING, color: chess.BLACK },
-        h2: { type: chess.KING, color: chess.WHITE },
-        h1: { type: chess.KING, color: chess.WHITE },
+        a7: { type: KING, color: BLACK },
+        h2: { type: KING, color: WHITE },
+        h1: { type: KING, color: WHITE },
       },
       should_pass: false,
     },
@@ -344,9 +344,9 @@ describe('Get/Put/Remove', () => {
     /* allow two kings if overwriting the exact same square */
     {
       pieces: {
-        a7: { type: chess.KING, color: chess.BLACK },
-        h2: { type: chess.KING, color: chess.WHITE },
-        h2: { type: chess.KING, color: chess.WHITE },
+        a7: { type: KING, color: BLACK },
+        h2: { type: KING, color: WHITE },
+        h2: { type: KING, color: WHITE },
       },
       should_pass: true,
     },
@@ -365,8 +365,8 @@ describe('Get/Put/Remove', () => {
       /* iterate over every square to make sure get returns the proper
        * piece values/color
        */
-      for (let j = 0; j < chess.SQUARES.length; j++) {
-        const square = chess.SQUARES[j]
+      for (let j = 0; j < SQUARES.length; j++) {
+        const square = SQUARES[j]
         if (!(square in position.pieces)) {
           if (chess.get(square)) {
             passed = false
@@ -389,8 +389,8 @@ describe('Get/Put/Remove', () => {
 
       if (passed) {
         /* remove the pieces */
-        for (let j = 0; j < chess.SQUARES.length; j++) {
-          const square = chess.SQUARES[j]
+        for (let j = 0; j < SQUARES.length; j++) {
+          const square = SQUARES[j]
           const piece = chess.remove(square)
           if (!(square in position.pieces) && piece) {
             passed = false
