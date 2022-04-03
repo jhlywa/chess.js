@@ -27,7 +27,7 @@ yarn add chess.js
 The code below plays a random game of chess:
 
 ```js
-import { Chess } = from 'chess.js';
+import { Chess } from 'chess.js';
 
 const chess = new Chess()
 
