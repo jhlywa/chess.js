@@ -136,6 +136,30 @@ describe('Single Square Move Generation', () => {
   })
 })
 
+describe('Double Check', () => {
+  test.each([
+    '1n6/8/8/3k4/5N2/8/8/K2R4 b - - 0 1',
+    '1n6/4k3/8/5N2/1B6/8/8/K7 b - - 0 1',
+    '8/4k3/5q2/8/8/3n4/5K2/8 w - - 0 1',
+  ])('Testing double check: %p', (fen) => {
+    const chess = new Chess(fen)
+    expect(chess.in_check()).toBe(true)
+    expect(chess.in_double_check()).toBe(true)
+  })
+})
+
+describe('Double Checkmate', () => {
+  test.each(['k4qqq/8/8/8/8/4n3/6K1/8 w - - 0 1'])(
+    'Testing double check: %p',
+    (fen) => {
+      const chess = new Chess(fen)
+      expect(chess.in_check()).toBe(true)
+      expect(chess.in_double_check()).toBe(true)
+      expect(chess.in_checkmate() && chess.in_double_check()).toBe(true)
+    }
+  )
+})
+
 describe('Checkmate', () => {
   const checkmates = [
     '8/5r2/4K1q1/4p3/3k4/8/8/8 w - - 0 7',

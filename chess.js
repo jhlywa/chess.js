@@ -945,12 +945,65 @@ export const Chess = function (fen) {
     return false
   }
 
+  function attack_count(color, square) {
+    var attack_count = 0
+
+    for (var i = SQUARE_MAP.a8; i <= SQUARE_MAP.h1; i++) {
+      /* did we run off the end of the board */
+      if (i & 0x88) {
+        i += 7
+        continue
+      }
+
+      /* if empty square or wrong color */
+      if (board[i] == null || board[i].color !== color) continue
+
+      var piece = board[i]
+      var difference = i - square
+      var index = difference + 119
+
+      if (ATTACKS[index] & (1 << SHIFTS[piece.type])) {
+        if (piece.type === PAWN) {
+          if (difference > 0) {
+            if (piece.color === WHITE) attack_count++
+          } else {
+            if (piece.color === BLACK) attack_count++
+          }
+          continue
+        }
+
+        /* if the piece is a knight or a king */
+        if (piece.type === 'n' || piece.type === 'k') attack_count++
+
+        var offset = RAYS[index]
+        var j = i + offset
+
+        var blocked = false
+        while (j !== square) {
+          if (board[j] != null) {
+            blocked = true
+            break
+          }
+          j += offset
+        }
+
+        if (!blocked) attack_count++
+      }
+    }
+
+    return attack_count
+  }
+
   function king_attacked(color) {
     return attacked(swap_color(color), kings[color])
   }
 
   function in_check() {
     return king_attacked(turn)
+  }
+
+  function in_double_check() {
+    return attack_count(swap_color(turn), kings[turn]) === 2
   }
 
   function in_checkmate() {
@@ -1388,6 +1441,10 @@ export const Chess = function (fen) {
 
     in_check: function () {
       return in_check()
+    },
+
+    in_double_check: function() {
+      return in_double_check()
     },
 
     in_checkmate: function () {
