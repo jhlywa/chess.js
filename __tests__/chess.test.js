@@ -160,6 +160,40 @@ describe('Double Checkmate', () => {
   )
 })
 
+describe('Attackers', () => {
+  test.each([
+    [
+      'k7/8/8/3p4/8/5Q2/8/K2R4 w - - 0 1',
+      'w',
+      'd5',
+      [
+        { square: 'f3', color: 'w', type: 'q' },
+        { square: 'd1', color: 'w', type: 'r' },
+      ],
+    ],
+    ['k7/8/8/3p4/8/5Q2/8/K2R4 w - - 0 1', 'b', 'd5', []],
+    [
+      '8/5Q2/2B5/2Kp2R1/1NP1P3/2N5/7k/3R4 w - - 0 1',
+      'w',
+      'd5',
+      [
+        { square: 'f7', color: 'w', type: 'q' },
+        { square: 'c6', color: 'w', type: 'b' },
+        { square: 'c5', color: 'w', type: 'k' },
+        { square: 'g5', color: 'w', type: 'r' },
+        { square: 'b4', color: 'w', type: 'n' },
+        { square: 'c4', color: 'w', type: 'p' },
+        { square: 'e4', color: 'w', type: 'p' },
+        { square: 'c3', color: 'w', type: 'n' },
+        { square: 'd1', color: 'w', type: 'r' },
+      ],
+    ],
+  ])('Testing attackers: %p', (fen, color, square, expected) => {
+    const chess = new Chess(fen)
+    expect(chess.attackers(color, square)).toStrictEqual(expected)
+  })
+})
+
 describe('Checkmate', () => {
   const checkmates = [
     '8/5r2/4K1q1/4p3/3k4/8/8/8 w - - 0 7',

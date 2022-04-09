@@ -899,11 +899,11 @@ export const Chess = function (fen) {
   }
 
   function attacked(color, square) {
-    return attack_count(color, square) >= 1
+    return attackers(color, square).length > 0
   }
 
-  function attack_count(color, square) {
-    var attack_count = 0
+  function attackers(color, square) {
+    var attackers = []
 
     for (var i = SQUARE_MAP.a8; i <= SQUARE_MAP.h1; i++) {
       /* did we run off the end of the board */
@@ -918,19 +918,20 @@ export const Chess = function (fen) {
       var piece = board[i]
       var difference = i - square
       var index = difference + 119
+      piece.square = algebraic(i)
 
       if (ATTACKS[index] & (1 << SHIFTS[piece.type])) {
         if (piece.type === PAWN) {
           if (difference > 0) {
-            if (piece.color === WHITE) attack_count++
+            if (piece.color === WHITE) attackers.push(piece)
           } else {
-            if (piece.color === BLACK) attack_count++
+            if (piece.color === BLACK) attackers.push(piece)
           }
           continue
         }
 
         /* if the piece is a knight or a king */
-        if (piece.type === 'n' || piece.type === 'k') attack_count++
+        if (piece.type === 'n') attackers.push(piece)
 
         var offset = RAYS[index]
         var j = i + offset
@@ -944,11 +945,11 @@ export const Chess = function (fen) {
           j += offset
         }
 
-        if (!blocked) attack_count++
+        if (!blocked) attackers.push(piece)
       }
     }
 
-    return attack_count
+    return attackers
   }
 
   function king_attacked(color) {
@@ -960,7 +961,7 @@ export const Chess = function (fen) {
   }
 
   function in_double_check() {
-    return attack_count(swap_color(turn), kings[turn]) === 2
+    return attackers(swap_color(turn), kings[turn]).length >= 2
   }
 
   function in_checkmate() {
@@ -1394,6 +1395,10 @@ export const Chess = function (fen) {
       }
 
       return moves
+    },
+
+    attackers: function(color, square) {
+      return attackers(color, SQUARE_MAP[square])
     },
 
     in_check: function () {
