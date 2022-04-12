@@ -193,34 +193,6 @@ function infer_piece_type(san) {
   }
   return piece_type
 }
-function ascii() {
-  var s = '   +------------------------+\n'
-  for (var i = SQUARE_MAP.a8; i <= SQUARE_MAP.h1; i++) {
-    /* display the rank */
-    if (file(i) === 0) {
-      s += ' ' + '87654321'[rank(i)] + ' |'
-    }
-
-    /* empty piece */
-    if (board[i] == null) {
-      s += ' . '
-    } else {
-      var piece = board[i].type
-      var color = board[i].color
-      var symbol = color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
-      s += ' ' + symbol + ' '
-    }
-
-    if ((i + 1) & 0x88) {
-      s += '|\n'
-      i += 8
-    }
-  }
-  s += '   +------------------------+\n'
-  s += '     a  b  c  d  e  f  g  h\n'
-
-  return s
-}
 
 // parses all of the decorators out of a SAN string
 function stripped_san(move) {
@@ -1441,7 +1413,11 @@ export const Chess = function (fen) {
         if (board[i] == null) {
           row.push(null)
         } else {
-          row.push({ square: algebraic(i), type: board[i].type, color: board[i].color })
+          row.push({
+            square: algebraic(i),
+            type: board[i].type,
+            color: board[i].color,
+          })
         }
         if ((i + 1) & 0x88) {
           output.push(row)
@@ -1800,10 +1776,6 @@ export const Chess = function (fen) {
       return set_header(arguments)
     },
 
-    ascii: function () {
-      return ascii()
-    },
-
     turn: function () {
       return turn
     },
@@ -1877,6 +1849,36 @@ export const Chess = function (fen) {
 
     get: function (square) {
       return get(square)
+    },
+
+    ascii() {
+      var s = '   +------------------------+\n'
+      for (var i = SQUARE_MAP.a8; i <= SQUARE_MAP.h1; i++) {
+        /* display the rank */
+        if (file(i) === 0) {
+          s += ' ' + '87654321'[rank(i)] + ' |'
+        }
+
+        /* empty piece */
+        if (board[i] == null) {
+          s += ' . '
+        } else {
+          var piece = board[i].type
+          var color = board[i].color
+          var symbol =
+            color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
+          s += ' ' + symbol + ' '
+        }
+
+        if ((i + 1) & 0x88) {
+          s += '|\n'
+          i += 8
+        }
+      }
+      s += '   +------------------------+\n'
+      s += '     a  b  c  d  e  f  g  h'
+
+      return s
     },
 
     remove: function (square) {
