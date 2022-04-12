@@ -127,6 +127,9 @@ const ROOKS = {
   ],
 }
 
+const PARSER_STRICT = 0
+const PARSER_SLOPPY = 1
+
 /* this function is used to uniquely identify ambiguous moves */
 function get_disambiguator(move, moves) {
   var from = move.from
@@ -1178,46 +1181,39 @@ export const Chess = function (fen) {
     // strip off any move decorations: e.g Nf3+?! becomes Nf3
     var clean_move = stripped_san(move)
 
-    var overly_disambiguated = false
-
-    if (sloppy) {
-      // The sloppy parser allows the user to parse non-standard chess
-      // notations. This parser is opt-in (by specifying the
-      // '{ sloppy: true }' setting) and is only run after the Standard
-      // Algebraic Notation (SAN) parser has failed.
-      //
-      // When running the sloppy parser, we'll run a regex to grab the piece,
-      // the to/from square, and an optional promotion piece. This regex will
-      // parse common non-standard notation like: Pe2-e4, Rc1c4, Qf3xf7, f7f8q,
-      // b1c3
-
-      // NOTE: Some positions and moves may be ambiguous when using the sloppy
-      // parser. For example, in this position: 6k1/8/8/B7/8/8/8/BN4K1 w - - 0 1,
-      // the move b1c3 may be interpreted as Nc3 or B1c3 (a disambiguated
-      // bishop move). In these cases, the sloppy parser will default to the
-      // most most basic interpretation - b1c3 parses to Nc3.
-
-      var matches = clean_move.match(
-        /([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/
-      )
-      if (matches) {
-        var piece = matches[1]
-        var from = matches[2]
-        var to = matches[3]
-        var promotion = matches[4]
-
-        if (from.length == 1) {
-          overly_disambiguated = true
+    // the move parsers is a 2-step state
+    for (var parser = 0; parser < 2; parser++) {
+      if (parser == PARSER_SLOPPY) {
+        // only run the sloppy parse if explicitly requested
+        if (!sloppy) {
+          return null
         }
-      } else {
-        // The [a-h]?[1-8]? portion of the regex below handles moves that may
-        // be overly disambiguated (e.g. Nge7 is unnecessary and non-standard
-        // when there is one legal knight move to e7). In this case, the value
-        // of 'from' variable will be a rank or file, not a square.
-        var matches = clean_move.match(
-          /([pnbrqkPNBRQK])?([a-h]?[1-8]?)x?-?([a-h][1-8])([qrbnQRBN])?/
-        )
 
+        // The sloppy parser allows the user to parse non-standard chess
+        // notations. This parser is opt-in (by specifying the
+        // '{ sloppy: true }' setting) and is only run after the Standard
+        // Algebraic Notation (SAN) parser has failed.
+        //
+        // When running the sloppy parser, we'll run a regex to grab the piece,
+        // the to/from square, and an optional promotion piece. This regex will
+        // parse common non-standard notation like: Pe2-e4, Rc1c4, Qf3xf7,
+        // f7f8q, b1c3
+
+        // NOTE: Some positions and moves may be ambiguous when using the
+        // sloppy parser. For example, in this position:
+        // 6k1/8/8/B7/8/8/8/BN4K1 w - - 0 1, the move b1c3 may be interpreted
+        // as Nc3 or B1c3 (a disambiguated bishop move). In these cases, the
+        // sloppy parser will default to the most most basic interpretation
+        // (which is b1c3 parsing to Nc3).
+
+        // FIXME: these var's are hoisted into function scope, this will need
+        // to change when switching to const/let
+
+        var overly_disambiguated = false
+
+        var matches = clean_move.match(
+          /([pnbrqkPNBRQK])?([a-h][1-8])x?-?([a-h][1-8])([qrbnQRBN])?/
+        )
         if (matches) {
           var piece = matches[1]
           var from = matches[2]
@@ -1225,45 +1221,69 @@ export const Chess = function (fen) {
           var promotion = matches[4]
 
           if (from.length == 1) {
-            var overly_disambiguated = true
+            overly_disambiguated = true
+          }
+        } else {
+          // The [a-h]?[1-8]? portion of the regex below handles moves that may
+          // be overly disambiguated (e.g. Nge7 is unnecessary and non-standard
+          // when there is one legal knight move to e7). In this case, the value
+          // of 'from' variable will be a rank or file, not a square.
+          var matches = clean_move.match(
+            /([pnbrqkPNBRQK])?([a-h]?[1-8]?)x?-?([a-h][1-8])([qrbnQRBN])?/
+          )
+
+          if (matches) {
+            var piece = matches[1]
+            var from = matches[2]
+            var to = matches[3]
+            var promotion = matches[4]
+
+            if (from.length == 1) {
+              var overly_disambiguated = true
+            }
           }
         }
       }
-    }
 
-    var piece_type = infer_piece_type(clean_move)
-    var moves = generate_moves({
-      legal: true,
-      piece: piece ? piece : piece_type,
-    })
+      var piece_type = infer_piece_type(clean_move)
+      var moves = generate_moves({
+        legal: true,
+        piece: piece ? piece : piece_type,
+      })
 
-    for (var i = 0, len = moves.length; i < len; i++) {
-      // try the strict parser first, then the sloppy parser if requested
-      // by the user
-      if (clean_move === stripped_san(move_to_san(moves[i], moves))) {
-        return moves[i]
-      } else {
-        if (sloppy && matches) {
-          // hand-compare move properties with the results from our sloppy
-          // regex
-          if (
-            (!piece || piece.toLowerCase() == moves[i].piece) &&
-            SQUARE_MAP[from] == moves[i].from &&
-            SQUARE_MAP[to] == moves[i].to &&
-            (!promotion || promotion.toLowerCase() == moves[i].promotion)
-          ) {
-            return moves[i]
-          } else if (overly_disambiguated) {
-            // SPECIAL CASE: we parsed a move string that may have an unneeded
-            // rank/file disambiguator (e.g. Nge7).  The 'from' variable will
-            var square = algebraic(moves[i].from)
-            if (
-              (!piece || piece.toLowerCase() == moves[i].piece) &&
-              SQUARE_MAP[to] == moves[i].to &&
-              (from == square[0] || from == square[1]) &&
-              (!promotion || promotion.toLowerCase() == moves[i].promotion)
-            ) {
+      for (var i = 0, len = moves.length; i < len; i++) {
+        switch (parser) {
+          case PARSER_STRICT: {
+            if (clean_move === stripped_san(move_to_san(moves[i], moves))) {
               return moves[i]
+            }
+            break
+          }
+          case PARSER_SLOPPY: {
+            if (matches) {
+              // hand-compare move properties with the results from our sloppy
+              // regex
+              if (
+                (!piece || piece.toLowerCase() == moves[i].piece) &&
+                SQUARE_MAP[from] == moves[i].from &&
+                SQUARE_MAP[to] == moves[i].to &&
+                (!promotion || promotion.toLowerCase() == moves[i].promotion)
+              ) {
+                return moves[i]
+              } else if (overly_disambiguated) {
+                // SPECIAL CASE: we parsed a move string that may have an
+                // unneeded rank/file disambiguator (e.g. Nge7).  The 'from'
+                // variable will
+                var square = algebraic(moves[i].from)
+                if (
+                  (!piece || piece.toLowerCase() == moves[i].piece) &&
+                  SQUARE_MAP[to] == moves[i].to &&
+                  (from == square[0] || from == square[1]) &&
+                  (!promotion || promotion.toLowerCase() == moves[i].promotion)
+                ) {
+                  return moves[i]
+                }
+              }
             }
           }
         }

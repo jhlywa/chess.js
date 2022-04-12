@@ -2980,4 +2980,26 @@ describe('Regression Tests', () => {
     chess.load_pgn('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
     expect(chess.pgn()).toBe('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
   })
+
+  it('Github Issue #321 - strict parser should always run before sloppy', () => {
+    let chess = new Chess()
+    // these test examples are lifted from the github issue
+    chess.load('r4rk1/4nqpp/1p1p4/2pPpp2/bPP1P3/R1B1NQ2/P4PPP/1R4K1 w - - 0 28')
+    expect(chess.move('bxc5')).not.toBeNull()
+
+    chess.load('r4rk1/4nqpp/1p1p4/2pPpp2/bPP1P3/R1B1NQ2/P4PPP/1R4K1 w - - 0 28')
+    expect(chess.move('bxc5', { sloppy: true })).not.toBeNull()
+
+    // over-disambiguation without sloppy should fail
+    chess.load(
+      'rnbqk2r/p1pp1ppp/1p2pn2/8/1bPP4/2N1P3/PP3PPP/R1BQKBNR w KQkq - 0 5'
+    )
+    expect(chess.move('Nge2')).toBeNull()
+
+    // over-disambiguation with sloppy should pass
+    chess.load(
+      'rnbqk2r/p1pp1ppp/1p2pn2/8/1bPP4/2N1P3/PP3PPP/R1BQKBNR w KQkq - 0 5'
+    )
+    expect(chess.move('Nge2', { sloppy: true })).not.toBeNull()
+  })
 })
