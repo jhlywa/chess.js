@@ -1623,8 +1623,9 @@ export const Chess = function (fen) {
         var value = ''
 
         for (var i = 0; i < headers.length; i++) {
-          key = headers[i].replace(/^\[([A-Z][A-Za-z]*)\s.*\]$/, '$1')
-          value = headers[i].replace(/^\[[A-Za-z]+\s"(.*)"\ *\]$/, '$1')
+          var regex = /^\s*\[([A-Za-z]+)\s*"(.*)"\s*\]\s*$/
+          key = headers[i].replace(regex, '$1')
+          value = headers[i].replace(regex, '$2')
           if (trim(key).length > 0) {
             header_obj[key] = value
           }
@@ -1633,6 +1634,9 @@ export const Chess = function (fen) {
         return header_obj
       }
 
+      // strip whitespace from head/tail of PGN block
+      pgn = pgn.trim()
+
       var newline_char =
         typeof options === 'object' && typeof options.newline_char === 'string'
           ? options.newline_char
@@ -1640,12 +1644,12 @@ export const Chess = function (fen) {
 
       // RegExp to split header. Takes advantage of the fact that header and movetext
       // will always have a blank line between them (ie, two newline_char's).
-      // With default newline_char, will equal: /^(\[((?:\r?\n)|.)*\])(?:\r?\n){2}/
+      // With default newline_char, will equal: /^(\[((?:\r?\n)|.)*\])(?:\s*\r?\n){2}/
       var header_regex = new RegExp(
         '^(\\[((?:' +
           mask(newline_char) +
           ')|.)*\\])' +
-          '(?:' +
+          '(?:\\s*' +
           mask(newline_char) +
           '){2}'
       )
