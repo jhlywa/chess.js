@@ -1611,13 +1611,6 @@ export const Chess = function (fen) {
         return str.replace(/\\/g, '\\')
       }
 
-      function has_keys(object) {
-        for (var key in object) {
-          return true
-        }
-        return false
-      }
-
       function parse_pgn_header(header, options) {
         var newline_char =
           typeof options === 'object' &&
