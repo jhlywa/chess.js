@@ -887,6 +887,47 @@ describe('Load PGN', () => {
       expect: true,
       sloppy: true,
     },
+
+    {
+      // strict parser - FEN requires a corresponding SetUp tag
+      fen: '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17',
+      pgn: [
+        '[White "Paul Morphy"]',
+        '[Black "Duke Karl / Count Isouard"]',
+        '[FEN "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]',
+        '',
+        '17.Rd8# 1-0',
+      ],
+      expect: false,
+    },
+
+    {
+      // sloppy parser - FEN doesn't need a SetUp tag
+      fen: '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17',
+      pgn: [
+        '[White "Paul Morphy"]',
+        '[Black "Duke Karl / Count Isouard"]',
+        '[FEN "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]',
+        '',
+        '17.Rd8# 1-0',
+      ],
+      sloppy: true,
+      expect: true,
+    },
+
+    {
+      // sloppy parser - FEN case doesn't matter
+      fen: '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17',
+      pgn: [
+        '[White "Paul Morphy"]',
+        '[Black "Duke Karl / Count Isouard"]',
+        '[feN "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]',
+        '',
+        '17.Rd8# 1-0',
+      ],
+      sloppy: true,
+      expect: true,
+    },
   ]
 
   const newline_chars = ['\n', '<br />', '\r\n', 'BLAH']

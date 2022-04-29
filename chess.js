@@ -1664,16 +1664,32 @@ export const Chess = function (fen) {
 
       /* parse PGN header */
       var headers = parse_pgn_header(header_string, options)
+      var fen = ''
+
       for (var key in headers) {
+        // check to see user is including fen (possibly with wrong tag case)
+        if (key.toLowerCase() === 'fen') {
+          fen = headers[key]
+        }
         set_header([key, headers[key]])
       }
 
-      /* load the starting position indicated by [Setup '1'] and
-       * [FEN position] */
-      if (headers['SetUp'] === '1') {
-        if (!('FEN' in headers && load(headers['FEN'], true))) {
-          // second argument to load: don't clear the headers
-          return false
+      /* sloppy parser should attempt to load a fen tag, even if it's
+       * the wrong case and doesn't include a corresponding [SetUp "1"] tag */
+      if (sloppy) {
+        if (fen) {
+          if (!load(fen, true)) {
+            return false
+          }
+        }
+      } else {
+        /* strict parser - load the starting position indicated by [Setup '1']
+         * and [FEN position] */
+        if (headers['SetUp'] === '1') {
+          if (!('FEN' in headers && load(headers['FEN'], true))) {
+            // second argument to load: don't clear the headers
+            return false
+          }
         }
       }
 
