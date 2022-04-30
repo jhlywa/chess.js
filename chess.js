@@ -432,12 +432,12 @@ export const Chess = function (fen) {
     }
 
     /* 2nd criterion: move number field is a integer value > 0? */
-    if (isNaN(tokens[5]) || parseInt(tokens[5], 10) <= 0) {
+    if (isNaN(parseInt(tokens[5])) || parseInt(tokens[5], 10) <= 0) {
       return { valid: false, error_number: 2, error: errors[2] }
     }
 
     /* 3rd criterion: half move counter is an integer >= 0? */
-    if (isNaN(tokens[4]) || parseInt(tokens[4], 10) < 0) {
+    if (isNaN(parseInt(tokens[4])) || parseInt(tokens[4], 10) < 0) {
       return { valid: false, error_number: 3, error: errors[3] }
     }
 

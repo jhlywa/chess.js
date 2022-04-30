@@ -1372,6 +1372,10 @@ describe('Validate FEN', () => {
       error_number: 2,
     },
     {
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 ',
+      error_number: 2,
+    },
+    {
       fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 0',
       error_number: 2,
     },
