@@ -12,14 +12,18 @@ chess.js has been extensively tested in node.js and most modern browsers.
 
 ## Installation
 
-To install the stable version:
+Run the following command to install the most recent version of chess.js from NPM:
 
 ```
-# NPM
 npm install chess.js
+```
 
-# Yarn
-yarn add chess.js
+TypeScript type definitions for chess.js are provided by the community-supported
+DefinitelyTyped repository and can be installed via:
+
+```
+npm install -D @types/chess.js
+
 ```
 
 ## Example Code
@@ -27,7 +31,7 @@ yarn add chess.js
 The code below plays a random game of chess:
 
 ```js
-import { Chess } from 'chess.js';
+import { Chess } from 'chess.js'
 
 const chess = new Chess()
 
@@ -732,13 +736,6 @@ chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 // -> { valid: false, error_number: 9,
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
-
-## MUSIC
-
-Musical support provided by:
-
--   [The Grateful Dead](https://www.youtube.com/watch?v=z-D9rdJWfWs)
--   [Umphrey's McGee](https://www.youtube.com/watch?v=auEfZVcYp64)
 
 ## BUGS
 
