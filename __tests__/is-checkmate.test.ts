@@ -8,10 +8,10 @@ const checkmates = [
 ]
 
 checkmates.forEach((fen, i) => {
-  test(`in_checkmate - position ${i}`, () => {
+  test(`isCheckmate - position ${i}`, () => {
     const chess = new Chess(fen)
-    expect(chess.in_checkmate()).toBe(true)
-    expect(chess.in_draw()).toBe(false)
+    expect(chess.isCheckmate()).toBe(true)
+    expect(chess.isDraw()).toBe(false)
   })
 })
 
@@ -21,8 +21,8 @@ const notCheckmates = [
 ]
 
 notCheckmates.forEach((fen, i) => {
-  test(`in_checkmate - position ${i} - not checkmate`, () => {
+  test(`isCheckmate - position ${i} - not checkmate`, () => {
     const chess = new Chess(fen)
-    expect(chess.in_checkmate()).toBe(false)
+    expect(chess.isCheckmate()).toBe(false)
   })
 })

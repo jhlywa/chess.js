@@ -29,7 +29,7 @@ describe('Regression Tests', () => {
     expect(chess.moves().join(' ')).toBe('Kd2 Ke2 Kxf2 Kf1 Kd1')
   })
 
-  it('Github Issue #85 (white) - SetUp and FEN should be accepted in load_pgn', () => {
+  it('Github Issue #85 (white) - SetUp and FEN should be accepted in loadPgn', () => {
     const chess = new Chess()
     const pgn = [
       '[SetUp "1"]',
@@ -37,12 +37,12 @@ describe('Regression Tests', () => {
       '',
       '1. Rh6#',
     ]
-    const result = chess.load_pgn(pgn.join('\n'))
+    const result = chess.loadPgn(pgn.join('\n'))
     expect(result).toBe(true)
     expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1')
   })
 
-  it('Github Issue #85 (black) - SetUp and FEN should be accepted in load_pgn', () => {
+  it('Github Issue #85 (black) - SetUp and FEN should be accepted in loadPgn', () => {
     const chess = new Chess()
     const pgn = [
       '[SetUp "1"]',
@@ -50,7 +50,7 @@ describe('Regression Tests', () => {
       '',
       '1. ... Qc5+',
     ]
-    const result = chess.load_pgn(pgn.join('\n'))
+    const result = chess.loadPgn(pgn.join('\n'))
     expect(result).toBe(true)
     expect(chess.fen()).toBe(
       'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2'
@@ -73,7 +73,7 @@ describe('Regression Tests', () => {
     expect(result.match(/(45\. \.\.\. Rf1\+)$/)?.[0]).toBe('45. ... Rf1+')
   })
 
-  it('Github Issue #129 load_pgn() should not clear headers if PGN contains SetUp and FEN tags', () => {
+  it('Github Issue #129 loadPgn() should not clear headers if PGN contains SetUp and FEN tags', () => {
     const pgn = [
       '[Event "Test Olympiad"]',
       '[Site "Earth"]',
@@ -89,7 +89,7 @@ describe('Regression Tests', () => {
     ]
 
     const chess = new Chess()
-    expect(chess.load_pgn(pgn.join('\n'))).toEqual(true)
+    expect(chess.loadPgn(pgn.join('\n'))).toEqual(true)
     const expected = {
       Event: 'Test Olympiad',
       Site: 'Earth',
@@ -120,7 +120,7 @@ describe('Regression Tests', () => {
     ]
 
     const chess = new Chess()
-    chess.load_pgn(pgn.join('\n'))
+    chess.loadPgn(pgn.join('\n'))
     chess.clear()
     const expected = {
       FEN: '8/8/8/8/8/8/8/8 w - - 0 1',
@@ -154,7 +154,7 @@ describe('Regression Tests', () => {
       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0',
     ]
     const chess = new Chess()
-    chess.load_pgn(pgn.join('\n'))
+    chess.loadPgn(pgn.join('\n'))
     expect(chess.header()['Date']).toBe('1972.01.07')
   })
 
@@ -168,7 +168,7 @@ describe('Regression Tests', () => {
     expect(chess.move('e4')).toBeNull()
   })
 
-  it('Github Issue #279 - load_pgn duplicate last move if it has a comment', () => {
+  it('Github Issue #279 - loadPgn duplicate last move if it has a comment', () => {
     const history = [
       'e4',
       'e5',
@@ -185,7 +185,7 @@ describe('Regression Tests', () => {
 
     // trailing comment - no end of game marker
     const chess = new Chess()
-    let result = chess.load_pgn(
+    let result = chess.loadPgn(
       '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment}'
     )
@@ -194,7 +194,7 @@ describe('Regression Tests', () => {
     expect(chess.header()['Result']).toBeUndefined()
 
     // trailing comment - end of game marker after comment
-    result = chess.load_pgn(
+    result = chess.loadPgn(
       '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment} *'
     )
@@ -203,7 +203,7 @@ describe('Regression Tests', () => {
     expect(chess.header()['Result']).toBeUndefined()
 
     // trailing comment - end of game marker before comment
-    result = chess.load_pgn(
+    result = chess.loadPgn(
       '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 * {comment}'
     )
@@ -212,7 +212,7 @@ describe('Regression Tests', () => {
     expect(chess.header()['Result']).toBeUndefined()
 
     // trailing comment with PGN header - no end of game marker
-    result = chess.load_pgn(
+    result = chess.loadPgn(
       '[White "name"]\n\n' +
         '1. e4 e5 2. Nf3 Nc6 ' +
         '3. Bb5 d6 ' +
@@ -224,7 +224,7 @@ describe('Regression Tests', () => {
     expect(chess.header()['Result']).toBeUndefined()
 
     // trailing comment with result header - end of game marker after comment
-    result = chess.load_pgn(
+    result = chess.loadPgn(
       '[White "name"]\n\n' +
         '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment} *'
@@ -234,7 +234,7 @@ describe('Regression Tests', () => {
     expect(chess.header()['Result']).toBe('*')
 
     // trailing comment with result header - end of game marker before comment
-    result = chess.load_pgn(
+    result = chess.loadPgn(
       '[White "name"]\n\n' +
         '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 1/2-1/2 {comment}'
@@ -246,7 +246,7 @@ describe('Regression Tests', () => {
 
   it('Github Issue #286 - pgn should not generate sloppy moves', () => {
     const chess = new Chess()
-    chess.load_pgn('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
+    chess.loadPgn('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
     expect(chess.pgn()).toBe('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
   })
 
@@ -272,7 +272,7 @@ describe('Regression Tests', () => {
     expect(chess.move('Nge2', { sloppy: true })).not.toBeNull()
   })
 
-  it('Github Issue #326a - ignore whitespace after header tag (load_pgn)', () => {
+  it('Github Issue #326a - ignore whitespace after header tag (loadPgn)', () => {
     let chess = new Chess()
     const pgn = `
     [white "player a"]
@@ -281,10 +281,10 @@ describe('Regression Tests', () => {
 
             1. e4 e5`
 
-    expect(chess.load_pgn(pgn)).toBe(true)
+    expect(chess.loadPgn(pgn)).toBe(true)
   })
 
-  it('Github Issue #326b - ignore whitespace in line after header (load_pgn)', () => {
+  it('Github Issue #326b - ignore whitespace in line after header (loadPgn)', () => {
     let chess = new Chess()
     const pgn = `
     [white "player a"]
@@ -293,6 +293,6 @@ describe('Regression Tests', () => {
    
             1. e4 e5`
 
-    expect(chess.load_pgn(pgn)).toBe(true)
+    expect(chess.loadPgn(pgn)).toBe(true)
   })
 })

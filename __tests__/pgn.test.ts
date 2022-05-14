@@ -18,8 +18,8 @@ describe('PGN', () => {
         'GreatestGameEverPlayed?',
         'True',
       ],
-      max_width: 19,
-      newline_char: '<br />',
+      maxWidth: 19,
+      newlineChar: '<br />',
       pgn: fileToString('pgn/0.pgn'),
       fen: '8/8/8/4Q3/2P1R1k1/8/5PKP/8 b - - 4 39',
     },
@@ -56,15 +56,15 @@ describe('PGN', () => {
         'PlyCount',
         '81',
       ],
-      max_width: 65,
+      maxWidth: 65,
       pgn: fileToString('pgn/1.pgn'),
       fen: '4q2k/2r1r3/4PR1p/p1p5/P1Bp1Q1P/1P6/6P1/6K1 b - - 4 41',
     },
     {
-      // testing max_width being small and having no comments
+      // testing maxWidth being small and having no comments
       moves: `f3 e5 g4 Qh4#`,
       header: [],
-      max_width: 1,
+      maxWidth: 1,
       pgn: fileToString('pgn/2.pgn'),
       fen: 'rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3',
     },
@@ -72,7 +72,7 @@ describe('PGN', () => {
       // testing a non-starting position
       moves: `Ba5 O-O d6 d4`,
       header: [],
-      max_width: 20,
+      maxWidth: 20,
       pgn: fileToString('pgn/3.pgn'),
       starting_position:
         'r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 1',
@@ -99,8 +99,8 @@ describe('PGN', () => {
       chess.header(...position.header)
 
       const pgn = chess.pgn({
-        max_width: position.max_width,
-        newline: position.newline_char,
+        maxWidth: position.maxWidth,
+        newline: position.newlineChar,
       })
       expect(pgn).toEqual(position.pgn)
     })

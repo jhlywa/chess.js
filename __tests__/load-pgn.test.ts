@@ -363,15 +363,15 @@ describe('Load PGN', () => {
     },
   ]
 
-  const newline_chars = ['\n', '<br />', '\r\n', 'BLAH']
+  const newlineChars = ['\n', '<br />', '\r\n', 'BLAH']
 
   tests.forEach((t, i) => {
-    newline_chars.forEach((newline, j) => {
+    newlineChars.forEach((newline, j) => {
       it(i + String.fromCharCode(97 + j), () => {
         const sloppy = t.sloppy || false
-        const result = chess.load_pgn(t.pgn.join(newline), {
+        const result = chess.loadPgn(t.pgn.join(newline), {
           sloppy: sloppy,
-          newline_char: newline,
+          newlineChar: newline,
         })
         const should_pass = t.expect
 
@@ -387,7 +387,7 @@ describe('Load PGN', () => {
           } else {
             expect(
               result &&
-                chess.pgn({ max_width: 65, newline }) == t.pgn.join(newline)
+                chess.pgn({ maxWidth: 65, newline }) == t.pgn.join(newline)
             ).toBe(true)
           }
         } else {
@@ -423,10 +423,10 @@ describe('Load PGN', () => {
       '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8\n' +
       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0\n'
 
-    const result = chess.load_pgn(pgn, { newline_char: '\r?\n' })
+    const result = chess.loadPgn(pgn, { newlineChar: '\r?\n' })
     expect(result).toBe(true)
 
-    expect(chess.load_pgn(pgn)).toBe(true)
+    expect(chess.loadPgn(pgn)).toBe(true)
     expect(chess.pgn().match(/^\[\[/) === null).toBe(true)
   })
 
@@ -454,10 +454,10 @@ describe('Load PGN', () => {
       '32. Qe5 Qe8 33. a4 Qd8 34. R1f2 Qe8 35. R2f3 Qd8 36. Bd3 Qe8\n' +
       '37. Qe4 Nf6 38. Rxf6 gxf6 39. Rxf6 Kg8 40. Bc4 Kh8 41. Qf4 1-0\n'
 
-    const result = chess.load_pgn(pgn, { newline_char: '\r?\n' })
+    const result = chess.loadPgn(pgn, { newlineChar: '\r?\n' })
     expect(result).toBe(true)
 
-    expect(chess.load_pgn(pgn)).toBe(true)
+    expect(chess.loadPgn(pgn)).toBe(true)
     expect(chess.pgn().match(/^\[\[/) === null).toBe(true)
   })
 })

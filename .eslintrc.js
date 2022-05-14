@@ -7,5 +7,25 @@ module.exports = {
   rules: {
     // allow while(true) loops
     'no-constant-condition': ['error', { checkLoops: false }],
+    '@typescript-eslint/naming-convention': [
+      'error',
+      {
+        selector: ['default'],
+        format: ['strictCamelCase'],
+        leadingUnderscore: 'allow',
+      },
+      {
+        selector: ['variable'],
+        format: ['strictCamelCase', 'UPPER_CASE'],
+      },
+      {
+        selector: ['objectLiteralProperty'],
+        format: ['strictCamelCase', 'UPPER_CASE'],
+      },
+      {
+        selector: ['typeLike'],
+        format: ['PascalCase'],
+      },
+    ],
   },
 }
