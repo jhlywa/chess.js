@@ -5,6 +5,7 @@
   "type": "module",
   "main": "chess.js",
   "homepage": "https://github.com/jhlywa/chess.js",
+  "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "keywords": [
     "chess"
   ],
