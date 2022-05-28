@@ -5,6 +5,8 @@ test('load - default position', () => {
   expect(chess.fen()).toEqual(DEFAULT_POSITION)
 })
 
+// see fen.test.ts for more testcases involving .load()
+
 test('load - invalid fen', () => {
   const chess = new Chess()
   expect(chess.load('')).toEqual(false)

@@ -38,7 +38,7 @@ export type Color = 'w' | 'b'
 export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
 
 // prettier-ignore
-export type Square = 
+export type Square =
     'a8' | 'b8' | 'c8' | 'd8' | 'e8' | 'f8' | 'g8' | 'h8' |
     'a7' | 'b7' | 'c7' | 'd7' | 'e7' | 'f7' | 'g7' | 'h7' |
     'a6' | 'b6' | 'c6' | 'd6' | 'e6' | 'f6' | 'g6' | 'h6' |
@@ -100,16 +100,16 @@ const FLAGS: Record<string, string> = {
 }
 
 // prettier-ignore
-const SQUARES: Record<Square, number> = {
-  a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
-  a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
-  a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,
-  a5:  48, b5:  49, c5:  50, d5:  51, e5:  52, f5:  53, g5:  54, h5:  55,
-  a4:  64, b4:  65, c4:  66, d4:  67, e4:  68, f4:  69, g4:  70, h4:  71,
-  a3:  80, b3:  81, c3:  82, d3:  83, e3:  84, f3:  85, g3:  86, h3:  87,
-  a2:  96, b2:  97, c2:  98, d2:  99, e2: 100, f2: 101, g2: 102, h2: 103,
-  a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
-}
+export const SQUARES: Square[] = [
+  'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
+  'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
+  'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
+  'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
+  'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
+  'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
+  'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
+  'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
+]
 
 const BITS: Record<string, number> = {
   NORMAL: 1,
@@ -119,6 +119,55 @@ const BITS: Record<string, number> = {
   PROMOTION: 16,
   KSIDE_CASTLE: 32,
   QSIDE_CASTLE: 64,
+}
+
+// NOTES ABOUT 0x88 MOVE GENERATION ALGORITHM
+// ----------------------------------------------------------------------------
+// From https://github.com/jhlywa/chess.js/issues/230
+//
+// A lot of people are confused when they first see the internal representation
+// of chess.js. It uses the 0x88 Move Generation Algorithm which internally
+// stores the board as an 8x16 array. This is purely for efficiency but has a
+// couple of interesting benefits:
+//
+// 1. 0x88 offers a very inexpensive "off the board" check. Bitwise AND (&) any
+//    square with 0x88, if the result is non-zero then the square is off the
+//    board. For example, assuming a knight square A8 (0 in 0x88 notation),
+//    there are 8 possible directions in which the knight can move. These
+//    directions are relative to the 8x16 board and are stored in the
+//    PIECE_OFFSETS map. One possible move is A8 - 18 (up one square, and two
+//    squares to the left - which is off the board). 0 - 18 = -18 & 0x88 = 0x88
+//    (because of two-complement representation of -18). The non-zero result
+//    means the square is off the board and the move is illegal. Take the
+//    opposite move (from A8 to C7), 0 + 18 = 18 & 0x88 = 0. A result of zero
+//    means the square is on the board.
+//
+// 2. The relative distance (or difference) between two squares on a 8x16 board
+//    is unique and can be used to inexpensively determine if a piece on a
+//    square can attack any other arbitrary square. For example, let's see if a
+//    pawn on E7 can attack E2. The difference between E7 (20) - E2 (100) is
+//    -80. We add 119 to make the ATTACKS array index non-negative (because the
+//    worst case difference is A8 - H1 = -119). The ATTACKS array contains a
+//    bitmask of pieces that can attack from that distance and direction.
+//    ATTACKS[-80 + 119=39] gives us 24 or 0b11000 in binary. Look at the
+//    PIECE_MASKS map to determine the mask for a given piece type. In our pawn
+//    example, we would check to see if 24 & 0x1 is non-zero, which it is
+//    not. So, naturally, a pawn on E7 can't attack a piece on E2. However, a
+//    rook can since 24 & 0x8 is non-zero. The only thing left to check is that
+//    there are no blocking pieces between E7 and E2. That's where the RAYS
+//    array comes in. It provides an offset (in this case 16) to add to E7 (20)
+//    to check for blocking pieces. E7 (20) + 16 = E6 (36) + 16 = E5 (52) etc.
+
+// prettier-ignore
+const Ox88: Record<Square, number> = {
+  a8:   0, b8:   1, c8:   2, d8:   3, e8:   4, f8:   5, g8:   6, h8:   7,
+  a7:  16, b7:  17, c7:  18, d7:  19, e7:  20, f7:  21, g7:  22, h7:  23,
+  a6:  32, b6:  33, c6:  34, d6:  35, e6:  36, f6:  37, g6:  38, h6:  39,
+  a5:  48, b5:  49, c5:  50, d5:  51, e5:  52, f5:  53, g5:  54, h5:  55,
+  a4:  64, b4:  65, c4:  66, d4:  67, e4:  68, f4:  69, g4:  70, h4:  71,
+  a3:  80, b3:  81, c3:  82, d3:  83, e3:  84, f3:  85, g3:  86, h3:  87,
+  a2:  96, b2:  97, c2:  98, d2:  99, e2: 100, f2: 101, g2: 102, h2: 103,
+  a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
 }
 
 const PAWN_OFFSETS = {
@@ -172,7 +221,7 @@ const RAYS = [
   -15,  0,  0,  0,  0,  0,  0,-16,  0,  0,  0,  0,  0,  0,-17
 ];
 
-const SHIFTS = { p: 0, n: 1, b: 2, r: 3, q: 4, k: 5 }
+const PIECE_MASKS = { p: 0x1, n: 0x2, b: 0x4, r: 0x8, q: 0x10, k: 0x20 }
 
 const SYMBOLS = 'pnbrqkPNBRQK'
 
@@ -189,12 +238,12 @@ const RANK_8 = 0
 
 const ROOKS = {
   w: [
-    { square: SQUARES.a1, flag: BITS.QSIDE_CASTLE },
-    { square: SQUARES.h1, flag: BITS.KSIDE_CASTLE },
+    { square: Ox88.a1, flag: BITS.QSIDE_CASTLE },
+    { square: Ox88.h1, flag: BITS.KSIDE_CASTLE },
   ],
   b: [
-    { square: SQUARES.a8, flag: BITS.QSIDE_CASTLE },
-    { square: SQUARES.h8, flag: BITS.KSIDE_CASTLE },
+    { square: Ox88.a8, flag: BITS.QSIDE_CASTLE },
+    { square: Ox88.h8, flag: BITS.KSIDE_CASTLE },
   ],
 }
 
@@ -512,7 +561,7 @@ export class Chess {
       this._castling.b |= BITS.QSIDE_CASTLE
     }
 
-    this._epSquare = tokens[3] === '-' ? EMPTY : SQUARES[tokens[3] as Square]
+    this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
     this._halfMoves = parseInt(tokens[4], 10)
     this._moveNumber = parseInt(tokens[5], 10)
 
@@ -525,7 +574,7 @@ export class Chess {
     let empty = 0
     let fen = ''
 
-    for (let i = SQUARES.a8; i <= SQUARES.h1; i++) {
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       if (this._board[i]) {
         if (empty > 0) {
           fen += empty
@@ -543,7 +592,7 @@ export class Chess {
           fen += empty
         }
 
-        if (i !== SQUARES.h1) {
+        if (i !== Ox88.h1) {
           fen += '/'
         }
 
@@ -603,7 +652,7 @@ export class Chess {
   }
 
   get(square: Square) {
-    return this._board[SQUARES[square]] || false
+    return this._board[Ox88[square]] || false
   }
 
   put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
@@ -613,11 +662,11 @@ export class Chess {
     }
 
     /* check for valid square */
-    if (!(square in SQUARES)) {
+    if (!(square in Ox88)) {
       return false
     }
 
-    const sq = SQUARES[square]
+    const sq = Ox88[square]
 
     /* don't let the user place more than one king */
     if (
@@ -640,7 +689,7 @@ export class Chess {
 
   remove(square: Square) {
     const piece = this.get(square)
-    delete this._board[SQUARES[square]]
+    delete this._board[Ox88[square]]
     if (piece && piece.type === KING) {
       this._kings[piece.color] = EMPTY
     }
@@ -651,7 +700,7 @@ export class Chess {
   }
 
   _attacked(color: Color, square: number) {
-    for (let i = SQUARES.a8; i <= SQUARES.h1; i++) {
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       /* did we run off the end of the board */
       if (i & 0x88) {
         i += 7
@@ -667,7 +716,7 @@ export class Chess {
       const difference = i - square
       const index = difference + 119
 
-      if (ATTACKS[index] & (1 << SHIFTS[piece.type])) {
+      if (ATTACKS[index] & PIECE_MASKS[piece.type]) {
         if (piece.type === PAWN) {
           if (difference > 0) {
             if (piece.color === WHITE) return true
@@ -737,7 +786,7 @@ export class Chess {
     let numPieces = 0
     let squareColor = 0
 
-    for (let i = SQUARES.a8; i <= SQUARES.h1; i++) {
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       squareColor = (squareColor + 1) % 2
       if (i & 0x88) {
         i += 7
@@ -860,17 +909,17 @@ export class Chess {
     const us = this._turn
     const them = swapColor(us)
 
-    let firstSquare = SQUARES.a8
-    let lastSquare = SQUARES.h1
+    let firstSquare = Ox88.a8
+    let lastSquare = Ox88.h1
     let singleSquare = false
 
     /* are we generating moves for a single square? */
     if (forSquare) {
       // illegal square, return empty moves
-      if (!(forSquare in SQUARES)) {
+      if (!(forSquare in Ox88)) {
         return []
       } else {
-        firstSquare = lastSquare = SQUARES[forSquare]
+        firstSquare = lastSquare = Ox88[forSquare]
         singleSquare = true
       }
     }
@@ -1765,8 +1814,8 @@ export class Chess {
         // regex
         if (
           (!piece || piece.toLowerCase() == moves[i].piece) &&
-          SQUARES[from] == moves[i].from &&
-          SQUARES[to] == moves[i].to &&
+          Ox88[from] == moves[i].from &&
+          Ox88[to] == moves[i].to &&
           (!promotion || promotion.toLowerCase() == moves[i].promotion)
         ) {
           return moves[i]
@@ -1778,7 +1827,7 @@ export class Chess {
           const square = algebraic(moves[i].from)
           if (
             (!piece || piece.toLowerCase() == moves[i].piece) &&
-            SQUARES[to] == moves[i].to &&
+            Ox88[to] == moves[i].to &&
             (from == square[0] || from == square[1]) &&
             (!promotion || promotion.toLowerCase() == moves[i].promotion)
           ) {
@@ -1793,7 +1842,7 @@ export class Chess {
 
   ascii() {
     let s = '   +------------------------+\n'
-    for (let i = SQUARES.a8; i <= SQUARES.h1; i++) {
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       /* display the rank */
       if (file(i) === 0) {
         s += ' ' + '87654321'[rank(i)] + ' |'
@@ -1879,7 +1928,7 @@ export class Chess {
     const output = []
     let row = []
 
-    for (let i = SQUARES.a8; i <= SQUARES.h1; i++) {
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       if (this._board[i] == null) {
         row.push(null)
       } else {
@@ -1900,8 +1949,8 @@ export class Chess {
   }
 
   squareColor(square: Square) {
-    if (square in SQUARES) {
-      const sq = SQUARES[square]
+    if (square in Ox88) {
+      const sq = Ox88[square]
       return (rank(sq) + file(sq)) % 2 === 0 ? 'light' : 'dark'
     }
 
