@@ -1,6 +1,8 @@
 # chess.js
 
-[![Build Status](https://travis-ci.org/jhlywa/chess.js.svg?branch=master)](https://travis-ci.org/jhlywa/chess.js)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jhlywa/chess.js/Node.js%20CI)
+![npm](https://img.shields.io/npm/v/chess.js?color=blue)
+![npm](https://img.shields.io/npm/dm/chess.js)
 
 chess.js is a Javascript chess library that is used for chess move
 generation/validation, piece placement/movement, and check/checkmate/stalemate
@@ -10,14 +12,18 @@ chess.js has been extensively tested in node.js and most modern browsers.
 
 ## Installation
 
-To install the stable version:
+Run the following command to install the most recent version of chess.js from NPM:
 
 ```
-# NPM
 npm install chess.js
+```
 
-# Yarn
-yarn add chess.js
+TypeScript type definitions for chess.js are provided by the community-supported
+DefinitelyTyped repository and can be installed via:
+
+```
+npm install -D @types/chess.js
+
 ```
 
 ## Example Code
@@ -25,7 +31,8 @@ yarn add chess.js
 The code below plays a random game of chess:
 
 ```js
-const { Chess } = require('./chess.js')
+import { Chess } from 'chess.js'
+
 const chess = new Chess()
 
 while (!chess.game_over()) {
@@ -96,27 +103,27 @@ represented by `null`.
 const chess = new Chess()
 
 chess.board()
-// -> [[{type: 'r', color: 'b'},
-        {type: 'n', color: 'b'},
-        {type: 'b', color: 'b'},
-        {type: 'q', color: 'b'},
-        {type: 'k', color: 'b'},
-        {type: 'b', color: 'b'},
-        {type: 'n', color: 'b'},
-        {type: 'r', color: 'b'}],
+// -> [[{square: 'a8', type: 'r', color: 'b'},
+        {square: 'b8', type: 'n', color: 'b'},
+        {square: 'c8', type: 'b', color: 'b'},
+        {square: 'd8', type: 'q', color: 'b'},
+        {square: 'e8', type: 'k', color: 'b'},
+        {square: 'f8', type: 'b', color: 'b'},
+        {square: 'g8', type: 'n', color: 'b'},
+        {square: 'h8', type: 'r', color: 'b'}],
         [...],
         [...],
         [...],
         [...],
         [...],
-        [{type: 'r', color: 'w'},
-         {type: 'n', color: 'w'},
-         {type: 'b', color: 'w'},
-         {type: 'q', color: 'w'},
-         {type: 'k', color: 'w'},
-         {type: 'b', color: 'w'},
-         {type: 'n', color: 'w'},
-         {type: 'r', color: 'w'}]]
+        [{square: 'a1', type: 'r', color: 'w'},
+         {square: 'b1', type: 'n', color: 'w'},
+         {square: 'c1', type: 'b', color: 'w'},
+         {square: 'd1', type: 'q', color: 'w'},
+         {square: 'e1', type: 'k', color: 'w'},
+         {square: 'f1', type: 'b', color: 'w'},
+         {square: 'g1', type: 'n', color: 'w'},
+         {square: 'h1', type: 'r', color: 'w'}]]
 ```
 
 ### .clear()
@@ -729,13 +736,6 @@ chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 // -> { valid: false, error_number: 9,
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
-
-## MUSIC
-
-Musical support provided by:
-
--   [The Grateful Dead](https://www.youtube.com/watch?v=z-D9rdJWfWs)
--   [Umphrey's McGee](https://www.youtube.com/watch?v=auEfZVcYp64)
 
 ## BUGS
 
