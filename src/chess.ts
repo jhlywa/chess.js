@@ -488,6 +488,16 @@ function strippedSan(move: string) {
   return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
 }
 
+export class PgnError extends Error{
+  constructor(message : string){
+    super(message)
+    Object.setPrototypeOf(this, PgnError.prototype)
+
+    this.name = 'PgnError'
+    this.message = message
+  }
+}
+
 export class Chess {
   private _board = new Array<Piece>(128)
   private _turn: Color = WHITE
@@ -1541,7 +1551,7 @@ export class Chess {
     if (sloppy) {
       if (fen) {
         if (!this.load(fen, true)) {
-          return false
+          throw new PgnError('Invalid FEN.');
         }
       }
     } else {
@@ -1550,7 +1560,7 @@ export class Chess {
       if (headers['SetUp'] === '1') {
         if (!('FEN' in headers && this.load(headers['FEN'], true))) {
           // second argument to load: don't clear the headers
-          return false
+          throw new PgnError('Invalid FEN.');
         }
       }
     }
@@ -1646,7 +1656,7 @@ export class Chess {
         if (TERMINATION_MARKERS.indexOf(moves[halfMove]) > -1) {
           result = moves[halfMove]
         } else {
-          return false
+          throw new PgnError(`Invalid Move "${moves[halfMove]}" at half move ${halfMove}.`)
         }
       } else {
         /* reset the end of game marker if making a valid move */

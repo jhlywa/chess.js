@@ -1,4 +1,59 @@
-import { Chess } from '../src/chess'
+import { Chess, PgnError } from '../src/chess'
+
+describe('Load PGN Exceptions', () => {
+  const tests = [
+    {
+      pgn: [
+        '[FEN "1n2kb1r/p4ppp/43/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]',
+        '',
+        '17.Rd8# 1-0',
+      ],
+      expect: { error: PgnError, message: 'Invalid FEN'},
+      sloppy: true
+    },
+
+    {
+      pgn: [
+        '[SetUp "1"]',
+        '[FEN "1n2kb1r/p4ppp/43/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]',
+        '',
+        '17.Rd8# 1-0',
+      ],
+      expect: { error: PgnError, message: 'Invalid FEN'},
+      sloppy: false
+    },
+
+    {
+      pgn: [
+        '[FEN "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]',
+        '',
+        '17.R8# 1-0',
+      ],
+      expect: { error: PgnError, message: 'Invalid Move'},
+      sloppy: true
+    },
+
+    {
+      pgn: [
+        '[FEN "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]',
+        '',
+        '17.R8# 1-0',
+      ],
+      expect: { error: PgnError, message: 'Invalid Move'},
+      sloppy: false
+    },
+  ]
+
+  for(const test of tests) {
+    const testName = `${test.expect.error.name}: ${test.expect.message}`
+    it(`${testName} ${test.sloppy ? 'sloppy: true': ''}`, () => {
+      const chess = new Chess()
+      const testFn = () => chess.loadPgn(test.pgn.join('\n'), { sloppy: test.sloppy })
+      expect(testFn).toThrow(test.expect.error)
+      expect(testFn).toThrow(test.expect.message)
+    })
+  }
+})
 
 describe('Load PGN', () => {
   const chess = new Chess()
@@ -369,14 +424,14 @@ describe('Load PGN', () => {
     newlineChars.forEach((newline, j) => {
       it(i + String.fromCharCode(97 + j), () => {
         const sloppy = t.sloppy || false
-        const result = chess.loadPgn(t.pgn.join(newline), {
+        const test = () => chess.loadPgn(t.pgn.join(newline), {
           sloppy: sloppy,
           newlineChar: newline,
         })
-        const should_pass = t.expect
 
         /* some tests are expected to fail */
-        if (should_pass) {
+        if (t.expect) {
+          const result = test();
           /* some PGN's tests contain comments which are stripped during
            * parsing, so we'll need compare the results of the load against a
            * FEN string (instead of the reconstructed PGN [e.g.
@@ -391,8 +446,8 @@ describe('Load PGN', () => {
             ).toBe(true)
           }
         } else {
-          /* this test should fail, so make sure it does */
-          expect(result == should_pass).toBe(true)
+          /* this test should fail, so lets make sure it throws an exception*/
+          expect(test).toThrow(PgnError)
         }
       })
     })
