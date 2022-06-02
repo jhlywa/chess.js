@@ -491,7 +491,6 @@ function strippedSan(move: string) {
 export class PgnError extends Error{
   constructor(message : string){
     super(message)
-    Object.setPrototypeOf(this, PgnError.prototype)
 
     this.name = 'PgnError'
     this.message = message
