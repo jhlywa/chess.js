@@ -479,6 +479,6 @@ test.each([
     fen: '3r1r2/3P2pk/1p1R3p/1Bp2p2/6q1/4Q3/PP3P1P/7K w - - 4 30',
     errorNumber: 0,
   },
-])("$fen returns error number $errorNumber", ({fen, errorNumber}) => {
+])("FEN '$fen' returns error number '$errorNumber'", ({fen, errorNumber}) => {
   expect(validateFen(fen)).toMatchObject({ errorNumber });
 });
