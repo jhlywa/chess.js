@@ -1,12 +1,16 @@
 {
   "name": "chess.js",
-  "version": "0.0.1",
-  "description": "blah blah",
+  "version": "1.0.0-alpha.0",
+  "license": "BSD-2-Clause",
   "main": "dist/index.js",
   "dist": "dist/index.d.ts",
+  "homepage": "https://github.com/jhlywa/chess.js",
+  "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "scripts": {
     "test": "jest",
-    "lint": "eslint src/ --ext .ts"
+    "lint": "eslint src/ --ext .ts",
+    "build": "tsc --build",
+    "clean": "tsc --build --clean"
   },
   "repository": {
     "type": "git",
