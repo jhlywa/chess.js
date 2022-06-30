@@ -1358,20 +1358,26 @@ export const Chess = function (fen) {
       var ugly_moves = generate_moves(options)
       var moves = []
 
+      var isVerbose =
+        typeof options !== 'undefined' &&
+        'verbose' in options &&
+        options.verbose
+
+      // Verbose mode doesn't use these, so only generate extra set of legal
+      // moves if we're not in verbose mode.
+      var legal_moves = null
+      if (!isVerbose) {
+        legal_moves = generate_moves({ legal: true })
+      }
+
       for (var i = 0, len = ugly_moves.length; i < len; i++) {
         /* does the user want a full move object (most likely not), or just
          * SAN
          */
-        if (
-          typeof options !== 'undefined' &&
-          'verbose' in options &&
-          options.verbose
-        ) {
+        if (isVerbose) {
           moves.push(make_pretty(ugly_moves[i]))
         } else {
-          moves.push(
-            move_to_san(ugly_moves[i], generate_moves({ legal: true }))
-          )
+          moves.push(move_to_san(ugly_moves[i], legal_moves))
         }
       }
 
