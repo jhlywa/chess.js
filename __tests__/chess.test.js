@@ -1262,6 +1262,18 @@ describe('Load Comments', () => {
       input: '1. e4 e5; ($1) 1. e4 is good',
       output: '1. e4 e5 {($1) 1. e4 is good}',
     },
+    {
+      name: 'comment before black to move',
+      input: `
+[SetUp "1"]
+[FEN "r4rk1/p1nq1pp1/1p1pp2p/8/P2PR3/1QP2N2/1P3PPP/R5K1 b - - 0 16"]
+
+{test comment} 16...Rfb8`,
+      output: `[SetUp "1"]
+[FEN "r4rk1/p1nq1pp1/1p1pp2p/8/P2PR3/1QP2N2/1P3PPP/R5K1 b - - 0 16"]
+
+{test comment} 16. ... Rfb8`,
+    },
   ]
 
   tests.forEach((test) => {
@@ -3084,7 +3096,7 @@ describe('Regression Tests', () => {
     const pgn = `
     [white "player a"]
          [black "player b"]
-              [note "whitespace after right bracket"]      
+              [note "whitespace after right bracket"]
 
             1. e4 e5`
 
@@ -3096,8 +3108,8 @@ describe('Regression Tests', () => {
     const pgn = `
     [white "player a"]
          [black "player b"]
-              [note "whitespace after right bracket and in empty line below"]      
-   
+              [note "whitespace after right bracket and in empty line below"]
+
             1. e4 e5`
 
     expect(chess.load_pgn(pgn)).toBe(true)

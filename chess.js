@@ -1464,7 +1464,7 @@ export const Chess = function (fen) {
       var result = []
       var header_exists = false
 
-      /* add the PGN header headerrmation */
+      /* add the PGN header information */
       for (var i in header) {
         /* TODO: order of enumerated properties in header object is not
          * guaranteed, see ECMA-262 spec (section 12.6.4)
@@ -1505,9 +1505,11 @@ export const Chess = function (fen) {
         move_string = append_comment(move_string)
         var move = reversed_history.pop()
 
-        /* if the position started with black to move, start PGN with 1. ... */
+        /* if the position started with black to move, start PGN with #. ... */
         if (!history.length && move.color === 'b') {
-          move_string = move_number + '. ...'
+          const prefix = `${move_number}. ...`
+          /* is there a comment preceding the first move? */
+          move_string = move_string ? `${move_string} ${prefix}` : prefix
         } else if (move.color === 'w') {
           /* store the previous generated move_string if we have one */
           if (move_string.length) {
