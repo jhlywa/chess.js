@@ -1314,7 +1314,7 @@ export class Chess {
     const result: string[] = []
     let headerExists = false
 
-    /* add the PGN header headerrmation */
+    /* add the PGN header information */
     for (const i in this._header) {
       /* TODO: order of enumerated properties in header object is not
        * guaranteed, see ECMA-262 spec (section 12.6.4)
@@ -1360,9 +1360,11 @@ export class Chess {
         break
       }
 
-      /* if the position started with black to move, start PGN with 1. ... */
+      /* if the position started with black to move, start PGN with #. ... */
       if (!this._history.length && move.color === 'b') {
-        moveString = this._moveNumber + '. ...'
+        const prefix = `${this._moveNumber}. ...`
+        /* is there a comment preceding the first move? */
+        moveString = moveString ? `${moveString} ${prefix}` : prefix
       } else if (move.color === 'w') {
         /* store the previous generated move_string if we have one */
         if (moveString.length) {
