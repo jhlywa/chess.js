@@ -556,7 +556,7 @@ chess.move('Nge7', { sloppy: true })
 
 ### .moves([ options ])
 
-Returns a list of legal moves from the current position. The function takes an optional parameter which controls the single-square move generation and verbosity.
+Returns a list of legal moves from the current position. This function takes an optional parameter which can be used generate detailed move objects, or to restrict the move generator to specific squares/pieces.
 
 ```js
 const chess = new Chess()
@@ -564,36 +564,47 @@ chess.moves()
 // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4',
 //     'f3', 'f4', 'g3', 'g4', 'h3', 'h4', 'Na3', 'Nc3', 'Nf3', 'Nh3']
 
-chess.moves({ square: 'e2' })
+chess.moves({ square: 'e2' }) // single square move generation
 // -> ['e3', 'e4']
 
-chess.moves({ square: 'e9' }) // invalid square
-// -> []
+chess.moves({ piece: 'n' }) // generate moves for piece type
+// ['Na3', 'Nc3', 'Nf3', 'Nh3']
 
-chess.moves({ verbose: true })
+chess.moves({ verbose: true }) // return verbose moves
 // -> [{ color: 'w', from: 'a2', to: 'a3',
 //       flags: 'n', piece: 'p', san 'a3'
-//       # a captured: key is included when the move is a capture
-//       # a promotion: key is included when the move is a promotion
+//       # a captured: field is included when the move is a capture
+//       # a promotion: field is included when the move is a promotion
 //     },
 //     ...
 //     ]
 ```
 
-The _piece_, _captured_, and _promotion_ fields contain the lowercase
-representation of the applicable piece.
+#### Move Objects (e.g. { verbose: true })
 
-The _flags_ field in verbose mode may contain one or more of the following values:
+The `color` field indicates the color of the moving piece (`w` or `b`).
 
--   'n' - a non-capture
--   'b' - a pawn push of two squares
--   'e' - an en passant capture
--   'c' - a standard capture
--   'p' - a promotion
--   'k' - kingside castling
--   'q' - queenside castling
+The `from` and `to` fields are from and to squares in algebraic notation.
 
-A flag of 'pc' would mean that a pawn captured a piece on the 8th rank and promoted.
+The `piece`, `captured`, and `promotion` fields contain the lowercase
+representation of the applicable piece (`pnbrqk`). The `captured` and
+`promotion` fields are only present when the move is a valid capture or
+promotion.
+
+The `san` field is the move in Standard Algebraic Notation (SAN).
+
+The `flags` field contains one or more of the string values:
+
+-   `n` - a non-capture
+-   `b` - a pawn push of two squares
+-   `e` - an en passant capture
+-   `c` - a standard capture
+-   `p` - a promotion
+-   `k` - kingside castling
+-   `q` - queenside castling
+
+A `flags` value of `pc` would mean that a pawn captured a piece on the 8th rank
+and promoted.
 
 ### .pgn([ options ])
 
