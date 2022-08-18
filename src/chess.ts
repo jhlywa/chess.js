@@ -500,12 +500,12 @@ export class Chess {
   private _comments: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
-  constructor(fen = DEFAULT_POSITION, obj?:Chess) {
-    if(obj){
-      Object.assign(this, obj);
-      this.load(this.fen());
+  constructor(value:(string | Chess) = DEFAULT_POSITION) {
+    if(typeof value === 'string'){
+      this.load(value);
     }else{
-        this.load(fen);
+      Object.assign(this, value);
+      this.load(this.fen());
     }
   }
 
