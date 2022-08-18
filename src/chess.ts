@@ -501,11 +501,11 @@ export class Chess {
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
   constructor(value:(string | Chess) = DEFAULT_POSITION) {
-    if(value instanceof Chess){
+    if(typeof value === 'string'){
+      this.load(value);
+    }else{
       Object.assign(this, value);
       this.load(this.fen());
-    }else{
-        this.load(value);
     }
   }
 
