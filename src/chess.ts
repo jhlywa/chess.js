@@ -505,7 +505,7 @@ export class Chess {
       this.load(value);
     }else{
       Object.assign(this, value);
-      this.load(value.fen());
+      this.load(this.fen());
       this._history = value._history
     }
   }
