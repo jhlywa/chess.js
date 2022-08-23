@@ -500,12 +500,13 @@ export class Chess {
   private _comments: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
-  constructor(value:(string | object) = DEFAULT_POSITION) {
+  constructor(value:(string | Chess) = DEFAULT_POSITION) {
     if(typeof value === 'string'){
       this.load(value);
     }else{
       Object.assign(this, value);
       this.load(this.fen());
+      this._history = value._history
     }
   }
 
