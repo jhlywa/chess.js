@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "dist": "dist/index.d.ts",
   "homepage": "https://github.com/jhlywa/chess.js",
-  "author": "",
+  "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "scripts": {
     "test": "jest",
     "lint": "eslint src/ --ext .ts",
