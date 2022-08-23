@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "dist": "dist/index.d.ts",
   "homepage": "https://github.com/jhlywa/chess.js",
-  "author": "Jeff Hlywa <jhlywa@gmail.com>",
+  "author": "",
   "scripts": {
     "test": "jest",
     "lint": "eslint src/ --ext .ts",
@@ -16,12 +16,11 @@
     "type": "git",
     "url": "mygitrepo"
   },
-  "author": "",
-  "license": "BSD-2-Clause",
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
+    "class-transformer": "^0.5.1",
     "eslint": "^8.12.0",
     "jest": "^27.0.6",
     "jest-extended": "^2.0.0",
