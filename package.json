@@ -1,9 +1,9 @@
 {
   "name": "chess.js",
-  "version": "1.0.0-alpha.0",
+  "version": "undefined",
   "license": "BSD-2-Clause",
-  "main": "dist/index.js",
-  "dist": "dist/index.d.ts",
+  "main": "dist/chess.js",
+  "dist": "dist/chess.d.ts",
   "homepage": "https://github.com/jhlywa/chess.js",
   "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "scripts": {
@@ -14,10 +14,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "mygitrepo"
+    "url": "https://github.com/jhlywa/chess.js"
   },
-  "author": "",
-  "license": "BSD-2-Clause",
   "devDependencies": {
     "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
