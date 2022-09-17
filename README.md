@@ -15,7 +15,7 @@ chess.js has been extensively tested in node.js and most modern browsers.
 Run the following command to install the most recent version of chess.js from NPM:
 
 ```
-npm install chess.js
+npm install chess.js@1.0.0-alpha.0
 ```
 
 TypeScript type definitions for chess.js are provided by the community-supported

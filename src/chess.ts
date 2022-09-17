@@ -461,7 +461,6 @@ function addMove(
       to,
       piece,
       captured,
-      promotion: undefined,
       flags,
     })
   }

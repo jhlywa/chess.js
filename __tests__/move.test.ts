@@ -1,6 +1,6 @@
 import { Chess } from '../src/chess'
 
-describe('Make Move', () => {
+describe('Make Move - Standard Algebraic Notation (SAN)', () => {
   const positions = [
     {
       fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
@@ -80,6 +80,52 @@ describe('Make Move', () => {
             chess.fen() == position.next &&
             result.captured == position.captured
         ).toBe(true)
+      } else {
+        expect(result).toBeNull()
+      }
+    })
+  })
+})
+
+describe('Make Move - Verbose', () => {
+  const positions = [
+    {
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+      legal: true,
+      move: { from: 'e2', to: 'e4' },
+      next: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
+    },
+    // specifying the promoting piece has no effect if the move is not a
+    // promotion
+    {
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+      legal: true,
+      move: { from: 'e2', to: 'e4', promotion: 'q' },
+      next: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
+    },
+    {
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+      legal: false,
+      move: { from: 'e2', to: 'e5' },
+    },
+
+    // under promotion
+    {
+      fen: '8/1k5P/8/8/8/8/8/1K6 w - - 0 1',
+      legal: true,
+      move: { from: 'h7', to: 'h8', promotion: 'n' },
+      next: '7N/1k6/8/8/8/8/8/1K6 b - - 0 1',
+    },
+  ]
+
+  positions.forEach((position) => {
+    const chess = new Chess()
+    chess.load(position.fen)
+    const move = position.move
+    it(position.fen + ` (${move.to}${move.from} - ${position.legal})`, () => {
+      const result = chess.move(move)
+      if (position.legal) {
+        expect(result && chess.fen() == position.next).toBe(true)
       } else {
         expect(result).toBeNull()
       }
