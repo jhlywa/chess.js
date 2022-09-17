@@ -1,26 +1,27 @@
 {
- "semi": false,
- "singleQuote": true,
- "overrides": [
+  "semi": false,
+  "singleQuote": true,
+  "overrides": [
     {
-        "files": "**/*.js",
-        "options": {
-            "parser": "babel"
-        }
+      "files": "**/*.js",
+      "options": {
+        "parser": "babel"
+      }
     },
     {
       "files": "**/*.md",
       "options": {
-        "parser": "markdown"
+        "parser": "markdown",
+        "printWidth": 80,
+        "proseWrap": "always"
       }
     },
     {
       "files": "**/*.json",
       "options": {
         "parser": "json",
-        "tabWidth": 2,
+        "tabWidth": 2
       }
     }
-
   ]
 }
