@@ -579,6 +579,50 @@ export const Chess = function (fen) {
     }
   }
 
+  function material() {
+    const fenAsArray = generate_fen().split(' ')
+    const pieces = fenAsArray[0].split('')
+    let black = 0
+    let white = 0
+    for (let i = 0; i < pieces.length; i++) {
+      switch (pieces[i]) {
+        case 'Q':
+          white += 9
+          break
+        case 'q':
+          black += 9
+          break
+        case 'R':
+          white += 5
+          break
+        case 'r':
+          black += 5
+          break
+        case 'B':
+          white += 3
+          break
+        case 'b':
+          black += 3
+          break
+        case 'N':
+          white += 3
+          break
+        case 'n':
+          black += 3
+          break
+        case 'P':
+          white += 1
+          break
+        case 'p':
+          black += 1
+          break
+        default:
+          break
+      }
+    }
+    return { black: black, white: white }
+  }
+
   function get(square) {
     var piece = board[SQUARE_MAP[square]]
     return piece ? { type: piece.type, color: piece.color } : null
@@ -1877,7 +1921,9 @@ export const Chess = function (fen) {
     clear: function () {
       return clear()
     },
-
+    material: function () {
+      return material()
+    },
     put: function (piece, square) {
       return put(piece, square)
     },

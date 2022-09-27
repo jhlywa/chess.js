@@ -1030,6 +1030,48 @@ describe('Load PGN', () => {
   })
 })
 
+describe('Material Count', () => {
+  const tests = [
+    {
+      description: 'Starting position',
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+      expect: { black: 39, white: 39 },
+    },
+    {
+      description: 'No FEN',
+      fen: undefined,
+      expect: { black: 39, white: 39 },
+    },
+    {
+      description: 'Test position 1',
+      fen: '2r1brk1/1R6/2n1p2p/P4p2/3PnP2/2P2N2/4PPBP/R5K1 b - - 0 25',
+      expect: { black: 22, white: 23 },
+    },
+    {
+      description: 'Test position 2',
+      fen: '8/p1br1kpp/1p3p2/8/P3P3/4B1P1/4KP1P/2R5 b - - 0 32',
+      expect: { black: 13, white: 13 },
+    },
+    {
+      description: 'Checkmate on the board',
+      fen: 'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 0 3',
+      expect: { black: 39, white: 39 },
+    },
+    {
+      description: 'Only kings',
+      fen: '8/8/4k3/8/4K3/8/8/8 w - - 0 0',
+      expect: { black: 0, white: 0 },
+    },
+  ]
+  tests.forEach((t) => {
+    it(t.description, () => {
+      const chess = new Chess(t.fen)
+      expect(chess.material().black).toEqual(t.expect.black)
+      expect(chess.material().white).toEqual(t.expect.white)
+    })
+  })
+})
+
 describe('Manipulate Comments', () => {
   it('no comments', () => {
     const chess = new Chess()

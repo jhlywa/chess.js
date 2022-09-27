@@ -623,6 +623,10 @@ chess.pgn({ max_width: 5, newline_char: '<br />' })
 // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
 ```
 
+### .material()
+
+Returns the pawn values of the material on the board (Q = 9, R = 5, B = 3, N = 3, P = 1) as an object {black: ..., white: ...}.
+
 ### .put(piece, square)
 
 Place a piece on the square where piece is an object with the form
