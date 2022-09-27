@@ -1921,9 +1921,11 @@ export const Chess = function (fen) {
     clear: function () {
       return clear()
     },
+
     material: function () {
       return material()
     },
+
     put: function (piece, square) {
       return put(piece, square)
     },
