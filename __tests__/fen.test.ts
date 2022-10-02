@@ -12,7 +12,7 @@ describe('.load() / .fen() should be symmetric', () => {
 
   validPositions.forEach((fen) => {
     it('fen symmetry - ' + fen, () => {
-      expect(chess.load(fen)).toBe(true)
+      expect(() => chess.load(fen)).not.toThrow()
       expect(chess.fen()).toEqual(fen)
     })
   })
