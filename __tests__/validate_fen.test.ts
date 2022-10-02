@@ -1,5 +1,31 @@
 import { validateFen } from '../src/chess'
+
 test.each([
+  {
+    // no kings
+    fen: '8/8/8/8/8/8/8/8 w - - 0 1',
+    ok: false,
+  },
+  {
+    // missing white king
+    fen: 'k7/8/8/8/8/8/8/8 w - - 0 1',
+    ok: false,
+  },
+  {
+    // missing black king
+    fen: '8/8/8/8/8/8/8/7K w - - 0 1',
+    ok: false,
+  },
+  {
+    // too many white kings
+    fen: 'k7/8/8/8/8/8/8/6KK w - - 0 1',
+    ok: false,
+  },
+  {
+    // too many black kings
+    fen: 'kk6/8/8/8/8/8/8/7K w - - 0 1',
+    ok: false,
+  },
   {
     fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNRw KQkq - 0 1',
     ok: false,
@@ -479,6 +505,10 @@ test.each([
     fen: '3r1r2/3P2pk/1p1R3p/1Bp2p2/6q1/4Q3/PP3P1P/7K w - - 4 30',
     ok: true,
   },
-])("validateFen %# '$fen' (expected: '$ok'", ({ fen, ok }) => {
+])("validateFen $# '$fen' (expected: '$ok')", ({ fen, ok }) => {
+  const result = validateFen(fen)
+  if (ok != result.ok) {
+    console.log(result)
+  }
   expect(validateFen(fen)).toMatchObject({ ok })
 })

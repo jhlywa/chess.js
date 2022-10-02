@@ -164,7 +164,8 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #282 - playing a move on an empty board throws an error', () => {
-    const chess = new Chess('8/8/8/8/8/8/8/8 w KQkq - 0 1')
+    const chess = new Chess()
+    chess.clear()
     expect(chess.move('e4')).toBeNull()
   })
 

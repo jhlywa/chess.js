@@ -378,6 +378,21 @@ export function validateFen(fen: string) {
     return { ok: false, error: 'Invalid FEN: illegal en-passant square' }
   }
 
+  const kings = [
+    { color: 'white', regex: /K/g },
+    { color: 'black', regex: /k/g },
+  ]
+
+  for (const { color, regex } of kings) {
+    if (!regex.test(tokens[0])) {
+      return { ok: false, error: `Invalid FEN: missing ${color} king` }
+    }
+
+    if ((tokens[0].match(regex) || []).length > 1) {
+      return { ok: false, error: `Invalid FEN: too many ${color} kings` }
+    }
+  }
+
   return { ok: true }
 }
 
