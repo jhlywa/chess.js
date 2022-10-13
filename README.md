@@ -556,7 +556,7 @@ chess.move('Nge7', { sloppy: true })
 
 ### .moves([ options ])
 
-Returns a list of legal moves from the current position. This function takes an optional parameter which can be used generate detailed move objects, or to restrict the move generator to specific squares/pieces.
+Returns a list of legal moves from the current position. This function takes an optional parameter which can be used to generate detailed move objects, or to restrict the move generator to specific squares/pieces.
 
 ```js
 const chess = new Chess()
