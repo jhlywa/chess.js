@@ -420,20 +420,21 @@ export const Chess = function (fen) {
       11: '4th field (en-passant square) is invalid [illegal value].',
       12: '1st field (piece positions) is invalid [illegal kings count].',
       13: '1st field (piece positions) is invalid [kings on neighbour cells].',
+      14: '1st field (piece positions) is invalid [pawn on rank 1/8].',
     }
 
+    var tokens = fen.split(/\s+/)
+
     /* Empty board is valid */
-    var parts = fen.split(' ')
     if (
-      parts[0] === '8/8/8/8/8/8/8/8' &&
-      parts[2] === '-' &&
-      parts[3] === '-'
+      tokens[0] === '8/8/8/8/8/8/8/8' &&
+      tokens[2] === '-' &&
+      tokens[3] === '-'
     ) {
       return { valid: true, error_number: 0, error: errors[0] }
     }
 
     /* 1st criterion: 6 space-seperated fields? */
-    var tokens = fen.split(/\s+/)
     if (tokens.length !== 6) {
       return { valid: false, error_number: 1, error: errors[1] }
     }
@@ -551,6 +552,16 @@ export const Chess = function (fen) {
 
     if (abs_dx <= 1 && abs_dy <= 1) {
       return { valid: false, error_number: 13, error: errors[13] }
+    }
+
+    /* pawn on rank 1 / rank 8 ? */
+    if (
+      lines[0].includes('P') ||
+      lines[0].includes('p') ||
+      lines[7].includes('P') ||
+      lines[7].includes('p')
+    ) {
+      return { valid: false, error_number: 14, error: errors[14] }
     }
 
     /* everything's okay! */

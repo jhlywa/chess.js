@@ -1473,6 +1473,22 @@ describe('Validate FEN', () => {
       error_number: 13,
     },
     {
+      fen: '2P5/8/8/3k4/8/2K5/8/8 w - - 0 1',
+      error_number: 14,
+    },
+    {
+      fen: '8/8/8/3k4/8/2K5/8/5P2 w - - 0 1',
+      error_number: 14,
+    },
+    {
+      fen: '8/8/8/3k4/8/5K2/8/p7 w - - 0 1',
+      error_number: 14,
+    },
+    {
+      fen: '6p1/8/8/3k4/8/5K2/8/8 w - - 0 1',
+      error_number: 14,
+    },
+    {
       fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
       error_number: 0,
     },
