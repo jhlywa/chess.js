@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2015",
+    "declaration": true,
+    "outDir": "./dist",
+    "strict": true
+  },
+  "include": ["src/**/*"],
+  "files": ["__tests__/global.d.ts"]
+}

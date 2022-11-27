@@ -4,7 +4,7 @@
 ![npm](https://img.shields.io/npm/v/chess.js?color=blue)
 ![npm](https://img.shields.io/npm/dm/chess.js)
 
-chess.js is a Javascript chess library that is used for chess move
+chess.js is a TypeScript chess library used for chess move
 generation/validation, piece placement/movement, and check/checkmate/stalemate
 detection - basically everything but the AI.
 
@@ -12,59 +12,54 @@ chess.js has been extensively tested in node.js and most modern browsers.
 
 ## Installation
 
-Run the following command to install the most recent version of chess.js from NPM:
+Run the following command to install the most recent version of chess.js from
+NPM:
 
-```
-npm install chess.js
-```
-
-TypeScript type definitions for chess.js are provided by the community-supported
-DefinitelyTyped repository and can be installed via:
-
-```
-npm install -D @types/chess.js
-
+```sh
+npm install chess.js@1.0.0-alpha.0
 ```
 
 ## Example Code
 
 The code below plays a random game of chess:
 
-```js
+```ts
 import { Chess } from 'chess.js'
 
 const chess = new Chess()
 
-while (!chess.game_over()) {
-    const moves = chess.moves()
-    const move = moves[Math.floor(Math.random() * moves.length)]
-    chess.move(move)
+while (!chess.isGameOver()) {
+  const moves = chess.moves()
+  const move = moves[Math.floor(Math.random() * moves.length)]
+  chess.move(move)
 }
 console.log(chess.pgn())
 ```
 
 ## User Interface
 
-By design, chess.js is headless and does not include user interface.  Many
+By design, chess.js is headless and does not include user interface. Many
 developers have had success integrating chess.js with the
 [chessboard.js](http://chessboardjs.com) library. See
-[chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for
-an example.
+[chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for an
+example.
 
 ## API
 
 ### Constructor: Chess([ fen ])
 
-The Chess() constructor takes an optional parameter which specifies the board configuration
-in [Forsyth-Edwards Notation](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation).
+The Chess() constructor takes an optional parameter which specifies the board
+configuration in
+[Forsyth-Edwards Notation (FEN)](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation).
+Throw an exception if an invalid FEN string is provided.
 
-```js
+```ts
 // board defaults to the starting position when called with no parameters
 const chess = new Chess()
 
 // pass in a FEN string to load a particular position
 const chess = new Chess(
-    'r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - c3 0 19'
+  'r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - c3 0 19'
 )
 ```
 
@@ -72,7 +67,7 @@ const chess = new Chess(
 
 Returns a string containing an ASCII diagram of the current position.
 
-```js
+```ts
 const chess = new Chess()
 
 // make some moves
@@ -99,7 +94,7 @@ chess.ascii()
 Returns an 2D array representation of the current position. Empty squares are
 represented by `null`.
 
-```js
+```ts
 const chess = new Chess()
 
 chess.board()
@@ -130,41 +125,43 @@ chess.board()
 
 Clears the board.
 
-```js
+```ts
 chess.clear()
 chess.fen()
 // -> '8/8/8/8/8/8/8/8 w - - 0 1' <- empty board
 ```
 
-### .delete_comment()
+### .deleteComment()
 
 Delete and return the comment for the current position, if it exists.
 
-```js
+```ts
 const chess = new Chess()
 
-chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+chess.loadPgn('1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *')
 
-chess.get_comment()
+chess.getComment()
 // -> "giuoco piano"
 
-chess.delete_comment()
+chess.deleteComment()
 // -> "giuoco piano"
 
-chess.get_comment()
+chess.getComment()
 // -> undefined
 ```
 
-### .delete_comments()
+### .deleteComments()
 
 Delete and return comments for all positions.
 
-```js
+```ts
 const chess = new Chess()
 
-chess.load_pgn("1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+chess.loadPgn(
+  "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *"
+)
 
-chess.delete_comments()
+chess.deleteComments()
 // -> [
 //     {
 //       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
@@ -176,14 +173,15 @@ chess.delete_comments()
 //     }
 //    ]
 
-chess.get_comments()
+chess.getComments()
 // -> []
 ```
+
 ### .fen()
 
 Returns the FEN string for the current position.
 
-```js
+```ts
 const chess = new Chess()
 
 // make some moves
@@ -195,23 +193,24 @@ chess.fen()
 // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
 ```
 
-### .game_over()
+### .isGameOver()
 
-Returns true if the game has ended via checkmate, stalemate, draw, threefold repetition, or insufficient material. Otherwise, returns false.
+Returns true if the game has ended via checkmate, stalemate, draw, threefold
+repetition, or insufficient material. Otherwise, returns false.
 
-```js
+```ts
 const chess = new Chess()
-chess.game_over()
+chess.isGameOver()
 // -> false
 
 // stalemate
 chess.load('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
-chess.game_over()
+chess.isGameOver()
 // -> true
 
 // checkmate
 chess.load('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3')
-chess.game_over()
+chess.isGameOver()
 // -> true
 ```
 
@@ -219,7 +218,7 @@ chess.game_over()
 
 Returns the piece on the square:
 
-```js
+```ts
 chess.clear()
 chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
 
@@ -229,29 +228,31 @@ chess.get('a6')
 // -> null
 ```
 
-### .get_comment()
+### .getComment()
 
 Retrieve the comment for the current position, if it exists.
 
-```js
+```ts
 const chess = new Chess()
 
-chess.load_pgn("1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+chess.loadPgn('1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *')
 
-chess.get_comment()
+chess.getComment()
 // -> "giuoco piano"
 ```
 
-### .get_comments()
+### .getComments()
 
 Retrieve comments for all positions.
 
-```js
+```ts
 const chess = new Chess()
 
-chess.load_pgn("1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *")
+chess.loadPgn(
+  "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *"
+)
 
-chess.get_comments()
+chess.getComments()
 // -> [
 //     {
 //       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
@@ -269,7 +270,7 @@ chess.get_comments()
 Allows header information to be added to PGN output. Any number of key/value
 pairs can be passed to .header().
 
-```js
+```ts
 chess.header('White', 'Robert James Fischer')
 chess.header('Black', 'Mikhail Tal')
 
@@ -278,9 +279,10 @@ chess.header('Black', 'Mikhail Tal')
 chess.header('White', 'Morphy', 'Black', 'Anderssen', 'Date', '1858-??-??')
 ```
 
-Calling .header() without any arguments returns the header information as an object.
+Calling .header() without any arguments returns the header information as an
+object.
 
-```js
+```ts
 chess.header()
 // -> { White: 'Morphy', Black: 'Anderssen', Date: '1858-??-??' }
 ```
@@ -288,10 +290,10 @@ chess.header()
 ### .history([ options ])
 
 Returns a list containing the moves of the current game. Options is an optional
-parameter which may contain a 'verbose' flag. See .moves() for a description of the
-verbose move fields.
+parameter which may contain a 'verbose' flag. See .moves() for a description of
+the verbose move fields.
 
-```js
+```ts
 const chess = new Chess()
 chess.move('e4')
 chess.move('e5')
@@ -308,143 +310,148 @@ chess.history({ verbose: true })
 //     { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }]
 ```
 
-### .in_check()
+### .inCheck()
 
 Returns true or false if the side to move is in check.
 
-```js
+```ts
 const chess = new Chess(
-    'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3'
+  'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3'
 )
-chess.in_check()
+chess.inCheck()
 // -> true
 ```
 
-### .in_checkmate()
+### .inCheckmate()
 
 Returns true or false if the side to move has been checkmated.
 
-```js
+```ts
 const chess = new Chess(
-    'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3'
+  'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3'
 )
-chess.in_checkmate()
+chess.inCheckmate()
 // -> true
 ```
 
-### .in_draw()
+### .isDraw()
 
-Returns true or false if the game is drawn (50-move rule or insufficient material).
+Returns true or false if the game is drawn (50-move rule or insufficient
+material).
 
-```js
+```ts
 const chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
-chess.in_draw()
+chess.isDraw()
 // -> true
 ```
 
-### .in_stalemate()
+### .isStalemate()
 
 Returns true or false if the side to move has been stalemated.
 
-```js
+```ts
 const chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
-chess.in_stalemate()
+chess.isStalemate()
 // -> true
 ```
 
-### .in_threefold_repetition()
+### .isThreefoldRepetition()
 
 Returns true or false if the current board position has occurred three or more
 times.
 
-```js
+```ts
 const chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 // -> true
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 1st time
-chess.in_threefold_repetition()
+chess.isThreefoldRepetition()
 // -> false
 
 chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 2nd time
-chess.in_threefold_repetition()
+chess.isThreefoldRepetition()
 // -> false
 
 chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 3rd time
-chess.in_threefold_repetition()
+chess.isThreefoldRepetition()
 // -> true
 ```
 
-### .insufficient_material()
+### .isInsufficientMaterial()
 
-Returns true if the game is drawn due to insufficient material (K vs. K,
-K vs. KB, or K vs. KN) otherwise false.
+Returns true if the game is drawn due to insufficient material (K vs. K, K vs.
+KB, or K vs. KN) otherwise false.
 
-```js
+```ts
 const chess = new Chess('k7/8/n7/8/8/8/8/7K b - - 0 1')
-chess.insufficient_material()
+chess.isInsufficientMaterial()
 // -> true
 ```
 
 ### .load(fen)
 
-The board is cleared, and the FEN string is loaded. Returns true if the position was
-successfully loaded, otherwise false.
+The board is cleared and the FEN string is loaded. Throws an exception if the
+the FEN is invalid.
 
-```js
+```ts
 const chess = new Chess()
 chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
-// -> true
 
-chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
-// -> false, bad piece X
+try {
+  chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
+} catch (e) {
+  console.log(e)
+}
+// -> Error: Invalid FEN: piece data is invalid (invalid piece)
 ```
 
-### .load_pgn(pgn, [ options ])
+### .loadPgn(pgn, [ options ])
 
 Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
-`pgn` should be a string. Options is an optional `object` which may contain
-a string `newline_char` and a boolean `sloppy`.
+`pgn` should be a string. Options is an optional `object` which may contain a
+string `newlineChar` and a boolean `sloppy`.
 
-The `newline_char` is a string representation of a valid RegExp fragment and is
-used to process the PGN. It defaults to `\r?\n`. Special characters
-should not be pre-escaped, but any literal special characters should be escaped
-as is normal for a RegExp. Keep in mind that backslashes in JavaScript strings
-must themselves be escaped (see `sloppy_pgn` example below). Avoid using
-a `newline_char` that may occur elsewhere in a PGN, such as `.` or `x`, as this
+The `newlineChar` is a string representation of a valid RegExp fragment and is
+used to process the PGN. It defaults to `\r?\n`. Special characters should not
+be pre-escaped, but any literal special characters should be escaped as is
+normal for a RegExp. Keep in mind that backslashes in JavaScript strings must
+themselves be escaped (see `sloppyPgn` example below). Avoid using a
+`newlineChar` that may occur elsewhere in a PGN, such as `.` or `x`, as this
 will result in unexpected behavior.
 
 The `sloppy` flag is a boolean that permits chess.js to parse moves in
 non-standard notations. See `.move` documentation for more information about
 non-SAN notations.
 
-The method will return `true` if the PGN was parsed successfully, otherwise `false`.
+The method will return `true` if the PGN was parsed successfully, otherwise
+`false`.
 
-```js
+```ts
 const chess = new Chess()
 const pgn = [
-    '[Event "Casual Game"]',
-    '[Site "Berlin GER"]',
-    '[Date "1852.??.??"]',
-    '[EventDate "?"]',
-    '[Round "?"]',
-    '[Result "1-0"]',
-    '[White "Adolf Anderssen"]',
-    '[Black "Jean Dufresne"]',
-    '[ECO "C52"]',
-    '[WhiteElo "?"]',
-    '[BlackElo "?"]',
-    '[PlyCount "47"]',
-    '',
-    '1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5 4.b4 Bxb4 5.c3 Ba5 6.d4 exd4 7.O-O',
-    'd3 8.Qb3 Qf6 9.e5 Qg6 10.Re1 Nge7 11.Ba3 b5 12.Qxb5 Rb8 13.Qa4',
-    'Bb6 14.Nbd2 Bb7 15.Ne4 Qf5 16.Bxd3 Qh5 17.Nf6+ gxf6 18.exf6',
-    'Rg8 19.Rad1 Qxf3 20.Rxe7+ Nxe7 21.Qxd7+ Kxd7 22.Bf5+ Ke8',
-    '23.Bd7+ Kf8 24.Bxe7# 1-0'
+  '[Event "Casual Game"]',
+  '[Site "Berlin GER"]',
+  '[Date "1852.??.??"]',
+  '[EventDate "?"]',
+  '[Round "?"]',
+  '[Result "1-0"]',
+  '[White "Adolf Anderssen"]',
+  '[Black "Jean Dufresne"]',
+  '[ECO "C52"]',
+  '[WhiteElo "?"]',
+  '[BlackElo "?"]',
+  '[PlyCount "47"]',
+  '',
+  '1.e4 e5 2.Nf3 Nc6 3.Bc4 Bc5 4.b4 Bxb4 5.c3 Ba5 6.d4 exd4 7.O-O',
+  'd3 8.Qb3 Qf6 9.e5 Qg6 10.Re1 Nge7 11.Ba3 b5 12.Qxb5 Rb8 13.Qa4',
+  'Bb6 14.Nbd2 Bb7 15.Ne4 Qf5 16.Bxd3 Qh5 17.Nf6+ gxf6 18.exf6',
+  'Rg8 19.Rad1 Qxf3 20.Rxe7+ Nxe7 21.Qxd7+ Kxd7 22.Bf5+ Ke8',
+  '23.Bd7+ Kf8 24.Bxe7# 1-0',
 ]
 
-chess.load_pgn(pgn.join('\n'))
+chess.loadPgn(pgn.join('\n'))
 // -> true
 
 chess.fen()
@@ -464,33 +471,33 @@ chess.ascii()
 //         a  b  c  d  e  f  g  h'
 
 // Parse non-standard move formats and unusual line separators
-const sloppy_pgn = [
-    '[Event "Wijk aan Zee (Netherlands)"]',
-    '[Date "1971.01.26"]',
-    '[Result "1-0"]',
-    '[White "Tigran Vartanovich Petrosian"]',
-    '[Black "Hans Ree"]',
-    '[ECO "A29"]',
-    '',
-    '1. Pc2c4 Pe7e5', // non-standard
-    '2. Nc3 Nf6',
-    '3. Nf3 Nc6',
-    '4. g2g3 Bb4', // non-standard
-    '5. Nd5 Nxd5',
-    '6. c4xd5 e5-e4', // non-standard
-    '7. dxc6 exf3',
-    '8. Qb3 1-0'
+const sloppyPgn = [
+  '[Event "Wijk aan Zee (Netherlands)"]',
+  '[Date "1971.01.26"]',
+  '[Result "1-0"]',
+  '[White "Tigran Vartanovich Petrosian"]',
+  '[Black "Hans Ree"]',
+  '[ECO "A29"]',
+  '',
+  '1. Pc2c4 Pe7e5', // non-standard
+  '2. Nc3 Nf6',
+  '3. Nf3 Nc6',
+  '4. g2g3 Bb4', // non-standard
+  '5. Nd5 Nxd5',
+  '6. c4xd5 e5-e4', // non-standard
+  '7. dxc6 exf3',
+  '8. Qb3 1-0',
 ].join('|')
 
 const options = {
-    newline_char: '\\|', // Literal '|' character escaped
-    sloppy: true
+  newlineChar: '\\|', // Literal '|' character escaped
+  sloppy: true,
 }
 
-chess.load_pgn(sloppy_pgn)
+chess.loadPgn(sloppyPgn)
 // -> false
 
-chess.load_pgn(sloppy_pgn, options)
+chess.loadPgn(sloppyPgn, options)
 // -> true
 
 chess.fen()
@@ -500,10 +507,10 @@ chess.fen()
 ### .move(move, [ options ])
 
 Attempts to make a move on the board, returning a move object if the move was
-legal, otherwise null. The .move function can be called two ways, by passing
-a string in Standard Algebraic Notation (SAN):
+legal, otherwise null. The .move function can be called two ways, by passing a
+string in Standard Algebraic Notation (SAN):
 
-```js
+```ts
 const chess = new Chess()
 
 chess.move('e4')
@@ -519,7 +526,7 @@ chess.move('Nf6')
 Or by passing .move() a move object (only the 'to', 'from', and when necessary
 'promotion', fields are needed):
 
-```js
+```ts
 const chess = new Chess()
 
 chess.move({ from: 'g2', to: 'g3' })
@@ -529,7 +536,7 @@ chess.move({ from: 'g2', to: 'g3' })
 An optional sloppy flag can be used to parse a variety of non-standard move
 notations:
 
-```js
+```ts
 const chess = new Chess()
 
 // various forms of Long Algebraic Notation
@@ -544,7 +551,7 @@ chess.move('Pe5xf4', { sloppy: true })
 
 // correctly parses incorrectly disambiguated moves
 chess = new Chess(
-    'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
+  'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
 )
 
 chess.move('Nge7') // Ne7 is unambiguous because the knight on c6 is pinned
@@ -556,9 +563,11 @@ chess.move('Nge7', { sloppy: true })
 
 ### .moves([ options ])
 
-Returns a list of legal moves from the current position. This function takes an optional parameter which can be used generate detailed move objects, or to restrict the move generator to specific squares/pieces.
+Returns a list of legal moves from the current position. This function takes an
+optional parameter which can be used generate detailed move objects or to
+restrict the move generator to specific squares or pieces.
 
-```js
+```ts
 const chess = new Chess()
 chess.moves()
 // -> ['a3', 'a4', 'b3', 'b4', 'c3', 'c4', 'd3', 'd4', 'e3', 'e4',
@@ -573,8 +582,8 @@ chess.moves({ piece: 'n' }) // generate moves for piece type
 chess.moves({ verbose: true }) // return verbose moves
 // -> [{ color: 'w', from: 'a2', to: 'a3',
 //       flags: 'n', piece: 'p', san 'a3'
-//       # a captured: field is included when the move is a capture
-//       # a promotion: field is included when the move is a promotion
+//       # a `captured` field is included when the move is a capture
+//       # a `promotion` field is included when the move is a promotion
 //     },
 //     ...
 //     ]
@@ -595,23 +604,23 @@ The `san` field is the move in Standard Algebraic Notation (SAN).
 
 The `flags` field contains one or more of the string values:
 
--   `n` - a non-capture
--   `b` - a pawn push of two squares
--   `e` - an en passant capture
--   `c` - a standard capture
--   `p` - a promotion
--   `k` - kingside castling
--   `q` - queenside castling
+- `n` - a non-capture
+- `b` - a pawn push of two squares
+- `e` - an en passant capture
+- `c` - a standard capture
+- `p` - a promotion
+- `k` - kingside castling
+- `q` - queenside castling
 
 A `flags` value of `pc` would mean that a pawn captured a piece on the 8th rank
 and promoted.
 
 ### .pgn([ options ])
 
-Returns the game in PGN format. Options is an optional parameter which may include
-max width and/or a newline character settings.
+Returns the game in PGN format. Options is an optional parameter which may
+include max width and/or a newline character settings.
 
-```js
+```ts
 const chess = new Chess()
 chess.header('White', 'Plunky', 'Black', 'Plinkie')
 chess.move('e4')
@@ -619,19 +628,18 @@ chess.move('e5')
 chess.move('Nc3')
 chess.move('Nc6')
 
-chess.pgn({ max_width: 5, newline_char: '<br />' })
+chess.pgn({ maxWidth: 5, newline: '<br />' })
 // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
 ```
 
 ### .put(piece, square)
 
-Place a piece on the square where piece is an object with the form
-{ type: ..., color: ... }. Returns true if the piece was successfully placed,
-otherwise, the board remains unchanged and false is returned. `put()` will fail
-when passed an invalid piece or square, or when two or more kings of the
-same color are placed.
+Place a piece on the square where piece is an object with the form { type: ...,
+color: ... }. Returns true if the piece was successfully placed, otherwise, the
+board remains unchanged and false is returned. `put()` will fail when passed an
+invalid piece or square, or when two or more kings of the same color are placed.
 
-```js
+```ts
 chess.clear()
 
 chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
@@ -658,7 +666,7 @@ chess.put({ type: 'k', color: 'w' }, 'h1') // fail - two kings
 
 Remove and return the piece on _square_.
 
-```js
+```ts
 chess.clear()
 chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
 chess.put({ type: chess.KING, color: chess.WHITE }, 'h1') // put a white king on h1
@@ -675,31 +683,31 @@ chess.remove('e1')
 
 Reset the board to the initial starting position.
 
-### .set_comment(comment)
+### .setComment(comment)
 
 Comment on the current position.
 
-```js
+```ts
 const chess = new Chess()
 
-chess.move("e4")
-chess.set_comment("king's pawn opening")
+chess.move('e4')
+chess.setComment("king's pawn opening")
 
 chess.pgn()
 // -> "1. e4 {king's pawn opening}"
 ```
 
-### .square_color(square)
+### .squareColor(square)
 
 Returns the color of the square ('light' or 'dark').
 
-```js
+```ts
 const chess = Chess()
-chess.square_color('h1')
+chess.squareColor('h1')
 // -> 'light'
-chess.square_color('a7')
+chess.squareColor('a7')
 // -> 'dark'
-chess.square_color('bogus square')
+chess.squareColor('bogus square')
 // -> null
 ```
 
@@ -707,7 +715,7 @@ chess.square_color('bogus square')
 
 Returns the current side to move.
 
-```js
+```ts
 chess.load('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1')
 chess.turn()
 // -> 'b'
@@ -715,9 +723,10 @@ chess.turn()
 
 ### .undo()
 
-Takeback the last half-move, returning a move object if successful, otherwise null.
+Takeback the last half-move, returning a move object if successful, otherwise
+null.
 
-```js
+```ts
 const chess = new Chess()
 
 chess.fen()
@@ -734,20 +743,21 @@ chess.undo()
 // -> null
 ```
 
-### .validate_fen(fen):
+### .validateFen(fen):
 
 Returns a validation object specifying validity or the errors found within the
 FEN string.
 
-```js
-chess.validate_fen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25')
-// -> { valid: true, error_number: 0, error: 'No errors.' }
+```ts
+chess.validateFen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25')
+// -> { ok: true }
 
-chess.validate_fen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
-// -> { valid: false, error_number: 9,
+chess.validateFen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
+// -> { ok: false,
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
 
 ## BUGS
 
--   The en passant square and castling flags aren't adjusted when using the put/remove functions (workaround: use .load() instead)
+- The en passant square and castling flags aren't adjusted when using the
+  put/remove functions (workaround: use .load() instead)

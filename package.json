@@ -1,24 +1,29 @@
 {
   "name": "chess.js",
-  "version": "0.13.4",
+  "version": "1.0.0-alpha.0",
   "license": "BSD-2-Clause",
-  "type": "module",
-  "main": "chess.js",
+  "main": "dist/chess.js",
+  "dist": "dist/chess.d.ts",
   "homepage": "https://github.com/jhlywa/chess.js",
   "author": "Jeff Hlywa <jhlywa@gmail.com>",
-  "keywords": [
-    "chess"
-  ],
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint src/ --ext .ts",
+    "build": "tsc --build",
+    "clean": "tsc --build --clean"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/jhlywa/chess.js.git"
+    "url": "https://github.com/jhlywa/chess.js"
   },
   "devDependencies": {
-    "jest": "^27.5.1",
-    "prettier": "^2.6.0"
-  },
-  "scripts": {
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "format": "prettier --write **/*.{js,json}"
+    "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "eslint": "^8.12.0",
+    "jest": "^27.0.6",
+    "jest-extended": "^2.0.0",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.6.3"
   }
 }
