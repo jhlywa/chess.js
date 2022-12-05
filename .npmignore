@@ -1,0 +1,4 @@
+.github/
+coverage/
+__tests__/
+debug.sh
