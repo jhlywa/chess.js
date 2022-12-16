@@ -905,10 +905,10 @@ export class Chess {
     return this.isCheckmate() || this.isStalemate() || this.isDraw()
   }
 
-  moves({
+  moves<T extends boolean = false>({
     verbose = false,
     square = undefined,
-  }: { verbose?: boolean; square?: Square } = {}) {
+  }: { verbose?: T; square?: Square } = {}): T extends false ? Move[] : string[] {
     const moves = this._moves({ square })
 
     if (verbose) {
@@ -1985,7 +1985,7 @@ export class Chess {
     return null
   }
 
-  history({ verbose = false }: { verbose?: boolean } = {}) {
+  history<T extends boolean = false>({ verbose = false }: { verbose?: T } = {}): T extends false ? string[] : Move[] {
     const reversedHistory = []
     const moveHistory = []
 
