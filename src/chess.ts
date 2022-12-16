@@ -905,16 +905,18 @@ export class Chess {
     return this.isCheckmate() || this.isStalemate() || this.isDraw()
   }
 
-  moves<T extends boolean = false>({
-    verbose = false,
+  moves<T extends boolean | undefined = undefined>({
+    verbose,
     square = undefined,
-  }: { verbose?: T; square?: Square } = {}): T extends false ? Move[] : string[] {
+  }: { verbose?: T; square?: Square } = {}): T extends true
+    ? Move[]
+    : string[] {
     const moves = this._moves({ square })
 
     if (verbose) {
-      return moves.map((move) => this._makePretty(move))
+      return moves.map((move) => this._makePretty(move)) as any
     } else {
-      return moves.map((move) => this._moveToSan(move, moves))
+      return moves.map((move) => this._moveToSan(move, moves)) as any
     }
   }
 
@@ -1985,7 +1987,9 @@ export class Chess {
     return null
   }
 
-  history<T extends boolean = false>({ verbose = false }: { verbose?: T } = {}): T extends false ? string[] : Move[] {
+  history<T extends boolean | undefined = undefined>({
+    verbose,
+  }: { verbose?: T } = {}): T extends true ? Move[] : string[] {
     const reversedHistory = []
     const moveHistory = []
 
@@ -2007,7 +2011,7 @@ export class Chess {
       this._makeMove(move)
     }
 
-    return moveHistory
+    return moveHistory as any
   }
 
   private _pruneComments() {
