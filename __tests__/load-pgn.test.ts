@@ -41,7 +41,7 @@ describe('Load PGN', () => {
       expect: true
     },
     {
-      pgn: [''],
+      pgn: [''], // extra newlineChar is expected because pgn() function adds it
       expect: true
     },
     {
