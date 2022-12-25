@@ -29,6 +29,17 @@ describe('Load PGN', () => {
       ],
       expect: true,
     },
+    // GitHub Issue #362 - Load PGN works with no moves
+    {
+      pgn: [
+        '[Event "UrTurn Game Jam"]',
+        '[Round "6"]',
+        '[White "Kevo1ution"]',
+        '[Black "Billy Bob Jr."]',
+        '',
+      ],
+      expect: true
+    },
     {
       fen: '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17',
       pgn: [

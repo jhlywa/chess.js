@@ -1528,15 +1528,19 @@ export class Chess {
     pgn = pgn.trim()
 
     // RegExp to split header. Takes advantage of the fact that header and movetext
-    // will always have a blank line between them (ie, two newline_char's).
-    // With default newline_char, will equal: /^(\[((?:\r?\n)|.)*\])(?:\s*\r?\n){2}/
+    // will always have a blank line between them (ie, two newline_char's). Handles
+    // case where movetext is empty by matching newlineChar until end of string is
+    // matched - effectively trimming from the end extra newlineChar.
+    // With default newline_char, will equal: /^(\[((?:\r?\n)|.)*\])((?:\s*\r?\n){2}|(?:\s*\r?\n)*$)/
     const headerRegex = new RegExp(
       '^(\\[((?:' +
         mask(newlineChar) +
         ')|.)*\\])' +
-        '(?:\\s*' +
+        '((?:\\s*' +
         mask(newlineChar) +
-        '){2}'
+        '){2}|(?:\\s*' +
+        mask(newlineChar) +
+        ')*$)'
     )
 
     // If no header given, begin with moves.
@@ -1655,7 +1659,7 @@ export class Chess {
     let moves = ms.trim().split(new RegExp(/\s+/))
 
     /* delete empty entries */
-    moves = moves.join(',').replace(/,,+/g, ',').split(',')
+    moves = moves.filter(move => move !== '')
 
     let result = ''
 
