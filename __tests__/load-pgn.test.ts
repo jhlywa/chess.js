@@ -36,7 +36,7 @@ describe('Load PGN', () => {
         '[Round "6"]',
         '[White "Kevo1ution"]',
         '[Black "Billy Bob Jr."]',
-        '',
+        '', // extra newlineChar is expected because pgn() function adds it
       ],
       expect: true
     },
