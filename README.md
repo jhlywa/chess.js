@@ -193,48 +193,6 @@ chess.fen()
 // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
 ```
 
-### .isAttacked(square, color)
-
-Returns true if the square is attacked by any piece of the given color.
-
-```ts
-const chess = new Chess()
-chess.isAttacked('f3', Chess.WHITE) 
-// -> true (we can attack empty squares)
-
-chess.isAttacked('f6', Chess.BLACK) 
-// -> true (side to move (e.g. the value returned by .turn) is ignored)
-
-chess.load(Chess.DEFAULT_POSITION)
-chess.isAttacked('e2', Chess.WHITE) 
-// -> true (we can attack our own pieces)
-
-chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
-chess.isAttacked('c6', Chess.BLACK) 
-// -> true (pieces still attack a square if even they are pinned)
-```
-
-### .isGameOver()
-
-Returns true if the game has ended via checkmate, stalemate, draw, threefold
-repetition, or insufficient material. Otherwise, returns false.
-
-```ts
-const chess = new Chess()
-chess.isGameOver()
-// -> false
-
-// stalemate
-chess.load('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
-chess.isGameOver()
-// -> true
-
-// checkmate
-chess.load('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3')
-chess.isGameOver()
-// -> true
-```
-
 ### .get(square)
 
 Returns the piece on the square:
@@ -343,6 +301,27 @@ chess.inCheck()
 // -> true
 ```
 
+### .isAttacked(square, color)
+
+Returns true if the square is attacked by any piece of the given color.
+
+```ts
+const chess = new Chess()
+chess.isAttacked('f3', Chess.WHITE)
+// -> true (we can attack empty squares)
+
+chess.isAttacked('f6', Chess.BLACK)
+// -> true (side to move (e.g. the value returned by .turn) is ignored)
+
+chess.load(Chess.DEFAULT_POSITION)
+chess.isAttacked('e2', Chess.WHITE)
+// -> true (we can attack our own pieces)
+
+chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
+chess.isAttacked('c6', Chess.BLACK)
+// -> true (pieces still attack a square if even they are pinned)
+```
+
 ### .isCheckmate()
 
 Returns true or false if the side to move has been checkmated.
@@ -363,6 +342,38 @@ material).
 ```ts
 const chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
 chess.isDraw()
+// -> true
+```
+
+### .isInsufficientMaterial()
+
+Returns true if the game is drawn due to insufficient material (K vs. K, K vs.
+KB, or K vs. KN) otherwise false.
+
+```ts
+const chess = new Chess('k7/8/n7/8/8/8/8/7K b - - 0 1')
+chess.isInsufficientMaterial()
+// -> true
+```
+
+### .isGameOver()
+
+Returns true if the game has ended via checkmate, stalemate, draw, threefold
+repetition, or insufficient material. Otherwise, returns false.
+
+```ts
+const chess = new Chess()
+chess.isGameOver()
+// -> false
+
+// stalemate
+chess.load('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
+chess.isGameOver()
+// -> true
+
+// checkmate
+chess.load('rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3')
+chess.isGameOver()
 // -> true
 ```
 
@@ -396,17 +407,6 @@ chess.isThreefoldRepetition()
 chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 3rd time
 chess.isThreefoldRepetition()
-// -> true
-```
-
-### .isInsufficientMaterial()
-
-Returns true if the game is drawn due to insufficient material (K vs. K, K vs.
-KB, or K vs. KN) otherwise false.
-
-```ts
-const chess = new Chess('k7/8/n7/8/8/8/8/7K b - - 0 1')
-chess.isInsufficientMaterial()
 // -> true
 ```
 
