@@ -193,6 +193,27 @@ chess.fen()
 // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
 ```
 
+### .isAttacked(square, color)
+
+Returns true if the square is attacked by any piece of the given color.
+
+```ts
+const chess = new Chess()
+chess.isAttacked('f3', Chess.WHITE) 
+// -> true (we can attack empty squares)
+
+chess.isAttacked('f6', Chess.BLACK) 
+// -> true (side to move (e.g. the value returned by .turn) is ignored)
+
+chess.load(Chess.DEFAULT_POSITION)
+chess.isAttacked('e2', Chess.WHITE) 
+// -> true (we can attack our own pieces)
+
+chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
+chess.isAttacked('c6', Chess.BLACK) 
+// -> true (pieces still attack a square if even they are pinned)
+```
+
 ### .isGameOver()
 
 Returns true if the game has ended via checkmate, stalemate, draw, threefold

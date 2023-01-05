@@ -739,6 +739,12 @@ export class Chess {
 
       const piece = this._board[i]
       const difference = i - square
+
+      // skip - to/from square are the same
+      if (difference === 0) {
+        continue;
+      }
+
       const index = difference + 119
 
       if (ATTACKS[index] & PIECE_MASKS[piece.type]) {
@@ -775,6 +781,10 @@ export class Chess {
 
   private _isKingAttacked(color: Color) {
     return this._attacked(swapColor(color), this._kings[color])
+  }
+
+  isAttacked(square: Square, attackedBy: Color) {
+    return this._attacked(attackedBy, Ox88[square]);
   }
 
   isCheck() {
