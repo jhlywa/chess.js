@@ -2014,7 +2014,7 @@ export class Chess {
       }
 
       if (verbose) {
-        moveHistory.push(this._makePretty(move))
+        moveHistory.push({fen: this.fen(), ...this._makePretty(move)})
       } else {
         moveHistory.push(this._moveToSan(move, this._moves()))
       }

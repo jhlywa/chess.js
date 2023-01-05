@@ -96,6 +96,7 @@ describe('History', () => {
       moves: [
         {
           color: 'w',
+          fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
           from: 'c2',
           to: 'c4',
           flags: 'b',
@@ -104,6 +105,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1',
           from: 'e7',
           to: 'e6',
           flags: 'n',
@@ -112,6 +114,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rnbqkbnr/pppp1ppp/4p3/8/2P5/8/PP1PPPPP/RNBQKBNR w KQkq - 0 2',
           from: 'g1',
           to: 'f3',
           flags: 'n',
@@ -120,6 +123,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnbqkbnr/pppp1ppp/4p3/8/2P5/5N2/PP1PPPPP/RNBQKB1R b KQkq - 1 2',
           from: 'd7',
           to: 'd5',
           flags: 'b',
@@ -128,6 +132,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rnbqkbnr/ppp2ppp/4p3/3p4/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq d6 0 3',
           from: 'd2',
           to: 'd4',
           flags: 'b',
@@ -136,6 +141,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq d3 0 3',
           from: 'g8',
           to: 'f6',
           flags: 'n',
@@ -144,6 +150,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R w KQkq - 1 4',
           from: 'b1',
           to: 'c3',
           flags: 'n',
@@ -152,6 +159,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/2N2N2/PP2PPPP/R1BQKB1R b KQkq - 2 4',
           from: 'f8',
           to: 'e7',
           flags: 'n',
@@ -160,6 +168,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rnbqk2r/ppp1bppp/4pn2/3p4/2PP4/2N2N2/PP2PPPP/R1BQKB1R w KQkq - 3 5',
           from: 'c1',
           to: 'g5',
           flags: 'n',
@@ -168,6 +177,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnbqk2r/ppp1bppp/4pn2/3p2B1/2PP4/2N2N2/PP2PPPP/R2QKB1R b KQkq - 4 5',
           from: 'e8',
           to: 'g8',
           flags: 'k',
@@ -176,6 +186,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rnbq1rk1/ppp1bppp/4pn2/3p2B1/2PP4/2N2N2/PP2PPPP/R2QKB1R w KQ - 5 6',
           from: 'e2',
           to: 'e3',
           flags: 'n',
@@ -184,6 +195,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnbq1rk1/ppp1bppp/4pn2/3p2B1/2PP4/2N1PN2/PP3PPP/R2QKB1R b KQ - 0 6',
           from: 'h7',
           to: 'h6',
           flags: 'n',
@@ -192,6 +204,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rnbq1rk1/ppp1bpp1/4pn1p/3p2B1/2PP4/2N1PN2/PP3PPP/R2QKB1R w KQ - 0 7',
           from: 'g5',
           to: 'h4',
           flags: 'n',
@@ -200,6 +213,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnbq1rk1/ppp1bpp1/4pn1p/3p4/2PP3B/2N1PN2/PP3PPP/R2QKB1R b KQ - 1 7',
           from: 'b7',
           to: 'b6',
           flags: 'n',
@@ -208,60 +222,67 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rnbq1rk1/p1p1bpp1/1p2pn1p/3p4/2PP3B/2N1PN2/PP3PPP/R2QKB1R w KQ - 0 8',
           from: 'c4',
           to: 'd5',
           flags: 'c',
           piece: 'p',
-          captured: 'p',
           san: 'cxd5',
+          captured: 'p',
         },
         {
           color: 'b',
+          fen: 'rnbq1rk1/p1p1bpp1/1p2pn1p/3P4/3P3B/2N1PN2/PP3PPP/R2QKB1R b KQ - 0 8',
           from: 'f6',
           to: 'd5',
           flags: 'c',
           piece: 'n',
-          captured: 'p',
           san: 'Nxd5',
+          captured: 'p',
         },
         {
           color: 'w',
+          fen: 'rnbq1rk1/p1p1bpp1/1p2p2p/3n4/3P3B/2N1PN2/PP3PPP/R2QKB1R w KQ - 0 9',
           from: 'h4',
           to: 'e7',
           flags: 'c',
           piece: 'b',
-          captured: 'b',
           san: 'Bxe7',
+          captured: 'b',
         },
         {
           color: 'b',
+          fen: 'rnbq1rk1/p1p1Bpp1/1p2p2p/3n4/3P4/2N1PN2/PP3PPP/R2QKB1R b KQ - 0 9',
           from: 'd8',
           to: 'e7',
           flags: 'c',
           piece: 'q',
-          captured: 'b',
           san: 'Qxe7',
+          captured: 'b',
         },
         {
           color: 'w',
+          fen: 'rnb2rk1/p1p1qpp1/1p2p2p/3n4/3P4/2N1PN2/PP3PPP/R2QKB1R w KQ - 0 10',
           from: 'c3',
           to: 'd5',
           flags: 'c',
           piece: 'n',
-          captured: 'n',
           san: 'Nxd5',
+          captured: 'n',
         },
         {
           color: 'b',
+          fen: 'rnb2rk1/p1p1qpp1/1p2p2p/3N4/3P4/4PN2/PP3PPP/R2QKB1R b KQ - 0 10',
           from: 'e6',
           to: 'd5',
           flags: 'c',
           piece: 'p',
-          captured: 'n',
           san: 'exd5',
+          captured: 'n',
         },
         {
           color: 'w',
+          fen: 'rnb2rk1/p1p1qpp1/1p5p/3p4/3P4/4PN2/PP3PPP/R2QKB1R w KQ - 0 11',
           from: 'a1',
           to: 'c1',
           flags: 'n',
@@ -270,6 +291,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnb2rk1/p1p1qpp1/1p5p/3p4/3P4/4PN2/PP3PPP/2RQKB1R b K - 1 11',
           from: 'c8',
           to: 'e6',
           flags: 'n',
@@ -278,6 +300,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rn3rk1/p1p1qpp1/1p2b2p/3p4/3P4/4PN2/PP3PPP/2RQKB1R w K - 2 12',
           from: 'd1',
           to: 'a4',
           flags: 'n',
@@ -286,6 +309,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rn3rk1/p1p1qpp1/1p2b2p/3p4/Q2P4/4PN2/PP3PPP/2R1KB1R b K - 3 12',
           from: 'c7',
           to: 'c5',
           flags: 'b',
@@ -294,6 +318,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rn3rk1/p3qpp1/1p2b2p/2pp4/Q2P4/4PN2/PP3PPP/2R1KB1R w K c6 0 13',
           from: 'a4',
           to: 'a3',
           flags: 'n',
@@ -302,6 +327,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rn3rk1/p3qpp1/1p2b2p/2pp4/3P4/Q3PN2/PP3PPP/2R1KB1R b K - 1 13',
           from: 'f8',
           to: 'c8',
           flags: 'n',
@@ -310,6 +336,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rnr3k1/p3qpp1/1p2b2p/2pp4/3P4/Q3PN2/PP3PPP/2R1KB1R w K - 2 14',
           from: 'f1',
           to: 'b5',
           flags: 'n',
@@ -318,6 +345,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnr3k1/p3qpp1/1p2b2p/1Bpp4/3P4/Q3PN2/PP3PPP/2R1K2R b K - 3 14',
           from: 'a7',
           to: 'a6',
           flags: 'n',
@@ -326,24 +354,27 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: 'rnr3k1/4qpp1/pp2b2p/1Bpp4/3P4/Q3PN2/PP3PPP/2R1K2R w K - 0 15',
           from: 'd4',
           to: 'c5',
           flags: 'c',
           piece: 'p',
-          captured: 'p',
           san: 'dxc5',
+          captured: 'p',
         },
         {
           color: 'b',
+          fen: 'rnr3k1/4qpp1/pp2b2p/1BPp4/8/Q3PN2/PP3PPP/2R1K2R b K - 0 15',
           from: 'b6',
           to: 'c5',
           flags: 'c',
           piece: 'p',
-          captured: 'p',
           san: 'bxc5',
+          captured: 'p',
         },
         {
           color: 'w',
+          fen: 'rnr3k1/4qpp1/p3b2p/1Bpp4/8/Q3PN2/PP3PPP/2R1K2R w K - 0 16',
           from: 'e1',
           to: 'g1',
           flags: 'k',
@@ -352,6 +383,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: 'rnr3k1/4qpp1/p3b2p/1Bpp4/8/Q3PN2/PP3PPP/2R2RK1 b - - 1 16',
           from: 'a8',
           to: 'a7',
           flags: 'n',
@@ -360,6 +392,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '1nr3k1/r3qpp1/p3b2p/1Bpp4/8/Q3PN2/PP3PPP/2R2RK1 w - - 2 17',
           from: 'b5',
           to: 'e2',
           flags: 'n',
@@ -368,6 +401,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '1nr3k1/r3qpp1/p3b2p/2pp4/8/Q3PN2/PP2BPPP/2R2RK1 b - - 3 17',
           from: 'b8',
           to: 'd7',
           flags: 'n',
@@ -376,6 +410,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '2r3k1/r2nqpp1/p3b2p/2pp4/8/Q3PN2/PP2BPPP/2R2RK1 w - - 4 18',
           from: 'f3',
           to: 'd4',
           flags: 'n',
@@ -384,6 +419,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '2r3k1/r2nqpp1/p3b2p/2pp4/3N4/Q3P3/PP2BPPP/2R2RK1 b - - 5 18',
           from: 'e7',
           to: 'f8',
           flags: 'n',
@@ -392,24 +428,27 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '2r2qk1/r2n1pp1/p3b2p/2pp4/3N4/Q3P3/PP2BPPP/2R2RK1 w - - 6 19',
           from: 'd4',
           to: 'e6',
           flags: 'c',
           piece: 'n',
-          captured: 'b',
           san: 'Nxe6',
+          captured: 'b',
         },
         {
           color: 'b',
+          fen: '2r2qk1/r2n1pp1/p3N2p/2pp4/8/Q3P3/PP2BPPP/2R2RK1 b - - 0 19',
           from: 'f7',
           to: 'e6',
           flags: 'c',
           piece: 'p',
-          captured: 'n',
           san: 'fxe6',
+          captured: 'n',
         },
         {
           color: 'w',
+          fen: '2r2qk1/r2n2p1/p3p2p/2pp4/8/Q3P3/PP2BPPP/2R2RK1 w - - 0 20',
           from: 'e3',
           to: 'e4',
           flags: 'n',
@@ -418,6 +457,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '2r2qk1/r2n2p1/p3p2p/2pp4/4P3/Q7/PP2BPPP/2R2RK1 b - - 0 20',
           from: 'd5',
           to: 'd4',
           flags: 'n',
@@ -426,6 +466,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '2r2qk1/r2n2p1/p3p2p/2p5/3pP3/Q7/PP2BPPP/2R2RK1 w - - 0 21',
           from: 'f2',
           to: 'f4',
           flags: 'b',
@@ -434,6 +475,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '2r2qk1/r2n2p1/p3p2p/2p5/3pPP2/Q7/PP2B1PP/2R2RK1 b - f3 0 21',
           from: 'f8',
           to: 'e7',
           flags: 'n',
@@ -442,6 +484,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '2r3k1/r2nq1p1/p3p2p/2p5/3pPP2/Q7/PP2B1PP/2R2RK1 w - - 1 22',
           from: 'e4',
           to: 'e5',
           flags: 'n',
@@ -450,6 +493,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '2r3k1/r2nq1p1/p3p2p/2p1P3/3p1P2/Q7/PP2B1PP/2R2RK1 b - - 0 22',
           from: 'c8',
           to: 'b8',
           flags: 'n',
@@ -458,6 +502,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '1r4k1/r2nq1p1/p3p2p/2p1P3/3p1P2/Q7/PP2B1PP/2R2RK1 w - - 1 23',
           from: 'e2',
           to: 'c4',
           flags: 'n',
@@ -466,6 +511,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '1r4k1/r2nq1p1/p3p2p/2p1P3/2Bp1P2/Q7/PP4PP/2R2RK1 b - - 2 23',
           from: 'g8',
           to: 'h8',
           flags: 'n',
@@ -474,6 +520,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '1r5k/r2nq1p1/p3p2p/2p1P3/2Bp1P2/Q7/PP4PP/2R2RK1 w - - 3 24',
           from: 'a3',
           to: 'h3',
           flags: 'n',
@@ -482,6 +529,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '1r5k/r2nq1p1/p3p2p/2p1P3/2Bp1P2/7Q/PP4PP/2R2RK1 b - - 4 24',
           from: 'd7',
           to: 'f8',
           flags: 'n',
@@ -490,6 +538,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '1r3n1k/r3q1p1/p3p2p/2p1P3/2Bp1P2/7Q/PP4PP/2R2RK1 w - - 5 25',
           from: 'b2',
           to: 'b3',
           flags: 'n',
@@ -498,6 +547,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '1r3n1k/r3q1p1/p3p2p/2p1P3/2Bp1P2/1P5Q/P5PP/2R2RK1 b - - 0 25',
           from: 'a6',
           to: 'a5',
           flags: 'n',
@@ -506,6 +556,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '1r3n1k/r3q1p1/4p2p/p1p1P3/2Bp1P2/1P5Q/P5PP/2R2RK1 w - - 0 26',
           from: 'f4',
           to: 'f5',
           flags: 'n',
@@ -514,24 +565,27 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '1r3n1k/r3q1p1/4p2p/p1p1PP2/2Bp4/1P5Q/P5PP/2R2RK1 b - - 0 26',
           from: 'e6',
           to: 'f5',
           flags: 'c',
           piece: 'p',
-          captured: 'p',
           san: 'exf5',
+          captured: 'p',
         },
         {
           color: 'w',
+          fen: '1r3n1k/r3q1p1/7p/p1p1Pp2/2Bp4/1P5Q/P5PP/2R2RK1 w - - 0 27',
           from: 'f1',
           to: 'f5',
           flags: 'c',
           piece: 'r',
-          captured: 'p',
           san: 'Rxf5',
+          captured: 'p',
         },
         {
           color: 'b',
+          fen: '1r3n1k/r3q1p1/7p/p1p1PR2/2Bp4/1P5Q/P5PP/2R3K1 b - - 0 27',
           from: 'f8',
           to: 'h7',
           flags: 'n',
@@ -540,6 +594,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '1r5k/r3q1pn/7p/p1p1PR2/2Bp4/1P5Q/P5PP/2R3K1 w - - 1 28',
           from: 'c1',
           to: 'f1',
           flags: 'n',
@@ -548,6 +603,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '1r5k/r3q1pn/7p/p1p1PR2/2Bp4/1P5Q/P5PP/5RK1 b - - 2 28',
           from: 'e7',
           to: 'd8',
           flags: 'n',
@@ -556,6 +612,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '1r1q3k/r5pn/7p/p1p1PR2/2Bp4/1P5Q/P5PP/5RK1 w - - 3 29',
           from: 'h3',
           to: 'g3',
           flags: 'n',
@@ -564,6 +621,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '1r1q3k/r5pn/7p/p1p1PR2/2Bp4/1P4Q1/P5PP/5RK1 b - - 4 29',
           from: 'a7',
           to: 'e7',
           flags: 'n',
@@ -572,6 +630,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '1r1q3k/4r1pn/7p/p1p1PR2/2Bp4/1P4Q1/P5PP/5RK1 w - - 5 30',
           from: 'h2',
           to: 'h4',
           flags: 'b',
@@ -580,6 +639,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '1r1q3k/4r1pn/7p/p1p1PR2/2Bp3P/1P4Q1/P5P1/5RK1 b - h3 0 30',
           from: 'b8',
           to: 'b7',
           flags: 'n',
@@ -588,6 +648,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '3q3k/1r2r1pn/7p/p1p1PR2/2Bp3P/1P4Q1/P5P1/5RK1 w - - 1 31',
           from: 'e5',
           to: 'e6',
           flags: 'n',
@@ -596,6 +657,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '3q3k/1r2r1pn/4P2p/p1p2R2/2Bp3P/1P4Q1/P5P1/5RK1 b - - 0 31',
           from: 'b7',
           to: 'c7',
           flags: 'n',
@@ -604,6 +666,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '3q3k/2r1r1pn/4P2p/p1p2R2/2Bp3P/1P4Q1/P5P1/5RK1 w - - 1 32',
           from: 'g3',
           to: 'e5',
           flags: 'n',
@@ -612,6 +675,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '3q3k/2r1r1pn/4P2p/p1p1QR2/2Bp3P/1P6/P5P1/5RK1 b - - 2 32',
           from: 'd8',
           to: 'e8',
           flags: 'n',
@@ -620,6 +684,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '4q2k/2r1r1pn/4P2p/p1p1QR2/2Bp3P/1P6/P5P1/5RK1 w - - 3 33',
           from: 'a2',
           to: 'a4',
           flags: 'b',
@@ -628,6 +693,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '4q2k/2r1r1pn/4P2p/p1p1QR2/P1Bp3P/1P6/6P1/5RK1 b - a3 0 33',
           from: 'e8',
           to: 'd8',
           flags: 'n',
@@ -636,6 +702,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '3q3k/2r1r1pn/4P2p/p1p1QR2/P1Bp3P/1P6/6P1/5RK1 w - - 1 34',
           from: 'f1',
           to: 'f2',
           flags: 'n',
@@ -644,6 +711,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '3q3k/2r1r1pn/4P2p/p1p1QR2/P1Bp3P/1P6/5RP1/6K1 b - - 2 34',
           from: 'd8',
           to: 'e8',
           flags: 'n',
@@ -652,6 +720,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '4q2k/2r1r1pn/4P2p/p1p1QR2/P1Bp3P/1P6/5RP1/6K1 w - - 3 35',
           from: 'f2',
           to: 'f3',
           flags: 'n',
@@ -660,6 +729,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '4q2k/2r1r1pn/4P2p/p1p1QR2/P1Bp3P/1P3R2/6P1/6K1 b - - 4 35',
           from: 'e8',
           to: 'd8',
           flags: 'n',
@@ -668,6 +738,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '3q3k/2r1r1pn/4P2p/p1p1QR2/P1Bp3P/1P3R2/6P1/6K1 w - - 5 36',
           from: 'c4',
           to: 'd3',
           flags: 'n',
@@ -676,6 +747,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '3q3k/2r1r1pn/4P2p/p1p1QR2/P2p3P/1P1B1R2/6P1/6K1 b - - 6 36',
           from: 'd8',
           to: 'e8',
           flags: 'n',
@@ -684,6 +756,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '4q2k/2r1r1pn/4P2p/p1p1QR2/P2p3P/1P1B1R2/6P1/6K1 w - - 7 37',
           from: 'e5',
           to: 'e4',
           flags: 'n',
@@ -692,6 +765,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '4q2k/2r1r1pn/4P2p/p1p2R2/P2pQ2P/1P1B1R2/6P1/6K1 b - - 8 37',
           from: 'h7',
           to: 'f6',
           flags: 'n',
@@ -700,33 +774,37 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '4q2k/2r1r1p1/4Pn1p/p1p2R2/P2pQ2P/1P1B1R2/6P1/6K1 w - - 9 38',
           from: 'f5',
           to: 'f6',
           flags: 'c',
           piece: 'r',
-          captured: 'n',
           san: 'Rxf6',
+          captured: 'n',
         },
         {
           color: 'b',
+          fen: '4q2k/2r1r1p1/4PR1p/p1p5/P2pQ2P/1P1B1R2/6P1/6K1 b - - 0 38',
           from: 'g7',
           to: 'f6',
           flags: 'c',
           piece: 'p',
-          captured: 'r',
           san: 'gxf6',
+          captured: 'r',
         },
         {
           color: 'w',
+          fen: '4q2k/2r1r3/4Pp1p/p1p5/P2pQ2P/1P1B1R2/6P1/6K1 w - - 0 39',
           from: 'f3',
           to: 'f6',
           flags: 'c',
           piece: 'r',
-          captured: 'p',
           san: 'Rxf6',
+          captured: 'p',
         },
         {
           color: 'b',
+          fen: '4q2k/2r1r3/4PR1p/p1p5/P2pQ2P/1P1B4/6P1/6K1 b - - 0 39',
           from: 'h8',
           to: 'g8',
           flags: 'n',
@@ -735,6 +813,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '4q1k1/2r1r3/4PR1p/p1p5/P2pQ2P/1P1B4/6P1/6K1 w - - 1 40',
           from: 'd3',
           to: 'c4',
           flags: 'n',
@@ -743,6 +822,7 @@ describe('History', () => {
         },
         {
           color: 'b',
+          fen: '4q1k1/2r1r3/4PR1p/p1p5/P1BpQ2P/1P6/6P1/6K1 b - - 2 40',
           from: 'g8',
           to: 'h8',
           flags: 'n',
@@ -751,6 +831,7 @@ describe('History', () => {
         },
         {
           color: 'w',
+          fen: '4q2k/2r1r3/4PR1p/p1p5/P1BpQ2P/1P6/6P1/6K1 w - - 3 41',
           from: 'e4',
           to: 'f4',
           flags: 'n',
@@ -776,6 +857,62 @@ describe('History', () => {
       for (let j = 0; j < t.moves.length; j++) {
         expect(history[j]).toEqual(t.moves[j])
       }
+    })
+  })
+
+  test('History - PGN Setup', () => {
+    let pgn = `[SetUp "1"]
+[FEN "r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 1"]
+
+1. ... Ba5 2. O-O d6
+3. d4`
+
+    const moves = [
+      {
+        fen: 'r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 1',
+        color: 'b',
+        piece: 'b',
+        from: 'b4',
+        to: 'a5',
+        san: 'Ba5',
+        flags: 'n',
+      },
+      {
+        fen: 'r1bqk1nr/pppp1ppp/2n5/b3p3/2B1P3/2P2N2/P2P1PPP/RNBQK2R w KQkq - 1 2',
+        color: 'w',
+        piece: 'k',
+        from: 'e1',
+        to: 'g1',
+        san: 'O-O',
+        flags: 'k',
+      },
+      {
+        fen: 'r1bqk1nr/pppp1ppp/2n5/b3p3/2B1P3/2P2N2/P2P1PPP/RNBQ1RK1 b kq - 2 2',
+        color: 'b',
+        piece: 'p',
+        from: 'd7',
+        to: 'd6',
+        san: 'd6',
+        flags: 'n',
+      },
+      {
+        fen: 'r1bqk1nr/ppp2ppp/2np4/b3p3/2B1P3/2P2N2/P2P1PPP/RNBQ1RK1 w kq - 0 3',
+        color: 'w',
+        piece: 'p',
+        from: 'd2',
+        to: 'd4',
+        san: 'd4',
+        flags: 'b',
+      },
+    ]
+
+    const chess = new Chess()
+    chess.loadPgn(pgn)
+
+    const history = chess.history({ verbose: true })
+
+    moves.forEach((move, i) => {
+      expect(history[i]).toEqual(move)
     })
   })
 })

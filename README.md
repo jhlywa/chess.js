@@ -270,7 +270,8 @@ chess.header()
 
 Returns a list containing the moves of the current game. Options is an optional
 parameter which may contain a 'verbose' flag. See .moves() for a description of
-the verbose move fields.
+the verbose move fields. A FEN string of the position _prior_ to the move being
+made is added to the verbose history output.
 
 ```ts
 const chess = new Chess()
@@ -283,10 +284,46 @@ chess.history()
 // -> ['e4', 'e5', 'f4', 'exf4']
 
 chess.history({ verbose: true })
-// -> [{ color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' },
-//     { color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5' },
-//     { color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' },
-//     { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }]
+// -->
+// [
+//   {
+//     fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+//     color: 'w',
+//     piece: 'p',
+//     from: 'e2',
+//     to: 'e4',
+//     san: 'e4',
+//     flags: 'b'
+//   },
+//   {
+//     fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
+//     color: 'b',
+//     piece: 'p',
+//     from: 'e7',
+//     to: 'e5',
+//     san: 'e5',
+//     flags: 'b'
+//   },
+//   {
+//     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+//     color: 'w',
+//     piece: 'p',
+//     from: 'f2',
+//     to: 'f4',
+//     san: 'f4',
+//     flags: 'b'
+//   },
+//   {
+//     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2',
+//     color: 'b',
+//     piece: 'p',
+//     from: 'e5',
+//     to: 'f4',
+//     san: 'exf4',
+//     flags: 'c',
+//     captured: 'p'
+//   }
+// ]
 ```
 
 ### .inCheck()
