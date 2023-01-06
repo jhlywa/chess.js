@@ -1,4 +1,5 @@
 import { Chess } from '../src/chess'
+import 'jest-extended'
 
 describe('Regression Tests', () => {
   it('Github Issue #30 - move generateion - single square bug', () => {

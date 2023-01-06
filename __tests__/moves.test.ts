@@ -1,5 +1,6 @@
 import { Chess, Square } from '../src/chess'
 import { split } from './utils'
+import 'jest-extended'
 
 test('moves', () => {
   const chess = new Chess()

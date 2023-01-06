@@ -6,6 +6,5 @@
     "outDir": "./dist",
     "strict": true
   },
-  "include": ["src/**/*"],
-  "files": ["__tests__/global.d.ts"]
+  "include": ["src/**/*"]
 }
