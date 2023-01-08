@@ -19,7 +19,7 @@ NPM:
 npm install chess.js@1.0.0-alpha.0
 ```
 
-or install the latest development version straight from Github:
+or install the latest development version straight from GitHub:
 
 ```sh
 npm install git+https://github.com/jhlywa/chess.js.git
@@ -44,7 +44,7 @@ console.log(chess.pgn())
 
 ## User Interface
 
-By design, chess.js is headless and does not include user interface. Many
+By design, chess.js is headless and does not include a user interface. Many
 developers have had success integrating chess.js with the
 [chessboard.js](http://chessboardjs.com) library. See
 [chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for an
@@ -455,8 +455,8 @@ chess.isThreefoldRepetition()
 
 ### .load(fen)
 
-The board is cleared and the FEN string is loaded. Throws an exception if the
-the FEN is invalid.
+Clears the board and loads the provided FEN string. Throws an exception if the
+FEN is invalid.
 
 ```ts
 const chess = new Chess()
