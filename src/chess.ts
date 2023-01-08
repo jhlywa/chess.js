@@ -1541,7 +1541,7 @@ export class Chess {
       let value = ''
 
       for (let i = 0; i < headers.length; i++) {
-        const regex = /^\s*\[([A-Za-z]+)\s*"(.*)"\s*\]\s*$/
+        const regex = /^\s*\[\s*([A-Za-z]+)\s*"(.*)"\s*\]\s*$/
         key = headers[i].replace(regex, '$1')
         value = headers[i].replace(regex, '$2')
         if (key.trim().length > 0) {
