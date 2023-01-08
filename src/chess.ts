@@ -1717,7 +1717,7 @@ export class Chess {
         if (TERMINATION_MARKERS.indexOf(moves[halfMove]) > -1) {
           result = moves[halfMove]
         } else {
-          return false
+          throw new Error(`Invalid move in PGN: ${moves[halfMove]}`)
         }
       } else {
         // reset the end of game marker if making a valid move
@@ -1735,8 +1735,6 @@ export class Chess {
     if (result && Object.keys(this._header).length && !this._header['Result']) {
       this.header('Result', result)
     }
-
-    return true
   }
 
   /*

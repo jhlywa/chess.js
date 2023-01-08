@@ -489,8 +489,7 @@ The `sloppy` flag is a boolean that permits chess.js to parse moves in
 non-standard notations. See `.move` documentation for more information about
 non-SAN notations.
 
-The method will return `true` if the PGN was parsed successfully, otherwise
-`false`.
+The method will throw and exception if the PGN failed to parse.
 
 ```ts
 const chess = new Chess()
@@ -516,7 +515,6 @@ const pgn = [
 ]
 
 chess.loadPgn(pgn.join('\n'))
-// -> true
 
 chess.fen()
 // -> 1r3kr1/pbpBBp1p/1b3P2/8/8/2P2q2/P4PPP/3R2K1 b - - 0 24
@@ -551,18 +549,12 @@ const sloppyPgn = [
   '6. c4xd5 e5-e4', // non-standard
   '7. dxc6 exf3',
   '8. Qb3 1-0',
-].join('|')
+].join(':')
 
-const options = {
-  newlineChar: '\\|', // Literal '|' character escaped
-  sloppy: true,
-}
+chess.loadPgn(sloppyPgn, { newlineChar: ':' })
+// Error: Invalid move in PGN: Pc2c4
 
-chess.loadPgn(sloppyPgn)
-// -> false
-
-chess.loadPgn(sloppyPgn, options)
-// -> true
+chess.loadPgn(sloppyPgn, { newlineChar: ':', sloppy: true })
 
 chess.fen()
 // -> 'r1bqk2r/pppp1ppp/2P5/8/1b6/1Q3pP1/PP1PPP1P/R1B1KB1R b KQkq - 1 8'
@@ -570,11 +562,12 @@ chess.fen()
 
 ### .move(move, [ options ])
 
-Makes a move on the board and returns a move object if the move was legal.
-The move argument can be either a string in Standard Algebraic Notation (SAN)
-or a move object. Throws an 'Illegal move' exception if the move was illegal.
+Makes a move on the board and returns a move object if the move was legal. The
+move argument can be either a string in Standard Algebraic Notation (SAN) or a
+move object. Throws an 'Illegal move' exception if the move was illegal.
 
 #### .move() - Standard Algebraic Notation (SAN)
+
 ```ts
 const chess = new Chess()
 
@@ -588,8 +581,10 @@ chess.move('Nf6')
 // -> { color: 'b', from: 'g8', to: 'f6', flags: 'n', piece: 'n', san: 'Nf6' }
 ```
 
-#### .move() - Move Object 
-A move object contains `to`, `from` and, `promotion` (only when necessary) fields.
+#### .move() - Move Object
+
+A move object contains `to`, `from` and, `promotion` (only when necessary)
+fields.
 
 ```ts
 const chess = new Chess()
@@ -599,8 +594,9 @@ chess.move({ from: 'g2', to: 'g3' })
 ```
 
 #### .move() - Sloppy Parser
-An optional `{ sloppy: true }` flag can be used to parse a variety of non-standard move
-notations:
+
+An optional `{ sloppy: true }` flag can be used to parse a variety of
+non-standard move notations:
 
 ```ts
 const chess = new Chess()

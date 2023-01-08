@@ -38,8 +38,7 @@ describe('Regression Tests', () => {
       '',
       '1. Rh6#',
     ]
-    const result = chess.loadPgn(pgn.join('\n'))
-    expect(result).toBe(true)
+    chess.loadPgn(pgn.join('\n'))
     expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1')
   })
 
@@ -51,8 +50,7 @@ describe('Regression Tests', () => {
       '',
       '1. ... Qc5+',
     ]
-    const result = chess.loadPgn(pgn.join('\n'))
-    expect(result).toBe(true)
+    chess.loadPgn(pgn.join('\n'))
     expect(chess.fen()).toBe(
       'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2'
     )
@@ -90,7 +88,7 @@ describe('Regression Tests', () => {
     ]
 
     const chess = new Chess()
-    expect(chess.loadPgn(pgn.join('\n'))).toEqual(true)
+    chess.loadPgn(pgn.join('\n'))
     const expected = {
       Event: 'Test Olympiad',
       Site: 'Earth',
@@ -170,7 +168,7 @@ describe('Regression Tests', () => {
     expect(() => chess.move('e4')).toThrowError()
   })
 
-  it('Github Issue #279 - loadPgn duplicate last move if it has a comment', () => {
+  it('Github Issue #279 - loadPgn duplicates last move if it has a comment', () => {
     const history = [
       'e4',
       'e5',
@@ -187,61 +185,55 @@ describe('Regression Tests', () => {
 
     // trailing comment - no end of game marker
     const chess = new Chess()
-    let result = chess.loadPgn(
+    chess.loadPgn(
       '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment}'
     )
-    expect(result).toBe(true)
     expect(chess.history()).toEqual(history)
     expect(chess.header()['Result']).toBeUndefined()
 
     // trailing comment - end of game marker after comment
-    result = chess.loadPgn(
+    chess.loadPgn(
       '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment} *'
     )
-    expect(result).toBe(true)
     expect(chess.history()).toEqual(history)
     expect(chess.header()['Result']).toBeUndefined()
 
     // trailing comment - end of game marker before comment
-    result = chess.loadPgn(
+    chess.loadPgn(
       '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 * {comment}'
     )
-    expect(result).toBe(true)
     expect(chess.history()).toEqual(history)
     expect(chess.header()['Result']).toBeUndefined()
 
     // trailing comment with PGN header - no end of game marker
-    result = chess.loadPgn(
+    chess.loadPgn(
       '[White "name"]\n\n' +
         '1. e4 e5 2. Nf3 Nc6 ' +
         '3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 ' +
         '6. Bxc6 {comment}'
     )
-    expect(result).toBe(true)
     expect(chess.history()).toEqual(history)
     expect(chess.header()['Result']).toBeUndefined()
 
     // trailing comment with result header - end of game marker after comment
-    result = chess.loadPgn(
+    chess.loadPgn(
       '[White "name"]\n\n' +
         '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment} *'
     )
-    expect(result).toBe(true)
     expect(chess.history()).toEqual(history)
     expect(chess.header()['Result']).toBe('*')
 
     // trailing comment with result header - end of game marker before comment
-    result = chess.loadPgn(
+    chess.loadPgn(
       '[White "name"]\n\n' +
         '1. e4 e5 2. Nf3 Nc6 3. Bb5 d6 ' +
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 1/2-1/2 {comment}'
     )
-    expect(result).toBe(true)
     expect(chess.history()).toEqual(history)
     expect(chess.header()['Result']).toBe('1/2-1/2')
   })
@@ -283,7 +275,7 @@ describe('Regression Tests', () => {
 
             1. e4 e5`
 
-    expect(chess.loadPgn(pgn)).toBe(true)
+    chess.loadPgn(pgn)
   })
 
   it('Github Issue #326b - ignore whitespace in line after header (loadPgn)', () => {
@@ -295,6 +287,6 @@ describe('Regression Tests', () => {
    
             1. e4 e5`
 
-    expect(chess.loadPgn(pgn)).toBe(true)
+    chess.loadPgn(pgn)
   })
 })
