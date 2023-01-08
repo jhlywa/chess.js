@@ -68,6 +68,7 @@ test('moves - single square - verbose', () => {
       piece: 'p',
       promotion: 'q',
       san: 'd1=Q',
+      lan: 'd2d1q',
     },
     {
       color: 'b',
@@ -77,6 +78,7 @@ test('moves - single square - verbose', () => {
       piece: 'p',
       promotion: 'r',
       san: 'd1=R',
+      lan: 'd2d1r',
     },
     {
       color: 'b',
@@ -86,6 +88,7 @@ test('moves - single square - verbose', () => {
       piece: 'p',
       promotion: 'b',
       san: 'd1=B',
+      lan: 'd2d1b',
     },
     {
       color: 'b',
@@ -95,6 +98,7 @@ test('moves - single square - verbose', () => {
       piece: 'p',
       promotion: 'n',
       san: 'd1=N',
+      lan: 'd2d1n',
     },
   ]
   expect(chess.moves({ square: 'd2', verbose: true })).toIncludeSameMembers(

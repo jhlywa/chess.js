@@ -299,6 +299,7 @@ chess.history({ verbose: true })
 //     from: 'e2',
 //     to: 'e4',
 //     san: 'e4',
+//     lan: 'e2e4',
 //     flags: 'b'
 //   },
 //   {
@@ -308,6 +309,7 @@ chess.history({ verbose: true })
 //     from: 'e7',
 //     to: 'e5',
 //     san: 'e5',
+//     lan: 'e7e5',
 //     flags: 'b'
 //   },
 //   {
@@ -317,6 +319,7 @@ chess.history({ verbose: true })
 //     from: 'f2',
 //     to: 'f4',
 //     san: 'f4',
+//     lan: 'f2f4',
 //     flags: 'b'
 //   },
 //   {
@@ -326,6 +329,7 @@ chess.history({ verbose: true })
 //     from: 'e5',
 //     to: 'f4',
 //     san: 'exf4',
+//     lan: 'e5f4',
 //     flags: 'c',
 //     captured: 'p'
 //   }

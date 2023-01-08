@@ -86,6 +86,7 @@ export type Move = {
   promotion?: PieceSymbol
   flags: string
   san: string
+  lan: string
 }
 
 const EMPTY = -1
@@ -1975,13 +1976,17 @@ export class Chess {
       }
     }
 
+    const fromAlgebraic = algebraic(from)
+    const toAlgebraic = algebraic(to)
+
     const move: Move = {
       color,
       piece,
-      from: algebraic(from),
-      to: algebraic(to),
+      from: fromAlgebraic,
+      to: toAlgebraic,
       san: this._moveToSan(uglyMove, this._moves({ legal: true })),
       flags: prettyFlags,
+      lan: fromAlgebraic + toAlgebraic,
     }
 
     if (captured) {
@@ -1989,6 +1994,7 @@ export class Chess {
     }
     if (promotion) {
       move.promotion = promotion
+      move.lan += promotion
     }
 
     return move
