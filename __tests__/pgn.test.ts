@@ -88,9 +88,9 @@ describe('PGN', () => {
         chess.load(position.starting_position)
       }
 
-      // make each move and check for a valid move object
+      // make each move - will throw if invalid
       split(position.moves).forEach((move: string) => {
-        expect(chess.move(move)).not.toBeNull()
+        chess.move(move)
       })
 
       // verify the fen in the final position

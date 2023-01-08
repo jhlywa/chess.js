@@ -161,13 +161,13 @@ describe('Regression Tests', () => {
 
   it('Github Issue #284 - sloppy settings allows illegal moves', () => {
     const chess = new Chess('4k3/8/8/8/8/4p3/8/4K3 w - - 0 1')
-    expect(chess.move('e1f2', { sloppy: true })).toBeNull()
+    expect(() => chess.move('e1f2', { sloppy: true })).toThrowError()
   })
 
   it('Github Issue #282 - playing a move on an empty board throws an error', () => {
     const chess = new Chess()
     chess.clear()
-    expect(chess.move('e4')).toBeNull()
+    expect(() => chess.move('e4')).toThrowError()
   })
 
   it('Github Issue #279 - loadPgn duplicate last move if it has a comment', () => {
@@ -256,22 +256,22 @@ describe('Regression Tests', () => {
     let chess = new Chess()
     // these test examples are lifted from the github issue
     chess.load('r4rk1/4nqpp/1p1p4/2pPpp2/bPP1P3/R1B1NQ2/P4PPP/1R4K1 w - - 0 28')
-    expect(chess.move('bxc5')).not.toBeNull()
+    chess.move('bxc5')
 
     chess.load('r4rk1/4nqpp/1p1p4/2pPpp2/bPP1P3/R1B1NQ2/P4PPP/1R4K1 w - - 0 28')
-    expect(chess.move('bxc5', { sloppy: true })).not.toBeNull()
+    chess.move('bxc5', { sloppy: true })
 
     // over-disambiguation without sloppy should fail
     chess.load(
       'rnbqk2r/p1pp1ppp/1p2pn2/8/1bPP4/2N1P3/PP3PPP/R1BQKBNR w KQkq - 0 5'
     )
-    expect(chess.move('Nge2')).toBeNull()
+    expect(() => chess.move('Nge2')).toThrowError()
 
     // over-disambiguation with sloppy should pass
     chess.load(
       'rnbqk2r/p1pp1ppp/1p2pn2/8/1bPP4/2N1P3/PP3PPP/R1BQKBNR w KQkq - 0 5'
     )
-    expect(chess.move('Nge2', { sloppy: true })).not.toBeNull()
+    chess.move('Nge2', { sloppy: true })
   })
 
   it('Github Issue #326a - ignore whitespace after header tag (loadPgn)', () => {

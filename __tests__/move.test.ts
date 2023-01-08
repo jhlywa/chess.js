@@ -73,15 +73,17 @@ describe('Make Move - Standard Algebraic Notation (SAN)', () => {
     chess.load(position.fen)
     it(position.fen + ' (' + position.move + ' ' + position.legal + ')', () => {
       const sloppy = position.sloppy || false
-      const result = chess.move(position.move, { sloppy: sloppy })
       if (position.legal) {
+        const result = chess.move(position.move, { sloppy: sloppy })
         expect(
           result &&
             chess.fen() == position.next &&
             result.captured == position.captured
         ).toBe(true)
       } else {
-        expect(result).toBeNull()
+        expect(() =>
+          chess.move(position.move, { sloppy: sloppy })
+        ).toThrowError()
       }
     })
   })
@@ -123,11 +125,11 @@ describe('Make Move - Verbose', () => {
     chess.load(position.fen)
     const move = position.move
     it(position.fen + ` (${move.to}${move.from} - ${position.legal})`, () => {
-      const result = chess.move(move)
       if (position.legal) {
-        expect(result && chess.fen() == position.next).toBe(true)
+        chess.move(move)
+        expect(chess.fen() == position.next).toEqual(true)
       } else {
-        expect(result).toBeNull()
+        expect(() => chess.move(move)).toThrowError()
       }
     })
   })

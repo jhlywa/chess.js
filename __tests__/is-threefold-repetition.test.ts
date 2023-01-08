@@ -9,7 +9,7 @@ test('isThreefoldRepetition', () => {
   const chess = new Chess(fen)
   moves.forEach((move) => {
     expect(chess.isThreefoldRepetition()).toBe(false)
-    expect(chess.move(move)).not.toBeNull()
+    chess.move(move)
   })
   expect(chess.isThreefoldRepetition()).toBe(true)
 })
@@ -19,7 +19,7 @@ test('isThreefoldRepetition - 2', () => {
   const chess = new Chess()
   moves.forEach((move) => {
     expect(chess.isThreefoldRepetition()).toBe(false)
-    expect(chess.move(move)).not.toBeNull()
+    chess.move(move)
   })
   expect(chess.isThreefoldRepetition()).toBe(true)
 })

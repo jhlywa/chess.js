@@ -1128,8 +1128,7 @@ export class Chess {
         * .move('Nxb7')      <- where 'move' is a case-sensitive SAN string
         *
         * .move({ from: 'h7', <- where the 'move' is a move object
-        (additional
-        *         to :'h8',      fields are ignored)
+        *         to :'h8',    
         *         promotion: 'q',
         *      })
         */
@@ -1159,7 +1158,11 @@ export class Chess {
 
     /* failed to find move */
     if (!moveObj) {
-      return null
+      if (typeof move === 'string') {
+        throw new Error(`Invalid move: ${move}`)
+      } else {
+        throw new Error(`Invalid move: ${JSON.stringify(move)}`)
+      }
     }
 
     /* need to make a copy of move because we can't generate SAN after

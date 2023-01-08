@@ -570,10 +570,11 @@ chess.fen()
 
 ### .move(move, [ options ])
 
-Attempts to make a move on the board, returning a move object if the move was
-legal, otherwise null. The .move function can be called two ways, by passing a
-string in Standard Algebraic Notation (SAN):
+Makes a move on the board and returns a move object if the move was legal.
+The move argument can be either a string in Standard Algebraic Notation (SAN)
+or a move object. Throws an 'Illegal move' exception if the move was illegal.
 
+#### .move() - Standard Algebraic Notation (SAN)
 ```ts
 const chess = new Chess()
 
@@ -581,14 +582,14 @@ chess.move('e4')
 // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
 
 chess.move('nf6') // SAN is case sensitive!!
-// -> null
+// Error: Invalid move: nf6
 
 chess.move('Nf6')
 // -> { color: 'b', from: 'g8', to: 'f6', flags: 'n', piece: 'n', san: 'Nf6' }
 ```
 
-Or by passing .move() a move object (only the 'to', 'from', and when necessary
-'promotion', fields are needed):
+#### .move() - Move Object 
+A move object contains `to`, `from` and, `promotion` (only when necessary) fields.
 
 ```ts
 const chess = new Chess()
@@ -597,7 +598,8 @@ chess.move({ from: 'g2', to: 'g3' })
 // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
 ```
 
-An optional sloppy flag can be used to parse a variety of non-standard move
+#### .move() - Sloppy Parser
+An optional `{ sloppy: true }` flag can be used to parse a variety of non-standard move
 notations:
 
 ```ts
@@ -619,7 +621,7 @@ chess = new Chess(
 )
 
 chess.move('Nge7') // Ne7 is unambiguous because the knight on c6 is pinned
-// -> null
+// Error: Invalid move: Nge7
 
 chess.move('Nge7', { sloppy: true })
 // -> { color: 'b', from: 'g8', to: 'e7', flags: 'n', piece: 'n', san: 'Ne7' }
