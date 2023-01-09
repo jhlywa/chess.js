@@ -629,30 +629,71 @@ export class Chess {
       }
     }
 
-    let cflags = ''
+    let castling = ''
     if (this._castling[WHITE] & BITS.KSIDE_CASTLE) {
-      cflags += 'K'
+      castling += 'K'
     }
     if (this._castling[WHITE] & BITS.QSIDE_CASTLE) {
-      cflags += 'Q'
+      castling += 'Q'
     }
     if (this._castling[BLACK] & BITS.KSIDE_CASTLE) {
-      cflags += 'k'
+      castling += 'k'
     }
     if (this._castling[BLACK] & BITS.QSIDE_CASTLE) {
-      cflags += 'q'
+      castling += 'q'
     }
 
     // do we have an empty castling flag?
-    cflags = cflags || '-'
+    castling = castling || '-'
 
-    const epflags = this._epSquare === EMPTY ? '-' : algebraic(this._epSquare)
+    let epSquare = '-'
+    /*
+     * only print the ep square if en passant is a valid move (pawn is present
+     * and ep capture is not pinned)
+     */
+    if (this._epSquare !== EMPTY) {
+      const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
+      const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
+
+      for (const square of squares) {
+        // is the square off the board?
+        if (square & 0x88) {
+          continue
+        }
+
+        const color = this._turn
+
+        // is there a pawn that can capture the epSquare?
+        if (
+          this._board[square]?.color === color &&
+          this._board[square]?.type === PAWN
+        ) {
+          // if the pawn makes an ep capture, does it leave it's king in check?
+          this._makeMove({
+            color,
+            from: square,
+            to: this._epSquare,
+            piece: PAWN,
+            captured: PAWN,
+            flags: BITS.EP_CAPTURE,
+          })
+          const isLegal = !this._isKingAttacked(color)
+          this._undoMove()
+
+          // if ep is legal, break and set the ep square in the FEN output
+          if (isLegal) {
+            epSquare = algebraic(this._epSquare)
+            break
+          }
+        }
+      }
+    }
 
     return [
       fen,
       this._turn,
-      cflags,
-      epflags,
+      castling,
+      epSquare,
       this._halfMoves,
       this._moveNumber,
     ].join(' ')

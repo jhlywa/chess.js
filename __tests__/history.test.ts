@@ -105,7 +105,7 @@ describe('History', () => {
           lan: 'c2c4',
         },
         {
-          fen: 'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq c3 0 1',
+          fen: 'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1',
           color: 'b',
           piece: 'p',
           from: 'e7',
@@ -135,7 +135,7 @@ describe('History', () => {
           lan: 'd7d5',
         },
         {
-          fen: 'rnbqkbnr/ppp2ppp/4p3/3p4/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq d6 0 3',
+          fen: 'rnbqkbnr/ppp2ppp/4p3/3p4/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq - 0 3',
           color: 'w',
           piece: 'p',
           from: 'd2',
@@ -145,7 +145,7 @@ describe('History', () => {
           lan: 'd2d4',
         },
         {
-          fen: 'rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq d3 0 3',
+          fen: 'rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/5N2/PP2PPPP/RNBQKB1R b KQkq - 0 3',
           color: 'b',
           piece: 'n',
           from: 'g8',
@@ -341,7 +341,7 @@ describe('History', () => {
           lan: 'c7c5',
         },
         {
-          fen: 'rn3rk1/p3qpp1/1p2b2p/2pp4/Q2P4/4PN2/PP3PPP/2R1KB1R w K c6 0 13',
+          fen: 'rn3rk1/p3qpp1/1p2b2p/2pp4/Q2P4/4PN2/PP3PPP/2R1KB1R w K - 0 13',
           color: 'w',
           piece: 'q',
           from: 'a4',
@@ -515,7 +515,7 @@ describe('History', () => {
           lan: 'f2f4',
         },
         {
-          fen: '2r2qk1/r2n2p1/p3p2p/2p5/3pPP2/Q7/PP2B1PP/2R2RK1 b - f3 0 21',
+          fen: '2r2qk1/r2n2p1/p3p2p/2p5/3pPP2/Q7/PP2B1PP/2R2RK1 b - - 0 21',
           color: 'b',
           piece: 'q',
           from: 'f8',
@@ -697,7 +697,7 @@ describe('History', () => {
           lan: 'h2h4',
         },
         {
-          fen: '1r1q3k/4r1pn/7p/p1p1PR2/2Bp3P/1P4Q1/P5P1/5RK1 b - h3 0 30',
+          fen: '1r1q3k/4r1pn/7p/p1p1PR2/2Bp3P/1P4Q1/P5P1/5RK1 b - - 0 30',
           color: 'b',
           piece: 'r',
           from: 'b8',
@@ -757,7 +757,7 @@ describe('History', () => {
           lan: 'a2a4',
         },
         {
-          fen: '4q2k/2r1r1pn/4P2p/p1p1QR2/P1Bp3P/1P6/6P1/5RK1 b - a3 0 33',
+          fen: '4q2k/2r1r1pn/4P2p/p1p1QR2/P1Bp3P/1P6/6P1/5RK1 b - - 0 33',
           color: 'b',
           piece: 'q',
           from: 'e8',

@@ -1,136 +1,121 @@
 import { Chess } from '../src/chess'
 
-describe('Make Move - Standard Algebraic Notation (SAN)', () => {
-  const positions = [
-    {
-      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-      legal: true,
-      move: 'e4',
-      next: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
-    },
-    {
-      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-      legal: false,
-      move: 'e5',
-    },
-    {
-      fen: '7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1',
-      legal: true,
-      move: 'Rd8#',
-      next: '3R3k/8/3p2Q1/6Q1/2N1N3/8/8/3R3K b - - 1 1',
-    },
-    {
-      fen: 'rnbqkbnr/pp3ppp/2pp4/4pP2/4P3/8/PPPP2PP/RNBQKBNR w KQkq e6 0 1',
-      legal: true,
-      move: 'fxe6',
-      next: 'rnbqkbnr/pp3ppp/2ppP3/8/4P3/8/PPPP2PP/RNBQKBNR b KQkq - 0 1',
-      captured: 'p',
-    },
-    {
-      fen: 'rnbqkbnr/pppp2pp/8/4p3/4Pp2/2PP4/PP3PPP/RNBQKBNR b KQkq e3 0 1',
-      legal: true,
-      move: 'fxe3',
-      next: 'rnbqkbnr/pppp2pp/8/4p3/8/2PPp3/PP3PPP/RNBQKBNR w KQkq - 0 2',
-      captured: 'p',
-    },
-
-    // strict move parser
-    {
-      fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
-      legal: true,
-      next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8',
-      move: 'Ne7',
-    },
-
-    // strict move parser should reject over disambiguation
-    {
-      fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
-      legal: false,
-      move: 'Nge7',
-    },
-
-    // sloppy move parser
-    {
-      fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
-      legal: true,
-      sloppy: true,
-      move: 'Nge7',
-      next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8',
-    },
-
-    // the sloppy parser should still accept correctly disambiguated moves
-    {
-      fen: 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7',
-      legal: true,
-      sloppy: true,
-      move: 'Ne7',
-      next: 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8',
-    },
-  ]
-
-  positions.forEach((position) => {
-    const chess = new Chess()
-    chess.load(position.fen)
-    it(position.fen + ' (' + position.move + ' ' + position.legal + ')', () => {
-      const sloppy = position.sloppy || false
-      if (position.legal) {
-        const result = chess.move(position.move, { sloppy: sloppy })
-        expect(
-          result &&
-            chess.fen() == position.next &&
-            result.captured == position.captured
-        ).toBe(true)
-      } else {
-        expect(() =>
-          chess.move(position.move, { sloppy: sloppy })
-        ).toThrowError()
-      }
-    })
-  })
+test('move - works - standard algebraic notation', () => {
+  const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+  const next = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+  const chess = new Chess(fen)
+  chess.move('e4')
+  expect(chess.fen()).toBe(next)
 })
 
-describe('Make Move - Verbose', () => {
-  const positions = [
-    {
-      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-      legal: true,
-      move: { from: 'e2', to: 'e4' },
-      next: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
-    },
-    // specifying the promoting piece has no effect if the move is not a
-    // promotion
-    {
-      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-      legal: true,
-      move: { from: 'e2', to: 'e4', promotion: 'q' },
-      next: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
-    },
-    {
-      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
-      legal: false,
-      move: { from: 'e2', to: 'e5' },
-    },
+test('move - works - standard algebraic notation (mates)', () => {
+  const fen = '7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1'
+  const next = '3R3k/8/3p2Q1/6Q1/2N1N3/8/8/3R3K b - - 1 1'
+  const chess = new Chess(fen)
+  chess.move('Rd8#')
+  expect(chess.fen()).toBe(next)
+})
 
-    // under promotion
-    {
-      fen: '8/1k5P/8/8/8/8/8/1K6 w - - 0 1',
-      legal: true,
-      move: { from: 'h7', to: 'h8', promotion: 'n' },
-      next: '7N/1k6/8/8/8/8/8/1K6 b - - 0 1',
-    },
-  ]
-
-  positions.forEach((position) => {
-    const chess = new Chess()
-    chess.load(position.fen)
-    const move = position.move
-    it(position.fen + ` (${move.to}${move.from} - ${position.legal})`, () => {
-      if (position.legal) {
-        chess.move(move)
-        expect(chess.fen() == position.next).toEqual(true)
-      } else {
-        expect(() => chess.move(move)).toThrowError()
-      }
-    })
+test('move - works - standard algebraic notation (white en passant)', () => {
+  const fen = 'rnbqkbnr/pp3ppp/2pp4/4pP2/4P3/8/PPPP2PP/RNBQKBNR w KQkq e6 0 1'
+  const next = 'rnbqkbnr/pp3ppp/2ppP3/8/4P3/8/PPPP2PP/RNBQKBNR b KQkq - 0 1'
+  const chess = new Chess(fen)
+  expect(chess.move('fxe6')).toMatchObject({
+    from: 'f5',
+    to: 'e6',
+    captured: 'p',
+    flags: 'e',
   })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - works - standard algebraic notation (black en passant)', () => {
+  const fen = 'rnbqkbnr/pppp2pp/8/4p3/4Pp2/2PP4/PP3PPP/RNBQKBNR b KQkq e3 0 1'
+  const next = 'rnbqkbnr/pppp2pp/8/4p3/8/2PPp3/PP3PPP/RNBQKBNR w KQkq - 0 2'
+  const chess = new Chess(fen)
+  expect(chess.move('fxe3')).toMatchObject({
+    from: 'f4',
+    to: 'e3',
+    captured: 'p',
+    flags: 'e',
+  })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - works - standard algebraic notation (pin disambiguates piece)', () => {
+  const fen = 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
+  const next = 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'
+  const chess = new Chess(fen)
+  expect(chess.move('Ne7')).toMatchObject({
+    from: 'g8',
+    to: 'e7',
+    flags: 'n',
+  })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - works - sloppy parser (accepts overly disambiguated piece)', () => {
+  const fen = 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
+  const next = 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'
+  const chess = new Chess(fen)
+  expect(chess.move('Nge7', { sloppy: true })).toMatchObject({
+    to: 'e7',
+    from: 'g8',
+    piece: 'n',
+  })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - works - sloppy parser (accepts correctly disambiguated piece)', () => {
+  const fen = 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
+  const next = 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'
+  const chess = new Chess(fen)
+  expect(chess.move('Ne7')).toMatchObject({
+    to: 'e7',
+    from: 'g8',
+    piece: 'n',
+  })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - throws Error - overly disambiguated piece', () => {
+  const fen = 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
+  const chess = new Chess(fen)
+  expect(() => chess.move('Nge7')).toThrowError()
+})
+
+test('move - throws Error - illegal move', () => {
+  const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+  const chess = new Chess(fen)
+  expect(() => chess.move('e5')).toThrowError()
+})
+
+test('move - works - verbose', () => {
+  const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+  const next = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+  const chess = new Chess(fen)
+  chess.move({ from: 'e2', to: 'e4' })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - works - verbose - promotion field ignored if not promoting', () => {
+  const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+  const next = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+  const chess = new Chess(fen)
+  chess.move({ from: 'e2', to: 'e4', promotion: 'q' })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - works - verbose - under promotion', () => {
+  const fen = '8/1k5P/8/8/8/8/8/1K6 w - - 0 1'
+  const next = '7N/1k6/8/8/8/8/8/1K6 b - - 0 1'
+  const chess = new Chess(fen)
+  chess.move({ from: 'h7', to: 'h8', promotion: 'n' })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - throws Error - verbose (illegal move)', () => {
+  const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+  const chess = new Chess(fen)
+  expect(() => chess.move({ from: 'e2', to: 'e5' })).toThrowError()
 })

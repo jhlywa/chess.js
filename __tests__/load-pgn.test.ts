@@ -167,7 +167,7 @@ test('loadPgn - works - regression test (pinned piece)', () => {
 
 test('loadPgn - works - move annotations', () => {
   const chess = new Chess()
-  const fen = 'rnbqkbnr/ppp2ppp/8/3pp3/3PP3/8/PPP2PPP/RNBQKBNR w KQkq d6 0 3'
+  const fen = 'rnbqkbnr/ppp2ppp/8/3pp3/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3'
   const pgn = '1. e4!! e5?! 2. d4?? d5!?'
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
@@ -185,7 +185,7 @@ test('loadPgn - works - move annotations (including check symbols)', () => {
 test('loadPgn - works - prunes recursive annotation variations (RAV)', () => {
   const chess = new Chess()
   const pgn = "1. e4 ( 1. d4 { Queen's pawn } d5 ( 1... Nf6 ) ) e5"
-  const fen = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2'
+  const fen = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2'
 
   chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)

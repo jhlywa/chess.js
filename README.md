@@ -65,7 +65,7 @@ const chess = new Chess()
 
 // pass in a FEN string to load a particular position
 const chess = new Chess(
-  'r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - c3 0 19'
+  'r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - - 0 19'
 )
 ```
 
@@ -170,7 +170,7 @@ chess.loadPgn(
 chess.deleteComments()
 // -> [
 //     {
-//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
 //       comment: "king's pawn opening"
 //     },
 //     {
@@ -185,7 +185,8 @@ chess.getComments()
 
 ### .fen()
 
-Returns the FEN string for the current position.
+Returns the FEN string for the current position. Note, the en passant square is
+only included if the side-to-move can legally capture en passant.
 
 ```ts
 const chess = new Chess()
@@ -196,7 +197,7 @@ chess.move('e5')
 chess.move('f4')
 
 chess.fen()
-// -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2'
+// -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2'
 ```
 
 ### .get(square)
@@ -240,7 +241,7 @@ chess.loadPgn(
 chess.getComments()
 // -> [
 //     {
-//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2",
+//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
 //       comment: "king's pawn opening"
 //     },
 //     {
@@ -303,7 +304,7 @@ chess.history({ verbose: true })
 //     flags: 'b'
 //   },
 //   {
-//     fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1',
+//     fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
 //     color: 'b',
 //     piece: 'p',
 //     from: 'e7',
@@ -313,7 +314,7 @@ chess.history({ verbose: true })
 //     flags: 'b'
 //   },
 //   {
-//     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2',
+//     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
 //     color: 'w',
 //     piece: 'p',
 //     from: 'f2',
@@ -323,7 +324,7 @@ chess.history({ verbose: true })
 //     flags: 'b'
 //   },
 //   {
-//     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq f3 0 2',
+//     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2',
 //     color: 'b',
 //     piece: 'p',
 //     from: 'e5',
@@ -799,7 +800,7 @@ chess.fen()
 // -> 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 chess.move('e4')
 chess.fen()
-// -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1'
+// -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
 
 chess.undo()
 // -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
