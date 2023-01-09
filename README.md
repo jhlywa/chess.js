@@ -460,8 +460,9 @@ chess.isThreefoldRepetition()
 
 ### .load(fen)
 
-Clears the board and loads the provided FEN string. Throws an exception if the
-FEN is invalid.
+Clears the board and loads the provided FEN string. The castling rights, en
+passant square and move numbers are defaulted to `- - 0 1` if ommitted. Throws
+an exception if the FEN is invalid.
 
 ```ts
 const chess = new Chess()
