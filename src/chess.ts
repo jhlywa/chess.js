@@ -1169,7 +1169,7 @@ export class Chess {
 
   move(
     move: string | { from: string; to: string; promotion?: string },
-    { sloppy = false }: { sloppy?: boolean } = {}
+    { strict = false }: { strict?: boolean } = {}
   ) {
     /*
      * The move function can be called with in the following parameters:
@@ -1181,14 +1181,14 @@ export class Chess {
      *         promotion: 'q' })
      *
      *
-     * The optional sloppy argument allows the move parser to work around over
-     * disambiguation bugs in Fritz and Chessbase
+     * An optional strict argument may be supplied to tell chess.js to
+     * strictly follow the SAN specification.
      */
 
     let moveObj = null
 
     if (typeof move === 'string') {
-      moveObj = this._moveFromSan(move, sloppy)
+      moveObj = this._moveFromSan(move, strict)
     } else if (typeof move === 'object') {
       const moves = this._moves()
 
@@ -1562,16 +1562,10 @@ export class Chess {
   loadPgn(
     pgn: string,
     {
-      sloppy = false,
+      strict = false,
       newlineChar = '\r?\n',
-    }: { sloppy?: boolean; newlineChar?: string } = {}
+    }: { strict?: boolean; newlineChar?: string } = {}
   ) {
-    /*
-     * option sloppy=true
-     * allow the user to specify the sloppy move parser to work around over
-     * disambiguation bugs in Fritz and Chessbase
-     */
-
     function mask(str: string): string {
       return str.replace(/\\/g, '\\')
     }
@@ -1642,10 +1636,10 @@ export class Chess {
     }
 
     /*
-     * sloppy parser should attempt to load a fen tag, even if it's the wrong
-     * case and doesn't include a corresponding [SetUp "1"] tag
+     * the permissive parser should attempt to load a fen tag, even if it's the
+     * wrong case and doesn't include a corresponding [SetUp "1"] tag
      */
-    if (sloppy) {
+    if (!strict) {
       if (fen) {
         this.load(fen, true)
       }
@@ -1751,7 +1745,7 @@ export class Chess {
         continue
       }
 
-      const move = this._moveFromSan(moves[halfMove], sloppy)
+      const move = this._moveFromSan(moves[halfMove], strict)
 
       // invalid move
       if (move == null) {
@@ -1783,8 +1777,8 @@ export class Chess {
    * Convert a move from 0x88 coordinates to Standard Algebraic Notation
    * (SAN)
    *
-   * @param {boolean} sloppy Use the sloppy SAN generator to work around
-   * over disambiguation bugs in Fritz and Chessbase.  See below:
+   * @param {boolean} strict Use the strict SAN parser. It will throw errors
+   * on overly disambiguated moves (see below):
    *
    * r1bqkbnr/ppp2ppp/2n5/1B1pP3/4P3/8/PPPP2PP/RNBQK1NR b KQkq - 2 4
    * 4. ... Nge7 is overly disambiguated because the knight on c6 is pinned
@@ -1832,7 +1826,7 @@ export class Chess {
   }
 
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
-  private _moveFromSan(move: string, sloppy = false): InternalMove | null {
+  private _moveFromSan(move: string, strict = false): InternalMove | null {
     // strip off any move decorations: e.g Nf3+?! becomes Nf3
     const cleanMove = strippedSan(move)
 
@@ -1846,8 +1840,8 @@ export class Chess {
       }
     }
 
-    // strict parser failed and the sloppy parser wasn't used, return null
-    if (!sloppy) {
+    // the strict parser failed
+    if (strict) {
       return null
     }
 
@@ -1858,24 +1852,20 @@ export class Chess {
     let promotion = undefined
 
     /*
-     * The sloppy parser allows the user to parse non-standard chess notations.
-     * This parser is opt-in (by specifying the '{ sloppy: true }' setting) and
-     * is only run after the Standard Algebraic Notation (SAN) parser has
-     * failed.
+     * The default permissive (non-strict) parser allows the user to parse
+     * non-standard chess notations. This parser is only run after the strict
+     * Standard Algebraic Notation (SAN) parser has failed.
      *
-     * When running the sloppy parser, we'll run a regex to grab the piece, the
+     * When running the permissive parser, we'll run a regex to grab the piece, the
      * to/from square, and an optional promotion piece. This regex will
      * parse common non-standard notation like: Pe2-e4, Rc1c4, Qf3xf7,
      * f7f8q, b1c3
      *
-     * NOTE: Some positions and moves may be ambiguous when using the sloppy
+     * NOTE: Some positions and moves may be ambiguous when using the permissive
      * parser. For example, in this position: 6k1/8/8/B7/8/8/8/BN4K1 w - - 0 1,
      * the move b1c3 may be interpreted as Nc3 or B1c3 (a disambiguated bishop
-     * move). In these cases, the sloppy parser will default to the most most
+     * move). In these cases, the permissive parser will default to the most
      * basic interpretation (which is b1c3 parsing to Nc3).
-     *
-     * FIXME: these var's are hoisted into function scope, this will need to
-     * change when switching to const/let
      */
 
     let overlyDisambiguated = false
@@ -1926,7 +1916,7 @@ export class Chess {
 
     for (let i = 0, len = moves.length; i < len; i++) {
       if (from && to) {
-        // hand-compare move properties with the results from our sloppy regex
+        // hand-compare move properties with the results from our permissive regex
         if (
           (!piece || piece.toLowerCase() == moves[i].piece) &&
           Ox88[from] == moves[i].from &&

@@ -157,9 +157,9 @@ describe('Regression Tests', () => {
     expect(chess.header()['Date']).toBe('1972.01.07')
   })
 
-  it('Github Issue #284 - sloppy settings allows illegal moves', () => {
+  it('Github Issue #284 - permissive settings allows illegal moves', () => {
     const chess = new Chess('4k3/8/8/8/8/4p3/8/4K3 w - - 0 1')
-    expect(() => chess.move('e1f2', { sloppy: true })).toThrowError()
+    expect(() => chess.move('e1f2')).toThrowError()
   })
 
   it('Github Issue #282 - playing a move on an empty board throws an error', () => {
@@ -244,26 +244,21 @@ describe('Regression Tests', () => {
     expect(chess.pgn()).toBe('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
   })
 
-  it('Github Issue #321 - strict parser should always run before sloppy', () => {
+  it('Github Issue #321 - strict parser should always run before permissive', () => {
     let chess = new Chess()
     // these test examples are lifted from the github issue
     chess.load('r4rk1/4nqpp/1p1p4/2pPpp2/bPP1P3/R1B1NQ2/P4PPP/1R4K1 w - - 0 28')
     chess.move('bxc5')
+    chess.undo()
+    chess.move('bxc5', { strict: true })
 
-    chess.load('r4rk1/4nqpp/1p1p4/2pPpp2/bPP1P3/R1B1NQ2/P4PPP/1R4K1 w - - 0 28')
-    chess.move('bxc5', { sloppy: true })
-
-    // over-disambiguation without sloppy should fail
+    // over-disambiguation with strict should fail
     chess.load(
       'rnbqk2r/p1pp1ppp/1p2pn2/8/1bPP4/2N1P3/PP3PPP/R1BQKBNR w KQkq - 0 5'
     )
-    expect(() => chess.move('Nge2')).toThrowError()
-
-    // over-disambiguation with sloppy should pass
-    chess.load(
-      'rnbqk2r/p1pp1ppp/1p2pn2/8/1bPP4/2N1P3/PP3PPP/R1BQKBNR w KQkq - 0 5'
-    )
-    chess.move('Nge2', { sloppy: true })
+    expect(() => chess.move('Nge2', { strict: true })).toThrowError()
+    // permisssive should work
+    chess.move('Nge2')
   })
 
   it('Github Issue #326a - ignore whitespace after header tag (loadPgn)', () => {

@@ -54,11 +54,11 @@ test('move - works - standard algebraic notation (pin disambiguates piece)', () 
   expect(chess.fen()).toBe(next)
 })
 
-test('move - works - sloppy parser (accepts overly disambiguated piece)', () => {
+test('move - works - permissive parser (accepts overly disambiguated piece)', () => {
   const fen = 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
   const next = 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'
   const chess = new Chess(fen)
-  expect(chess.move('Nge7', { sloppy: true })).toMatchObject({
+  expect(chess.move('Nge7')).toMatchObject({
     to: 'e7',
     from: 'g8',
     piece: 'n',
@@ -66,7 +66,7 @@ test('move - works - sloppy parser (accepts overly disambiguated piece)', () => 
   expect(chess.fen()).toBe(next)
 })
 
-test('move - works - sloppy parser (accepts correctly disambiguated piece)', () => {
+test('move - works - permissive parser (accepts correctly disambiguated piece)', () => {
   const fen = 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
   const next = 'r2qkb1r/ppp1nppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R w KQkq - 4 8'
   const chess = new Chess(fen)
@@ -78,10 +78,10 @@ test('move - works - sloppy parser (accepts correctly disambiguated piece)', () 
   expect(chess.fen()).toBe(next)
 })
 
-test('move - throws Error - overly disambiguated piece', () => {
+test('move - strict - throws Error - overly disambiguated piece', () => {
   const fen = 'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
   const chess = new Chess(fen)
-  expect(() => chess.move('Nge7')).toThrowError()
+  expect(() => chess.move('Nge7', { strict: true })).toThrowError()
 })
 
 test('move - throws Error - illegal move', () => {

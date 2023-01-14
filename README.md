@@ -44,11 +44,21 @@ console.log(chess.pgn())
 
 ## User Interface
 
-By design, chess.js is headless and does not include a user interface. Many
-developers have had success integrating chess.js with the
+By design chess.js is a headless library and does not include user interface
+elements. Many developers have successfully integrated chess.js with the
 [chessboard.js](http://chessboardjs.com) library. See
 [chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for an
 example.
+
+## Move & PGN Parsers
+
+This library includes two parsers (`permissive` and `strict`) which are used to
+parse different forms of chess move notation. The `permissive` parser (the
+default) is able to handle many derivates of algebraic notation (e.g. `Nf3`,
+`g1f3`, `g1-f3`, `Ng1f3`, `Ng1-f3`, `Ng1xf3`). The `strict` parser only accepts
+moves in Standard Algebraic Notation and requires that they strictly adhere to
+the specification. The `strict` parser runs slightly faster but is much less
+forgiving of non-standard notation.
 
 ## API
 
@@ -57,7 +67,7 @@ example.
 The Chess() constructor takes an optional parameter which specifies the board
 configuration in
 [Forsyth-Edwards Notation (FEN)](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation).
-Throw an exception if an invalid FEN string is provided.
+Throws an exception if an invalid FEN string is provided.
 
 ```ts
 // board defaults to the starting position when called with no parameters
@@ -480,8 +490,8 @@ try {
 
 Load the moves of a game stored in
 [Portable Game Notation](http://en.wikipedia.org/wiki/Portable_Game_Notation).
-`pgn` should be a string. Options is an optional `object` which may contain a
-string `newlineChar` and a boolean `sloppy`.
+`pgn` should be a string. Options is an optional object which may contain a
+string `newlineChar` and a boolean `strict`.
 
 The `newlineChar` is a string representation of a valid RegExp fragment and is
 used to process the PGN. It defaults to `\r?\n`. Special characters should not
@@ -491,11 +501,11 @@ themselves be escaped (see `sloppyPgn` example below). Avoid using a
 `newlineChar` that may occur elsewhere in a PGN, such as `.` or `x`, as this
 will result in unexpected behavior.
 
-The `sloppy` flag is a boolean that permits chess.js to parse moves in
-non-standard notations. See `.move` documentation for more information about
-non-SAN notations.
+The `strict` flag is a boolean (default: `false`) that instructs chess.js to
+only parse moves in Standard Algebraic Notation form. See `.move` documentation
+for more information about non-SAN notations.
 
-The method will throw and exception if the PGN failed to parse.
+The method will throw and exception if the PGN fails to parse.
 
 ```ts
 const chess = new Chess()
@@ -521,9 +531,6 @@ const pgn = [
 ]
 
 chess.loadPgn(pgn.join('\n'))
-
-chess.fen()
-// -> 1r3kr1/pbpBBp1p/1b3P2/8/8/2P2q2/P4PPP/3R2K1 b - - 0 24
 
 chess.ascii()
 // -> '  +------------------------+
@@ -558,12 +565,10 @@ const sloppyPgn = [
 ].join(':')
 
 chess.loadPgn(sloppyPgn, { newlineChar: ':' })
+// works by default
+
+chess.loadPgn(sloppyPgn, { newlineChar: ':', strict: true })
 // Error: Invalid move in PGN: Pc2c4
-
-chess.loadPgn(sloppyPgn, { newlineChar: ':', sloppy: true })
-
-chess.fen()
-// -> 'r1bqk2r/pppp1ppp/2P5/8/1b6/1Q3pP1/PP1PPP1P/R1B1KB1R b KQkq - 1 8'
 ```
 
 ### .move(move, [ options ])
@@ -599,34 +604,32 @@ chess.move({ from: 'g2', to: 'g3' })
 // -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
 ```
 
-#### .move() - Sloppy Parser
+#### .move() - Permissive Parser
 
-An optional `{ sloppy: true }` flag can be used to parse a variety of
-non-standard move notations:
+The permissive (default) move parser can be used to parse a variety of
+non-standard move notations. Users may specify an `{ strict: true }` flag to
+verify that all supplied moves adhere to the Standard Algebraic Notation
+specification.
 
 ```ts
 const chess = new Chess()
 
-// various forms of Long Algebraic Notation
-chess.move('e2e4', { sloppy: true })
-// -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
-chess.move('e7-e5', { sloppy: true })
-// -> { color: 'b', from: 'e7', to: 'e5', flags: 'b', piece: 'p', san: 'e5' }
-chess.move('Pf2f4', { sloppy: true })
-// -> { color: 'w', from: 'f2', to: 'f4', flags: 'b', piece: 'p', san: 'f4' }
-chess.move('Pe5xf4', { sloppy: true })
-// -> { color: 'b', from: 'e5', to: 'f4', flags: 'c', piece: 'p', captured: 'p', san: 'exf4' }
+// permissive parser accepts various forms of algebraic notation
+chess.move('e2e4')
+chess.move('e7-e5')
+chess.move('Pf2-f4')
+chess.move('ef4') // missing 'x' in capture
+chess.move('Ng1-f3')
+chess.move('d7xd6') // ignore 'x' when not a capture
+chess.move('d4')
 
 // correctly parses incorrectly disambiguated moves
-chess = new Chess(
-  'r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7'
-)
+chess.load('r2qkbnr/ppp2ppp/2n5/1B2pQ2/4P3/8/PPP2PPP/RNB1K2R b KQkq - 3 7')
 
 chess.move('Nge7') // Ne7 is unambiguous because the knight on c6 is pinned
+chess.undo()
+chess.move('Nge7', { strict: true }) // strict SAN requires Ne7
 // Error: Invalid move: Nge7
-
-chess.move('Nge7', { sloppy: true })
-// -> { color: 'b', from: 'g8', to: 'e7', flags: 'n', piece: 'n', san: 'Ne7' }
 ```
 
 ### .moves([ options ])

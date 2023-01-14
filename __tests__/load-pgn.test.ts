@@ -347,7 +347,7 @@ test('loadPgn - works - parses different newline characters', () => {
   })
 })
 
-test('loadPgn - works - sloppy parser (unnecessary disambiguation - #1)', () => {
+test('loadPgn - works - permissive parser (unnecessary disambiguation - #1)', () => {
   const chess = new Chess()
   const fen = '8/4P1bp/pk6/1p6/4r3/1P2n3/r5PP/2R4K w - - 0 33'
   const pgn = `
@@ -358,14 +358,14 @@ Ng4 23.Rxd7+ Kc6 24.Rxf7 Bxb2 25.Rxg7 Ne3 26.Rg3 Bd4 27.Kh1 Rxa2 28.Rc1+ Kb6
 29.e5 Rf8 30.e6 Rxf4 31.e7 Re4 32.Rg7 Bxg7`
 
   // move 7... Nge7 is overly disambiguated, so loadPgn will throw
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
   // but the sloppy parse will handle it
-  chess.loadPgn(pgn, { sloppy: true })
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (unnecessary disambiguation - #2)', () => {
+test('loadPgn - works - permissive parser (unnecessary disambiguation - #2)', () => {
   const chess = new Chess()
   const pgn = `
 1.e4 e5 2. Nf3 d5 3. Nxe5 f6 4. Bb5+ c6 5. Qh5+ Ke7 Qf7+ Kd6 7. d3 Kxe5 8. Qh5+
@@ -376,14 +376,14 @@ Rc4-d4 Rb7 29. Qf7 Rc7 30. Qe8# 1-0`
   const fen = '2bkQb1r/p1rnn2p/1p3N2/1P6/3R2R1/3P4/PP5P/5K2 b - - 5 30'
 
   // the strict parser should throwa on 27. Rc1c4
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
   // the sloppy parser should accept it
-  chess.loadPgn(pgn, { sloppy: true })
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (correctly disambiguated move - #1)', () => {
+test('loadPgn - works - permissive parser (correctly disambiguated move - #1)', () => {
   const chess = new Chess()
   const fen = '8/4P1bp/pk6/1p6/4r3/1P2n3/r5PP/2R4K w - - 0 33'
   const pgn = `
@@ -396,26 +396,26 @@ Ng4 23.Rxd7+ Kc6 24.Rxf7 Bxb2 25.Rxg7 Ne3 26.Rg3 Bd4 27.Kh1 Rxa2 28.Rc1+ Kb6
   // move 7... Ne7 is correct now
 
   // both parsers should handle correctly disambiguated moves
-  chess.loadPgn(pgn)
+  chess.loadPgn(pgn, { strict: true })
   expect(chess.fen()).toEqual(fen)
-  chess.loadPgn(pgn, { sloppy: true })
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (correctly disambiguated move - #2)', () => {
+test('loadPgn - works - permissive parser (correctly disambiguated move - #2)', () => {
   const chess = new Chess()
   const fen = 'r1bq1b1r/ppp3pp/4k3/3np3/1nB5/2N2Q2/PPPP1PPP/R1B1K2R w KQ - 4 9'
   const pgn = `
 1.e4 e5 2.Nf3 Nc6 3.Bc4 Nf6 4.Ng5 d5 5.exd5 Nxd5 6.Nxf7 Kxf7 7.Qf3+ Ke6 8.Nc3 Nb4`
 
   // both parsers should handle correctly disambiguated moves (8... Nb4)
-  chess.loadPgn(pgn)
+  chess.loadPgn(pgn, { strict: true })
   expect(chess.fen()).toEqual(fen)
-  chess.loadPgn(pgn, { sloppy: true })
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (alebraic notation)', () => {
+test('loadPgn - works - permissive parser (alebraic notation)', () => {
   const chess = new Chess()
   const fen = 'r1q1r1k1/1p1n1ppB/p2b4/2pn4/8/7P/PPQ2BP1/3R1RK1 b - - 0 25'
   const pgn = `
@@ -425,14 +425,14 @@ e3a7 b8a8 a7d4 e7d6 b3c2 f8e8 f2f4 e5d7 e2d3 c7c5 d4f2 d6f4 c3e4 f6d5 e4d6 f4d6
 d3h7`
 
   // the strict parser shouldn't handle this
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
-  // the sloppy parser should accept it
-  chess.loadPgn(pgn, { sloppy: true })
+  // the permissive parser should accept it
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (alebraic notation with symbols and en passant)', () => {
+test('loadPgn - works - permissive parser (alebraic notation with symbols and en passant)', () => {
   const chess = new Chess()
   const fen = '8/p2Q4/2P3kp/5p2/4b3/1P2P3/r6q/3K1R2 w - - 0 39'
   const pgn = `
@@ -445,14 +445,14 @@ e6d5 30. f3d1 f7h5 31. c2h2 g4g3+ 32. f4g3 g8g3+ 33. g1f2 h5h2+ 34. f2e1 g3g2
 35. d1d3 d5e4 36. d3d7+ h7g6 37. b5c6 g2e2+ 38. e1d1 e2a2 0-1`
 
   // the strict parser shouldn't handle this
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
-  // the sloppy parser should accept it
-  chess.loadPgn(pgn, { sloppy: true })
+  // the permissive parser should accept it
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (alebraic notation with underpromotion)', () => {
+test('loadPgn - works - permissive parser (alebraic notation with underpromotion)', () => {
   const chess = new Chess()
   const fen = '7Q/6R1/4B3/7k/4N3/8/6PP/6K1 b - - 2 68'
   const pgn = `
@@ -471,14 +471,14 @@ f7f8R h5h6 62. f4f5 h6h7 63. f8f7+ h7h6 64. f5f6 h6g6 65. f7g7+ g6h5 66. f6f7
 h5h4 67. f7f8Q h4h5 68. f8h8# 1-0`
 
   // the strict parser shouldn't handle this
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
-  // the sloppy parser should accept it
-  chess.loadPgn(pgn, { sloppy: true })
+  // the permissive parser should accept it
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (extended long alebraic notation)', () => {
+test('loadPgn - works - permissive parser (extended long alebraic notation)', () => {
   const chess = new Chess()
   const fen = '8/2kP4/4K3/8/8/1p6/8/8 b - - 2 59'
   const pgn = `
@@ -497,14 +497,14 @@ Rb7b6 Kc5b6 58. d6d7 Kb6c7 59. Ke5e6 1-0
 `
 
   // the strict parser shouldn't handle this
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
-  // the sloppy parser should accept it
-  chess.loadPgn(pgn, { sloppy: true })
+  // the permissive parser should accept it
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (extended long alebraic notation with hyphens)', () => {
+test('loadPgn - works - permissive parser (extended long alebraic notation with hyphens)', () => {
   const chess = new Chess()
   const fen = '7Q/6R1/4B3/7k/4N3/8/6PP/6K1 b - - 2 68'
   const pgn = `
@@ -526,14 +526,14 @@ Rf8-f7+ Kh7-h6 64. f5-f6 Kh6-g6 65. Rf7-g7+ Kg6-h5 66. f6-f7 Kh5-h4 67. f7-f8Q
 Kh4-h5 68. Qf8-h8# 1-0`
 
   // the strict parser shouldn't handle this
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
-  // the sloppy parser should accept it
-  chess.loadPgn(pgn, { sloppy: true })
+  // the permissive parser should accept it
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (FEN without SetUp tag)', () => {
+test('loadPgn - works - permissive parser (FEN without SetUp tag)', () => {
   const chess = new Chess()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
   const pgn = `
@@ -544,14 +544,14 @@ test('loadPgn - works - sloppy parser (FEN without SetUp tag)', () => {
 17.Rd8# 1-0`
 
   // the strict parser shouldn't handle this
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
-  // the sloppy parser should accept it
-  chess.loadPgn(pgn, { sloppy: true })
+  // the permissive parser should accept it
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
-test('loadPgn - works - sloppy parser (FEN tag case insensitive)', () => {
+test('loadPgn - works - permissive parser (FEN tag case insensitive)', () => {
   const chess = new Chess()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
   const pgn = `
@@ -562,10 +562,10 @@ test('loadPgn - works - sloppy parser (FEN tag case insensitive)', () => {
 17.Rd8# 1-0`
 
   // the strict parser shouldn't handle this
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
-  // the sloppy parser should accept it
-  chess.loadPgn(pgn, { sloppy: true })
+  // the permissive parser should accept it
+  chess.loadPgn(pgn)
   expect(chess.fen()).toEqual(fen)
 })
 
@@ -591,8 +591,8 @@ test('loadPgn - throws Error (invalid FEN in header)', () => {
 17.Rd8# 1-0`
 
   // the strict parser shouldn't handle this
-  expect(() => chess.loadPgn(pgn)).toThrowError()
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
 
-  // the sloppy parser shouldn'taccept it either
-  expect(() => chess.loadPgn(pgn, { sloppy: true })).toThrowError()
+  // the permissive parser shouldn'taccept it either
+  expect(() => chess.loadPgn(pgn)).toThrowError()
 })
