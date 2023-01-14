@@ -958,6 +958,17 @@ export class Chess {
     return this.isCheckmate() || this.isStalemate() || this.isDraw()
   }
 
+  moves(): string[]
+  moves({ square }: { square: Square }): string[]
+  moves({ verbose, square }: { verbose: true; square?: Square }): Move[]
+  moves({ verbose, square }: { verbose: false; square?: Square }): string[]
+  moves({
+    verbose,
+    square,
+  }: {
+    verbose?: boolean
+    square?: Square
+  }): string[] | Move[]
   moves({
     verbose = false,
     square = undefined,
@@ -2068,6 +2079,14 @@ export class Chess {
     return null
   }
 
+  history(): string[]
+  history({ verbose }: { verbose: true }): (Move & { fen: string })[]
+  history({ verbose }: { verbose: false }): string[]
+  history({
+    verbose,
+  }: {
+    verbose: boolean
+  }): string[] | (Move & { fen: string })[]
   history({ verbose = false }: { verbose?: boolean } = {}) {
     const reversedHistory = []
     const moveHistory = []
