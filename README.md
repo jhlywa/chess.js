@@ -19,12 +19,6 @@ NPM:
 npm install chess.js@1.0.0-alpha.0
 ```
 
-or install the latest development version straight from GitHub:
-
-```sh
-npm install git+https://github.com/jhlywa/chess.js.git
-```
-
 ## Example Code
 
 The code below plays a random game of chess:
