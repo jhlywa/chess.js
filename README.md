@@ -16,7 +16,7 @@ Run the following command to install the most recent version of chess.js from
 NPM:
 
 ```sh
-npm install chess.js@1.0.0-alpha.0
+npm install chess.js
 ```
 
 ## Example Code
