@@ -79,8 +79,8 @@ interface History {
 
 export type Move = {
   color: Color
-  from: string
-  to: string
+  from: Square
+  to: Square
   piece: PieceSymbol
   captured?: PieceSymbol
   promotion?: PieceSymbol
