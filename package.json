@@ -4,6 +4,7 @@
   "license": "BSD-2-Clause",
   "main": "dist/chess.js",
   "types": "dist/chess.d.ts",
+  "type": "module",
   "homepage": "https://github.com/jhlywa/chess.js",
   "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "scripts": {
