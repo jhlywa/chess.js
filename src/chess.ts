@@ -960,20 +960,30 @@ export class Chess {
 
   moves(): string[]
   moves({ square }: { square: Square }): string[]
+  moves({ piece }: { piece: PieceSymbol }): string[]
+
+  moves({ square, piece }: { square: Square; piece: PieceSymbol }): string[]
+
   moves({ verbose, square }: { verbose: true; square?: Square }): Move[]
   moves({ verbose, square }: { verbose: false; square?: Square }): string[]
-  moves({
-    verbose,
-    square,
-  }: {
-    verbose?: boolean
-    square?: Square
-  }): string[] | Move[]
+  moves({ verbose, square }: { verbose?: boolean;  square?: Square}): string[] | Move[]
+
+  moves({ verbose, piece }: { verbose: true; piece?: PieceSymbol }): Move[]
+  moves({ verbose, piece }: { verbose: false; piece?: PieceSymbol }): string[]
+  moves({ verbose, piece }: { verbose?: boolean;  piece?: PieceSymbol}): string[] | Move[]
+
+  moves({ verbose, square, piece }: { verbose: true; square?: Square; piece?: PieceSymbol }): Move[]
+  moves({ verbose, square, piece }: { verbose: false; square?: Square; piece?: PieceSymbol }): string[]
+  moves({ verbose, square, piece }: { verbose?: boolean; square?: Square; piece?: PieceSymbol }): string[] | Move[]
+  
+  moves({ square, piece }: { square?: Square; piece?: PieceSymbol }): Move[]
+
   moves({
     verbose = false,
     square = undefined,
-  }: { verbose?: boolean; square?: Square } = {}) {
-    const moves = this._moves({ square })
+    piece = undefined,
+  }: { verbose?: boolean; square?: Square, piece?: PieceSymbol } = {}) {
+    const moves = this._moves({ square, piece })
 
     if (verbose) {
       return moves.map((move) => this._makePretty(move))

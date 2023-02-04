@@ -105,3 +105,108 @@ test('moves - single square - verbose', () => {
     moves
   )
 })
+
+test('moves - piece', () => {
+  const chess = new Chess()
+  const moves = 'Na3 Nc3 Nf3 Nh3'
+  expect(chess.moves({ piece: 'n' })).toIncludeSameMembers(split(moves))
+})
+
+test('moves - piece - en passante', () => {
+  const chess = new Chess('rnbq1rk1/4bpp1/p2p1n1p/Ppp1p3/2B1P3/2NP1N1P/1PP2PP1/R1BQ1RK1 w - b6 0 10')
+  const moves = 'axb6 b3 b4 d4 g3 g4 h4'
+  expect(chess.moves({ piece: 'p' })).toIncludeSameMembers(split(moves))
+})
+
+test('moves - piece - no such piece', () => {
+  const chess = new Chess('r1bq1rk1/1pp2ppp/p1np1n2/2b1p3/4P3/2NP1N2/PPP1QPPP/R3K2R w KQ - 0 8')
+  const moves: string[] = []
+  expect(chess.moves({piece: 'b' })).toEqual(moves)
+})
+test('moves - piece - verbose', () => {
+  const chess = new Chess('r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19')
+  const moves = [
+    {
+      color: 'w',
+      flags: 'n',
+      from: 'a1',
+      lan: 'a1a2',
+      piece: 'r',
+      san: 'Ra2',
+      to: 'a2'
+    },
+    {
+      color: 'w',
+      flags: 'n',
+      from: 'a1',
+      lan: 'a1b1',
+      piece: 'r',
+      san: 'Rab1',
+      to: 'b1'
+    },
+    {
+      color: 'w',
+      flags: 'n',
+      from: 'c1',
+      lan: 'c1c2',
+      piece: 'r',
+      san: 'Rc2',
+      to: 'c2'
+    },
+    {
+      captured: 'p',
+      color: 'w',
+      flags: 'c',
+      from: 'c1',
+      lan: 'c1c3',
+      piece: 'r',
+      san: 'Rxc3',
+      to: 'c3'
+    },
+    {
+      color: 'w',
+      flags: 'n',
+      from: 'c1',
+      lan: 'c1d1',
+      piece: 'r',
+      san: 'Rd1',
+      to: 'd1'
+    },
+    {
+      color: 'w',
+      flags: 'n',
+      from: 'c1',
+      lan: 'c1e1',
+      piece: 'r',
+      san: 'Re1',
+      to: 'e1'
+    },
+    {
+      color: 'w',
+      flags: 'n',
+      from: 'c1',
+      lan: 'c1f1',
+      piece: 'r',
+      san: 'Rf1',
+      to: 'f1'
+    },
+    {
+      color: 'w',
+      flags: 'n',
+      from: 'c1',
+      lan: 'c1b1',
+      piece: 'r',
+      san: 'Rcb1',
+      to: 'b1'
+    }
+  ]
+  expect(chess.moves({piece: 'r', verbose: true })).toIncludeSameMembers(moves)
+})
+
+test('moves - square and piece', () => {
+  const chess = new Chess('5rk1/1p3rp1/p1n1p3/2p1p2p/2PpP1qP/P2P2P1/1P2QP1K/3R1R2 w - - 0 23')
+  const moves = 'Qd2 Qc2 Qe1 Qe3 Qf3 Qxg4'
+  expect(chess.moves({ square: 'e2', piece: 'q', })).toIncludeSameMembers(split(moves))
+})
+
+
