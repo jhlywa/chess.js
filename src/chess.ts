@@ -87,6 +87,8 @@ export type Move = {
   flags: string
   san: string
   lan: string
+  before: string
+  after: string
 }
 
 const EMPTY = -1
@@ -966,23 +968,59 @@ export class Chess {
 
   moves({ verbose, square }: { verbose: true; square?: Square }): Move[]
   moves({ verbose, square }: { verbose: false; square?: Square }): string[]
-  moves({ verbose, square }: { verbose?: boolean;  square?: Square}): string[] | Move[]
+  moves({
+    verbose,
+    square,
+  }: {
+    verbose?: boolean
+    square?: Square
+  }): string[] | Move[]
 
   moves({ verbose, piece }: { verbose: true; piece?: PieceSymbol }): Move[]
   moves({ verbose, piece }: { verbose: false; piece?: PieceSymbol }): string[]
-  moves({ verbose, piece }: { verbose?: boolean;  piece?: PieceSymbol}): string[] | Move[]
+  moves({
+    verbose,
+    piece,
+  }: {
+    verbose?: boolean
+    piece?: PieceSymbol
+  }): string[] | Move[]
 
-  moves({ verbose, square, piece }: { verbose: true; square?: Square; piece?: PieceSymbol }): Move[]
-  moves({ verbose, square, piece }: { verbose: false; square?: Square; piece?: PieceSymbol }): string[]
-  moves({ verbose, square, piece }: { verbose?: boolean; square?: Square; piece?: PieceSymbol }): string[] | Move[]
-  
+  moves({
+    verbose,
+    square,
+    piece,
+  }: {
+    verbose: true
+    square?: Square
+    piece?: PieceSymbol
+  }): Move[]
+  moves({
+    verbose,
+    square,
+    piece,
+  }: {
+    verbose: false
+    square?: Square
+    piece?: PieceSymbol
+  }): string[]
+  moves({
+    verbose,
+    square,
+    piece,
+  }: {
+    verbose?: boolean
+    square?: Square
+    piece?: PieceSymbol
+  }): string[] | Move[]
+
   moves({ square, piece }: { square?: Square; piece?: PieceSymbol }): Move[]
 
   moves({
     verbose = false,
     square = undefined,
     piece = undefined,
-  }: { verbose?: boolean; square?: Square, piece?: PieceSymbol } = {}) {
+  }: { verbose?: boolean; square?: Square; piece?: PieceSymbol } = {}) {
     const moves = this._moves({ square, piece })
 
     if (verbose) {
@@ -2039,7 +2077,14 @@ export class Chess {
       san: this._moveToSan(uglyMove, this._moves({ legal: true })),
       flags: prettyFlags,
       lan: fromAlgebraic + toAlgebraic,
+      before: this.fen(),
+      after: '',
     }
+
+    // generate the FEN for the 'after' key
+    this._makeMove(uglyMove)
+    move.after = this.fen()
+    this._undoMove()
 
     if (captured) {
       move.captured = captured
@@ -2090,13 +2135,9 @@ export class Chess {
   }
 
   history(): string[]
-  history({ verbose }: { verbose: true }): (Move & { fen: string })[]
+  history({ verbose }: { verbose: true }): Move[]
   history({ verbose }: { verbose: false }): string[]
-  history({
-    verbose,
-  }: {
-    verbose: boolean
-  }): string[] | (Move & { fen: string })[]
+  history({ verbose }: { verbose: boolean }): string[] | Move[]
   history({ verbose = false }: { verbose?: boolean } = {}) {
     const reversedHistory = []
     const moveHistory = []
@@ -2112,7 +2153,7 @@ export class Chess {
       }
 
       if (verbose) {
-        moveHistory.push({ fen: this.fen(), ...this._makePretty(move) })
+        moveHistory.push(this._makePretty(move))
       } else {
         moveHistory.push(this._moveToSan(move, this._moves()))
       }

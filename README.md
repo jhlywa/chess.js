@@ -298,7 +298,8 @@ chess.history({ verbose: true })
 // -->
 // [
 //   {
-//     fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+//     before: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+//     after: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
 //     color: 'w',
 //     piece: 'p',
 //     from: 'e2',
@@ -308,7 +309,8 @@ chess.history({ verbose: true })
 //     flags: 'b'
 //   },
 //   {
-//     fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
+//     before: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
+//     after: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
 //     color: 'b',
 //     piece: 'p',
 //     from: 'e7',
@@ -318,7 +320,8 @@ chess.history({ verbose: true })
 //     flags: 'b'
 //   },
 //   {
-//     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
+//     before: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
+//     after: 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2',
 //     color: 'w',
 //     piece: 'p',
 //     from: 'f2',
@@ -328,7 +331,8 @@ chess.history({ verbose: true })
 //     flags: 'b'
 //   },
 //   {
-//     fen: 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2',
+//     before: 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2',
+//     after: 'rnbqkbnr/pppp1ppp/8/8/4Pp2/8/PPPP2PP/RNBQKBNR w KQkq - 0 3',
 //     color: 'b',
 //     piece: 'p',
 //     from: 'e5',
@@ -586,7 +590,7 @@ chess.move('Nf6')
 // -> { color: 'b', from: 'g8', to: 'f6', flags: 'n', piece: 'n', san: 'Nf6' }
 ```
 
-#### .move() - Move Object
+#### .move() - Object Notation
 
 A move object contains `to`, `from` and, `promotion` (only when necessary)
 fields.
@@ -626,10 +630,10 @@ chess.move('Nge7', { strict: true }) // strict SAN requires Ne7
 // Error: Invalid move: Nge7
 ```
 
-### .moves([ options ])
+### .moves({ piece?: Piece, square?: Square, verbose?: Boolean }?)
 
 Returns a list of legal moves from the current position. This function takes an
-optional parameter which can be used to generate detailed move objects or to
+optional object which can be used to generate detailed move objects or to
 restrict the move generator to specific squares or pieces.
 
 ```ts
@@ -646,7 +650,10 @@ chess.moves({ piece: 'n' }) // generate moves for piece type
 
 chess.moves({ verbose: true }) // return verbose moves
 // -> [{ color: 'w', from: 'a2', to: 'a3',
-//       flags: 'n', piece: 'p', san 'a3'
+//       flags: 'n', piece: 'p',
+//       san 'a3', 'lan', 'a2a3',
+//       before: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+//       after: 'rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1'
 //       # a `captured` field is included when the move is a capture
 //       # a `promotion` field is included when the move is a promotion
 //     },
@@ -654,7 +661,7 @@ chess.moves({ verbose: true }) // return verbose moves
 //     ]
 ```
 
-#### Move Objects (e.g. { verbose: true })
+#### Move Objects (e.g. when { verbose: true })
 
 The `color` field indicates the color of the moving piece (`w` or `b`).
 
@@ -665,7 +672,11 @@ representation of the applicable piece (`pnbrqk`). The `captured` and
 `promotion` fields are only present when the move is a valid capture or
 promotion.
 
-The `san` field is the move in Standard Algebraic Notation (SAN).
+The `san` field is the move in Standard Algebraic Notation (SAN). The `lan`
+field is the move in Long Algebraic Notation (LAN).
+
+The `before` and `after` keys contain the FEN of the position before and after
+the move.
 
 The `flags` field contains one or more of the string values:
 
@@ -801,7 +812,18 @@ chess.fen()
 // -> 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
 
 chess.undo()
-// -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
+//  {
+//    color: 'w',
+//    piece: 'p',
+//    from: 'e2',
+//    to: 'e4',
+//    san: 'e4',
+//    flags: 'b',
+//    lan: 'e2e4',
+//    before: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+//    after: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+//  }
+
 chess.fen()
 // -> 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 chess.undo()
