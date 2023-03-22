@@ -119,3 +119,15 @@ test('move - throws Error - verbose (illegal move)', () => {
   const chess = new Chess(fen)
   expect(() => chess.move({ from: 'e2', to: 'e5' })).toThrowError()
 })
+
+test('move - works - permissive parser (capture without x)', () => {
+  const fen = 'r1bqk2r/p1p2pp1/2n1pn2/1p5p/2pP4/bPNB1PN1/PB1Q2PP/R3K2R w KQkq - 0 12'
+  const next = 'r1bqk2r/p1p2pp1/2n1pn2/1p5p/2pP4/BPNB1PN1/P2Q2PP/R3K2R b KQkq - 0 12'
+  const chess = new Chess(fen)
+  expect(chess.move('Ba3')).toMatchObject({
+    to: 'a3',
+    from: 'b2',
+    piece: 'b',
+  })
+  expect(chess.fen()).toBe(next)
+})
