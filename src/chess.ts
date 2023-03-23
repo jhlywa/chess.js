@@ -827,7 +827,8 @@ export class Chess {
   }
 
   private _isKingAttacked(color: Color) {
-    return this._attacked(swapColor(color), this._kings[color])
+    const square = this._kings[color]
+    return square === -1 ? false : this._attacked(swapColor(color), square)
   }
 
   isAttacked(square: Square, attackedBy: Color) {
@@ -1208,7 +1209,7 @@ export class Chess {
      * return all pseudo-legal moves (this includes moves that allow the king
      * to be captured)
      */
-    if (!legal) {
+    if (!legal || this._kings[us] === -1) {
       return moves
     }
 

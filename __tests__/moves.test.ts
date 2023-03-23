@@ -258,3 +258,38 @@ test('moves - square and piece', () => {
     split(moves)
   )
 })
+
+test('moves - no kings (starting position minus kings)', () => {
+  const noKings = new Chess();
+  noKings.remove("e1");
+  noKings.remove("e8");
+
+  const kings = new Chess();
+
+  expect(noKings.moves().filter(m => m !== "Qe1")).toEqual(kings.moves());
+})
+
+test('inCheck - no kings (starting position minus kings)', () => {
+  const noKings = new Chess();
+  noKings.remove("e1");
+  noKings.remove("e8");
+
+  expect(noKings.inCheck()).toEqual(false);
+})
+
+test('isCheckmate - no kings (starting position minus kings)', () => {
+  const noKings = new Chess();
+  noKings.remove("e1");
+  noKings.remove("e8");
+
+  expect(noKings.isCheckmate()).toEqual(false);
+})
+
+test('isStalemate - no kings (starting position minus kings)', () => {
+  const noKings = new Chess();
+  noKings.remove("e1");
+  noKings.remove("e8");
+
+  expect(noKings.isStalemate()).toEqual(false);
+})
+
