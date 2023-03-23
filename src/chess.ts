@@ -1973,31 +1973,38 @@ export class Chess {
       piece: piece ? (piece as PieceSymbol) : pieceType,
     })
 
+    if (!to) {
+      return null;
+    }
+
     for (let i = 0, len = moves.length; i < len; i++) {
-      if (from && to) {
-        // hand-compare move properties with the results from our permissive regex
-        if (
+      if (!from) {
+          // if there is no from square, it could be just 'x' missing from a capture
+          if (cleanMove === strippedSan(this._moveToSan(moves[i], moves)).replace('x', '')) {
+            return moves[i];
+          }
+      // hand-compare move properties with the results from our permissive regex
+      } else if (
           (!piece || piece.toLowerCase() == moves[i].piece) &&
           Ox88[from] == moves[i].from &&
           Ox88[to] == moves[i].to &&
           (!promotion || promotion.toLowerCase() == moves[i].promotion)
+      ) {
+        return moves[i]
+      } else if (overlyDisambiguated) {
+        /*
+         * SPECIAL CASE: we parsed a move string that may have an unneeded
+         * rank/file disambiguator (e.g. Nge7).  The 'from' variable will
+         */
+
+        const square = algebraic(moves[i].from)
+        if (
+          (!piece || piece.toLowerCase() == moves[i].piece) &&
+          Ox88[to] == moves[i].to &&
+          (from == square[0] || from == square[1]) &&
+          (!promotion || promotion.toLowerCase() == moves[i].promotion)
         ) {
           return moves[i]
-        } else if (overlyDisambiguated) {
-          /*
-           * SPECIAL CASE: we parsed a move string that may have an unneeded
-           * rank/file disambiguator (e.g. Nge7).  The 'from' variable will
-           */
-
-          const square = algebraic(moves[i].from)
-          if (
-            (!piece || piece.toLowerCase() == moves[i].piece) &&
-            Ox88[to] == moves[i].to &&
-            (from == square[0] || from == square[1]) &&
-            (!promotion || promotion.toLowerCase() == moves[i].promotion)
-          ) {
-            return moves[i]
-          }
         }
       }
     }

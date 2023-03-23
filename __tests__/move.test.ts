@@ -119,3 +119,39 @@ test('move - throws Error - verbose (illegal move)', () => {
   const chess = new Chess(fen)
   expect(() => chess.move({ from: 'e2', to: 'e5' })).toThrowError()
 })
+
+test('move - works - permissive parser (piece capture without x)', () => {
+  const fen = 'r1bqk2r/p1p2pp1/2n1pn2/1p5p/2pP4/bPNB1PN1/PB1Q2PP/R3K2R w KQkq - 0 12'
+  const next = 'r1bqk2r/p1p2pp1/2n1pn2/1p5p/2pP4/BPNB1PN1/P2Q2PP/R3K2R b KQkq - 0 12'
+  const chess = new Chess(fen)
+  expect(chess.move('Ba3')).toMatchObject({
+    to: 'a3',
+    from: 'b2',
+    piece: 'b',
+  })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - works - permissive parser (pawn capture without x)', () => {
+  const fen = 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2'
+  const next = 'rnbqkbnr/pppp1ppp/8/8/4Pp2/8/PPPP2PP/RNBQKBNR w KQkq - 0 3'
+  const chess = new Chess(fen)
+  expect(chess.move('ef4')).toMatchObject({
+    to: 'f4',
+    from: 'e5',
+    piece: 'p',
+  })
+  expect(chess.fen()).toBe(next)
+})
+
+test('move - works - permissive parser (en passant capture without x)', () => {
+  const fen = 'rnbqkbnr/pppp1ppp/8/8/4PpP1/8/PPPP3P/RNBQKBNR b KQkq g3 0 3'
+  const next = 'rnbqkbnr/pppp1ppp/8/8/4P3/6p1/PPPP3P/RNBQKBNR w KQkq - 0 4'
+  const chess = new Chess(fen)
+  expect(chess.move('fg3')).toMatchObject({
+    to: 'g3',
+    from: 'f4',
+    piece: 'p',
+  })
+  expect(chess.fen()).toBe(next)
+})
