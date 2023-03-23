@@ -827,7 +827,8 @@ export class Chess {
   }
 
   private _isKingAttacked(color: Color) {
-    return this._attacked(swapColor(color), this._kings[color])
+    const square = this._kings[color]
+    return square === -1 ? false : this._attacked(swapColor(color), square)
   }
 
   isAttacked(square: Square, attackedBy: Color) {
