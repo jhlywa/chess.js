@@ -1208,7 +1208,7 @@ export class Chess {
      * return all pseudo-legal moves (this includes moves that allow the king
      * to be captured)
      */
-    if (!legal) {
+    if (!legal || this._kings[us] === -1) {
       return moves
     }
 

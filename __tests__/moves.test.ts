@@ -258,3 +258,13 @@ test('moves - square and piece', () => {
     split(moves)
   )
 })
+
+test('moves - no kings (starting position minus kings)', () => {
+  const noKings = new Chess();
+  noKings.remove("e1");
+  noKings.remove("e8");
+
+  const kings = new Chess();
+
+  expect(noKings.moves().filter(m => m !== "Qe1")).toEqual(kings.moves());
+})
