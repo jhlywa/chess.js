@@ -6,6 +6,7 @@ import {
   WHITE,
   BLACK,
   PAWN,
+  KNIGHT,
   ROOK,
   KING,
 } from '../src/chess'
@@ -66,3 +67,47 @@ test('put - allow two kings if overwriting the same square', () => {
   expect(chess.put(piece, 'a2')).toEqual(true)
   expect(chess.put(piece, 'a2')).toEqual(true)
 })
+
+test('put - replacing white kingside rook loses castling right', () => {
+  const chess = new Chess("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1")
+
+  chess.put({ type :KNIGHT, color: WHITE}, 'h1')
+  expect(chess.moves()).not.toContain('O-O')
+});
+
+test('put - replacing white queenside rook loses castling right', () => {
+  const chess = new Chess("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1")
+
+  chess.put({ type :KNIGHT, color: WHITE}, 'a1')
+  expect(chess.moves()).not.toContain('O-O-O')
+});
+
+test('put - replacing white king loses castling rights', () => {
+  const chess = new Chess("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1")
+
+  chess.put({ type :KNIGHT, color: WHITE}, 'e1')
+  expect(chess.moves()).not.toContain('O-O')
+  expect(chess.moves()).not.toContain('O-O-O')
+});
+
+test('put - replacing black kingside rook loses castling right', () => {
+  const chess = new Chess('r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1')
+
+  chess.put({ type :KNIGHT, color: BLACK}, 'h8')
+  expect(chess.moves()).not.toContain('O-O')
+});
+
+test('put - replacing black queenside rook loses castling right', () => {
+  const chess = new Chess('r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1')
+
+  chess.put({ type :KNIGHT, color: BLACK}, 'a8')
+  expect(chess.moves()).not.toContain('O-O-O')
+});
+
+test('put - replacing black king loses castling rights', () => {
+  const chess = new Chess('r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1')
+
+  chess.put({ type :KNIGHT, color: BLACK}, 'e8')
+  expect(chess.moves()).not.toContain('O-O')
+  expect(chess.moves()).not.toContain('O-O-O')
+});

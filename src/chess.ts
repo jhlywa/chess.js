@@ -754,6 +754,8 @@ export class Chess {
       this._kings[color] = sq
     }
 
+    this._updateCastlingRights()
+
     this._updateSetup(this.fen())
 
     return true
@@ -766,9 +768,32 @@ export class Chess {
       this._kings[piece.color] = EMPTY
     }
 
+    this._updateCastlingRights()
+
     this._updateSetup(this.fen())
 
     return piece
+  }
+
+  _updateCastlingRights() {
+    const whiteKingInPlace = (this._board[Ox88.e1]?.type === 'k' && this._board[Ox88.e1]?.color === WHITE)
+    const blackKingInPlace = (this._board[Ox88.e8]?.type === 'k' && this._board[Ox88.e8]?.color === BLACK)
+
+    if (!whiteKingInPlace || this._board[Ox88.a1]?.type !== 'r' || this._board[Ox88.a1]?.color === WHITE) {
+      this._castling.w &= ~BITS.QSIDE_CASTLE
+    }
+
+    if (!whiteKingInPlace || this._board[Ox88.h1]?.type !== 'r' || this._board[Ox88.h1]?.color === WHITE) {
+      this._castling.w &= ~BITS.KSIDE_CASTLE
+    }
+
+    if (!blackKingInPlace || this._board[Ox88.a8]?.type !== 'r' || this._board[Ox88.a8]?.color === BLACK) {
+      this._castling.b &= ~BITS.QSIDE_CASTLE
+    }
+
+    if (!blackKingInPlace || this._board[Ox88.h8]?.type !== 'r' || this._board[Ox88.h8]?.color === BLACK) {
+      this._castling.b &= ~BITS.KSIDE_CASTLE
+    }
   }
 
   _attacked(color: Color, square: number) {
