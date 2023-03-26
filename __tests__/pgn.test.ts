@@ -80,6 +80,30 @@ describe('PGN', () => {
     },
   ]
 
+  test('pgn - works - removes header', () => {
+    const chess = new Chess()
+    const pgn = `
+  [White "Paul Morphy"]
+  [Black "Duke Karl / Count Isouard"]
+  [fEn "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]
+
+  17.Rd8# 1-0`
+
+    const chess2 = new Chess()
+    const pgn2 = `
+  [Black "Duke Karl / Count Isouard"]
+  [fEn "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]
+
+  17.Rd8# 1-0`
+
+    chess.loadPgn(pgn)
+    chess2.loadPgn(pgn2)
+
+    chess.removeHeader("White") 
+
+    expect(chess.header()).toEqual(chess2.header())
+  })
+
   positions.forEach((position, i) => {
     it(`Postion: ${i}`, () => {
       const chess = new Chess()
