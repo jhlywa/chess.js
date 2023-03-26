@@ -540,6 +540,12 @@ export class Chess {
     this._updateSetup(this.fen())
   }
 
+  removeHeader(key: string) {
+    if (key in this._header) {
+      delete this._header[key]
+    }
+  }
+
   load(fen: string, keepHeaders = false) {
     let tokens = fen.split(/\s+/)
 
