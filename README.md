@@ -218,6 +218,22 @@ chess.get('a6')
 // -> null
 ```
 
+### .getCastlingRight(color, side)
+
+Gets the castling right for the given color and side. True indicates the right
+is available and false not. Note this does not indicate if such a move is legal
+or not in the current position as checks etc. also need to be considered.
+
+```ts
+const chess = new Chess()
+
+chess.getCastlingRight(WHITE, KING_SIDE) // white can castle kingside
+// -> true
+
+chess.getCastlingRight(BLACK, QUEEN_SIDE) // black can castle queenside
+// -> true
+```
+
 ### .getComment()
 
 Retrieve the comment for the current position, if it exists.
@@ -758,6 +774,19 @@ chess.remove('e1')
 ### .reset()
 
 Reset the board to the initial starting position.
+
+### .setCastlingRight(color, side, canCastle)
+
+Sets or removes a castling right for the given color and side. Returns true if
+the change was successfully made. False will be returned when the position
+doesn't allow the requested change i.e. if the corresponding king or rook is
+not on it's starting square.
+
+```ts
+chess.setCastlingRight(WHITE, KING_SIDE, false) // white can't castle kingside
+
+chess.setCastlingRight(BLACK, QUEEN_SIDE, true) // black can castle queenside
+```
 
 ### .setComment(comment)
 

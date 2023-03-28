@@ -49,6 +49,10 @@ export type Square =
     'a2' | 'b2' | 'c2' | 'd2' | 'e2' | 'f2' | 'g2' | 'h2' |
     'a1' | 'b1' | 'c1' | 'd1' | 'e1' | 'f1' | 'g1' | 'h1'
 
+export const KING_SIDE = 'k'
+export const QUEEN_SIDE = 'q'
+export type Side = 'k' | 'q'
+
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -244,6 +248,11 @@ const RANK_2 = 6
  */
 const RANK_7 = 1
 const RANK_8 = 0
+
+const SIDES = {
+  k: BITS.KSIDE_CASTLE,
+  q: BITS.QSIDE_CASTLE
+}
 
 const ROOKS = {
   w: [
@@ -2251,5 +2260,20 @@ export class Chess {
       delete this._comments[fen]
       return { fen: fen, comment: comment }
     })
+  }
+
+  setCastlingRight(color: Color, side: Side, canCastle: boolean) {
+    if (canCastle) {
+      this._castling[color] |= SIDES[side]
+    } else {
+      this._castling[color] &= ~SIDES[side]
+    }
+
+    this._updateCastlingRights()
+    return this.getCastlingRight(color, side) === canCastle
+  }
+
+  getCastlingRight(color: Color, side: Side) {
+    return (this._castling[color] & SIDES[side]) !== 0
   }
 }
