@@ -686,7 +686,7 @@ export class Chess {
             flags: BITS.EP_CAPTURE,
           })
           const isLegal = !this._isKingAttacked(color)
-          this._undoMove()
+          // this._undoMove()
 
           // if ep is legal, break and set the ep square in the FEN output
           if (isLegal) {
@@ -1227,7 +1227,7 @@ export class Chess {
       if (!this._isKingAttacked(us)) {
         legalMoves.push(moves[i])
       }
-      this._undoMove()
+      // this._undoMove()
     }
 
     return legalMoves
@@ -1886,7 +1886,7 @@ export class Chess {
         output += '+'
       }
     }
-    this._undoMove()
+    // this._undoMove()
 
     return output
   }
