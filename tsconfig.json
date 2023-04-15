@@ -2,13 +2,13 @@
   "compilerOptions": {
     "declaration": true,
     "esModuleInterop": true,
-    "module": "ES2015",
+    "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "./dist",
     "removeComments": false,
     "sourceMap": true,
     "strict": true,
-    "target": "ES2017"
+    "target": "es2017"
   },
   "include": ["src/**/*"]
 }
