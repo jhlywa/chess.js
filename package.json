@@ -1,6 +1,6 @@
 {
   "name": "chess.js",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "license": "BSD-2-Clause",
   "main": "dist/chess.js",
   "types": "dist/chess.d.ts",
