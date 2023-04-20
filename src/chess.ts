@@ -245,6 +245,11 @@ const RANK_2 = 6
 const RANK_7 = 1
 const RANK_8 = 0
 
+const SIDES = {
+  [KING]: BITS.KSIDE_CASTLE,
+  [QUEEN]: BITS.QSIDE_CASTLE
+}
+
 const ROOKS = {
   w: [
     { square: Ox88.a1, flag: BITS.QSIDE_CASTLE },
@@ -760,6 +765,8 @@ export class Chess {
       this._kings[color] = sq
     }
 
+    this._updateCastlingRights()
+
     this._updateSetup(this.fen())
 
     return true
@@ -772,9 +779,32 @@ export class Chess {
       this._kings[piece.color] = EMPTY
     }
 
+    this._updateCastlingRights()
+
     this._updateSetup(this.fen())
 
     return piece
+  }
+
+  _updateCastlingRights() {
+    const whiteKingInPlace = (this._board[Ox88.e1]?.type === KING && this._board[Ox88.e1]?.color === WHITE)
+    const blackKingInPlace = (this._board[Ox88.e8]?.type === KING && this._board[Ox88.e8]?.color === BLACK)
+
+    if (!whiteKingInPlace || this._board[Ox88.a1]?.type !== ROOK || this._board[Ox88.a1]?.color !== WHITE) {
+      this._castling.w &= ~BITS.QSIDE_CASTLE
+    }
+
+    if (!whiteKingInPlace || this._board[Ox88.h1]?.type !== ROOK || this._board[Ox88.h1]?.color !== WHITE) {
+      this._castling.w &= ~BITS.KSIDE_CASTLE
+    }
+
+    if (!blackKingInPlace || this._board[Ox88.a8]?.type !== ROOK || this._board[Ox88.a8]?.color !== BLACK) {
+      this._castling.b &= ~BITS.QSIDE_CASTLE
+    }
+
+    if (!blackKingInPlace || this._board[Ox88.h8]?.type !== ROOK || this._board[Ox88.h8]?.color !== BLACK) {
+      this._castling.b &= ~BITS.KSIDE_CASTLE
+    }
   }
 
   _attacked(color: Color, square: number) {
@@ -2232,5 +2262,29 @@ export class Chess {
       delete this._comments[fen]
       return { fen: fen, comment: comment }
     })
+  }
+
+  setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>) {
+    for (const side of [KING, QUEEN] as const) {
+      if (rights[side] !== undefined) {
+        if (rights[side]) {
+          this._castling[color] |= SIDES[side]
+        } else {
+          this._castling[color] &= ~SIDES[side]
+        }
+      }
+    }
+
+    this._updateCastlingRights()
+    const result = this.getCastlingRights(color)
+
+    return (rights[KING] === undefined || rights[KING] === result[KING]) && (rights[QUEEN] === undefined || rights[QUEEN] === result[QUEEN])
+  }
+
+  getCastlingRights(color: Color) {
+    return {
+      [KING]: (this._castling[color] & SIDES[KING]) !== 0,
+      [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
+    }
   }
 }
