@@ -49,10 +49,6 @@ export type Square =
     'a2' | 'b2' | 'c2' | 'd2' | 'e2' | 'f2' | 'g2' | 'h2' |
     'a1' | 'b1' | 'c1' | 'd1' | 'e1' | 'f1' | 'g1' | 'h1'
 
-export const KING_SIDE = 'k'
-export const QUEEN_SIDE = 'q'
-export type Side = 'k' | 'q'
-
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -250,8 +246,8 @@ const RANK_7 = 1
 const RANK_8 = 0
 
 const SIDES = {
-  k: BITS.KSIDE_CASTLE,
-  q: BITS.QSIDE_CASTLE
+  [KING]: BITS.KSIDE_CASTLE,
+  [QUEEN]: BITS.QSIDE_CASTLE
 }
 
 const ROOKS = {
@@ -785,22 +781,22 @@ export class Chess {
   }
 
   _updateCastlingRights() {
-    const whiteKingInPlace = (this._board[Ox88.e1]?.type === 'k' && this._board[Ox88.e1]?.color === WHITE)
-    const blackKingInPlace = (this._board[Ox88.e8]?.type === 'k' && this._board[Ox88.e8]?.color === BLACK)
+    const whiteKingInPlace = (this._board[Ox88.e1]?.type === KING && this._board[Ox88.e1]?.color === WHITE)
+    const blackKingInPlace = (this._board[Ox88.e8]?.type === KING && this._board[Ox88.e8]?.color === BLACK)
 
-    if (!whiteKingInPlace || this._board[Ox88.a1]?.type !== 'r' || this._board[Ox88.a1]?.color !== WHITE) {
+    if (!whiteKingInPlace || this._board[Ox88.a1]?.type !== ROOK || this._board[Ox88.a1]?.color !== WHITE) {
       this._castling.w &= ~BITS.QSIDE_CASTLE
     }
 
-    if (!whiteKingInPlace || this._board[Ox88.h1]?.type !== 'r' || this._board[Ox88.h1]?.color !== WHITE) {
+    if (!whiteKingInPlace || this._board[Ox88.h1]?.type !== ROOK || this._board[Ox88.h1]?.color !== WHITE) {
       this._castling.w &= ~BITS.KSIDE_CASTLE
     }
 
-    if (!blackKingInPlace || this._board[Ox88.a8]?.type !== 'r' || this._board[Ox88.a8]?.color !== BLACK) {
+    if (!blackKingInPlace || this._board[Ox88.a8]?.type !== ROOK || this._board[Ox88.a8]?.color !== BLACK) {
       this._castling.b &= ~BITS.QSIDE_CASTLE
     }
 
-    if (!blackKingInPlace || this._board[Ox88.h8]?.type !== 'r' || this._board[Ox88.h8]?.color !== BLACK) {
+    if (!blackKingInPlace || this._board[Ox88.h8]?.type !== ROOK || this._board[Ox88.h8]?.color !== BLACK) {
       this._castling.b &= ~BITS.KSIDE_CASTLE
     }
   }
@@ -2262,18 +2258,27 @@ export class Chess {
     })
   }
 
-  setCastlingRight(color: Color, side: Side, canCastle: boolean) {
-    if (canCastle) {
-      this._castling[color] |= SIDES[side]
-    } else {
-      this._castling[color] &= ~SIDES[side]
+  setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>) {
+    for (const side of [KING, QUEEN] as const) {
+      if (rights[side] !== undefined) {
+        if (rights[side]) {
+          this._castling[color] |= SIDES[side]
+        } else {
+          this._castling[color] &= ~SIDES[side]
+        }
+      }
     }
 
     this._updateCastlingRights()
-    return this.getCastlingRight(color, side) === canCastle
+    const result = this.getCastlingRights(color)
+
+    return (rights[KING] === undefined || rights[KING] === result[KING]) && (rights[QUEEN] === undefined || rights[QUEEN] === result[QUEEN])
   }
 
-  getCastlingRight(color: Color, side: Side) {
-    return (this._castling[color] & SIDES[side]) !== 0
+  getCastlingRights(color: Color) {
+    return {
+      [KING]: (this._castling[color] & SIDES[KING]) !== 0,
+      [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
+    }
   }
 }

@@ -218,20 +218,18 @@ chess.get('a6')
 // -> null
 ```
 
-### .getCastlingRight(color, side)
+### .getCastlingRights(color)
 
-Gets the castling right for the given color and side. True indicates the right
-is available and false not. Note this does not indicate if such a move is legal
-or not in the current position as checks etc. also need to be considered.
+Gets the castling rights for the given color. An object is returned which
+indicates whether the right is available or not for both kingside and
+queenside. Note this does not indicate if such a move is legal or not in the
+current position as checks etc. also need to be considered.
 
 ```ts
 const chess = new Chess()
 
-chess.getCastlingRight(WHITE, KING_SIDE) // white can castle kingside
-// -> true
-
-chess.getCastlingRight(BLACK, QUEEN_SIDE) // black can castle queenside
-// -> true
+chess.getCastlingRights(BLACK) // black can castle queenside only
+// -> { 'k': false, 'q': true }
 ```
 
 ### .getComment()
@@ -775,17 +773,16 @@ chess.remove('e1')
 
 Reset the board to the initial starting position.
 
-### .setCastlingRight(color, side, canCastle)
+### .setCastlingRights(color, rights)
 
-Sets or removes a castling right for the given color and side. Returns true if
-the change was successfully made. False will be returned when the position
-doesn't allow the requested change i.e. if the corresponding king or rook is
-not on it's starting square.
+Sets the castling rights for the given color. Returns true if the change was
+successfully made. False will be returned when the position doesn't allow the
+requested change i.e. if the corresponding king or rook is not on it's starting
+square.
 
 ```ts
-chess.setCastlingRight(WHITE, KING_SIDE, false) // white can't castle kingside
-
-chess.setCastlingRight(BLACK, QUEEN_SIDE, true) // black can castle queenside
+// white can't castle kingside but can castle queenside
+chess.setCastlingRights(WHITE, {[chess.KING]: false, [chess.QUEEN]: true})
 ```
 
 ### .setComment(comment)
