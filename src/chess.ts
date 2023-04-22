@@ -766,7 +766,7 @@ export class Chess {
     }
 
     this._updateCastlingRights()
-
+    this._updateEnPassantSquare()
     this._updateSetup(this.fen())
 
     return true
@@ -780,7 +780,7 @@ export class Chess {
     }
 
     this._updateCastlingRights()
-
+    this._updateEnPassantSquare()
     this._updateSetup(this.fen())
 
     return piece
@@ -804,6 +804,35 @@ export class Chess {
 
     if (!blackKingInPlace || this._board[Ox88.h8]?.type !== ROOK || this._board[Ox88.h8]?.color !== BLACK) {
       this._castling.b &= ~BITS.KSIDE_CASTLE
+    }
+  }
+
+  _updateEnPassantSquare() {
+    if(this._epSquare === EMPTY) {
+      return
+    }
+
+    const startSquare = this._epSquare + (this._turn === WHITE ? -16 : 16)
+    const currentSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
+    const attackers = [currentSquare + 1, currentSquare - 1]
+
+    if (
+      this._board[startSquare] !== null ||
+      this._board[this._epSquare] !== null ||
+      this._board[currentSquare]?.color !== swapColor(this._turn) ||
+      this._board[currentSquare]?.type !== PAWN
+    ) {
+      this._epSquare = EMPTY
+      return
+    }
+
+    const canCapture = (square: number) =>
+      !(square & 0x88) &&
+      this._board[square]?.color === this._turn &&
+      this._board[square]?.type === PAWN;
+
+    if(!attackers.some(canCapture)) {
+      this._epSquare = EMPTY
     }
   }
 
