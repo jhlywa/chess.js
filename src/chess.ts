@@ -2316,4 +2316,8 @@ export class Chess {
       [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
     }
   }
+
+  moveNumber() {
+    return this._moveNumber
+  }
 }
