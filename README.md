@@ -644,6 +644,16 @@ chess.move('Nge7', { strict: true }) // strict SAN requires Ne7
 // Error: Invalid move: Nge7
 ```
 
+### .moveNumber()
+
+Returns the current move number.
+
+```ts
+chess.load('4r1k1/p1prnpb1/Pp1pq1pp/3Np2P/2P1P3/R4N2/1PP2PP1/3QR1K1 w - - 2 20')
+chess.moveNumber()
+// -> 20
+```
+
 ### .moves({ piece?: Piece, square?: Square, verbose?: Boolean }?)
 
 Returns a list of legal moves from the current position. This function takes an
