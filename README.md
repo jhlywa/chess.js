@@ -879,8 +879,3 @@ chess.validateFen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 // -> { ok: false,
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
-
-## BUGS
-
-- The en passant square and castling flags aren't adjusted when using the
-  put/remove functions (workaround: use .load() instead)
