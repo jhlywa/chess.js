@@ -19,13 +19,33 @@ NPM:
 npm install chess.js
 ```
 
+## Import into your project
+
+### Modern way (ESM)
+
+```js
+import { Chess } from 'chess.js'
+```
+
+If you want to use it in a browser you can import as module like this:
+
+```html
+<script type="module">
+  import { Chess } from 'chess.js'
+</script>
+```
+
+### Old way (CommonJS)
+
+```js
+const { Chess } = require('chess.js')
+```
+
 ## Example Code
 
 The code below plays a random game of chess:
 
-```ts
-import { Chess } from 'chess.js'
-
+```js
 const chess = new Chess()
 
 while (!chess.isGameOver()) {
@@ -221,9 +241,9 @@ chess.get('a6')
 ### .getCastlingRights(color)
 
 Gets the castling rights for the given color. An object is returned which
-indicates whether the right is available or not for both kingside and
-queenside. Note this does not indicate if such a move is legal or not in the
-current position as checks etc. also need to be considered.
+indicates whether the right is available or not for both kingside and queenside.
+Note this does not indicate if such a move is legal or not in the current
+position as checks etc. also need to be considered.
 
 ```ts
 const chess = new Chess()
@@ -792,7 +812,7 @@ square.
 
 ```ts
 // white can't castle kingside but can castle queenside
-chess.setCastlingRights(WHITE, {[chess.KING]: false, [chess.QUEEN]: true})
+chess.setCastlingRights(WHITE, { [chess.KING]: false, [chess.QUEEN]: true })
 ```
 
 ### .setComment(comment)

@@ -2,15 +2,16 @@
   "name": "chess.js",
   "version": "1.0.0-beta.5",
   "license": "BSD-2-Clause",
-  "main": "dist/chess.js",
-  "types": "dist/chess.d.ts",
+  "main": "dist/cjs/chess.js",
+  "module": "dist/esm/chess.js",
+  "types": "dist/types/chess.d.ts",
   "homepage": "https://github.com/jhlywa/chess.js",
   "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "scripts": {
     "test": "jest",
     "lint": "eslint src/ --ext .ts",
-    "build": "tsc --build",
-    "clean": "tsc --build --clean"
+    "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+    "clean": "rm -rf ./dist"
   },
   "repository": {
     "type": "git",
