@@ -379,6 +379,7 @@ export function validateFen(fen: string) {
     }
   }
 
+  // 9th criterion: is en-passant square legal?
   if (
     (tokens[3][1] == '3' && tokens[1] == 'w') ||
     (tokens[3][1] == '6' && tokens[1] == 'b')
@@ -386,6 +387,7 @@ export function validateFen(fen: string) {
     return { ok: false, error: 'Invalid FEN: illegal en-passant square' }
   }
 
+  // 10th criterion: does chess position contain exact two kings?
   const kings = [
     { color: 'white', regex: /K/g },
     { color: 'black', regex: /k/g },
@@ -398,6 +400,14 @@ export function validateFen(fen: string) {
 
     if ((tokens[0].match(regex) || []).length > 1) {
       return { ok: false, error: `Invalid FEN: too many ${color} kings` }
+    }
+  }
+
+  // 11th criterion: are any pawns on promotion row?
+  if (rows[0].includes('P') || rows[7].includes('p')) {
+    return {
+      ok: false,
+      error: 'Invalid FEN: pawns on promotion row',
     }
   }
 
