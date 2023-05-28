@@ -403,11 +403,13 @@ export function validateFen(fen: string) {
     }
   }
 
-  // 11th criterion: are any pawns on promotion row?
-  if (rows[0].includes('P') || rows[7].includes('p')) {
+  // 11th criterion: are any pawns on the first or eighth rows?
+  if (
+    Array.from(rows[0] + rows[7]).some((char) => char.toUpperCase() === 'P')
+  ) {
     return {
       ok: false,
-      error: 'Invalid FEN: pawns on promotion row',
+      error: 'Invalid FEN: some pawns are on the edge rows',
     }
   }
 
