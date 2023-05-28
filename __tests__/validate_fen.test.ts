@@ -27,6 +27,16 @@ test.each([
     ok: false,
   },
   {
+    // white pawn on 8th row
+    fen: '3P4/1k2K3/8/8/8/8/8/8 w - - 0 1',
+    ok: false,
+  },
+  {
+    // black pawn on 1st row
+    fen: '8/8/8/8/8/8/1k3K2/3p4 w - - 0 1',
+    ok: false,
+  },
+  {
     fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNRw KQkq - 0 1',
     ok: false,
   },
