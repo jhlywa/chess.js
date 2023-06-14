@@ -1033,9 +1033,13 @@ export class Chess {
   }
 
   isDraw(strict = false) {
-    return this.isStalemate() || this.isInsufficientMaterial() || strict
-      ? this.isFivefoldRepetition() || this.isSeventyFiveMoveRule()
-      : this.isThreefoldRepetition() || this.isFiftyMoveRule()
+    return (
+      this.isStalemate() ||
+      this.isInsufficientMaterial() ||
+      (strict
+        ? this.isFivefoldRepetition() || this.isSeventyFiveMoveRule()
+        : this.isThreefoldRepetition() || this.isFiftyMoveRule())
+    )
   }
 
   isGameOver(strict = false) {
