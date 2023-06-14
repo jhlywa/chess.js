@@ -533,6 +533,7 @@ export class Chess {
   private _header: Record<string, string> = {}
   private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
   private _epSquare = -1
+  // TODO: Perhaps rename `_halfMoves` to something more descriptive, eg. `_halfMoveClock`?
   private _halfMoves = 0
   private _moveNumber = 0
   private _history: History[] = []
@@ -989,53 +990,56 @@ export class Chess {
     return false
   }
 
-  isThreefoldRepetition() {
-    const moves = []
-    const positions: Record<string, number> = {}
-    let repetition = false
+  private _getRepetitionCount() {
+    // remove the last two fields in the FEN string, they're not needed when checking for repetition
+    const trimFen = (fen: string) => fen.split(' ').slice(0, 4).join(' ')
+    const finalFen = trimFen(this.fen())
 
+    const moves = []
     while (true) {
       const move = this._undoMove()
       if (!move) break
       moves.push(move)
     }
 
+    let repetitionCount = 0
     while (true) {
-      /*
-       * remove the last two fields in the FEN string, they're not needed when
-       * checking for draw by rep
-       */
-      const fen = this.fen().split(' ').slice(0, 4).join(' ')
-
-      // has the position occurred three or move times
-      positions[fen] = fen in positions ? positions[fen] + 1 : 1
-      if (positions[fen] >= 3) {
-        repetition = true
-      }
+      const currentFen = trimFen(this.fen())
+      if (currentFen === finalFen) repetitionCount++
 
       const move = moves.pop()
-
-      if (!move) {
-        break
-      } else {
-        this._makeMove(move)
-      }
+      if (move) this._makeMove(move)
+      else break
     }
-
-    return repetition
+    return repetitionCount
   }
 
-  isDraw() {
-    return (
-      this._halfMoves >= 100 || // 50 moves per side = 100 half moves
-      this.isStalemate() ||
-      this.isInsufficientMaterial() ||
-      this.isThreefoldRepetition()
-    )
+  isThreefoldRepetition() {
+    return this._getRepetitionCount() >= 3
   }
 
-  isGameOver() {
-    return this.isCheckmate() || this.isStalemate() || this.isDraw()
+  isFivefoldRepetition() {
+    return this._getRepetitionCount() >= 5
+  }
+
+  isFiftyMoveRule() {
+    // 50 moves per side = 100 half moves
+    return this._halfMoves >= 100
+  }
+
+  isSeventyFiveMoveRule() {
+    // 75 moves per side = 150 half moves
+    return this._halfMoves >= 150
+  }
+
+  isDraw(strict = false) {
+    return this.isStalemate() || this.isInsufficientMaterial() || strict
+      ? this.isFivefoldRepetition() || this.isSeventyFiveMoveRule()
+      : this.isThreefoldRepetition() || this.isFiftyMoveRule()
+  }
+
+  isGameOver(strict = false) {
+    return this.isCheckmate() || this.isDraw(strict)
   }
 
   moves(): string[]
