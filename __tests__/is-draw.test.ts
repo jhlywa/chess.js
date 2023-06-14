@@ -5,17 +5,17 @@ test('isDraw - strict mode, fivefold repetition', () => {
   const chess = new Chess()
 
   moves.forEach((move) => {
-    expect(chess.isDraw(true)).toBe(false)
+    expect(chess.isDraw({strict: true})).toBe(false)
     chess.move(move)
   })
   
   expect(chess.isDraw()).toBe(true)
-  expect(chess.isDraw(true)).toBe(false)
+  expect(chess.isDraw({strict: true})).toBe(false)
   chess.move('Nf3')
   chess.move('Nf6')
   chess.move('Ng1')
   chess.move('Ng8')
-  expect(chess.isDraw(true)).toBe(true)
+  expect(chess.isDraw({strict: true})).toBe(true)
 
 })
 
@@ -44,15 +44,15 @@ test('isDraw - strict mode, seventy-five-move rule', () => {
   const chess = new Chess()
   moves.forEach((move) => {
     expect(chess.isDraw()).toBe(false)
-    expect(chess.isDraw(true)).toBe(false)
+    expect(chess.isDraw({strict: true})).toBe(false)
     chess.move(move)
   })
 
   strictMoves.forEach((move) => {
     expect(chess.isDraw()).toBe(true)
-    expect(chess.isDraw(true)).toBe(false)
+    expect(chess.isDraw({strict: true})).toBe(false)
     chess.move(move)
   })
   expect(chess.isDraw()).toBe(true)
-  expect(chess.isDraw(true)).toBe(true)
+  expect(chess.isDraw({strict: true})).toBe(true)
 })

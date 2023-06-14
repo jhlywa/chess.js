@@ -1032,7 +1032,7 @@ export class Chess {
     return this._halfMoves >= 150
   }
 
-  isDraw(strict = false) {
+  isDraw({ strict = false }: { strict?: boolean } = {}) {
     return (
       this.isStalemate() ||
       this.isInsufficientMaterial() ||
@@ -1042,8 +1042,8 @@ export class Chess {
     )
   }
 
-  isGameOver(strict = false) {
-    return this.isCheckmate() || this.isDraw(strict)
+  isGameOver({ strict = false }: { strict?: boolean } = {}) {
+    return this.isCheckmate() || this.isDraw({strict})
   }
 
   moves(): string[]

@@ -424,11 +424,11 @@ chess.isCheckmate()
 // -> true
 ```
 
-### .isDraw(strict = false)
+### .isDraw({ strict = false }: { strict?: boolean } = {})
 
 Returns true or false if the game is drawn (by stalemate, insufficient material, threefold repetition or 50-move rule).
 
-When the optional `strict` parameter is given as `true`, returns true or false if the game is strictly drawn as per latest [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023) Article 9 (by stalemate, insufficient material, fivefold repetition or 75-move rule).
+If optional `{ strict: true }` argument is given, returns true or false if the game is strictly drawn as per Article 9 of the [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023) (by stalemate, insufficient material, fivefold repetition or 75-move rule).
 
 ```ts
 const chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
@@ -441,11 +441,11 @@ const chess = new Chess('8/8/8/2R5/8/7K/8/k2r4 w - - 149 129')
 chess.isDraw()
 // -> true
 
-chess.isDraw(true)
+chess.isDraw({ strict: true })
 // -> false
 
 chess.move('Rd5')
-chess.isDraw(true)
+chess.isDraw({ strict: true })
 // -> true
 ```
 
@@ -460,11 +460,11 @@ chess.isInsufficientMaterial()
 // -> true
 ```
 
-### .isGameOver(strict = false)
+### .isGameOver({ strict = false }: { strict?: boolean } = {})
 
 Returns true if the game has ended via checkmate or draw (by stalemate, insufficient material, threefold repetition or 50-move rule). Otherwise, returns false.
 
-If optional `strict` parameter is given, it determines whether the game is strictly drawn as per latest [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023) Article 9 (by stalemate, insufficient material, fivefold repetition or 75-move rule).
+If optional `{ strict: true }` argument is given, it determines whether the game is strictly drawn as per Article 9 of the [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023) (by stalemate, insufficient material, fivefold repetition or 75-move rule).
 
 ```ts
 const chess = new Chess()
