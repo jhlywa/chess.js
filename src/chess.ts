@@ -596,25 +596,7 @@ export class Chess {
         square += parseInt(piece, 10)
       } else {
         const color = piece < 'a' ? WHITE : BLACK
-        /*
-         * TODO: `.load` calls `.put` for every piece in the fen, which in turns calls `._updateSetup`, which
-         * in turn calls `.fen`. Is it necessary to call `._updateSetup` for every piece? We are already 
-         * calling it once at the end of this method. Perhaps the publicly exposed `.put` method should call
-         * a private `._put` method (which does not call `._updateSetup`) and after call .`_updateSetup`, eg.
-         * ```
-         *   private _put(...args) {
-         *     ${ code from `.put` as it is currently except }
-         *     ${ without the `this._updateSetup(this.fen())` at the end }
-         *   }
-         * 
-         *   put(...args) {
-         *     this._put(...args)
-         *     this._updateSetup(this.fen())
-         *   }
-         * ```
-         * This change would prevent many unnecessary calls to `._updateSetup` and `.fen`.
-         */
-        this.put(
+        this._put(
           { type: piece.toLowerCase() as PieceSymbol, color },
           algebraic(square)
         )
@@ -794,6 +776,16 @@ export class Chess {
   }
 
   put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
+    const result = this._put({ type, color }, square)
+    if (result) {
+      this._updateCastlingRights()
+      this._updateEnPassantSquare()
+      this._updateSetup(this.fen())
+    } 
+    return result
+  }
+
+  private _put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
     // check for piece
     if (SYMBOLS.indexOf(type.toLowerCase()) === -1) {
       return false
@@ -819,10 +811,6 @@ export class Chess {
     if (type === KING) {
       this._kings[color] = sq
     }
-
-    this._updateCastlingRights()
-    this._updateEnPassantSquare()
-    this._updateSetup(this.fen())
 
     return true
   }
