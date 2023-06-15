@@ -557,7 +557,24 @@ export class Chess {
     this._comments = {}
     this._header = keepHeaders ? this._header : {}
     this._updateSetup(this.fen())
-    this._positionCounts = {}
+    /*
+     * Instantiate a proxy that keeps track of position occurrence counts for the purpose
+     * of repetition checking. The getter and setter methods automatically handle trimming
+     * irrelevent information from the fen, initialising new positions, and removing old
+     * positions from the record if their counts are reduced to 0.
+     */
+    this._positionCounts = new Proxy({} as Record<string, number>, {
+      get: (target, position: string) =>
+        position === 'length'
+          ? Object.keys(target).length // length for unit testing
+          : target?.[this._trimFen(position)] || 0,
+      set: (target, position: string, count: number) => {
+        const trimmedFen = this._trimFen(position)
+        if (count === 0) delete target[trimmedFen]
+        else target[trimmedFen] = count
+        return true
+      },
+    })
   }
 
   removeHeader(key: string) {
@@ -624,28 +641,12 @@ export class Chess {
     this._moveNumber = parseInt(tokens[5], 10)
 
     this._updateSetup(fen)
-
-    /*
-     * Instantiate a proxy that keeps track of position occurrence counts for the purpose
-     * of repetition checking. The getter and setter methods automatically handle trimming
-     * irrelevent information from the fen, initialising new positions, and removing old
-     * positions from the record if their counts are reduced to 0.
-     */
-    this._positionCounts = new Proxy({[this._trimFen(fen)]: 1}, {
-      get: (target, position: string) => target?.[this._trimFen(position)] || 0,
-      set: (target, position: string, count: number) => {
-        const trimmedFen = this._trimFen(position)
-        if (count === 0) delete target[trimmedFen]
-        else target[trimmedFen] = count
-        return true
-      },
-    })
+    this._positionCounts[fen]++
   }
 
   private _trimFen(fen: string): string {
     // remove last two fields in FEN string as they're not needed when checking for repetition
     return fen.split(' ').slice(0, 4).join(' ')
-
   }
 
   fen() {
@@ -776,13 +777,13 @@ export class Chess {
   }
 
   put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
-    const result = this._put({ type, color }, square)
-    if (result) {
+    if (this._put({ type, color }, square)) {
       this._updateCastlingRights()
       this._updateEnPassantSquare()
       this._updateSetup(this.fen())
+      return true
     } 
-    return result
+    return false
   }
 
   private _put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
@@ -818,13 +819,15 @@ export class Chess {
   remove(square: Square) {
     const piece = this.get(square)
     delete this._board[Ox88[square]]
-    if (piece && piece.type === KING) {
-      this._kings[piece.color] = EMPTY
-    }
 
-    this._updateCastlingRights()
-    this._updateEnPassantSquare()
-    this._updateSetup(this.fen())
+    if (piece) {
+      this._updateCastlingRights()
+      this._updateEnPassantSquare()
+      this._updateSetup(this.fen())
+      if (piece.type === KING) {
+        this._kings[piece.color] = EMPTY
+      }
+    }
 
     return piece
   }
@@ -1048,8 +1051,8 @@ export class Chess {
 
   isDraw({ strict = false }: { strict?: boolean } = {}): boolean {
     return this.isStalemate() || this.isInsufficientMaterial() || (strict
-      ? this.isFivefoldRepetition() || this.isSeventyFiveMoveRule()
-      : this.canClaimDraw())
+        ? this.isFivefoldRepetition() || this.isSeventyFiveMoveRule()
+        : this.canClaimDraw())
   }
 
   isGameOver({ strict = false }: { strict?: boolean } = {}): boolean {
@@ -1492,10 +1495,10 @@ export class Chess {
     const move = this._undoMove()
     if (move) {
       const prettyMove = this._makePretty(move)
-      this._positionCounts[prettyMove.before]--
+      this._positionCounts[prettyMove.after]--
       return prettyMove
-    }
-    else return null
+    }    
+    return null
   }
 
   private _undoMove() {
@@ -1919,6 +1922,7 @@ export class Chess {
         // reset the end of game marker if making a valid move
         result = ''
         this._makeMove(move)
+        this._positionCounts[this.fen()]++
       }
     }
 
