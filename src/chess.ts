@@ -539,6 +539,7 @@ export class Chess {
   private _history: History[] = []
   private _comments: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
+  private _positionCounts: Record<string, number> = {}
 
   constructor(fen = DEFAULT_POSITION) {
     this.load(fen)
@@ -556,6 +557,7 @@ export class Chess {
     this._comments = {}
     this._header = keepHeaders ? this._header : {}
     this._updateSetup(this.fen())
+    this._positionCounts = {}
   }
 
   removeHeader(key: string) {
@@ -594,6 +596,24 @@ export class Chess {
         square += parseInt(piece, 10)
       } else {
         const color = piece < 'a' ? WHITE : BLACK
+        /*
+         * TODO: `.load` calls `.put` for every piece in the fen, which in turns calls `._updateSetup`, which
+         * in turn calls `.fen`. Is it necessary to call `._updateSetup` for every piece? We are already 
+         * calling it once at the end of this method. Perhaps the publicly exposed `.put` method should call
+         * a private `._put` method (which does not call `._updateSetup`) and after call .`_updateSetup`, eg.
+         * ```
+         *   private _put(...args) {
+         *     ${ code from `.put` as it is currently except }
+         *     ${ without the `this._updateSetup(this.fen())` at the end }
+         *   }
+         * 
+         *   put(...args) {
+         *     this._put(...args)
+         *     this._updateSetup(this.fen())
+         *   }
+         * ```
+         * This change would prevent many unnecessary calls to `._updateSetup` and `.fen`.
+         */
         this.put(
           { type: piece.toLowerCase() as PieceSymbol, color },
           algebraic(square)
@@ -621,7 +641,29 @@ export class Chess {
     this._halfMoves = parseInt(tokens[4], 10)
     this._moveNumber = parseInt(tokens[5], 10)
 
-    this._updateSetup(this.fen())
+    this._updateSetup(fen)
+
+    /*
+     * Instantiate a proxy that keeps track of position occurrence counts for the purpose
+     * of repetition checking. The getter and setter methods automatically handle trimming
+     * irrelevent information from the fen, initialising new positions, and removing old
+     * positions from the record if their counts are reduced to 0.
+     */
+    this._positionCounts = new Proxy({[this._trimFen(fen)]: 1}, {
+      get: (target, position: string) => target?.[this._trimFen(position)] || 0,
+      set: (target, position: string, count: number) => {
+        const trimmedFen = this._trimFen(position)
+        if (count === 0) delete target[trimmedFen]
+        else target[trimmedFen] = count
+        return true
+      },
+    })
+  }
+
+  private _trimFen(fen: string): string {
+    // remove last two fields in FEN string as they're not needed when checking for repetition
+    return fen.split(' ').slice(0, 4).join(' ')
+
   }
 
   fen() {
@@ -991,27 +1033,7 @@ export class Chess {
   }
 
   private _getRepetitionCount() {
-    // remove the last two fields in the FEN string, they're not needed when checking for repetition
-    const trimFen = (fen: string) => fen.split(' ').slice(0, 4).join(' ')
-    const finalFen = trimFen(this.fen())
-
-    const moves = []
-    while (true) {
-      const move = this._undoMove()
-      if (!move) break
-      moves.push(move)
-    }
-
-    let repetitionCount = 0
-    while (true) {
-      const currentFen = trimFen(this.fen())
-      if (currentFen === finalFen) repetitionCount++
-
-      const move = moves.pop()
-      if (move) this._makeMove(move)
-      else break
-    }
-    return repetitionCount
+    return this._positionCounts[this.fen()]
   }
 
   isThreefoldRepetition(): boolean {
@@ -1366,7 +1388,7 @@ export class Chess {
     const prettyMove = this._makePretty(moveObj)
 
     this._makeMove(moveObj)
-
+    this._positionCounts[prettyMove.after]++
     return prettyMove
   }
 
@@ -1480,7 +1502,12 @@ export class Chess {
 
   undo() {
     const move = this._undoMove()
-    return move ? this._makePretty(move) : null
+    if (move) {
+      const prettyMove = this._makePretty(move)
+      this._positionCounts[prettyMove.before]--
+      return prettyMove
+    }
+    else return null
   }
 
   private _undoMove() {
