@@ -1014,36 +1014,36 @@ export class Chess {
     return repetitionCount
   }
 
-  isThreefoldRepetition() {
+  isThreefoldRepetition(): boolean {
     return this._getRepetitionCount() >= 3
   }
 
-  isFivefoldRepetition() {
+  isFivefoldRepetition(): boolean {
     return this._getRepetitionCount() >= 5
   }
 
-  isFiftyMoveRule() {
+  isFiftyMoveRule(): boolean {
     // 50 moves per side = 100 half moves
     return this._halfMoves >= 100
   }
 
-  isSeventyFiveMoveRule() {
+  isSeventyFiveMoveRule(): boolean {
     // 75 moves per side = 150 half moves
     return this._halfMoves >= 150
   }
 
-  isDraw({ strict = false }: { strict?: boolean } = {}) {
-    return (
-      this.isStalemate() ||
-      this.isInsufficientMaterial() ||
-      (strict
-        ? this.isFivefoldRepetition() || this.isSeventyFiveMoveRule()
-        : this.isThreefoldRepetition() || this.isFiftyMoveRule())
-    )
+  canClaimDraw(): boolean {
+    return this.isThreefoldRepetition() || this.isFiftyMoveRule()
   }
 
-  isGameOver({ strict = false }: { strict?: boolean } = {}) {
-    return this.isCheckmate() || this.isDraw({strict})
+  isDraw({ strict = false }: { strict?: boolean } = {}): boolean {
+    return this.isStalemate() || this.isInsufficientMaterial() || (strict
+      ? this.isFivefoldRepetition() || this.isSeventyFiveMoveRule()
+      : this.canClaimDraw())
+  }
+
+  isGameOver({ strict = false }: { strict?: boolean } = {}): boolean {
+    return this.isCheckmate() || this.isDraw({ strict })
   }
 
   moves(): string[]

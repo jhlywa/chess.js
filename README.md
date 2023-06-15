@@ -424,6 +424,11 @@ chess.isCheckmate()
 // -> true
 ```
 
+### .canClaimDraw() 
+
+Returns true or false if a draw can be claimed in the current position as per Article 9 of the [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023), ie. if `.isThreefoldRepetition()` or `.isFiftyMoveRule()`.
+
+
 ### .isDraw({ strict = false }: { strict?: boolean } = {})
 
 Returns true or false if the game is drawn (by stalemate, insufficient material, threefold repetition or 50-move rule).
