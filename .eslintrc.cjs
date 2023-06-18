@@ -27,6 +27,7 @@ module.exports = {
         format: ['PascalCase'],
       },
     ],
-    'multiline-comment-style': ['error', 'starred-block']
+    'multiline-comment-style': ['error', 'starred-block'], 
+    "@typescript-eslint/no-non-null-assertion": 'allow'
   },
 }
