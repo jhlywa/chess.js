@@ -95,3 +95,23 @@ test('_positionCounts - properly updates if remove is called', () => {
     expect(chess._positionCounts['rnbqkbnr/pppp1ppp/8/4p3/8/8/PPPP1PPP/RNBQKBNR w KQkq - 0 3']).toBe(1)
 })
 
+test('_positionCounts - properly updates if put/remove is called but undone', () => {
+    const chess = new Chess()
+    expect(chess._positionCounts[DEFAULT_POSITION]).toBe(1)
+    chess.move('e4')
+    expect(chess._positionCounts[e4Fen]).toBe(1)
+
+    chess.move('e5')
+    chess.put({type: 'p', color: 'w'}, 'e2')
+    chess.remove('e4')
+    chess.move('Nc3')
+    expect(chess._positionCounts['rnbqkbnr/pppp1ppp/8/4p3/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 1 2']).toBe(1)
+    chess.undo()
+    chess.undo()
+    expect(chess._positionCounts['rnbqkbnr/pppp1ppp/8/4p3/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 1 2']).toBe(0)
+    chess.move('e5')
+    chess.move('Nc3')
+    expect(chess._positionCounts['rnbqkbnr/pppp1ppp/8/4p3/8/2N5/PPPPPPPP/R1BQKBNR b KQkq - 1 2']).toBe(0)
+    expect(chess._positionCounts['rnbqkbnr/pppp1ppp/8/4p3/4P3/2N5/PPPP1PPP/R1BQKBNR b KQkq - 1 2']).toBe(1)
+})
+
