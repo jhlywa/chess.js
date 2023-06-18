@@ -67,14 +67,34 @@ type InternalMove = {
   flags: number
 }
 
-interface History {
-  move: InternalMove
+export interface Put {
+  piece: Piece, 
+  square: Square
+  oldPiece?: Piece
+}
+
+export interface Remove {
+  piece: Piece
+  square: Square
+}
+
+interface HistoryType {
+  historyType: 'move' | 'put' | 'remove'
+  move: InternalMove | Put | Remove
+}
+
+interface History extends HistoryType{
   kings: Record<Color, number>
   turn: Color
   castling: Record<Color, number>
   epSquare: number
   halfMoves: number
   moveNumber: number
+}
+
+export type HistoryMove = {
+  historyType: 'move' | 'put' | 'remove'
+  move: Move | Put | Remove
 }
 
 export type Move = {
@@ -615,7 +635,8 @@ export class Chess {
         const color = piece < 'a' ? WHITE : BLACK
         this._put(
           { type: piece.toLowerCase() as PieceSymbol, color },
-          algebraic(square)
+          algebraic(square),
+          {update: false, push: false}
         )
         square++
       }
@@ -776,17 +797,22 @@ export class Chess {
     return this._board[Ox88[square]] || false
   }
 
-  put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
-    if (this._put({ type, color }, square)) {
-      this._updateCastlingRights()
-      this._updateEnPassantSquare()
-      this._updateSetup(this.fen())
-      return true
-    } 
-    return false
+  put({ type, color }: { type: PieceSymbol; color: Color }, square: Square): boolean {
+    return this._history.length === 0 
+    /*
+     * On the first turn (ie. before any moves have been made) we don't want to push the
+     * put to _history as we just consider it altering the starting FEN
+     */
+    ? this._put({ type, color }, square, {update: true, push: false})
+    : this._put({ type, color }, square)
   }
 
-  private _put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
+  private _put(
+    { type, color }: { type: PieceSymbol; color: Color },
+    square: Square,
+    options: { update?: boolean; push?: boolean } = {update: true, push: true}
+  ): boolean {
+
     // check for piece
     if (SYMBOLS.indexOf(type.toLowerCase()) === -1) {
       return false
@@ -807,23 +833,49 @@ export class Chess {
       return false
     }
 
+    if (options.push)
+      this._push({ piece: { type, color }, square, oldPiece: this._board[sq] }, 'put')
+
     this._board[sq] = { type: type as PieceSymbol, color: color as Color }
 
     if (type === KING) {
       this._kings[color] = sq
     }
 
-    return true
-  }
-
-  remove(square: Square) {
-    const piece = this.get(square)
-    delete this._board[Ox88[square]]
-
-    if (piece) {
+    if (options.update) {
       this._updateCastlingRights()
       this._updateEnPassantSquare()
       this._updateSetup(this.fen())
+    }
+
+    return true
+  }
+
+  remove(square: Square): Piece | false {
+    return this._history.length === 0 
+    /*
+     * On the first turn (ie. before any moves have been made) we don't want to push the
+     * remove to _history as we just consider it altering the starting FEN
+     */
+    ? this._remove(square, {update: true, push: false})
+    : this._remove(square)
+  }
+
+
+  private _remove(
+    square: Square,
+    options: { update?: boolean; push?: boolean } = { update: true, push: true }
+  ): Piece | false {
+    const piece = this.get(square)
+    
+    if (piece) {
+      if (options.push) this._push({piece, square}, 'remove')
+      delete this._board[Ox88[square]]
+      if (options.update) {
+        this._updateCastlingRights()
+        this._updateEnPassantSquare()
+        this._updateSetup(this.fen())
+      }
       if (piece.type === KING) {
         this._kings[piece.color] = EMPTY
       }
@@ -1383,8 +1435,9 @@ export class Chess {
     return prettyMove
   }
 
-  _push(move: InternalMove) {
+  _push(move: History['move'], historyType: History['historyType'] = 'move'): void {
     this._history.push({
+      historyType,
       move,
       kings: { b: this._kings.b, w: this._kings.w },
       turn: this._turn,
@@ -1487,28 +1540,44 @@ export class Chess {
     if (us === BLACK) {
       this._moveNumber++
     }
-
+    
     this._turn = them
   }
-
-  undo() {
-    const move = this._undoMove()
-    if (move) {
-      const prettyMove = this._makePretty(move)
-      this._positionCounts[prettyMove.after]--
-      return prettyMove
-    }    
-    return null
-  }
-
-  private _undoMove() {
-    const old = this._history.pop()
-    if (old === undefined) {
+  
+  undo(): Move | null
+  undo({ untilMove }: { untilMove: true }): Move | null
+  undo({ untilMove }: { untilMove: false }): HistoryMove | null
+  undo({ untilMove = true }: { untilMove?: boolean } = {}):
+    | HistoryMove
+    | Move
+    | null {
+    const old = this._undoMove()
+    if (old === null) {
       return null
     }
 
-    const move = old.move
+    const { historyType, move } = old
+    if (historyType === 'move') {
+      const prettyMove = this._makePretty(move as InternalMove)
+      this._positionCounts[prettyMove.after]--
+      return untilMove 
+        ? { historyType, move: prettyMove } 
+        : prettyMove
+    } else {
+      // old is a put/remove
+      return untilMove
+        ? this.undo()
+        : { historyType, move: move as Put | Remove }
+    }
+  }
 
+  private _undoMove(): History | null {
+    const old = this._history.pop()
+
+    if (old === undefined) {
+      return null
+    }
+    
     this._kings = old.kings
     this._turn = old.turn
     this._castling = old.castling
@@ -1516,44 +1585,76 @@ export class Chess {
     this._halfMoves = old.halfMoves
     this._moveNumber = old.moveNumber
 
-    const us = this._turn
-    const them = swapColor(us)
+    if (old.historyType === 'put') {
+      const putEvent = old.move as Put
+      if (putEvent.oldPiece) {
+        this._put(putEvent.oldPiece, putEvent.square, {update: true, push: false})
+      } else {
+        this._remove(putEvent.square, {update: true, push: false})
+      }
+    } else if (old.historyType === 'remove') {
+      const removeEvent = old.move as Remove
+      this._put(removeEvent.piece, removeEvent.square, {update: true, push: false})
 
-    this._board[move.from] = this._board[move.to]
-    this._board[move.from].type = move.piece // to undo any promotions
-    delete this._board[move.to]
+    } else if (old.historyType === 'move') {      
+      const move = old.move as InternalMove
 
-    if (move.captured) {
-      if (move.flags & BITS.EP_CAPTURE) {
-        // en passant capture
-        let index: number
-        if (us === BLACK) {
-          index = move.to - 16
+      const us = this._turn
+      const them = swapColor(us)
+
+      this._board[move.from] = this._board[move.to]
+      this._board[move.from].type = move.piece // to undo any promotions
+      delete this._board[move.to]
+  
+      if (move.captured) {
+        if (move.flags & BITS.EP_CAPTURE) {
+          // en passant capture
+          let index: number
+          if (us === BLACK) {
+            index = move.to - 16
+          } else {
+            index = move.to + 16
+          }
+          this._board[index] = { type: PAWN, color: them }
         } else {
-          index = move.to + 16
+          // regular capture
+          this._board[move.to] = { type: move.captured, color: them }
         }
-        this._board[index] = { type: PAWN, color: them }
-      } else {
-        // regular capture
-        this._board[move.to] = { type: move.captured, color: them }
       }
+  
+      if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+        let castlingTo: number, castlingFrom: number
+        if (move.flags & BITS.KSIDE_CASTLE) {
+          castlingTo = move.to + 1
+          castlingFrom = move.to - 1
+        } else {
+          castlingTo = move.to - 2
+          castlingFrom = move.to + 1
+        }
+  
+        this._board[castlingTo] = this._board[castlingFrom]
+        delete this._board[castlingFrom]
+      }
+    } else {
+      throw Error(`Unexpected historyType of _history entry: ${old}`)
     }
 
-    if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-      let castlingTo: number, castlingFrom: number
-      if (move.flags & BITS.KSIDE_CASTLE) {
-        castlingTo = move.to + 1
-        castlingFrom = move.to - 1
-      } else {
-        castlingTo = move.to - 2
-        castlingFrom = move.to + 1
-      }
-
-      this._board[castlingTo] = this._board[castlingFrom]
-      delete this._board[castlingFrom]
+    return old
+  }
+  
+  private _redoMove({historyType, move}): void {
+    // Used to redo moves undone with _undoMove (not with undo)
+    switch (historyType) {
+      case 'move':
+        this._makeMove(move)
+        break
+      case 'put':
+        this.put(move.piece, move.square)
+        break
+      case 'remove':
+        this.remove(move.square)
+        break
     }
-
-    return move
   }
 
   pgn({
@@ -1582,9 +1683,14 @@ export class Chess {
       result.push(newline)
     }
 
-    const appendComment = (moveString: string) => {
-      const comment = this._comments[this.fen()]
-      if (typeof comment !== 'undefined') {
+    const appendComment = (
+      moveString: string,
+      comment: string | undefined = undefined
+    ): string => {
+      if (comment === undefined) {
+        comment = this._comments[this.fen()]
+      }
+      if (comment !== undefined) {
         const delimiter = moveString.length > 0 ? ' ' : ''
         moveString = `${moveString}${delimiter}{${comment}}`
       }
@@ -1592,7 +1698,7 @@ export class Chess {
     }
 
     // pop all of history onto reversed_history
-    const reversedHistory = []
+    const reversedHistory: History[] = []
     while (this._history.length > 0) {
       reversedHistory.push(this._undoMove())
     }
@@ -1607,30 +1713,37 @@ export class Chess {
 
     // build the list of moves.  a move_string looks like: "3. e3 e6"
     while (reversedHistory.length > 0) {
-      moveString = appendComment(moveString)
-      const move = reversedHistory.pop()
+      const { historyType, move } = reversedHistory.pop()
 
-      // make TypeScript stop complaining about move being undefined
-      if (!move) {
-        break
-      }
-
-      // if the position started with black to move, start PGN with #. ...
-      if (!this._history.length && move.color === 'b') {
-        const prefix = `${this._moveNumber}. ...`
-        // is there a comment preceding the first move?
-        moveString = moveString ? `${moveString} ${prefix}` : prefix
-      } else if (move.color === 'w') {
-        // store the previous generated move_string if we have one
-        if (moveString.length) {
-          moves.push(moveString)
+      if (historyType === 'move') {
+        const moveEvent = move as InternalMove
+        moveString = appendComment(moveString)
+  
+        // if the position started with black to move, start PGN with #. ...
+        if (!this._history.length && moveEvent.color === 'b') {
+          const prefix = `${this._moveNumber}. ...`
+          // is there a comment preceding the first move?
+          moveString = moveString ? `${moveString} ${prefix}` : prefix
+        } else if (moveEvent.color === 'w') {
+          // store the previous generated move_string if we have one
+          if (moveString.length) {
+            moves.push(moveString)
+          }
+          moveString = this._moveNumber + '.'
         }
-        moveString = this._moveNumber + '.'
-      }
+  
+        moveString =
+          moveString + ' ' + this._moveToSan(moveEvent, this._moves({ legal: true }))
 
-      moveString =
-        moveString + ' ' + this._moveToSan(move, this._moves({ legal: true }))
-      this._makeMove(move)
+      } else if (historyType === 'put') {
+        const putEvent = move as Put
+        moveString = appendComment(moveString, `Chess.js: ${putEvent.piece.color} ${putEvent.piece.type} put on ${putEvent.square}`)
+
+      } else if (historyType === 'remove') {
+        const removeEvent = move as Remove
+        moveString = appendComment(moveString, `Chess.js: ${removeEvent.piece.color} ${removeEvent.piece.type} removed from ${removeEvent.square}`)
+      }
+      this._redoMove({ historyType, move })
     }
 
     // are there any other leftover moves?
@@ -1855,7 +1968,7 @@ export class Chess {
 
     const encodeComment = function (s: string) {
       s = s.replace(new RegExp(mask(newlineChar), 'g'), ' ')
-      return `{${toHex(s.slice(1, s.length - 1))}}`
+      return ` {${toHex(s)}} `
     }
 
     const decodeComment = function (s: string) {
@@ -1869,12 +1982,8 @@ export class Chess {
       .replace(headerString, '')
       .replace(
         // encode comments so they don't get deleted below
-        new RegExp(`({[^}]*})+?|;([^${mask(newlineChar)}]*)`, 'g'),
-        function (_match, bracket, semicolon) {
-          return bracket !== undefined
-            ? encodeComment(bracket)
-            : ' ' + encodeComment(`{${semicolon.slice(1)}}`)
-        }
+        new RegExp(`\\s*{([^}]*)}\\s*|;[^\\S\\n\\r]*([^${mask(newlineChar)}]*)[${mask(newlineChar)}]?`, 'g'),
+        (_match, bracket, semicolon) => encodeComment(bracket !== undefined ? bracket : semicolon)
       )
       .replace(new RegExp(mask(newlineChar), 'g'), ' ')
 
@@ -1904,7 +2013,24 @@ export class Chess {
     for (let halfMove = 0; halfMove < moves.length; halfMove++) {
       const comment = decodeComment(moves[halfMove])
       if (comment !== undefined) {
-        this._comments[this.fen()] = comment
+        const match = comment.match(
+          /Chess\.js: ([wb]) ([pbnrqk]) (put|removed) (?:on|from) ([a-h][1-8])/
+        )
+        if (match) {
+          const [color, piece, event, square] = match.slice(1)
+          switch (event) {
+            case 'put':
+              this.put({type: piece as PieceSymbol, color: color as Color}, square as Square)
+              break
+            case 'removed':
+              this.remove(square as Square)
+              break
+          }
+        } else {
+          const fen = this.fen()
+          if (this._comments[fen]) this._comments[fen] += ' ' + comment
+          else this._comments[fen] = comment
+        }
         continue
       }
 
@@ -2250,26 +2376,49 @@ export class Chess {
   history({ verbose }: { verbose: true }): Move[]
   history({ verbose }: { verbose: false }): string[]
   history({ verbose }: { verbose: boolean }): string[] | Move[]
-  history({ verbose = false }: { verbose?: boolean } = {}) {
-    const reversedHistory = []
+  history({ verbose, onlyMoves }: { verbose: false, onlyMoves: true }): string[]
+  history({ verbose, onlyMoves }: { verbose: true, onlyMoves: true }): Move[]
+  history({ verbose, onlyMoves }: { verbose: true, onlyMoves: false }): HistoryMove[]
+  history({ verbose, onlyMoves }: { verbose: false, onlyMoves: false }): never
+  history({ verbose, onlyMoves }: { verbose: boolean, onlyMoves: boolean }):  string[] | Move[] | HistoryMove[]
+  history({ verbose = false, onlyMoves = true }: { verbose?: boolean, onlyMoves?: boolean } = {}) {
+    /*
+     * TODO: Why does history need to replay the entire game to get the history? We are already
+     * storing the game history in _history. It seems the only reason we are replaying the entire 
+     * game is just to call _makePretty on the moves, ie. to get FENs and SANs. Is this necessary?
+     * Perhaps we should just store this information in _history? 
+     */
+    if (!verbose && !onlyMoves) {
+      throw Error(
+        'Unsupported options for history: { verbose: false, onlyMoves: false }.\nPlease use { verbose: true, onlyMoves: false } instead.'
+      )
+    }
+
+    const reversedHistory: History[]= []
     const moveHistory = []
 
     while (this._history.length > 0) {
       reversedHistory.push(this._undoMove())
     }
 
-    while (true) {
-      const move = reversedHistory.pop()
-      if (!move) {
-        break
+    while (reversedHistory.length > 0) {
+      const { historyType, move } = reversedHistory.pop()
+
+      if (onlyMoves && historyType === 'move') {
+        if (verbose) {
+          moveHistory.push(this._makePretty(move as InternalMove))
+        } else {
+          moveHistory.push(this._moveToSan(move as InternalMove, this._moves()))
+        }
+      } else if (!onlyMoves) {
+        if (historyType === 'move') {
+          moveHistory.push({ historyType, move: this._makePretty(move as InternalMove) })
+        } else {
+          moveHistory.push({ historyType, move })
+        }
       }
 
-      if (verbose) {
-        moveHistory.push(this._makePretty(move))
-      } else {
-        moveHistory.push(this._moveToSan(move, this._moves()))
-      }
-      this._makeMove(move)
+      this._redoMove({ historyType, move })
     }
 
     return moveHistory
@@ -2292,11 +2441,12 @@ export class Chess {
     copyComment(this.fen())
 
     while (true) {
-      const move = reversedHistory.pop()
-      if (!move) {
+      const old = reversedHistory.pop()
+      if (!old) {
         break
       }
-      this._makeMove(move)
+      const { historyType, move } = old
+      this._redoMove({historyType, move})
       copyComment(this.fen())
     }
     this._comments = currentComments
