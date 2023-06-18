@@ -617,7 +617,7 @@ export class Chess {
         square += parseInt(piece, 10)
       } else {
         const color = piece < 'a' ? WHITE : BLACK
-        this.put(
+        this._put(
           { type: piece.toLowerCase() as PieceSymbol, color },
           algebraic(square)
         )
@@ -776,6 +776,16 @@ export class Chess {
   }
 
   put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
+    if (this._put({ type, color }, square)) {
+      this._updateCastlingRights()
+      this._updateEnPassantSquare()
+      this._updateSetup(this.fen())
+      return true
+    } 
+    return false
+  }
+
+  private _put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
     // check for piece
     if (SYMBOLS.indexOf(type.toLowerCase()) === -1) {
       return false
