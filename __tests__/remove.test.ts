@@ -101,3 +101,13 @@ test('remove - removing white pawn clears black en passant square 2', () => {
   chess.remove('b5')
   expect(chess.moves()).not.toContain('bxc6')
 });
+
+test('remove - can be undone', () => {
+  const chess = new Chess()
+
+  chess.move('e4')
+  chess.remove('e4')
+  expect(chess.fen()).toBe('rnbqkbnr/pppppppp/8/8/8/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1')
+  chess.undo({untilMove: false})
+  expect(chess.fen()).toBe('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1')
+});

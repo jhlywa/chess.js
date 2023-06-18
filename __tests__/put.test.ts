@@ -182,3 +182,13 @@ test('put - replacing white pawn clears black en passant square 2', () => {
   chess.put({ type :BISHOP, color: WHITE}, 'b5')
   expect(chess.moves()).not.toContain('bxc6')
 });
+
+test('put - can be undone', () => {
+  const chess = new Chess()
+
+  chess.move('e4')
+  chess.put({ type: PAWN, color: WHITE}, 'e2')
+  expect(chess.fen()).toBe('rnbqkbnr/pppppppp/8/8/4P3/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1')
+  chess.undo({untilMove: false})
+  expect(chess.fen()).toBe('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1')
+});

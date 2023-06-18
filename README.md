@@ -424,14 +424,33 @@ chess.isCheckmate()
 // -> true
 ```
 
-### .isDraw()
+### .canClaimDraw() 
 
-Returns true or false if the game is drawn (50-move rule or insufficient
-material).
+Returns true or false if a draw can be claimed in the current position as per Article 9 of the [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023), ie. if `.isThreefoldRepetition()` or `.isFiftyMoveRule()`.
+
+
+### .isDraw({ strict = false }: { strict?: boolean } = {})
+
+Returns true or false if the game is drawn (by stalemate, insufficient material, threefold repetition or 50-move rule).
+
+If optional `{ strict: true }` argument is given, returns true or false if the game is strictly drawn as per Article 9 of the [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023) (by stalemate, insufficient material, fivefold repetition or 75-move rule).
 
 ```ts
 const chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
 chess.isDraw()
+// -> true
+```
+
+```ts
+const chess = new Chess('8/8/8/2R5/8/7K/8/k2r4 w - - 149 129')
+chess.isDraw()
+// -> true
+
+chess.isDraw({ strict: true })
+// -> false
+
+chess.move('Rd5')
+chess.isDraw({ strict: true })
 // -> true
 ```
 
@@ -446,10 +465,11 @@ chess.isInsufficientMaterial()
 // -> true
 ```
 
-### .isGameOver()
+### .isGameOver({ strict = false }: { strict?: boolean } = {})
 
-Returns true if the game has ended via checkmate, stalemate, draw, threefold
-repetition, or insufficient material. Otherwise, returns false.
+Returns true if the game has ended via checkmate or draw (by stalemate, insufficient material, threefold repetition or 50-move rule). Otherwise, returns false.
+
+If optional `{ strict: true }` argument is given, it determines whether the game is strictly drawn as per Article 9 of the [FIDE Laws of Chess](https://handbook.fide.com/chapter/E012023) (by stalemate, insufficient material, fivefold repetition or 75-move rule).
 
 ```ts
 const chess = new Chess()
@@ -498,6 +518,73 @@ chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 3rd time
 chess.isThreefoldRepetition()
 // -> true
+```
+### .isFivefoldRepetition()
+
+Returns true or false if the current board position has occurred five or more
+times.
+
+```ts
+const chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+// -> true
+// rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 1st time
+chess.isFivefoldRepetition()
+// -> false
+
+chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
+// rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 2nd time
+chess.isFivefoldRepetition()
+// -> false
+
+chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
+chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8') 
+chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
+// rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 5th time
+chess.isFivefoldRepetition()
+// -> true
+```
+
+### .isFiftyMoveRule()
+
+Returns true or false if the [fifty-move rule](https://en.wikipedia.org/wiki/Fifty-move_rule) is in effect.
+
+```ts
+const chess = new Chess('8/2R5/5K2/1k6/8/8/8/4r3 w - - 99 104')
+
+chess.isFiftyMoveRule()
+// -> false
+
+chess.move('Kf5')
+chess.isFiftyMoveRule()
+// -> true
+
+chess.move('Re5')
+chess.isFiftyMoveRule()
+// -> true
+
+chess.move('Kxe5')
+chess.isFiftyMoveRule()
+// -> false
+```
+
+### .isSeventyFiveMoveRule()
+
+Returns true or false if the [seventy-five-move rule](https://en.wikipedia.org/wiki/Fifty-move_rule#Seventy-five-move_rule) is in effect.
+
+
+```ts
+const chess = new Chess('8/8/8/2R5/8/7K/8/k2r4 w - - 149 129')
+
+chess.isSeventyFiveMoveRule()
+// -> false
+
+chess.move('Rd5')
+chess.isSeventyFiveMoveRule()
+// -> true
+
+chess.move('Rxd5')
+chess.isSeventyFiveMoveRule()
+// -> false
 ```
 
 ### .load(fen)
