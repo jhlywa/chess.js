@@ -1642,17 +1642,17 @@ export class Chess {
     return old
   }
   
-  private _redoMove({historyType, move}): void {
+  private _redoMove({historyType, move}: HistoryType): void {
     // Used to redo moves undone with _undoMove (not with undo)
     switch (historyType) {
       case 'move':
-        this._makeMove(move)
+        this._makeMove(move as InternalMove)
         break
       case 'put':
-        this.put(move.piece, move.square)
+        this.put(move.piece as Piece, (move as Put).square)
         break
       case 'remove':
-        this.remove(move.square)
+        this.remove((move as Remove).square)
         break
     }
   }
@@ -1700,7 +1700,7 @@ export class Chess {
     // pop all of history onto reversed_history
     const reversedHistory: History[] = []
     while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
+      reversedHistory.push(this._undoMove()!)
     }
 
     const moves = []
@@ -1713,7 +1713,7 @@ export class Chess {
 
     // build the list of moves.  a move_string looks like: "3. e3 e6"
     while (reversedHistory.length > 0) {
-      const { historyType, move } = reversedHistory.pop()
+      const { historyType, move } = reversedHistory.pop()!
 
       if (historyType === 'move') {
         const moveEvent = move as InternalMove
@@ -2381,7 +2381,7 @@ export class Chess {
   history({ verbose, onlyMoves }: { verbose: true, onlyMoves: false }): HistoryMove[]
   history({ verbose, onlyMoves }: { verbose: false, onlyMoves: false }): never
   history({ verbose, onlyMoves }: { verbose: boolean, onlyMoves: boolean }):  string[] | Move[] | HistoryMove[]
-  history({ verbose = false, onlyMoves = true }: { verbose?: boolean, onlyMoves?: boolean } = {}) {
+  history({ verbose = false, onlyMoves = true }: { verbose?: boolean, onlyMoves?: boolean } = {}):  (string | Move | HistoryMove)[] {
     /*
      * TODO: Why does history need to replay the entire game to get the history? We are already
      * storing the game history in _history. It seems the only reason we are replaying the entire 
@@ -2398,11 +2398,11 @@ export class Chess {
     const moveHistory = []
 
     while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
+      reversedHistory.push(this._undoMove() as History)
     }
 
     while (reversedHistory.length > 0) {
-      const { historyType, move } = reversedHistory.pop()
+      const { historyType, move } = reversedHistory.pop() as History
 
       if (onlyMoves && historyType === 'move') {
         if (verbose) {
@@ -2414,7 +2414,7 @@ export class Chess {
         if (historyType === 'move') {
           moveHistory.push({ historyType, move: this._makePretty(move as InternalMove) })
         } else {
-          moveHistory.push({ historyType, move })
+          moveHistory.push({ historyType, move: move as Put | Remove })
         }
       }
 
