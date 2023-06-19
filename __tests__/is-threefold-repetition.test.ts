@@ -12,6 +12,8 @@ test('isThreefoldRepetition', () => {
     chess.move(move)
   })
   expect(chess.isThreefoldRepetition()).toBe(true)
+  chess.move('a6')
+  expect(chess.isThreefoldRepetition()).toBe(false)
 })
 
 test('isThreefoldRepetition - 2', () => {
@@ -22,4 +24,6 @@ test('isThreefoldRepetition - 2', () => {
     chess.move(move)
   })
   expect(chess.isThreefoldRepetition()).toBe(true)
+  chess.move('e4')
+  expect(chess.isThreefoldRepetition()).toBe(false)
 })
