@@ -812,10 +812,6 @@ export class Chess {
       this._kings[color] = sq
     }
 
-    this._updateCastlingRights()
-    this._updateEnPassantSquare()
-    this._updateSetup(this.fen())
-
     return true
   }
 
