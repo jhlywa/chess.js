@@ -644,7 +644,7 @@ export class Chess {
     this._halfMoves = parseInt(tokens[4], 10)
     this._moveNumber = parseInt(tokens[5], 10)
 
-    this._updateSetup(this.fen())
+    this._updateSetup(fen)
     this._positionCounts[fen]++
   }
 
