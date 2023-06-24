@@ -1357,7 +1357,7 @@ export class Chess {
 
     this._makeMove(moveObj)
 
-    const prettyMove = { ...this._history.at(-1)?.pretty as Move } 
+    const prettyMove = { ...this._history.slice(-1)[0].pretty as Move } 
     this._positionCounts[prettyMove.after]++
     return prettyMove
   }
