@@ -806,6 +806,12 @@ export class Chess {
       return false
     }
 
+    const currentPieceOnSquare = this._board[sq]
+
+    if (currentPieceOnSquare && currentPieceOnSquare.type === KING) {
+      this._kings[currentPieceOnSquare.color] = EMPTY
+    }
+
     this._board[sq] = { type: type as PieceSymbol, color: color as Color }
 
     if (type === KING) {
