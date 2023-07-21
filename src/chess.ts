@@ -806,6 +806,13 @@ export class Chess {
       return false
     }
 
+    const currentPieceOnSquare = this._board[sq]
+
+    // if one of the kings will be replaced by the piece from args, set the `_kings` respective entry to `EMPTY`
+    if (currentPieceOnSquare && currentPieceOnSquare.type === KING) {
+      this._kings[currentPieceOnSquare.color] = EMPTY
+    }
+
     this._board[sq] = { type: type as PieceSymbol, color: color as Color }
 
     if (type === KING) {
