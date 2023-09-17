@@ -325,7 +325,7 @@ export function validateFen(fen: string) {
     return { ok: false, error: 'Invalid FEN: en-passant square is invalid' }
   }
 
-  // 5th criterion: 3th field is a valid castle-string?
+  // 5th criterion: 3rd field is a valid castle-string?
   if (/[^kKqQ-]/.test(tokens[2])) {
     return { ok: false, error: 'Invalid FEN: castling availability is invalid' }
   }
