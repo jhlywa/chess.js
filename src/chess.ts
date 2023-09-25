@@ -2453,8 +2453,8 @@ export class Chess {
     return null
   }
 
-  ascii(): string {
-    let s = '   +------------------------+\n'
+  ascii(separator = '\n'): string {
+    let s = `   +------------------------+${separator}`
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       // display the rank
       if (file(i) === 0) {
@@ -2472,11 +2472,11 @@ export class Chess {
       }
 
       if ((i + 1) & 0x88) {
-        s += '|\n'
+        s += `|${separator}`
         i += 8
       }
     }
-    s += '   +------------------------+\n'
+    s += `   +------------------------+${separator}`
     s += '     a  b  c  d  e  f  g  h'
 
     return s
