@@ -19,15 +19,15 @@ NPM:
 npm install chess.js
 ```
 
-## Import into your project
+## Importing
 
-### Modern way (ESM)
+### Import (as ESM)
 
 ```js
 import { Chess } from 'chess.js'
 ```
 
-If you want to use it in a browser you can import as module like this:
+ECMAScript modules (ESM) can be directly imported in a browser:
 
 ```html
 <script type="module">
@@ -35,7 +35,7 @@ If you want to use it in a browser you can import as module like this:
 </script>
 ```
 
-### Old way (CommonJS)
+### Import (as CommonJS)
 
 ```js
 const { Chess } = require('chess.js')
@@ -46,6 +46,8 @@ const { Chess } = require('chess.js')
 The code below plays a random game of chess:
 
 ```js
+import { Chess } from 'chess.js'
+
 const chess = new Chess()
 
 while (!chess.isGameOver()) {
@@ -58,23 +60,47 @@ console.log(chess.pgn())
 
 ## User Interface
 
-By design chess.js is a headless library and does not include user interface
+By design, chess.js is a headless library and does not include user interface
 elements. Many developers have successfully integrated chess.js with the
 [chessboard.js](http://chessboardjs.com) library. See
 [chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for an
 example.
 
-## Move & PGN Parsers
+## Parsers (permissive / strict)
 
 This library includes two parsers (`permissive` and `strict`) which are used to
 parse different forms of chess move notation. The `permissive` parser (the
-default) is able to handle many derivates of algebraic notation (e.g. `Nf3`,
-`g1f3`, `g1-f3`, `Ng1f3`, `Ng1-f3`, `Ng1xf3`). The `strict` parser only accepts
-moves in Standard Algebraic Notation and requires that they strictly adhere to
-the specification. The `strict` parser runs slightly faster but is much less
-forgiving of non-standard notation.
+default) is able to handle many non-standard derivatives of algebraic notation
+(e.g. `Nf3`, `g1f3`, `g1-f3`, `Ng1f3`, `Ng1-f3`, `Ng1xf3`). The `strict` parser
+only accepts moves in Standard Algebraic Notation and requires that they
+strictly adhere to the specification. The `strict` parser runs slightly faster
+but will not parse any non-standard notation.
 
 ## API
+
+### Constants
+
+The following constants are exported from the top-level module:
+
+```ts
+// colors
+export const WHITE = 'w'
+export const BLACK = 'b'
+
+// pieces
+export const PAWN = 'p'
+export const KNIGHT = 'n'
+export const BISHOP = 'b'
+export const ROOK = 'r'
+export const QUEEN = 'q'
+export const KING = 'k'
+
+// starting position (in FEN)
+export const DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
+// square list
+export const SQUARES = ['a8', 'b8', 'c8', ..., 'f1', 'g1', 'h1']
+```
 
 ### Constructor: Chess([ fen ])
 
@@ -84,11 +110,13 @@ configuration in
 Throws an exception if an invalid FEN string is provided.
 
 ```ts
-// board defaults to the starting position when called with no parameters
-const chess = new Chess()
+import { Chess } from 'chess.js'
+
+// an empty constructor defaults the starting position
+let chess = new Chess()
 
 // pass in a FEN string to load a particular position
-const chess = new Chess(
+let chess = new Chess(
   'r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - - 0 19'
 )
 ```
@@ -229,8 +257,7 @@ chess.fen()
 Returns the piece on the square:
 
 ```ts
-chess.clear()
-chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
+chess.put({ type: PAWN, color: BLACK }, 'a5') // put a black pawn on a5
 
 chess.get('a5')
 // -> { type: 'p', color: 'b' },
@@ -397,18 +424,18 @@ Returns true if the square is attacked by any piece of the given color.
 
 ```ts
 const chess = new Chess()
-chess.isAttacked('f3', Chess.WHITE)
+chess.isAttacked('f3', WHITE)
 // -> true (we can attack empty squares)
 
-chess.isAttacked('f6', Chess.BLACK)
+chess.isAttacked('f6', BLACK)
 // -> true (side to move (e.g. the value returned by .turn) is ignored)
 
-chess.load(Chess.DEFAULT_POSITION)
-chess.isAttacked('e2', Chess.WHITE)
+chess.load(DEFAULT_POSITION)
+chess.isAttacked('e2', WHITE)
 // -> true (we can attack our own pieces)
 
 chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
-chess.isAttacked('c6', Chess.BLACK)
+chess.isAttacked('c6', BLACK)
 // -> true (pieces still attack a square if even they are pinned)
 ```
 
@@ -503,8 +530,8 @@ chess.isThreefoldRepetition()
 ### .load(fen)
 
 Clears the board and loads the provided FEN string. The castling rights, en
-passant square and move numbers are defaulted to `- - 0 1` if ommitted. Throws
-an exception if the FEN is invalid.
+passant square and move numbers are defaulted to `- - 0 1` if omitted. Throws an
+exception if the FEN is invalid.
 
 ```ts
 const chess = new Chess()
@@ -762,7 +789,7 @@ invalid piece or square, or when two or more kings of the same color are placed.
 ```ts
 chess.clear()
 
-chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
+chess.put({ type: PAWN, color: BLACK }, 'a5') // put a black pawn on a5
 // -> true
 chess.put({ type: 'k', color: 'w' }, 'h1') // shorthand
 // -> true
@@ -788,8 +815,8 @@ Remove and return the piece on _square_.
 
 ```ts
 chess.clear()
-chess.put({ type: chess.PAWN, color: chess.BLACK }, 'a5') // put a black pawn on a5
-chess.put({ type: chess.KING, color: chess.WHITE }, 'h1') // put a white king on h1
+chess.put({ type: PAWN, color: BLACK }, 'a5') // put a black pawn on a5
+chess.put({ type: KING, color: WHITE }, 'h1') // put a white king on h1
 
 chess.remove('a5')
 // -> { type: 'p', color: 'b' },
@@ -812,7 +839,7 @@ square.
 
 ```ts
 // white can't castle kingside but can castle queenside
-chess.setCastlingRights(WHITE, { [chess.KING]: false, [chess.QUEEN]: true })
+chess.setCastlingRights(WHITE, { [KING]: false, [QUEEN]: true })
 ```
 
 ### .setComment(comment)
@@ -886,16 +913,18 @@ chess.undo()
 // -> null
 ```
 
-### .validateFen(fen):
+### validateFen(fen):
 
-Returns a validation object specifying validity or the errors found within the
-FEN string.
+This static function returns a validation object specifying validity or the
+errors found within the FEN string.
 
 ```ts
-chess.validateFen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25')
+import { validateFen } from 'chess.js'
+
+validateFen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25')
 // -> { ok: true }
 
-chess.validateFen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
+validateFen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 // -> { ok: false,
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
 ```
