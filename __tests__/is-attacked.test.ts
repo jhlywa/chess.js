@@ -1,4 +1,12 @@
-import { Chess, Square, Color, SQUARES, WHITE, BLACK } from '../src/chess'
+import {
+  Chess,
+  Square,
+  Color,
+  SQUARES,
+  WHITE,
+  BLACK,
+  DEFAULT_POSITION,
+} from '../src/chess'
 
 function areAttacked(chess: Chess, squares: Square[], color: Color) {
   return squares.reduce(
@@ -147,4 +155,14 @@ test('isAttacked (pinned pieces still attacks)', () => {
 test('isAttacked (no x-ray)', () => {
   const chess = new Chess('4k3/4n3/8/8/8/4q3/4P3/4K3 w - - 0 1')
   expect(areNotAttacked(chess, ['e1'], BLACK)).toBe(true)
+})
+
+test('isAttacked (doc tests)', () => {
+  const chess = new Chess()
+  expect(chess.isAttacked('f3', WHITE)).toBe(true)
+  expect(chess.isAttacked('f6', BLACK)).toBe(true)
+  chess.load(DEFAULT_POSITION)
+  expect(chess.isAttacked('e2', WHITE)).toBe(true)
+  chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
+  expect(chess.isAttacked('c6', BLACK)).toBe(true)
 })
