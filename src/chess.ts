@@ -2321,6 +2321,26 @@ export class Chess {
     })
   }
 
+  private _getCapturedPiecesForColor(color: string) {
+    const captured = {'p': 0, 'n': 0, 'b': 0, 'r': 0, 'q': 0, 'k': 0}
+
+    for (const move of this.history({ verbose: true })) {
+        if (move.captured && move.color !== color) {
+            captured[move.captured]++
+        }
+    }
+
+    return captured
+  }
+
+  getCapturedWhitePieces() {
+    return this._getCapturedPiecesForColor("w")
+  }
+
+  getCapturedBlackPieces() {
+    return this._getCapturedPiecesForColor("b")
+  }
+
   setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>) {
     for (const side of [KING, QUEEN] as const) {
       if (rights[side] !== undefined) {
