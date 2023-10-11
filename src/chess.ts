@@ -69,6 +69,7 @@ type InternalMove = {
 
 interface History {
   move: InternalMove
+  pretty?: Move
   kings: Record<Color, number>
   turn: Color
   castling: Record<Color, number>
@@ -726,7 +727,7 @@ export class Chess {
             piece: PAWN,
             captured: PAWN,
             flags: BITS.EP_CAPTURE,
-          })
+          }, { pushPretty: false })
           const isLegal = !this._isKingAttacked(color)
           this._undoMove()
 
@@ -1304,7 +1305,7 @@ export class Chess {
     const legalMoves = []
 
     for (let i = 0, len = moves.length; i < len; i++) {
-      this._makeMove(moves[i])
+      this._makeMove(moves[i], { pushPretty: false })
       if (!this._isKingAttacked(us)) {
         legalMoves.push(moves[i])
       }
@@ -1361,20 +1362,17 @@ export class Chess {
       }
     }
 
-    /*
-     * need to make a copy of move because we can't generate SAN after the move
-     * is made
-     */
-    const prettyMove = this._makePretty(moveObj)
-
     this._makeMove(moveObj)
+
+    const prettyMove = { ...this._history.slice(-1)[0].pretty as Move } 
     this._positionCounts[prettyMove.after]++
     return prettyMove
   }
 
-  _push(move: InternalMove) {
+  _push(move: InternalMove, pretty?: Move) {
     this._history.push({
       move,
+      pretty,
       kings: { b: this._kings.b, w: this._kings.w },
       turn: this._turn,
       castling: { b: this._castling.b, w: this._castling.w },
@@ -1384,10 +1382,11 @@ export class Chess {
     })
   }
 
-  private _makeMove(move: InternalMove) {
+  private _makeMove(move: InternalMove, { pushPretty = true } = {}) {
     const us = this._turn
     const them = swapColor(us)
-    this._push(move)
+
+    this._push(move, pushPretty ? this._makePretty(move) : undefined)
 
     this._board[move.to] = this._board[move.from]
     delete this._board[move.from]
@@ -1483,11 +1482,9 @@ export class Chess {
   undo() {
     const move = this._undoMove()
     if (move) {
-      const prettyMove = this._makePretty(move)
-      this._positionCounts[prettyMove.after]--
-      return prettyMove
+      this._positionCounts[(move as Move).after]--
     }    
-    return null
+    return move
   }
 
   private _undoMove() {
@@ -1542,7 +1539,7 @@ export class Chess {
       delete this._board[castlingFrom]
     }
 
-    return move
+    return old.pretty
   }
 
   pgn({
@@ -1571,8 +1568,8 @@ export class Chess {
       result.push(newline)
     }
 
-    const appendComment = (moveString: string) => {
-      const comment = this._comments[this.fen()]
+    const appendComment = (moveString: string, fen: string) => {
+      const comment = this._comments[fen]
       if (typeof comment !== 'undefined') {
         const delimiter = moveString.length > 0 ? ' ' : ''
         moveString = `${moveString}${delimiter}{${comment}}`
@@ -1580,51 +1577,34 @@ export class Chess {
       return moveString
     }
 
-    // pop all of history onto reversed_history
-    const reversedHistory = []
-    while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
-    }
-
     const moves = []
-    let moveString = ''
+    let moveString = appendComment('', this._header?.FEN || DEFAULT_POSITION)
 
-    // special case of a commented starting position with no moves
-    if (reversedHistory.length === 0) {
-      moves.push(appendComment(''))
+    // if the position started with black to move, start PGN with #. ...
+    if (this._history.length && this._history[0].move.color === 'b') {
+      const prefix = `${this._history[0].moveNumber}. ...`
+      // is there a comment preceding the first move?
+      moveString = moveString ? `${moveString} ${prefix}` : prefix
     }
-
+    
     // build the list of moves.  a move_string looks like: "3. e3 e6"
-    while (reversedHistory.length > 0) {
-      moveString = appendComment(moveString)
-      const move = reversedHistory.pop()
-
-      // make TypeScript stop complaining about move being undefined
-      if (!move) {
-        break
-      }
-
-      // if the position started with black to move, start PGN with #. ...
-      if (!this._history.length && move.color === 'b') {
-        const prefix = `${this._moveNumber}. ...`
-        // is there a comment preceding the first move?
-        moveString = moveString ? `${moveString} ${prefix}` : prefix
-      } else if (move.color === 'w') {
+    for (const history of this._history) { 
+      if (history.move.color === 'w') {
         // store the previous generated move_string if we have one
         if (moveString.length) {
           moves.push(moveString)
         }
-        moveString = this._moveNumber + '.'
+        moveString = history.moveNumber + '.'
       }
 
-      moveString =
-        moveString + ' ' + this._moveToSan(move, this._moves({ legal: true }))
-      this._makeMove(move)
+      const pretty = history.pretty as Move
+      moveString += ' ' + pretty.san
+      moveString = appendComment(moveString, pretty.after)
     }
 
     // are there any other leftover moves?
     if (moveString.length) {
-      moves.push(appendComment(moveString))
+      moves.push(moveString)
     }
 
     // is there a result?
@@ -1632,10 +1612,6 @@ export class Chess {
       moves.push(this._header.Result)
     }
 
-    /*
-     * history should be back to what it was before we started generating PGN,
-     * so join together moves
-     */
     if (maxWidth === 0) {
       return result.join('') + moves.join(' ')
     }
@@ -1965,7 +1941,7 @@ export class Chess {
       }
     }
 
-    this._makeMove(move)
+    this._makeMove(move, { pushPretty: false })
     if (this.isCheck()) {
       if (this.isCheckmate()) {
         output += '#'
@@ -2141,7 +2117,7 @@ export class Chess {
     const color = this._turn
 
     for (let i = 0, len = moves.length; i < len; i++) {
-      this._makeMove(moves[i])
+      this._makeMove(moves[i], { pushPretty: false })
       if (!this._isKingAttacked(color)) {
         if (depth - 1 > 0) {
           nodes += this.perft(depth - 1)
@@ -2183,7 +2159,7 @@ export class Chess {
     }
 
     // generate the FEN for the 'after' key
-    this._makeMove(uglyMove)
+    this._makeMove(uglyMove, { pushPretty: false })
     move.after = this.fen()
     this._undoMove()
 
@@ -2240,32 +2216,12 @@ export class Chess {
   history({ verbose }: { verbose: false }): string[]
   history({ verbose }: { verbose: boolean }): string[] | Move[]
   history({ verbose = false }: { verbose?: boolean } = {}) {
-    const reversedHistory = []
-    const moveHistory = []
-
-    while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
-    }
-
-    while (true) {
-      const move = reversedHistory.pop()
-      if (!move) {
-        break
-      }
-
-      if (verbose) {
-        moveHistory.push(this._makePretty(move))
-      } else {
-        moveHistory.push(this._moveToSan(move, this._moves()))
-      }
-      this._makeMove(move)
-    }
-
-    return moveHistory
+    return verbose
+      ? this._history.map(h => ({ ...h.pretty }))
+      : this._history.map(h => h.pretty?.san)
   }
 
   private _pruneComments() {
-    const reversedHistory = []
     const currentComments: Record<string, string> = {}
 
     const copyComment = (fen: string) => {
@@ -2274,20 +2230,12 @@ export class Chess {
       }
     }
 
-    while (this._history.length > 0) {
-      reversedHistory.push(this._undoMove())
+    copyComment(this._header.FEN || DEFAULT_POSITION)
+    
+    for (const history of this._history) {
+      copyComment((history.pretty as Move).after)
     }
 
-    copyComment(this.fen())
-
-    while (true) {
-      const move = reversedHistory.pop()
-      if (!move) {
-        break
-      }
-      this._makeMove(move)
-      copyComment(this.fen())
-    }
     this._comments = currentComments
   }
 
