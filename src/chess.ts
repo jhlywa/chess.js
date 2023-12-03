@@ -527,6 +527,14 @@ function strippedSan(move: string) {
   return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
 }
 
+function trimFen(fen: string): string {
+  /*
+   * remove last two fields in FEN string as they're not needed when checking
+   * for repetition
+   */
+  return fen.split(' ').slice(0, 4).join(' ')
+}
+
 export class Chess {
   private _board = new Array<Piece>(128)
   private _turn: Color = WHITE
@@ -566,19 +574,14 @@ export class Chess {
       get: (target, position: string) =>
         position === 'length'
           ? Object.keys(target).length // length for unit testing
-          : target?.[this._trimFen(position)] || 0,
+          : target?.[trimFen(position)] || 0,
       set: (target, position: string, count: number) => {
-        const trimmedFen = this._trimFen(position)
+        const trimmedFen = trimFen(position)
         if (count === 0) delete target[trimmedFen]
         else target[trimmedFen] = count
         return true
       },
     })
-  }
-
-  private _trimFen(fen: string): string {
-    // remove last two fields in FEN string as they're not needed when checking for repetition
-    return fen.split(' ').slice(0, 4).join(' ')
   }
 
   removeHeader(key: string) {
