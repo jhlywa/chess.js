@@ -99,7 +99,7 @@ describe('PGN', () => {
     chess.loadPgn(pgn)
     chess2.loadPgn(pgn2)
 
-    chess.removeHeader("White") 
+    chess.removeHeader('White')
 
     expect(chess.header()).toEqual(chess2.header())
   })

@@ -33,10 +33,10 @@ test('fen - ep square only if en passant is legal (illegal - pinned) - #1)', () 
 test('fen - ep square only if en passant is legal (illegal - pinned - #2)', () => {
   // black queen pins the ep pawn, making ep illegal (submitted by @ajax333221)
   const chess = new Chess(
-    'rnb1kbn1/p1p1pp2/PpPp2qr/5Pp1/8/R1P4p/1PK1P1PP/1NBQ1BNR b - - 0 1'
+    'rnb1kbn1/p1p1pp2/PpPp2qr/5Pp1/8/R1P4p/1PK1P1PP/1NBQ1BNR b - - 0 1',
   )
   chess.move('e5')
   expect(chess.fen()).toEqual(
-    'rnb1kbn1/p1p2p2/PpPp2qr/4pPp1/8/R1P4p/1PK1P1PP/1NBQ1BNR w - - 0 2'
+    'rnb1kbn1/p1p2p2/PpPp2qr/4pPp1/8/R1P4p/1PK1P1PP/1NBQ1BNR w - - 0 2',
   )
 })

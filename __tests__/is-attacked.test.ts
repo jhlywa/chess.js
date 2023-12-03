@@ -11,7 +11,7 @@ import {
 function areAttacked(chess: Chess, squares: Square[], color: Color) {
   return squares.reduce(
     (acc, square) => acc && chess.isAttacked(square, color),
-    true
+    true,
   )
 }
 
@@ -19,7 +19,7 @@ function areNotAttacked(chess: Chess, squares: Square[], color: Color) {
   // returns true is all squares are NOT attacked
   return !squares.reduce(
     (acc, square) => acc || chess.isAttacked(square, color),
-    false
+    false,
   )
 }
 

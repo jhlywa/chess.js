@@ -117,7 +117,7 @@ let chess = new Chess()
 
 // pass in a FEN string to load a particular position
 let chess = new Chess(
-  'r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - - 0 19'
+  'r1k4r/p2nb1p1/2b4p/1p1n1p2/2PP4/3Q1NB1/1P3PPP/R5K1 b - - 0 19',
 )
 ```
 
@@ -216,7 +216,7 @@ Delete and return comments for all positions.
 const chess = new Chess()
 
 chess.loadPgn(
-  "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *"
+  "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *",
 )
 
 chess.deleteComments()
@@ -300,7 +300,7 @@ Retrieve comments for all positions.
 const chess = new Chess()
 
 chess.loadPgn(
-  "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *"
+  "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *",
 )
 
 chess.getComments()
@@ -412,7 +412,7 @@ Returns true or false if the side to move is in check.
 
 ```ts
 const chess = new Chess(
-  'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3'
+  'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3',
 )
 chess.inCheck()
 // -> true
@@ -445,7 +445,7 @@ Returns true or false if the side to move has been checkmated.
 
 ```ts
 const chess = new Chess(
-  'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3'
+  'rnb1kbnr/pppp1ppp/8/4p3/5PPq/8/PPPPP2P/RNBQKBNR w KQkq - 1 3',
 )
 chess.isCheckmate()
 // -> true

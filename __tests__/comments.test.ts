@@ -83,7 +83,7 @@ describe('Manipulate Comments', () => {
       { fen: e6, comment: 'dubious move' },
     ])
     expect(chess.pgn()).toEqual(
-      '{starting position} 1. e4 {good move} e6 {dubious move}'
+      '{starting position} 1. e4 {good move} e6 {dubious move}',
     )
   })
 
@@ -162,10 +162,12 @@ describe('Format Comments', () => {
     chess.setComment('classical response')
     expect(chess.pgn()).toEqual('1. e4 {good   move} e5 {classical response}')
     expect(chess.pgn({ maxWidth: 16 })).toEqual(
-      ['1. e4 {good', 'move} e5', '{classical', 'response}'].join('\n')
+      ['1. e4 {good', 'move} e5', '{classical', 'response}'].join('\n'),
     )
     expect(chess.pgn({ maxWidth: 2 })).toEqual(
-      ['1.', 'e4', '{good', 'move}', 'e5', '{classical', 'response}'].join('\n')
+      ['1.', 'e4', '{good', 'move}', 'e5', '{classical', 'response}'].join(
+        '\n',
+      ),
     )
   })
 })

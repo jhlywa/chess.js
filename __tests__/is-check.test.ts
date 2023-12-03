@@ -7,7 +7,7 @@ test('isCheck - no, starting position', () => {
 
 test('isCheck - yes, black giving check', () => {
   const chess = new Chess(
-    'rnb1kbnr/pppp1ppp/8/8/4Pp1q/2N5/PPPP2PP/R1BQKBNR w KQkq - 2 4'
+    'rnb1kbnr/pppp1ppp/8/8/4Pp1q/2N5/PPPP2PP/R1BQKBNR w KQkq - 2 4',
   )
   expect(chess.isCheck()).toBe(true)
 })
