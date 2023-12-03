@@ -8,10 +8,13 @@
   "homepage": "https://github.com/jhlywa/chess.js",
   "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "scripts": {
-    "test": "jest",
-    "lint": "eslint src/ --ext .ts",
     "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
-    "clean": "rm -rf ./dist"
+    "check": "npm run format:check && npm run lint && npm run test && npm run build",
+    "clean": "rm -rf ./dist",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint src/ --ext .ts",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -24,6 +27,7 @@
     "eslint": "^8.12.0",
     "jest": "^27.0.6",
     "jest-extended": "^2.0.0",
+    "prettier": "^3.1.0",
     "ts-jest": "^27.0.4",
     "typescript": "^4.6.3"
   }
