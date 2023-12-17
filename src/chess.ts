@@ -552,7 +552,7 @@ export class Chess {
     this.load(fen)
   }
 
-  clear(keepHeaders = false) {
+  clear({ preserveHeaders = false } = {}) {
     this._board = new Array<Piece>(128)
     this._kings = { w: EMPTY, b: EMPTY }
     this._turn = WHITE
@@ -562,7 +562,7 @@ export class Chess {
     this._moveNumber = 1
     this._history = []
     this._comments = {}
-    this._header = keepHeaders ? this._header : {}
+    this._header = preserveHeaders ? this._header : {}
     this._updateSetup(this.fen())
     /*
      * Instantiate a proxy that keeps track of position occurrence counts for the purpose
@@ -590,7 +590,7 @@ export class Chess {
     }
   }
 
-  load(fen: string, keepHeaders = false) {
+  load(fen: string, { preserveHeaders = false } = {}) {
     let tokens = fen.split(/\s+/)
 
     // append commonly omitted fen tokens
@@ -609,7 +609,7 @@ export class Chess {
     const position = tokens[0]
     let square = 0
 
-    this.clear(keepHeaders)
+    this.clear({ preserveHeaders })
 
     for (let i = 0; i < position.length; i++) {
       const piece = position.charAt(i)
@@ -1819,7 +1819,7 @@ export class Chess {
      */
     if (!strict) {
       if (fen) {
-        this.load(fen, true)
+        this.load(fen, { preserveHeaders: true })
       }
     } else {
       /*
@@ -1832,8 +1832,8 @@ export class Chess {
             'Invalid PGN: FEN tag must be supplied with SetUp tag',
           )
         }
-        // second argument to load: don't clear the headers
-        this.load(headers['FEN'], true)
+        // don't clear the headers when loading
+        this.load(headers['FEN'], { preserveHeaders: true })
       }
     }
 

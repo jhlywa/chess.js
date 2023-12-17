@@ -179,7 +179,7 @@ chess.board()
          {square: 'h1', type: 'r', color: 'w'}]]
 ```
 
-### .clear()
+### .clear({ preserveHeaders = false } = {})
 
 Clears the board.
 
@@ -527,7 +527,7 @@ chess.isThreefoldRepetition()
 // -> true
 ```
 
-### .load(fen)
+### .load(fen: string, { preserveHeaders = false } = {})
 
 Clears the board and loads the provided FEN string. The castling rights, en
 passant square and move numbers are defaulted to `- - 0 1` if omitted. Throws an
