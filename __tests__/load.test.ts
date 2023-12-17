@@ -31,6 +31,18 @@ test('load - bad piece (X)', () => {
   expect(() => chess.load(fen)).toThrow()
 })
 
+test('load - missing white king', () => {
+  const chess = new Chess()
+  const fen = '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQ1BN1 b - - 1 2'
+  expect(() => chess.load(fen)).toThrow()
+})
+
+test('load - missing black king', () => {
+  const chess = new Chess()
+  const fen = '1nbq1bn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQKBN1 b - - 1 2'
+  expect(() => chess.load(fen)).toThrow()
+})
+
 test('load - bad ep square (e9)', () => {
   const chess = new Chess()
   const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e9 0 1'
@@ -60,4 +72,11 @@ test('load - preserveHeaders = true', () => {
     White: 'Magnus Carlsen',
     Black: 'Viswanathan Anand',
   })
+})
+
+test('load - skipValidation = true', () => {
+  const chess = new Chess()
+  // missing white king
+  const fen = '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQ1BN1 b - - 1 2'
+  expect(() => chess.load(fen, { skipValidation: true })).not.toThrow()
 })

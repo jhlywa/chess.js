@@ -527,7 +527,7 @@ chess.isThreefoldRepetition()
 // -> true
 ```
 
-### .load(fen: string, { preserveHeaders = false } = {})
+### .load(fen: string, { skipValidation = false, preserveHeaders = false } = {})
 
 Clears the board and loads the provided FEN string. The castling rights, en
 passant square and move numbers are defaulted to `- - 0 1` if omitted. Throws an
@@ -538,11 +538,14 @@ const chess = new Chess()
 chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 
 try {
-  chess.load('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
+  chess.load('8/4p3/8/8/8/8/4P3/6K1 w - - 1 45')
 } catch (e) {
   console.log(e)
 }
-// -> Error: Invalid FEN: piece data is invalid (invalid piece)
+// -> Error: Invalid FEN: missing black king
+
+chess.load('8/4p3/8/8/8/8/4P3/6K1 w - - 1 45', { skipValidation: true })
+// -> Works!
 ```
 
 ### .loadPgn(pgn, [ options ])
