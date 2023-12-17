@@ -701,7 +701,7 @@ chess.moveNumber()
 // -> 20
 ```
 
-### .moves({ piece?: Piece, square?: Square, verbose?: Boolean }?)
+### .moves({ piece?: Piece, square?: Square, verbose = false} = {})
 
 Returns a list of legal moves from the current position. This function takes an
 optional object which can be used to generate detailed move objects or to
