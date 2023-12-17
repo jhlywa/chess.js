@@ -563,7 +563,15 @@ export class Chess {
     this._history = []
     this._comments = {}
     this._header = preserveHeaders ? this._header : {}
-    this._updateSetup(this.fen())
+
+    /*
+     * Delete the SetUp and FEN headers (if preserved), the board is empty and
+     * these headers don't make sense in this state. They'll get added later
+     * via .load() or .put()
+     */
+    delete this._header['SetUp']
+    delete this._header['FEN']
+
     /*
      * Instantiate a proxy that keeps track of position occurrence counts for the purpose
      * of repetition checking. The getter and setter methods automatically handle trimming

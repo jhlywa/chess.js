@@ -103,7 +103,7 @@ describe('Regression Tests', () => {
     expect(chess.header()).toEqual(expected)
   })
 
-  it('Github Issue #129 clear() should clear the board and delete all headers with the exception of SetUp and FEN', () => {
+  it('Github Issue #129 clear() should clear the board and delete all headers', () => {
     const pgn = [
       '[Event "Test Olympiad"]',
       '[Site "Earth"]',
@@ -121,11 +121,7 @@ describe('Regression Tests', () => {
     const chess = new Chess()
     chess.loadPgn(pgn.join('\n'))
     chess.clear()
-    const expected = {
-      FEN: '8/8/8/8/8/8/8/8 w - - 0 1',
-      SetUp: '1',
-    }
-    expect(chess.header()).toEqual(expected)
+    expect(chess.header()).toEqual({})
   })
 
   it('Github Issue #191 - whitespace before closing bracket', () => {
@@ -266,7 +262,7 @@ describe('Regression Tests', () => {
     const pgn = `
     [white "player a"]
          [black "player b"]
-              [note "whitespace after right bracket"]      
+              [note "whitespace after right bracket"]
 
             1. e4 e5`
 
@@ -278,8 +274,8 @@ describe('Regression Tests', () => {
     const pgn = `
     [white "player a"]
          [black "player b"]
-              [note "whitespace after right bracket and in empty line below"]      
-   
+              [note "whitespace after right bracket and in empty line below"]
+
             1. e4 e5`
 
     chess.loadPgn(pgn)
