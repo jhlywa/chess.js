@@ -42,3 +42,22 @@ test('load - missing FEN tokens (no castling rights, ep square, or move numbers)
   const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b'
   expect(() => chess.load(fen)).not.toThrow()
 })
+
+test('load - preserveHeaders = false', () => {
+  const chess = new Chess()
+  chess.header('White', 'Magnus Carlsen')
+  chess.header('Black', 'Viswanathan Anand')
+  chess.load(DEFAULT_POSITION)
+  expect(chess.header()).toEqual({})
+})
+
+test('load - preserveHeaders = true', () => {
+  const chess = new Chess()
+  chess.header('White', 'Magnus Carlsen')
+  chess.header('Black', 'Viswanathan Anand')
+  chess.load(DEFAULT_POSITION, { preserveHeaders: true })
+  expect(chess.header()).toEqual({
+    White: 'Magnus Carlsen',
+    Black: 'Viswanathan Anand',
+  })
+})
