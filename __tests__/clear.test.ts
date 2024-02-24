@@ -6,7 +6,6 @@ test('clear', () => {
   chess.header('Black', 'Viswanathan Anand')
 
   chess.clear()
-  console.log(chess.header())
   expect(chess.fen()).toEqual('8/8/8/8/8/8/8/8 w - - 0 1')
   expect(chess.header()).toEqual({})
 })

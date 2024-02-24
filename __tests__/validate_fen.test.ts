@@ -516,9 +516,5 @@ test.each([
     ok: true,
   },
 ])("validateFen $# '$fen' (expected: '$ok')", ({ fen, ok }) => {
-  const result = validateFen(fen)
-  if (ok != result.ok) {
-    console.log(result)
-  }
   expect(validateFen(fen)).toMatchObject({ ok })
 })
