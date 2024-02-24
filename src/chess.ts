@@ -546,7 +546,9 @@ export class Chess {
   private _history: History[] = []
   private _comments: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
-  private _positionCounts: Record<string, number> = {}
+
+  // tracks number of times a position has been seen for repetition checking
+  private _positionCount: Record<string, number> = {}
 
   constructor(fen = DEFAULT_POSITION) {
     this.load(fen)
@@ -563,6 +565,7 @@ export class Chess {
     this._history = []
     this._comments = {}
     this._header = preserveHeaders ? this._header : {}
+    this._positionCount = {}
 
     /*
      * Delete the SetUp and FEN headers (if preserved), the board is empty and
@@ -571,25 +574,6 @@ export class Chess {
      */
     delete this._header['SetUp']
     delete this._header['FEN']
-
-    /*
-     * Instantiate a proxy that keeps track of position occurrence counts for the purpose
-     * of repetition checking. The getter and setter methods automatically handle trimming
-     * irrelevent information from the fen, initialising new positions, and removing old
-     * positions from the record if their counts are reduced to 0.
-     */
-    this._positionCounts = new Proxy({} as Record<string, number>, {
-      get: (target, position: string) =>
-        position === 'length'
-          ? Object.keys(target).length // length for unit testing
-          : target?.[trimFen(position)] || 0,
-      set: (target, position: string, count: number) => {
-        const trimmedFen = trimFen(position)
-        if (count === 0) delete target[trimmedFen]
-        else target[trimmedFen] = count
-        return true
-      },
-    })
   }
 
   removeHeader(key: string) {
@@ -658,7 +642,7 @@ export class Chess {
     this._moveNumber = parseInt(tokens[5], 10)
 
     this._updateSetup(fen)
-    this._positionCounts[fen]++
+    this._incPositionCount(fen)
   }
 
   fen() {
@@ -1063,12 +1047,8 @@ export class Chess {
     return false
   }
 
-  private _getRepetitionCount() {
-    return this._positionCounts[this.fen()]
-  }
-
   isThreefoldRepetition(): boolean {
-    return this._getRepetitionCount() >= 3
+    return this._getPositionCount(this.fen()) >= 3
   }
 
   isDraw() {
@@ -1404,7 +1384,7 @@ export class Chess {
     const prettyMove = this._makePretty(moveObj)
 
     this._makeMove(moveObj)
-    this._positionCounts[prettyMove.after]++
+    this._incPositionCount(prettyMove.after)
     return prettyMove
   }
 
@@ -1520,7 +1500,7 @@ export class Chess {
     const move = this._undoMove()
     if (move) {
       const prettyMove = this._makePretty(move)
-      this._positionCounts[prettyMove.after]--
+      this._decPositionCount(prettyMove.after)
       return prettyMove
     }
     return null
@@ -1947,7 +1927,7 @@ export class Chess {
         // reset the end of game marker if making a valid move
         result = ''
         this._makeMove(move)
-        this._positionCounts[this.fen()]++
+        this._incPositionCount(this.fen())
       }
     }
 
@@ -2301,6 +2281,34 @@ export class Chess {
     }
 
     return moveHistory
+  }
+
+  /*
+   * Keeps track of position occurrence counts for the purpose of repetition
+   * checking. All three methods (`_inc`, `_dec`, and `_get`) trim the
+   * irrelevent information from the fen, initialising new positions, and
+   * removing old positions from the record if their counts are reduced to 0.
+   */
+  private _getPositionCount(fen: string) {
+    const trimmedFen = trimFen(fen)
+    return this._positionCount[trimmedFen] || 0
+  }
+
+  private _incPositionCount(fen: string) {
+    const trimmedFen = trimFen(fen)
+    if (this._positionCount[trimmedFen] === undefined) {
+      this._positionCount[trimmedFen] = 0
+    }
+    this._positionCount[trimmedFen] += 1
+  }
+
+  private _decPositionCount(fen: string) {
+    const trimmedFen = trimFen(fen)
+    if (this._positionCount[trimmedFen] === 1) {
+      delete this._positionCount[trimmedFen]
+    } else {
+      this._positionCount[trimmedFen] -= 1
+    }
   }
 
   private _pruneComments() {
