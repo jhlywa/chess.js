@@ -219,6 +219,7 @@ const FLAGS: Record<string, string> = {
   PROMOTION: 'p',
   KSIDE_CASTLE: 'k',
   QSIDE_CASTLE: 'q',
+  NULL_MOVE: 'nm',
 }
 
 // prettier-ignore
@@ -241,6 +242,7 @@ const BITS: Record<string, number> = {
   PROMOTION: 16,
   KSIDE_CASTLE: 32,
   QSIDE_CASTLE: 64,
+  NULL_MOVE: 128,
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -436,6 +438,10 @@ const ROOKS = {
 }
 
 const SECOND_RANK = { b: RANK_7, w: RANK_2 }
+
+const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
+
+const SAN_NULLMOVE = '--'
 
 // Extracts the zero-based rank of an 0x88 square.
 function rank(square: number): number {
@@ -1729,6 +1735,18 @@ export class Chess {
     const them = swapColor(us)
     this._push(move)
 
+    if (move.flags & BITS.NULL_MOVE){
+      if (us === BLACK) {
+        this._moveNumber++
+      }
+  
+      this._turn = them
+
+      this._epSquare = EMPTY
+
+      return
+    }
+
     this._hash ^= this._epKey()
     this._hash ^= this._castlingKey()
 
@@ -1879,6 +1897,10 @@ export class Chess {
 
     const us = this._turn
     const them = swapColor(us)
+
+    if (move.flags & (BITS.NULL_MOVE)) {
+      return move
+    }
 
     this._movePiece(move.to, move.from)
 
@@ -2225,6 +2247,8 @@ export class Chess {
       output = 'O-O'
     } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O'
+    } else if (move.flags & BITS.NULL_MOVE){
+      output = SAN_NULLMOVE
     } else {
       if (move.piece !== PAWN) {
         const disambiguator = getDisambiguator(move, moves)
@@ -2245,15 +2269,17 @@ export class Chess {
       }
     }
 
-    this._makeMove(move)
-    if (this.isCheck()) {
-      if (this.isCheckmate()) {
-        output += '#'
-      } else {
-        output += '+'
+    if (!(move.flags & BITS.NULL_MOVE)){
+      this._makeMove(move)
+      if (this.isCheck()) {
+        if (this.isCheckmate()) {
+          output += '#'
+        } else {
+          output += '+'
+        }
       }
+      this._undoMove()
     }
-    this._undoMove()
 
     return output
   }
@@ -2269,6 +2295,18 @@ export class Chess {
       } else if (cleanMove === '0-0-0') {
         cleanMove = 'O-O-O'
       }
+    }
+
+    //first implementation of null with a dummy move (black king moves from a8 to a8), maybe this can be implemented better
+    if (cleanMove == SAN_NULLMOVE){
+      let res: InternalMove = {
+        color: this._turn,
+        from: 0,
+        to: 0,
+        piece: "k",
+        flags: BITS.NULL_MOVE,
+      };
+      return res
     }
 
     let pieceType = inferPieceType(cleanMove)
