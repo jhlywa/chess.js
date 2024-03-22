@@ -219,7 +219,7 @@ const FLAGS: Record<string, string> = {
   PROMOTION: 'p',
   KSIDE_CASTLE: 'k',
   QSIDE_CASTLE: 'q',
-  NULL_MOVE: 'nm',
+  NULL_MOVE: '-',
 }
 
 // prettier-ignore
@@ -2248,7 +2248,7 @@ export class Chess {
     } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O'
     } else if (move.flags & BITS.NULL_MOVE){
-      output = SAN_NULLMOVE
+      return SAN_NULLMOVE
     } else {
       if (move.piece !== PAWN) {
         const disambiguator = getDisambiguator(move, moves)
