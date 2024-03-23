@@ -2299,7 +2299,7 @@ export class Chess {
 
     //first implementation of null with a dummy move (black king moves from a8 to a8), maybe this can be implemented better
     if (cleanMove == SAN_NULLMOVE) {
-      let res: InternalMove = {
+      const res: InternalMove = {
         color: this._turn,
         from: 0,
         to: 0,
