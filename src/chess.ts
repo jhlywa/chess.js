@@ -1735,11 +1735,11 @@ export class Chess {
     const them = swapColor(us)
     this._push(move)
 
-    if (move.flags & BITS.NULL_MOVE){
+    if (move.flags & BITS.NULL_MOVE) {
       if (us === BLACK) {
         this._moveNumber++
       }
-  
+
       this._turn = them
 
       this._epSquare = EMPTY
@@ -1898,7 +1898,7 @@ export class Chess {
     const us = this._turn
     const them = swapColor(us)
 
-    if (move.flags & (BITS.NULL_MOVE)) {
+    if (move.flags & BITS.NULL_MOVE) {
       return move
     }
 
@@ -2247,7 +2247,7 @@ export class Chess {
       output = 'O-O'
     } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O'
-    } else if (move.flags & BITS.NULL_MOVE){
+    } else if (move.flags & BITS.NULL_MOVE) {
       return SAN_NULLMOVE
     } else {
       if (move.piece !== PAWN) {
@@ -2269,7 +2269,7 @@ export class Chess {
       }
     }
 
-    if (!(move.flags & BITS.NULL_MOVE)){
+    if (!(move.flags & BITS.NULL_MOVE)) {
       this._makeMove(move)
       if (this.isCheck()) {
         if (this.isCheckmate()) {
@@ -2298,14 +2298,14 @@ export class Chess {
     }
 
     //first implementation of null with a dummy move (black king moves from a8 to a8), maybe this can be implemented better
-    if (cleanMove == SAN_NULLMOVE){
+    if (cleanMove == SAN_NULLMOVE) {
       let res: InternalMove = {
         color: this._turn,
         from: 0,
         to: 0,
-        piece: "k",
+        piece: 'k',
         flags: BITS.NULL_MOVE,
-      };
+      }
       return res
     }
 
