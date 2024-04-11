@@ -480,29 +480,23 @@ function addMove(
   flags: number = BITS.NORMAL,
 ) {
   const r = rank(to)
+  const promotionNeeded = piece === PAWN && (r === RANK_1 || r === RANK_8)
 
-  if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
+  const move = {
+    color,
+    from,
+    to,
+    piece,
+    captured,
+    flags: flags | (promotionNeeded ? BITS.PROMOTION : 0),
+  }
+
+  if (promotionNeeded) {
     for (let i = 0; i < PROMOTIONS.length; i++) {
-      const promotion = PROMOTIONS[i]
-      moves.push({
-        color,
-        from,
-        to,
-        piece,
-        captured,
-        promotion,
-        flags: flags | BITS.PROMOTION,
-      })
+      moves.push({ ...move, promotion: PROMOTIONS[i] })
     }
   } else {
-    moves.push({
-      color,
-      from,
-      to,
-      piece,
-      captured,
-      flags,
-    })
+    moves.push(move)
   }
 }
 
@@ -1154,14 +1148,14 @@ export class Chess {
     let lastSquare = Ox88.h1
     let singleSquare = false
 
-    // are we generating moves for a single square?
     if (forSquare) {
-      // illegal square, return empty moves
-      if (!(forSquare in Ox88)) {
-        return []
-      } else {
-        firstSquare = lastSquare = Ox88[forSquare]
+      // check if forSquare is a valid square
+      const squareIndex = Ox88[forSquare]
+      if (squareIndex !== undefined) {
+        firstSquare = lastSquare = squareIndex
         singleSquare = true
+      } else {
+        return []
       }
     }
 
@@ -1199,16 +1193,20 @@ export class Chess {
           to = from + PAWN_OFFSETS[us][j]
           if (to & 0x88) continue
 
-          if (this._board[to]?.color === them) {
-            addMove(
-              moves,
-              us,
-              from,
-              to,
-              PAWN,
-              this._board[to].type,
-              BITS.CAPTURE,
-            )
+          const targetSquare = this._board[to]
+
+          if (targetSquare) {
+            if (targetSquare.color === them) {
+              addMove(
+                moves,
+                us,
+                from,
+                to,
+                PAWN,
+                targetSquare.type,
+                BITS.CAPTURE,
+              )
+            }
           } else if (to === this._epSquare) {
             addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
           }
@@ -1589,9 +1587,8 @@ export class Chess {
 
     const appendComment = (moveString: string) => {
       const comment = this._comments[this.fen()]
-      if (typeof comment !== 'undefined') {
-        const delimiter = moveString.length > 0 ? ' ' : ''
-        moveString = `${moveString}${delimiter}{${comment}}`
+      if (comment !== undefined) {
+        return moveString + (moveString.length > 0 ? ' ' : '') + `{${comment}}`
       }
       return moveString
     }
@@ -2226,13 +2223,14 @@ export class Chess {
     let row = []
 
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      if (this._board[i] == null) {
+      const piece = this._board[i]
+      if (piece == null) {
         row.push(null)
       } else {
         row.push({
           square: algebraic(i),
-          type: this._board[i].type,
-          color: this._board[i].color,
+          type: piece.type,
+          color: piece.color,
         })
       }
       if ((i + 1) & 0x88) {
@@ -2354,9 +2352,10 @@ export class Chess {
 
   getComments() {
     this._pruneComments()
-    return Object.keys(this._comments).map((fen: string) => {
-      return { fen: fen, comment: this._comments[fen] }
-    })
+    return Object.entries(this._comments).map(([fen, comment]) => ({
+      fen,
+      comment,
+    }))
   }
 
   deleteComments() {
@@ -2373,11 +2372,12 @@ export class Chess {
     rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>,
   ) {
     for (const side of [KING, QUEEN] as const) {
+      const sideFlag = SIDES[side]
       if (rights[side] !== undefined) {
         if (rights[side]) {
-          this._castling[color] |= SIDES[side]
+          this._castling[color] |= sideFlag
         } else {
-          this._castling[color] &= ~SIDES[side]
+          this._castling[color] &= ~sideFlag
         }
       }
     }
