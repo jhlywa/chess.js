@@ -177,6 +177,8 @@ const Ox88: Record<Square, number> = {
   a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
 }
 
+const SCORES = { p: 1, n: 3, b: 3, r: 5, q: 8, k: 0 }
+
 const PAWN_OFFSETS = {
   b: [16, 32, 17, 15],
   w: [-16, -32, -17, -15],
@@ -2173,6 +2175,106 @@ export class Chess {
 
     return nodes
   }
+
+  generate_score() {
+
+    let point = 0
+
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+        if (this._board[i] == null) {} else {
+
+            const color = this._board[i].color
+            const piece = this._board[i].type
+
+            point += (color === WHITE) ?
+                SCORES[piece] : -SCORES[piece]
+        }
+
+    }
+
+    return point;
+
+}
+
+alphabeta(depth: number, alpha: number, beta: number) {
+    let nodes = 0
+
+    if (depth == 0) {
+        let bestscore = this.generate_score()
+        nodes++
+        return [bestscore, '', nodes]
+    } else {
+
+        const moves = this._moves({ legal: false })
+
+        const color = this._turn
+        if (color == "w") {
+            let bestmove = ''
+            for (let i = 0, len = moves.length; i < len; i++) {
+                this._makeMove(moves[i])
+                if (!this._isKingAttacked(color)) {
+                    if (depth > 0) {
+                        let cscore = this.alphabeta(depth - 1, alpha, beta)
+                        let child_nodes = Number(cscore[2])
+                        nodes += child_nodes
+                        let score = Number(cscore[0])
+                        if (score > alpha) {
+                            alpha = score
+                            bestmove = moves[i]
+                        }
+                        if (alpha >= beta) {
+                            this._undoMove()
+                            break;
+                        }
+                    } else {
+                        console.log('horizon effect')
+                        console.log('Quiescence search')
+                    }
+
+                }
+
+
+
+                this._undoMove()
+            }
+
+            return [alpha, bestmove, nodes]
+        } else {
+            let bestmove = ''
+            for (let i = 0, len = moves.length; i < len; i++) {
+                this._makeMove(moves[i])
+                if (!this._isKingAttacked(color)) {
+                    if (depth > 0) {
+                        let cscore = this.alphabeta(depth - 1, alpha, beta)
+                        let child_nodes = Number(cscore[2])
+                        nodes += child_nodes
+                        let score = Number(cscore[0])
+                        if (score < beta) {
+                            beta = score
+                            bestmove = moves[i]
+                        }
+                        if (alpha >= beta) {
+                            this._undoMove()
+                            break;
+                        }
+                    } else {
+                        console.log('horizon effect')
+                        console.log('Quiescence search')
+                    }
+
+                }
+
+
+
+                this._undoMove()
+            }
+
+
+            return [beta, bestmove, nodes]
+
+        }
+    }
+}
 
   // pretty = external move object
   private _makePretty(uglyMove: InternalMove): Move {
