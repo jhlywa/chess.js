@@ -906,7 +906,11 @@ export class Chess {
     }
   }
 
-  private _attacked(color: Color, square: number) {
+  private _attacked(color: Color, square: number): boolean
+  private _attacked(color: Color, square: number, verbose: false): boolean
+  private _attacked(color: Color, square: number, verbose: true): Square[]
+  private _attacked(color: Color, square: number, verbose?: boolean) {
+    const attackers: Square[] = []
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       // did we run off the end of the board
       if (i & 0x88) {
@@ -931,16 +935,28 @@ export class Chess {
 
       if (ATTACKS[index] & PIECE_MASKS[piece.type]) {
         if (piece.type === PAWN) {
-          if (difference > 0) {
-            if (piece.color === WHITE) return true
-          } else {
-            if (piece.color === BLACK) return true
+          if (
+            (difference > 0 && piece.color === WHITE) ||
+            (difference <= 0 && piece.color === BLACK)
+          ) {
+            if (!verbose) {
+              return true
+            } else {
+              attackers.push(algebraic(i))
+            }
           }
           continue
         }
 
         // if the piece is a knight or a king
-        if (piece.type === 'n' || piece.type === 'k') return true
+        if (piece.type === 'n' || piece.type === 'k') {
+          if (!verbose) {
+            return true
+          } else {
+            attackers.push(algebraic(i))
+            continue
+          }
+        }
 
         const offset = RAYS[index]
         let j = i + offset
@@ -954,11 +970,26 @@ export class Chess {
           j += offset
         }
 
-        if (!blocked) return true
+        if (!blocked) {
+          if (!verbose) {
+            return true
+          } else {
+            attackers.push(algebraic(i))
+            continue
+          }
+        }
       }
     }
 
-    return false
+    if (verbose) {
+      return attackers
+    } else {
+      return false
+    }
+  }
+
+  attackers(square: Square, attackedBy: Color) {
+    return this._attacked(attackedBy, Ox88[square], true)
   }
 
   private _isKingAttacked(color: Color) {

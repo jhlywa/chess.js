@@ -147,6 +147,27 @@ chess.ascii()
 //          a  b  c  d  e  f  g  h'
 ```
 
+### .attackers(square, color)
+
+Returns a list of squares that can attack the given square of the given color.
+
+```ts
+const chess = new Chess()
+
+chess.attackers('f3', WHITE)
+// -> ['e2', 'g2', 'g1'] (we can attack empty squares)
+
+chess.attackers('f6', BLACK)
+// -> ['g8', 'e7', 'g7'] (side to move (e.g. the value returned by .turn) is ignored)
+
+chess.attackers('e2', WHITE)
+// -> ['d1', 'e1', 'f1', 'g1'] (we can attack our own pieces)
+
+chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
+chess.attackers('c6', BLACK)
+// -> ['e7'] (pieces still attack a square even if they are pinned)
+```
+
 ### .board()
 
 Returns an 2D array representation of the current position. Empty squares are
@@ -436,7 +457,7 @@ chess.isAttacked('e2', WHITE)
 
 chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
 chess.isAttacked('c6', BLACK)
-// -> true (pieces still attack a square if even they are pinned)
+// -> true (pieces still attack a square even if they are pinned)
 ```
 
 ### .isCheckmate()
