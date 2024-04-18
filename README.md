@@ -149,7 +149,7 @@ chess.ascii()
 
 ### .attackers(square, color)
 
-Returns a list of squares that can attack the given square of the given color.
+Returns a list of squares that can attack the given square from the given color.
 
 ```ts
 const chess = new Chess()
