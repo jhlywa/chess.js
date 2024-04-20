@@ -2196,6 +2196,82 @@ export class Chess {
 
 }
 
+minimax(depth: number) {
+    let nodes = 0
+
+    if (depth == 0) {
+        let bestscore = this.generate_score()
+        nodes++
+        return [bestscore, '', nodes]
+    } else {
+
+        const moves = this._moves({ legal: false })
+
+        const color = this._turn
+        if (color == "w") {
+            let bestscore = -Infinity
+            let bestmove = ''
+            for (let i = 0, len = moves.length; i < len; i++) {
+                this._makeMove(moves[i])
+                if (!this._isKingAttacked(color)) {
+                    if (depth > 0) {
+                        let cscore = this.minimax(depth - 1)
+                        let child_nodes = Number(cscore[2])
+                        nodes += child_nodes
+                        let score = Number(cscore[0])
+                        if (score > bestscore) {
+                            bestscore = score
+                            bestmove = moves[i]
+                        }
+
+                    } else {
+                        console.log('horizon effect')
+                        console.log('Quiescence search')
+                    }
+
+                }
+
+
+
+                this._undoMove()
+            }
+
+            return [bestscore, bestmove, nodes]
+        } else {
+            let bestscore = Infinity
+            let bestmove = ''
+            for (let i = 0, len = moves.length; i < len; i++) {
+                this._makeMove(moves[i])
+                if (!this._isKingAttacked(color)) {
+                    if (depth > 0) {
+                        let cscore = this.minimax(depth - 1)
+                        let child_nodes = Number(cscore[2])
+                        nodes += child_nodes
+                        let score = Number(cscore[0])
+                        if (score < bestscore) {
+                            bestscore = score
+                            bestmove = moves[i]
+                        }
+
+                    } else {
+                        console.log('horizon effect')
+                        console.log('Quiescence search')
+                    }
+
+                }
+
+
+
+                this._undoMove()
+            }
+
+
+            return [bestscore, bestmove, nodes]
+
+        }
+    }
+}
+
 alphabeta(depth: number, alpha: number, beta: number) {
     let nodes = 0
 
