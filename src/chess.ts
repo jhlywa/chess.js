@@ -2276,6 +2276,55 @@ alphabeta(depth: number, alpha: number, beta: number) {
     }
 }
 
+
+negamax(depth: number, alpha: number, beta: number) {
+    let nodes = 0
+
+    if (depth == 0) {
+        let bestscore = this.generate_score()
+        nodes++
+        return [bestscore, '', nodes]
+    } else {
+
+        const moves = this._moves({ legal: false })
+
+        const color = this._turn
+        const neg =  color == "w" ? 1 : -1 
+
+            let bestmove = ''
+            for (let i = 0, len = moves.length; i < len; i++) {
+                this._makeMove(moves[i])
+                if (!this._isKingAttacked(color)) {
+                    if (depth > 0) {
+                        let cscore = this.negamax(depth - 1, -beta, -alpha)
+                        let child_nodes = Number(cscore[2])
+                        nodes += child_nodes
+                        let score = neg * Number(cscore[0])
+                        if (score > alpha) {
+                            alpha = score
+                            bestmove = moves[i]
+                        }
+                        if (alpha >= beta) {
+                            this._undoMove()
+                            break;
+                        }
+                    } else {
+                        console.log('horizon effect')
+                        console.log('Quiescence search')
+                    }
+
+                }
+
+                this._undoMove()
+            }
+
+
+            return [neg * alpha, bestmove, nodes]
+     
+    }
+}
+
+
   // pretty = external move object
   private _makePretty(uglyMove: InternalMove): Move {
     const { color, piece, from, to, flags, captured, promotion } = uglyMove
