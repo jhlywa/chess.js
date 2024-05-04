@@ -725,7 +725,7 @@ chess.moves({ piece: 'n' }) // generate moves for piece type
 chess.moves({ verbose: true }) // return verbose moves
 // -> [{ color: 'w', from: 'a2', to: 'a3',
 //       flags: 'n', piece: 'p',
-//       san 'a3', 'lan', 'a2a3',
+//       san: 'a3', lan: 'a2a3',
 //       before: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 //       after: 'rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1'
 //       # a `captured` field is included when the move is a capture
