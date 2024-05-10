@@ -100,6 +100,20 @@ test('attackers - attacker count when all but one square is covered', () => {
   expect(getAttackerCount(chess, BLACK)).toEqual(expectedBlackAttackerCount)
 })
 
+test('attackers - return value depends on side to move', () => {
+  const chess = new Chess()
+  expect(chess.attackers('c3')).toIncludeSameMembers(['b1', 'b2', 'd2'])
+  expect(chess.attackers('c6')).toEqual([])
+
+  chess.move('e4')
+  expect(chess.attackers('c3')).toEqual([])
+  expect(chess.attackers('c6')).toIncludeSameMembers(['b7', 'b8', 'd7'])
+
+  chess.move('e5')
+  expect(chess.attackers('c3')).toIncludeSameMembers(['b1', 'b2', 'd2'])
+  expect(chess.attackers('c6')).toEqual([])
+})
+
 test('attackers - every piece attacking empty square', () => {
   const chess = new Chess('2b5/4kp2/2r5/3q2n1/8/8/4P3/4K3 w - - 0 1')
   expect(chess.attackers('e6', BLACK)).toIncludeSameMembers([
@@ -114,7 +128,7 @@ test('attackers - every piece attacking empty square', () => {
 
 test('attackers - every piece attacking another piece', () => {
   const chess = new Chess('4k3/8/8/8/5Q2/5p1R/4PK2/4N2B w - - 0 1')
-  expect(chess.attackers('f3', WHITE)).toIncludeSameMembers([
+  expect(chess.attackers('f3')).toIncludeSameMembers([
     'e1',
     'e2',
     'f2',
@@ -138,7 +152,7 @@ test('attackers - every piece defending empty square', () => {
 
 test('attackers - every piece defending another piece', () => {
   const chess = new Chess('2r5/1b1p4/1kp1q3/4n3/8/8/8/4K3 b - - 0 1')
-  expect(chess.attackers('c6', BLACK)).toIncludeSameMembers([
+  expect(chess.attackers('c6')).toIncludeSameMembers([
     'b6',
     'b7',
     'c8',
@@ -193,14 +207,12 @@ test('attackers - no attackers', () => {
 
 test('attackers - readme tests', () => {
   const chess = new Chess()
-  expect(chess.attackers('f3', WHITE)).toIncludeSameMembers(['e2', 'g2', 'g1'])
-  expect(chess.attackers('f6', BLACK)).toIncludeSameMembers(['g8', 'e7', 'g7'])
-  expect(chess.attackers('e2', WHITE)).toIncludeSameMembers([
-    'd1',
-    'e1',
-    'f1',
-    'g1',
-  ])
+  expect(chess.attackers('f3')).toEqual(['e2', 'g2', 'g1'])
+  expect(chess.attackers('e2')).toEqual(['d1', 'e1', 'f1', 'g1'])
+  expect(chess.attackers('f6')).toEqual([])
+  chess.move('e4')
+  expect(chess.attackers('f6')).toEqual(['g8', 'e7', 'g7'])
+  expect(chess.attackers('f3', WHITE)).toEqual(['g2', 'd1', 'g1'])
   chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
-  expect(chess.attackers('c6', BLACK)).toIncludeSameMembers(['e7'])
+  expect(chess.attackers('c6', BLACK)).toEqual(['e7'])
 })

@@ -988,8 +988,12 @@ export class Chess {
     }
   }
 
-  attackers(square: Square, attackedBy: Color) {
-    return this._attacked(attackedBy, Ox88[square], true)
+  attackers(square: Square, attackedBy?: Color) {
+    if (!attackedBy) {
+      return this._attacked(this._turn, Ox88[square], true)
+    } else {
+      return this._attacked(attackedBy, Ox88[square], true)
+    }
   }
 
   private _isKingAttacked(color: Color) {
