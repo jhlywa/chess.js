@@ -101,6 +101,7 @@ const FLAGS: Record<string, string> = {
   PROMOTION: 'p',
   KSIDE_CASTLE: 'k',
   QSIDE_CASTLE: 'q',
+  NULL_MOVE: '-',
 }
 
 // prettier-ignore
@@ -123,6 +124,7 @@ const BITS: Record<string, number> = {
   PROMOTION: 16,
   KSIDE_CASTLE: 32,
   QSIDE_CASTLE: 64,
+  NULL_MOVE: 128,
 }
 
 /*
@@ -264,6 +266,8 @@ const ROOKS = {
 const SECOND_RANK = { b: RANK_7, w: RANK_2 }
 
 const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
+
+const SAN_NULLMOVE = '--'
 
 // Extracts the zero-based rank of an 0x88 square.
 function rank(square: number): number {
@@ -1440,6 +1444,18 @@ export class Chess {
     const them = swapColor(us)
     this._push(move)
 
+    if (move.flags & BITS.NULL_MOVE) {
+      if (us === BLACK) {
+        this._moveNumber++
+      }
+
+      this._turn = them
+
+      this._epSquare = EMPTY
+
+      return
+    }
+
     this._board[move.to] = this._board[move.from]
     delete this._board[move.from]
 
@@ -1558,6 +1574,10 @@ export class Chess {
 
     const us = this._turn
     const them = swapColor(us)
+
+    if (move.flags & BITS.NULL_MOVE) {
+      return move
+    }
 
     this._board[move.from] = this._board[move.to]
     this._board[move.from].type = move.piece // to undo any promotions
@@ -1996,6 +2016,8 @@ export class Chess {
       output = 'O-O'
     } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O'
+    } else if (move.flags & BITS.NULL_MOVE) {
+      return SAN_NULLMOVE
     } else {
       if (move.piece !== PAWN) {
         const disambiguator = getDisambiguator(move, moves)
@@ -2016,15 +2038,17 @@ export class Chess {
       }
     }
 
-    this._makeMove(move)
-    if (this.isCheck()) {
-      if (this.isCheckmate()) {
-        output += '#'
-      } else {
-        output += '+'
+    if (!(move.flags & BITS.NULL_MOVE)) {
+      this._makeMove(move)
+      if (this.isCheck()) {
+        if (this.isCheckmate()) {
+          output += '#'
+        } else {
+          output += '+'
+        }
       }
+      this._undoMove()
     }
-    this._undoMove()
 
     return output
   }
@@ -2033,6 +2057,18 @@ export class Chess {
   private _moveFromSan(move: string, strict = false): InternalMove | null {
     // strip off any move decorations: e.g Nf3+?! becomes Nf3
     const cleanMove = strippedSan(move)
+
+    //first implementation of null with a dummy move (black king moves from a8 to a8), maybe this can be implemented better
+    if (cleanMove == SAN_NULLMOVE) {
+      const res: InternalMove = {
+        color: this._turn,
+        from: 0,
+        to: 0,
+        piece: 'k',
+        flags: BITS.NULL_MOVE,
+      }
+      return res
+    }
 
     let pieceType = inferPieceType(cleanMove)
     let moves = this._moves({ legal: true, piece: pieceType })
@@ -2237,9 +2273,13 @@ export class Chess {
     }
 
     // generate the FEN for the 'after' key
-    this._makeMove(uglyMove)
-    move.after = this.fen()
-    this._undoMove()
+    if (!(uglyMove.flags & BITS.NULL_MOVE)) {
+      this._makeMove(uglyMove)
+      move.after = this.fen()
+      this._undoMove()
+    } else {
+      move.after = this.fen()
+    }
 
     if (captured) {
       move.captured = captured
