@@ -8,6 +8,7 @@
   "homepage": "https://github.com/jhlywa/chess.js",
   "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "scripts": {
+    "prepare": "npm run build",
     "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
     "check": "npm run format:check && npm run lint && npm run test && npm run build",
     "clean": "rm -rf ./dist",
