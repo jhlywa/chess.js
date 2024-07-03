@@ -179,7 +179,7 @@ chess.attackers('c6', BLACK)
 
 ### .board()
 
-Returns an 2D array representation of the current position. Empty squares are
+Returns a 2D array representation of the current position. Empty squares are
 represented by `null`.
 
 ```ts
