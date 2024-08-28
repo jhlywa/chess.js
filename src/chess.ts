@@ -2383,9 +2383,9 @@ export class Chess {
       .replace('}', ']')
   }
 
-  deleteComment() {
-    const comment = this._comments[this.fen()]
-    delete this._comments[this.fen()]
+  deleteComment(fen: string = '') {
+    const comment = this._comments[fen ? fen : this.fen()]
+    delete this._comments[fen ? fen : this.fen()]
     return comment
   }
 
