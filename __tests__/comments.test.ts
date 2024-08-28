@@ -85,6 +85,19 @@ describe('Manipulate Comments', () => {
     expect(chess.pgn()).toEqual(
       '{starting position} 1. e4 {good move} e6 {dubious move}',
     )
+    chess.move('c4')
+    const c4 = chess.fen()
+    chess.move('c6')
+    chess.setComment('explosive', c4)
+    expect(chess.getComments()).toEqual([
+      { fen: initial, comment: 'starting position' },
+      { fen: e4, comment: 'good move' },
+      { fen: e6, comment: 'dubious move' },
+      { fen: c4, comment: 'explosive' },
+    ])
+    expect(chess.pgn()).toEqual(
+      '{starting position} 1. e4 {good move} e6 {dubious move} 2. c4 {explosive} c6',
+    )
   })
 
   it('delete comments', () => {
