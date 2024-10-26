@@ -13,12 +13,12 @@ test('get', () => {
 //   expect(chess.get('A7' as Square)).toEqual({ type: PAWN, color: BLACK })
 // })
 
-test('get - returns false for empty square', () => {
+test('get - returns undefined for empty square', () => {
   const chess = new Chess()
-  expect(chess.get('a4')).toEqual(false)
+  expect(chess.get('a4')).toEqual(undefined)
 })
 
-test('get - returns false for invalid square', () => {
+test('get - returns undefined for invalid square', () => {
   const chess = new Chess()
-  expect(chess.get('bad-square' as Square)).toEqual(false)
+  expect(chess.get('bad-square' as Square)).toEqual(undefined)
 })

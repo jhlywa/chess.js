@@ -284,7 +284,7 @@ chess.fen()
 
 ### .get(square)
 
-Returns the piece on the square:
+Returns the piece on the square. Returns `undefined` if the square is empty.
 
 ```ts
 chess.put({ type: PAWN, color: BLACK }, 'a5') // put a black pawn on a5
@@ -292,7 +292,7 @@ chess.put({ type: PAWN, color: BLACK }, 'a5') // put a black pawn on a5
 chess.get('a5')
 // -> { type: 'p', color: 'b' },
 chess.get('a6')
-// -> null
+// -> undefined
 ```
 
 ### .getCastlingRights(color)
@@ -844,7 +844,8 @@ chess.put({ type: 'k', color: 'w' }, 'h1') // fail - two kings
 
 ### .remove(square)
 
-Remove and return the piece on _square_.
+Remove and return the piece on _square_. Returns `undefined` if the square is
+already empty.
 
 ```ts
 chess.clear()
@@ -856,7 +857,7 @@ chess.remove('a5')
 chess.remove('h1')
 // -> { type: 'k', color: 'w' },
 chess.remove('e1')
-// -> null
+// -> undefined
 ```
 
 ### .reset()

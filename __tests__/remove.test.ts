@@ -11,17 +11,17 @@ import {
 test('remove - returns piece', () => {
   const chess = new Chess()
   expect(chess.remove('d1')).toEqual({ type: QUEEN, color: WHITE })
-  expect(chess.get('d1')).toEqual(false)
+  expect(chess.get('d1')).toEqual(undefined)
 })
 
-test('remove - returns false for empty square', () => {
+test('remove - returns undefined for empty square', () => {
   const chess = new Chess()
-  expect(chess.remove('e4')).toEqual(false)
+  expect(chess.remove('e4')).toEqual(undefined)
 })
 
-test('remove - returns false for invalid square', () => {
+test('remove - returns undefined for invalid square', () => {
   const chess = new Chess()
-  expect(chess.remove('bad_square' as Square)).toEqual(false)
+  expect(chess.remove('bad_square' as Square)).toEqual(undefined)
 })
 
 test('remove - removing white kingside rook loses castling right', () => {

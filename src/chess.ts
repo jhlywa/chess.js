@@ -768,8 +768,8 @@ export class Chess {
     this.load(DEFAULT_POSITION)
   }
 
-  get(square: Square) {
-    return this._board[Ox88[square]] || false
+  get(square: Square): Piece | undefined {
+    return this._board[Ox88[square]]
   }
 
   put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
@@ -822,7 +822,7 @@ export class Chess {
     return true
   }
 
-  remove(square: Square) {
+  remove(square: Square): Piece | undefined {
     const piece = this.get(square)
     delete this._board[Ox88[square]]
     if (piece && piece.type === KING) {
