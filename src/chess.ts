@@ -988,7 +988,7 @@ export class Chess {
     }
   }
 
-  attackers(square: Square, attackedBy?: Color) {
+  attackers(square: Square, attackedBy?: Color): Square[] {
     if (!attackedBy) {
       return this._attacked(this._turn, Ox88[square], true)
     } else {
@@ -996,32 +996,32 @@ export class Chess {
     }
   }
 
-  private _isKingAttacked(color: Color) {
+  private _isKingAttacked(color: Color): boolean {
     const square = this._kings[color]
     return square === -1 ? false : this._attacked(swapColor(color), square)
   }
 
-  isAttacked(square: Square, attackedBy: Color) {
+  isAttacked(square: Square, attackedBy: Color): boolean {
     return this._attacked(attackedBy, Ox88[square])
   }
 
-  isCheck() {
+  isCheck(): boolean {
     return this._isKingAttacked(this._turn)
   }
 
-  inCheck() {
+  inCheck(): boolean {
     return this.isCheck()
   }
 
-  isCheckmate() {
+  isCheckmate(): boolean {
     return this.isCheck() && this._moves().length === 0
   }
 
-  isStalemate() {
+  isStalemate(): boolean {
     return !this.isCheck() && this._moves().length === 0
   }
 
-  isInsufficientMaterial() {
+  isInsufficientMaterial(): boolean {
     /*
      * k.b. vs k.b. (of opposite colors) with mate in 1:
      * 8/8/8/8/1b6/8/B1k5/K7 b - - 0 1
