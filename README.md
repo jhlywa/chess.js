@@ -492,6 +492,16 @@ chess.isDraw()
 // -> true
 ```
 
+### .isDrawByFiftyMoves()
+
+Returns true or false if the game is drawn by 50-move rule.
+
+```ts
+const chess = new Chess('4k3/4P3/4K3/8/8/8/8/8 b - - 0 78')
+chess.isDrawByFiftyMoves()
+// -> true
+```
+
 ### .isInsufficientMaterial()
 
 Returns true if the game is drawn due to insufficient material (K vs. K, K vs.
