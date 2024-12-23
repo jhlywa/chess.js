@@ -1086,20 +1086,16 @@ export class Chess {
     return this._getPositionCount(this.fen()) >= 3
   }
 
-  isDrawByFiftyMoves(): boolean {
-    return this._halfMoves >= 100 // 50 moves per side = 100 half moves
-  }
-
-  isDraw(): boolean {
+  isDraw() {
     return (
-      this.isDrawByFiftyMoves() ||
+      this._halfMoves >= 100 || // 50 moves per side = 100 half moves
       this.isStalemate() ||
       this.isInsufficientMaterial() ||
       this.isThreefoldRepetition()
     )
   }
 
-  isGameOver(): boolean {
+  isGameOver() {
     return this.isCheckmate() || this.isStalemate() || this.isDraw()
   }
 
