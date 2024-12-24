@@ -133,7 +133,7 @@ chess.move('e4')
 chess.move('e5')
 chess.move('f4')
 
-chess.ascii()
+console.log(chess.ascii())
 // -> '   +------------------------+
 //      8 | r  n  b  q  k  b  n  r |
 //      7 | p  p  p  p  .  p  p  p |
