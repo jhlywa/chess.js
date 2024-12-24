@@ -2381,13 +2381,15 @@ export class Chess {
     return this._comments[this.fen()]
   }
 
-  setComment(comment: string) {
-    this._comments[this.fen()] = comment.replace('{', '[').replace('}', ']')
+  setComment(comment: string, fen: string = '') {
+    this._comments[fen ? fen : this.fen()] = comment
+      .replace('{', '[')
+      .replace('}', ']')
   }
 
-  deleteComment() {
-    const comment = this._comments[this.fen()]
-    delete this._comments[this.fen()]
+  deleteComment(fen: string = '') {
+    const comment = this._comments[fen ? fen : this.fen()]
+    delete this._comments[fen ? fen : this.fen()]
     return comment
   }
 

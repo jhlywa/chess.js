@@ -85,6 +85,19 @@ describe('Manipulate Comments', () => {
     expect(chess.pgn()).toEqual(
       '{starting position} 1. e4 {good move} e6 {dubious move}',
     )
+    chess.move('c4')
+    const c4 = chess.fen()
+    chess.move('c6')
+    chess.setComment('explosive', c4)
+    expect(chess.getComments()).toEqual([
+      { fen: initial, comment: 'starting position' },
+      { fen: e4, comment: 'good move' },
+      { fen: e6, comment: 'dubious move' },
+      { fen: c4, comment: 'explosive' },
+    ])
+    expect(chess.pgn()).toEqual(
+      '{starting position} 1. e4 {good move} e6 {dubious move} 2. c4 {explosive} c6',
+    )
   })
 
   it('delete comments', () => {
@@ -107,11 +120,30 @@ describe('Manipulate Comments', () => {
     expect(chess.deleteComment()).toEqual('dubious move')
     expect(chess.pgn()).toEqual('{starting position} 1. e4 {good move} e6')
     expect(chess.deleteComment()).toBeUndefined()
+    chess.move('c4')
+    const c4 = chess.fen()
+    chess.setComment('explosive')
+    chess.move('c6')
+    expect(chess.getComments()).toEqual([
+      { fen: initial, comment: 'starting position' },
+      { fen: e4, comment: 'good move' },
+      { fen: c4, comment: 'explosive' },
+    ])
+    chess.deleteComment(c4)
+    expect(chess.getComments()).toEqual([
+      { fen: initial, comment: 'starting position' },
+      { fen: e4, comment: 'good move' },
+    ])
+    chess.deleteComment(chess.fen()) //should do nothing
+    expect(chess.getComments()).toEqual([
+      { fen: initial, comment: 'starting position' },
+      { fen: e4, comment: 'good move' },
+    ])
     expect(chess.deleteComments()).toEqual([
       { fen: initial, comment: 'starting position' },
       { fen: e4, comment: 'good move' },
     ])
-    expect(chess.pgn()).toEqual('1. e4 e6')
+    expect(chess.pgn()).toEqual('1. e4 e6 2. c4 c6')
   })
 
   it('prune comments', () => {
