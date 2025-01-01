@@ -1757,10 +1757,14 @@ export class Chess {
     return result.join('')
   }
 
+  capitalize(s : string) : string {
+    return s[0].toUpperCase() + s.slice(1).toLowerCase();
+  }
+
   header(...args: string[]) {
     for (let i = 0; i < args.length; i += 2) {
       if (typeof args[i] === 'string' && typeof args[i + 1] === 'string') {
-        this._header[args[i]] = args[i + 1]
+        this._header[this.capitalize(args[i])] = this.capitalize(args[i + 1]);
       }
     }
     return this._header
