@@ -882,6 +882,17 @@ chess.remove('e1')
 // -> undefined
 ```
 
+### .removeHeader(field: string)
+
+Remove a field from the PGN header.
+
+```ts
+chess.header('White', 'Morphy', 'Black', 'Anderssen', 'Date', '1858-??-??')
+chess.removeHeader('Date')
+chess.header()
+// -> { White: 'Morphy', Black: 'Anderssen'}
+```
+
 ### .reset()
 
 Reset the board to the initial starting position.
