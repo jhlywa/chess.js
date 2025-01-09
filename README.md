@@ -775,7 +775,7 @@ chess.moves({ verbose: true }) // return verbose moves
 //     ]
 ```
 
-#### Move Objects (e.g. when { verbose: true })
+#### Move Object (e.g. when { verbose: true })
 
 The `color` field indicates the color of the moving piece (`w` or `b`).
 
@@ -791,6 +791,18 @@ field is the move in Long Algebraic Notation (LAN).
 
 The `before` and `after` keys contain the FEN of the position before and after
 the move.
+
+The `Move` object has helper methods that describe the type of move:
+
+- `.isCapture()` - is the move a regular capture? NOTE: this is `false` for an
+  en-passant capture
+- `.isEnPassant()` - is the move an en-passant capture?
+- `.isBigPawn()` - is the move a 2-rank pawn move?
+- `.isPromotion()` - is the move a pawn promotion?
+- `.isKingsideCastle()` - is the move a kingside castle?
+- `.isQueensideCastle()` - is the move a queenside castle?
+
+##### Move Flags (deprecated)
 
 The `flags` field contains one or more of the string values:
 

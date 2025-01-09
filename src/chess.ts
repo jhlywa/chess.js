@@ -77,18 +77,94 @@ interface History {
   moveNumber: number
 }
 
-export type Move = {
+export class Move {
   color: Color
   from: Square
   to: Square
   piece: PieceSymbol
   captured?: PieceSymbol
   promotion?: PieceSymbol
+
+  /**
+   * @deprecated This field is deprecated and will be removed in version 2.0.0.
+   * Please use move descriptor functions instead: `isCapture`, `isPromotion`,
+   * `isEnPassant`, `isKingsideCastle`, `isQueensideCastle`, `isCastle`, and
+   * `isBigPawn`
+   */
   flags: string
+
   san: string
   lan: string
   before: string
   after: string
+
+  constructor(chess: Chess, internal: InternalMove) {
+    const { color, piece, from, to, flags, captured, promotion } = internal
+
+    const fromAlgebraic = algebraic(from)
+    const toAlgebraic = algebraic(to)
+
+    this.color = color
+    this.piece = piece
+    this.from = fromAlgebraic
+    this.to = toAlgebraic
+
+    /*
+     * HACK: The chess['_method']() calls below invoke private methods in the
+     * Chess class to generate SAN and FEN. It's a bit of a hack, but makes the
+     * code cleaner elsewhere.
+     */
+
+    this.san = chess['_moveToSan'](internal, chess['_moves']({ legal: true }))
+    this.lan = fromAlgebraic + toAlgebraic
+    this.before = chess.fen()
+
+    // Generate the FEN for the 'after' key
+    chess['_makeMove'](internal)
+    this.after = chess.fen()
+    chess['_undoMove']()
+
+    // Build the text representation of the move flags
+    this.flags = ''
+    for (const flag in BITS) {
+      if (BITS[flag] & flags) {
+        this.flags += FLAGS[flag]
+      }
+    }
+
+    if (captured) {
+      this.captured = captured
+    }
+
+    if (promotion) {
+      this.promotion = promotion
+      this.lan += promotion
+    }
+  }
+
+  isCapture() {
+    return this.flags.indexOf(FLAGS['CAPTURE']) > -1
+  }
+
+  isPromotion() {
+    return this.flags.indexOf(FLAGS['PROMOTION']) > -1
+  }
+
+  isEnPassant() {
+    return this.flags.indexOf(FLAGS['EP_CAPTURE']) > -1
+  }
+
+  isKingsideCastle() {
+    return this.flags.indexOf(FLAGS['KSIDE_CASTLE']) > -1
+  }
+
+  isQueensideCastle() {
+    return this.flags.indexOf(FLAGS['QSIDE_CASTLE']) > -1
+  }
+
+  isBigPawn() {
+    return this.flags.indexOf(FLAGS['BIG_PAWN']) > -1
+  }
 }
 
 const EMPTY = -1
@@ -1167,7 +1243,7 @@ export class Chess {
     const moves = this._moves({ square, piece })
 
     if (verbose) {
-      return moves.map((move) => this._makePretty(move))
+      return moves.map((move) => new Move(this, move))
     } else {
       return moves.map((move) => this._moveToSan(move, moves))
     }
@@ -1420,7 +1496,7 @@ export class Chess {
      * need to make a copy of move because we can't generate SAN after the move
      * is made
      */
-    const prettyMove = this._makePretty(moveObj)
+    const prettyMove = new Move(this, moveObj)
 
     this._makeMove(moveObj)
     this._incPositionCount(prettyMove.after)
@@ -1538,7 +1614,7 @@ export class Chess {
   undo() {
     const move = this._undoMove()
     if (move) {
-      const prettyMove = this._makePretty(move)
+      const prettyMove = new Move(this, move)
       this._decPositionCount(prettyMove.after)
       return prettyMove
     }
@@ -2213,49 +2289,6 @@ export class Chess {
     return nodes
   }
 
-  // pretty = external move object
-  private _makePretty(uglyMove: InternalMove): Move {
-    const { color, piece, from, to, flags, captured, promotion } = uglyMove
-
-    let prettyFlags = ''
-
-    for (const flag in BITS) {
-      if (BITS[flag] & flags) {
-        prettyFlags += FLAGS[flag]
-      }
-    }
-
-    const fromAlgebraic = algebraic(from)
-    const toAlgebraic = algebraic(to)
-
-    const move: Move = {
-      color,
-      piece,
-      from: fromAlgebraic,
-      to: toAlgebraic,
-      san: this._moveToSan(uglyMove, this._moves({ legal: true })),
-      flags: prettyFlags,
-      lan: fromAlgebraic + toAlgebraic,
-      before: this.fen(),
-      after: '',
-    }
-
-    // generate the FEN for the 'after' key
-    this._makeMove(uglyMove)
-    move.after = this.fen()
-    this._undoMove()
-
-    if (captured) {
-      move.captured = captured
-    }
-    if (promotion) {
-      move.promotion = promotion
-      move.lan += promotion
-    }
-
-    return move
-  }
-
   turn() {
     return this._turn
   }
@@ -2312,7 +2345,7 @@ export class Chess {
       }
 
       if (verbose) {
-        moveHistory.push(this._makePretty(move))
+        moveHistory.push(new Move(this, move))
       } else {
         moveHistory.push(this._moveToSan(move, this._moves()))
       }

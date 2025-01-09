@@ -109,9 +109,9 @@ test('moves - single square - verbose', () => {
       after: '8/7K/8/8/1R6/k7/1R6/3n4 w - - 0 2',
     },
   ]
-  expect(chess.moves({ square: 'd2', verbose: true })).toIncludeSameMembers(
-    moves,
-  )
+  expect(
+    chess.moves({ square: 'd2', verbose: true }),
+  ).toIncludeAllPartialMembers(moves)
 })
 
 test('moves - piece', () => {
@@ -139,7 +139,7 @@ test('moves - piece - verbose', () => {
   const chess = new Chess(
     'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/1P2QPP1/R1R3K1 w - - 0 19',
   )
-  const moves: Move[] = [
+  const moves = [
     {
       after:
         'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1pP3P/RP2QPP1/2R3K1 b - - 1 19',
@@ -246,7 +246,9 @@ test('moves - piece - verbose', () => {
     },
   ]
 
-  expect(chess.moves({ piece: 'r', verbose: true })).toIncludeSameMembers(moves)
+  expect(chess.moves({ piece: 'r', verbose: true })).toIncludeAllPartialMembers(
+    moves,
+  )
 })
 
 test('moves - square and piece', () => {
