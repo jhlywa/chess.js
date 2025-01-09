@@ -367,7 +367,7 @@ function swapColor(color: Color): Color {
   return color === WHITE ? BLACK : WHITE
 }
 
-export function validateFen(fen: string) {
+export function validateFen(fen: string): { ok: boolean; error?: string } {
   // 1st criterion: 6 space-seperated fields?
   const tokens = fen.split(/\s+/)
   if (tokens.length !== 6) {
@@ -493,7 +493,7 @@ export function validateFen(fen: string) {
 }
 
 // this function is used to uniquely identify ambiguous moves
-function getDisambiguator(move: InternalMove, moves: InternalMove[]) {
+function getDisambiguator(move: InternalMove, moves: InternalMove[]): string {
   const from = move.from
   const to = move.to
   const piece = move.piece
@@ -582,7 +582,7 @@ function addMove(
   }
 }
 
-function inferPieceType(san: string) {
+function inferPieceType(san: string): PieceSymbol | undefined {
   let pieceType = san.charAt(0)
   if (pieceType >= 'a' && pieceType <= 'h') {
     const matches = san.match(/[a-h]\d.*[a-h]\d/)
@@ -599,7 +599,7 @@ function inferPieceType(san: string) {
 }
 
 // parses all of the decorators out of a SAN string
-function strippedSan(move: string) {
+function strippedSan(move: string): string {
   return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
 }
 
@@ -848,7 +848,10 @@ export class Chess {
     return this._board[Ox88[square]]
   }
 
-  put({ type, color }: { type: PieceSymbol; color: Color }, square: Square) {
+  put(
+    { type, color }: { type: PieceSymbol; color: Color },
+    square: Square,
+  ): boolean {
     if (this._put({ type, color }, square)) {
       this._updateCastlingRights()
       this._updateEnPassantSquare()
@@ -861,7 +864,7 @@ export class Chess {
   private _put(
     { type, color }: { type: PieceSymbol; color: Color },
     square: Square,
-  ) {
+  ): boolean {
     // check for piece
     if (SYMBOLS.indexOf(type.toLowerCase()) === -1) {
       return false
@@ -1257,7 +1260,7 @@ export class Chess {
     legal?: boolean
     piece?: PieceSymbol
     square?: Square
-  } = {}) {
+  } = {}): InternalMove[] {
     const forSquare = square ? (square.toLowerCase() as Square) : undefined
     const forPiece = piece?.toLowerCase()
 
@@ -1448,7 +1451,7 @@ export class Chess {
   move(
     move: string | { from: string; to: string; promotion?: string },
     { strict = false }: { strict?: boolean } = {},
-  ) {
+  ): Move {
     /*
      * The move function can be called with in the following parameters:
      *
@@ -1611,7 +1614,7 @@ export class Chess {
     this._turn = them
   }
 
-  undo() {
+  undo(): Move | null {
     const move = this._undoMove()
     if (move) {
       const prettyMove = new Move(this, move)
@@ -1621,7 +1624,7 @@ export class Chess {
     return null
   }
 
-  private _undoMove() {
+  private _undoMove(): InternalMove | null {
     const old = this._history.pop()
     if (old === undefined) {
       return null
@@ -1679,7 +1682,7 @@ export class Chess {
   pgn({
     newline = '\n',
     maxWidth = 0,
-  }: { newline?: string; maxWidth?: number } = {}) {
+  }: { newline?: string; maxWidth?: number } = {}): string {
     /*
      * using the specification from http://www.chessclub.com/help/PGN-spec
      * example for html usage: .pgn({ max_width: 72, newline_char: "<br />" })
@@ -1833,7 +1836,7 @@ export class Chess {
     return result.join('')
   }
 
-  header(...args: string[]) {
+  header(...args: string[]): Record<string, string> {
     for (let i = 0; i < args.length; i += 2) {
       if (typeof args[i] === 'string' && typeof args[i + 1] === 'string') {
         this._header[args[i]] = args[i + 1]
@@ -1973,7 +1976,7 @@ export class Chess {
         : decodeURIComponent('%' + (s.match(/.{1,2}/g) || []).join('%'))
     }
 
-    const encodeComment = function (s: string) {
+    const encodeComment = function (s: string): string {
       s = s.replace(new RegExp(mask(newlineChar), 'g'), ' ')
       return `{${toHex(s.slice(1, s.length - 1))}}`
     }
@@ -2069,7 +2072,7 @@ export class Chess {
    * 4. ... Ne7 is technically the valid SAN
    */
 
-  private _moveToSan(move: InternalMove, moves: InternalMove[]) {
+  private _moveToSan(move: InternalMove, moves: InternalMove[]): string {
     let output = ''
 
     if (move.flags & BITS.KSIDE_CASTLE) {
@@ -2240,7 +2243,7 @@ export class Chess {
     return null
   }
 
-  ascii() {
+  ascii(): string {
     let s = '   +------------------------+\n'
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       // display the rank
@@ -2269,7 +2272,7 @@ export class Chess {
     return s
   }
 
-  perft(depth: number) {
+  perft(depth: number): number {
     const moves = this._moves({ legal: false })
     let nodes = 0
     const color = this._turn
@@ -2289,11 +2292,11 @@ export class Chess {
     return nodes
   }
 
-  turn() {
+  turn(): Color {
     return this._turn
   }
 
-  board() {
+  board(): ({ square: Square; type: PieceSymbol; color: Color } | null)[][] {
     const output = []
     let row = []
 
@@ -2317,7 +2320,7 @@ export class Chess {
     return output
   }
 
-  squareColor(square: Square) {
+  squareColor(square: Square): 'light' | 'dark' | null {
     if (square in Ox88) {
       const sq = Ox88[square]
       return (rank(sq) + file(sq)) % 2 === 0 ? 'light' : 'dark'
@@ -2361,7 +2364,7 @@ export class Chess {
    * irrelevent information from the fen, initialising new positions, and
    * removing old positions from the record if their counts are reduced to 0.
    */
-  private _getPositionCount(fen: string) {
+  private _getPositionCount(fen: string): number {
     const trimmedFen = trimFen(fen)
     return this._positionCount[trimmedFen] || 0
   }
@@ -2410,7 +2413,7 @@ export class Chess {
     this._comments = currentComments
   }
 
-  getComment() {
+  getComment(): string {
     return this._comments[this.fen()]
   }
 
@@ -2418,20 +2421,20 @@ export class Chess {
     this._comments[this.fen()] = comment.replace('{', '[').replace('}', ']')
   }
 
-  deleteComment() {
+  deleteComment(): string {
     const comment = this._comments[this.fen()]
     delete this._comments[this.fen()]
     return comment
   }
 
-  getComments() {
+  getComments(): { fen: string; comment: string }[] {
     this._pruneComments()
     return Object.keys(this._comments).map((fen: string) => {
       return { fen: fen, comment: this._comments[fen] }
     })
   }
 
-  deleteComments() {
+  deleteComments(): { fen: string; comment: string }[] {
     this._pruneComments()
     return Object.keys(this._comments).map((fen) => {
       const comment = this._comments[fen]
@@ -2443,7 +2446,7 @@ export class Chess {
   setCastlingRights(
     color: Color,
     rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>,
-  ) {
+  ): boolean {
     for (const side of [KING, QUEEN] as const) {
       if (rights[side] !== undefined) {
         if (rights[side]) {
@@ -2463,14 +2466,14 @@ export class Chess {
     )
   }
 
-  getCastlingRights(color: Color) {
+  getCastlingRights(color: Color): { [KING]: boolean; [QUEEN]: boolean } {
     return {
       [KING]: (this._castling[color] & SIDES[KING]) !== 0,
       [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
     }
   }
 
-  moveNumber() {
+  moveNumber(): number {
     return this._moveNumber
   }
 }
