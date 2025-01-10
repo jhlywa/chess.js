@@ -346,7 +346,19 @@ chess.getComments()
 //    ]
 ```
 
-### .header()
+### .getHeaders()
+
+Retrieve the PGN headers.
+
+```ts
+chess.setHeader('White', 'Morphy')
+chess.setHeader('Black', 'Anderssen')
+chess.setHeader('Date', '1858-??-??')
+chess.getHeaders()
+// -> { White: 'Morphy', Black: 'Anderssen', Date: '1858-??-??' }
+```
+
+### .header() (deprecated - use `setHeader` and `getHeaders`)
 
 Allows header information to be added to PGN output. Any number of key/value
 pairs can be passed to .header().
@@ -890,14 +902,17 @@ chess.remove('e1')
 // -> undefined
 ```
 
-### .removeHeader(field: string)
+### .removeHeader(field: string): boolean
 
-Remove a field from the PGN header.
+Remove a field from the PGN header. Returns `true` if the header was removed,
+else `false` as the header was not found.
 
 ```ts
-chess.header('White', 'Morphy', 'Black', 'Anderssen', 'Date', '1858-??-??')
+chess.setHeader('White', 'Morphy')
+chess.setHeader('Black', 'Anderssen')
+chess.setHeader('Date', '1858-??-??')
 chess.removeHeader('Date')
-chess.header()
+chess.getHeaders()
 // -> { White: 'Morphy', Black: 'Anderssen'}
 ```
 
@@ -929,6 +944,17 @@ chess.setComment("king's pawn opening")
 
 chess.pgn()
 // -> "1. e4 {king's pawn opening}"
+```
+
+### .setHeader(key: string, value: string): Record<string, string>
+
+Set a header key/value pair to be added to the PGN output.
+
+```ts
+chess.setHeader('White', 'Robert James Fischer')
+// { 'White': 'Robert James Fischer' }
+chess.setHeader('Black', 'Mikhail Tal')
+// { 'White': 'Robert James Fischer', 'Black': 'Mikhail Tal' }
 ```
 
 ### .squareColor(square)

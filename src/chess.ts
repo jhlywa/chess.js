@@ -652,12 +652,6 @@ export class Chess {
     delete this._header['FEN']
   }
 
-  removeHeader(key: string) {
-    if (key in this._header) {
-      delete this._header[key]
-    }
-  }
-
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
     let tokens = fen.split(/\s+/)
 
@@ -1842,6 +1836,23 @@ export class Chess {
         this._header[args[i]] = args[i + 1]
       }
     }
+    return this._header
+  }
+
+  setHeader(key: string, value: string): Record<string, string> {
+    this._header[key] = value
+    return this._header
+  }
+
+  removeHeader(key: string): boolean {
+    if (key in this._header) {
+      delete this._header[key]
+      return true
+    }
+    return false
+  }
+
+  getHeaders(): Record<string, string> {
     return this._header
   }
 
