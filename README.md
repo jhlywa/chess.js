@@ -550,18 +550,26 @@ Returns true or false if the current board position has occurred three or more
 times.
 
 ```ts
-const chess = new Chess('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+const chess = new Chess(
+  'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+)
 // -> true
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 1st time
 chess.isThreefoldRepetition()
 // -> false
 
-chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
+chess.move('Nf3')
+chess.move('Nf6')
+chess.move('Ng1')
+chess.move('Ng8')
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 2nd time
 chess.isThreefoldRepetition()
 // -> false
 
-chess.move('Nf3') chess.move('Nf6') chess.move('Ng1') chess.move('Ng8')
+chess.move('Nf3')
+chess.move('Nf6')
+chess.move('Ng1')
+chess.move('Ng8')
 // rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq occurs 3rd time
 chess.isThreefoldRepetition()
 // -> true
