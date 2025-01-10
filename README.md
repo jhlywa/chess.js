@@ -219,52 +219,6 @@ chess.fen()
 // -> '8/8/8/8/8/8/8/8 w - - 0 1' <- empty board
 ```
 
-### .deleteComment()
-
-Delete and return the comment for the current position, if it exists.
-
-```ts
-const chess = new Chess()
-
-chess.loadPgn('1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *')
-
-chess.getComment()
-// -> "giuoco piano"
-
-chess.deleteComment()
-// -> "giuoco piano"
-
-chess.getComment()
-// -> undefined
-```
-
-### .deleteComments()
-
-Delete and return comments for all positions.
-
-```ts
-const chess = new Chess()
-
-chess.loadPgn(
-  "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *",
-)
-
-chess.deleteComments()
-// -> [
-//     {
-//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
-//       comment: "king's pawn opening"
-//     },
-//     {
-//       fen: "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
-//       comment: "giuoco piano"
-//     }
-//    ]
-
-chess.getComments()
-// -> []
-```
-
 ### .fen()
 
 Returns the FEN string for the current position. Note, the en passant square is
@@ -358,28 +312,6 @@ chess.getHeaders()
 // -> { White: 'Morphy', Black: 'Anderssen', Date: '1858-??-??' }
 ```
 
-### .header() (deprecated - use `setHeader` and `getHeaders`)
-
-Allows header information to be added to PGN output. Any number of key/value
-pairs can be passed to .header().
-
-```ts
-chess.header('White', 'Robert James Fischer')
-chess.header('Black', 'Mikhail Tal')
-
-// or
-
-chess.header('White', 'Morphy', 'Black', 'Anderssen', 'Date', '1858-??-??')
-```
-
-Calling .header() without any arguments returns the header information as an
-object.
-
-```ts
-chess.header()
-// -> { White: 'Morphy', Black: 'Anderssen', Date: '1858-??-??' }
-```
-
 ### .history([ options ])
 
 Returns a list containing the moves of the current game. Options is an optional
@@ -409,7 +341,6 @@ chess.history({ verbose: true })
 //     to: 'e4',
 //     san: 'e4',
 //     lan: 'e2e4',
-//     flags: 'b'
 //   },
 //   {
 //     before: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1',
@@ -420,7 +351,6 @@ chess.history({ verbose: true })
 //     to: 'e5',
 //     san: 'e5',
 //     lan: 'e7e5',
-//     flags: 'b'
 //   },
 //   {
 //     before: 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
@@ -431,7 +361,6 @@ chess.history({ verbose: true })
 //     to: 'f4',
 //     san: 'f4',
 //     lan: 'f2f4',
-//     flags: 'b'
 //   },
 //   {
 //     before: 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2',
@@ -442,7 +371,6 @@ chess.history({ verbose: true })
 //     to: 'f4',
 //     san: 'exf4',
 //     lan: 'e5f4',
-//     flags: 'c',
 //     captured: 'p'
 //   }
 // ]
@@ -705,13 +633,13 @@ move object. Throws an 'Illegal move' exception if the move was illegal.
 const chess = new Chess()
 
 chess.move('e4')
-// -> { color: 'w', from: 'e2', to: 'e4', flags: 'b', piece: 'p', san: 'e4' }
+// -> { color: 'w', from: 'e2', to: 'e4', piece: 'p', san: 'e4' }
 
 chess.move('nf6') // SAN is case sensitive!!
 // Error: Invalid move: nf6
 
 chess.move('Nf6')
-// -> { color: 'b', from: 'g8', to: 'f6', flags: 'n', piece: 'n', san: 'Nf6' }
+// -> { color: 'b', from: 'g8', to: 'f6', piece: 'n', san: 'Nf6' }
 ```
 
 #### .move() - Object Notation
@@ -723,7 +651,7 @@ fields.
 const chess = new Chess()
 
 chess.move({ from: 'g2', to: 'g3' })
-// -> { color: 'w', from: 'g2', to: 'g3', flags: 'n', piece: 'p', san: 'g3' }
+// -> { color: 'w', from: 'g2', to: 'g3', piece: 'p', san: 'g3' }
 ```
 
 #### .move() - Permissive Parser
@@ -784,7 +712,7 @@ chess.moves({ piece: 'n' }) // generate moves for piece type
 
 chess.moves({ verbose: true }) // return verbose moves
 // -> [{ color: 'w', from: 'a2', to: 'a3',
-//       flags: 'n', piece: 'p',
+//       piece: 'p',
 //       san: 'a3', lan: 'a2a3',
 //       before: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 //       after: 'rnbqkbnr/pppppppp/8/8/8/P7/1PPPPPPP/RNBQKBNR b KQkq - 0 1'
@@ -822,21 +750,6 @@ The `Move` object has helper methods that describe the type of move:
 - `.isKingsideCastle()` - is the move a kingside castle?
 - `.isQueensideCastle()` - is the move a queenside castle?
 
-##### Move Flags (deprecated)
-
-The `flags` field contains one or more of the string values:
-
-- `n` - a non-capture
-- `b` - a pawn push of two squares
-- `e` - an en passant capture
-- `c` - a standard capture
-- `p` - a promotion
-- `k` - kingside castling
-- `q` - queenside castling
-
-A `flags` value of `pc` would mean that a pawn captured a piece on the 8th rank
-and promoted.
-
 ### .pgn([ options ])
 
 Returns the game in PGN format. Options is an optional parameter which may
@@ -844,7 +757,8 @@ include max width and/or a newline character settings.
 
 ```ts
 const chess = new Chess()
-chess.header('White', 'Plunky', 'Black', 'Plinkie')
+chess.setHeader('White', 'Plunky')
+chess.setHeader('Black', 'Plinkie')
 chess.move('e4')
 chess.move('e5')
 chess.move('Nc3')
@@ -900,6 +814,52 @@ chess.remove('h1')
 // -> { type: 'k', color: 'w' },
 chess.remove('e1')
 // -> undefined
+```
+
+### .removeComment()
+
+Delete and return the comment for the current position, if it exists.
+
+```ts
+const chess = new Chess()
+
+chess.loadPgn('1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *')
+
+chess.getComment()
+// -> "giuoco piano"
+
+chess.removeComment()
+// -> "giuoco piano"
+
+chess.getComment()
+// -> undefined
+```
+
+### .removeComments()
+
+Delete and return comments for all positions.
+
+```ts
+const chess = new Chess()
+
+chess.loadPgn(
+  "1. e4 e5 {king's pawn opening} 2. Nf3 Nc6 3. Bc4 Bc5 {giuoco piano} *",
+)
+
+chess.removeComments()
+// -> [
+//     {
+//       fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+//       comment: "king's pawn opening"
+//     },
+//     {
+//       fen: "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3",
+//       comment: "giuoco piano"
+//     }
+//    ]
+
+chess.getComments()
+// -> []
 ```
 
 ### .removeHeader(field: string): boolean
