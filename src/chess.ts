@@ -2435,7 +2435,14 @@ export class Chess {
     this._comments[this.fen()] = comment.replace('{', '[').replace('}', ']')
   }
 
+  /**
+   * @deprecated Renamed to `removeComment` for consistency
+   */
   deleteComment(): string {
+    return this.removeComment()
+  }
+
+  removeComment(): string {
     const comment = this._comments[this.fen()]
     delete this._comments[this.fen()]
     return comment
@@ -2448,7 +2455,14 @@ export class Chess {
     })
   }
 
+  /**
+   * @deprecated Renamed to `removeComments` for consistency
+   */
   deleteComments(): { fen: string; comment: string }[] {
+    return this.removeComments()
+  }
+
+  removeComments(): { fen: string; comment: string }[] {
     this._pruneComments()
     return Object.keys(this._comments).map((fen) => {
       const comment = this._comments[fen]

@@ -87,10 +87,10 @@ describe('Manipulate Comments', () => {
     )
   })
 
-  it('delete comments', () => {
+  it('remove comments', () => {
     const chess = new Chess()
-    expect(chess.deleteComment()).toBeUndefined()
-    expect(chess.deleteComments()).toEqual([])
+    expect(chess.removeComment()).toBeUndefined()
+    expect(chess.removeComments()).toEqual([])
     const initial = chess.fen()
     chess.setComment('starting position')
     chess.move('e4')
@@ -104,10 +104,10 @@ describe('Manipulate Comments', () => {
       { fen: e4, comment: 'good move' },
       { fen: e6, comment: 'dubious move' },
     ])
-    expect(chess.deleteComment()).toEqual('dubious move')
+    expect(chess.removeComment()).toEqual('dubious move')
     expect(chess.pgn()).toEqual('{starting position} 1. e4 {good move} e6')
-    expect(chess.deleteComment()).toBeUndefined()
-    expect(chess.deleteComments()).toEqual([
+    expect(chess.removeComment()).toBeUndefined()
+    expect(chess.removeComments()).toEqual([
       { fen: initial, comment: 'starting position' },
       { fen: e4, comment: 'good move' },
     ])
