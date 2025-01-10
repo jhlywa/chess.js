@@ -1830,6 +1830,9 @@ export class Chess {
     return result.join('')
   }
 
+  /*
+   * @deprecated Use `setHeader` and `getHeaders` instead.
+   */
   header(...args: string[]): Record<string, string> {
     for (let i = 0; i < args.length; i += 2) {
       if (typeof args[i] === 'string' && typeof args[i + 1] === 'string') {
