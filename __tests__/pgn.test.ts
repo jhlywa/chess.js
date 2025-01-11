@@ -78,6 +78,56 @@ describe('PGN', () => {
         'r1bqk1nr/pppp1ppp/2n5/4p3/1bB1P3/2P2N2/P2P1PPP/RNBQK2R b KQkq - 0 1',
       fen: 'r1bqk1nr/ppp2ppp/2np4/b3p3/2BPP3/2P2N2/P4PPP/RNBQ1RK1 b kq - 0 3',
     },
+    {
+      // testing maxWidth being small and having no comments
+      moves: `f3 e5 g4 Qh4#`,
+      header: [],
+      maxWidth: 1,
+      pgn: fileToString('pgn/2.pgn'),
+      fen: 'rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3',
+    },
+    {
+      // testing minimal (empty) pgn
+      moves: ``,
+      header: [],
+      maxWidth: undefined,
+      pgn: fileToString('pgn/4.pgn'),
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    },
+    {
+      // testing minimal pgn with single header
+      moves: ``,
+      header: [
+        'Event',
+        '?'
+      ],
+      maxWidth: undefined,
+      pgn: fileToString('pgn/5.pgn'),
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    },
+    {
+      // testing minimal pgn with headers and termination marker
+      moves: ``,
+      header: [
+        'Event',
+        '?',
+        'Site',
+        '?',
+        'Date',
+        '????.??.??',
+        'Round',
+        '?',
+        'White',
+        '?',
+        'Black',
+        '?',
+        'Result',
+        '*'
+      ],
+      maxWidth: undefined,
+      pgn: fileToString('pgn/6.pgn'),
+      fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+    },
   ]
 
   test('pgn - works - removes header', () => {
