@@ -1398,7 +1398,7 @@ export class Chess {
 
           if (castlingTo != castlingFrom) {
             const count =
-              Math.max(KINGS[us][KING].to, ROOKS[us][KING].from) -
+              Math.max(KINGS[us][KING].to, KINGS[us][KING].from) -
               KINGS[us][KING].from
 
             let noAttacked = true
@@ -1449,7 +1449,7 @@ export class Chess {
           if (castlingTo != castlingFrom) {
             const count =
               KINGS[us][QUEEN].from -
-              Math.min(ROOKS[us][QUEEN].from, KINGS[us][QUEEN].to)
+              Math.min(KINGS[us][QUEEN].from, KINGS[us][QUEEN].to)
 
             let noAttacked = true
             let noAttackedCount = 0
