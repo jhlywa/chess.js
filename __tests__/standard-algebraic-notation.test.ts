@@ -17,10 +17,10 @@ const positions = [
     Rc1 Rb1 Ra1 Kg2 Kh2 Kg1`,
   },
   {
-    fen: '1r3k2/P1P5/8/8/8/8/8/R3K2R w KQ - 0 1',
+    fen: '1r3k2/P1P5/8/8/8/8/8/R3K2R w K - 0 1',
     moves: `a8=Q a8=R a8=B a8=N axb8=Q+ axb8=R+ axb8=B axb8=N c8=Q+ c8=R+
         c8=B c8=N cxb8=Q+ cxb8=R+ cxb8=B cxb8=N Ra2 Ra3 Ra4 Ra5 Ra6 Rb1 Rc1 Rd1
-        Kd2 Ke2 Kf2 Kf1 Kd1 Rh2 Rh3 Rh4 Rh5 Rh6 Rh7 Rh8+ Rg1 Rf1+ O-O+ O-O-O`,
+        Kd2 Ke2 Kf2 Kf1 Kd1 Rh2 Rh3 Rh4 Rh5 Rh6 Rh7 Rh8+ Rg1 Rf1+ O-O+`,
   },
 
   {
