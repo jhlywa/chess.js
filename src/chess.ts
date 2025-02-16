@@ -1593,7 +1593,7 @@ export class Chess {
     this._push(move)
 
     const toPiece = this._board[move.to]
-    const toCount = move.to - move.from
+    const toCount = Math.abs(move.to - move.from)
     this._board[move.to] = this._board[move.from]
     delete this._board[move.from]
 
@@ -1616,9 +1616,16 @@ export class Chess {
       this._kings[us] = move.to
 
       // if we castled, move the rook next to the king
-      if (move.flags & BITS.KSIDE_CASTLE) {
-        const castlingTo = ROOKS[us][KING].to
-        const castlingFrom = ROOKS[us][KING].from
+      if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+        let castlingTo: number, castlingFrom: number
+
+        if (move.flags & BITS.KSIDE_CASTLE) {
+          castlingTo = ROOKS[us][KING].to
+          castlingFrom = ROOKS[us][KING].from
+        } else {
+          castlingTo = ROOKS[us][QUEEN].to
+          castlingFrom = ROOKS[us][QUEEN].from
+        }
         if (castlingFrom != castlingTo) {
           const toCastlingPiece = this._board[castlingFrom]
           this._board[castlingTo] = this._board[castlingFrom]
@@ -1639,31 +1646,6 @@ export class Chess {
           }
           if (toCount >= 1 && toPiece && toPiece.type === ROOK) {
             this._board[castlingTo] = toPiece
-          }
-        }
-      } else if (move.flags & BITS.QSIDE_CASTLE) {
-        const castlingTo = ROOKS[us][QUEEN].to
-        const castlingFrom = ROOKS[us][QUEEN].from
-        if (castlingFrom != castlingTo) {
-          const toCastlingPiece = this._board[castlingFrom]
-          this._board[castlingTo] = this._board[castlingFrom]
-          delete this._board[castlingFrom]
-          if (
-            toCount <= -1 &&
-            toCastlingPiece &&
-            toCastlingPiece.type === KING
-          ) {
-            this._board[move.to] = toCastlingPiece
-          }
-          if (
-            toCount <= -1 &&
-            toCastlingPiece &&
-            toCastlingPiece.type === ROOK
-          ) {
-            this._board[castlingTo] = toCastlingPiece
-          }
-          if (toCount <= -1 && toPiece && toPiece.type === ROOK) {
-            this._board[move.from] = toPiece
           }
         }
       }
@@ -1753,7 +1735,7 @@ export class Chess {
     const us = this._turn
     const them = swapColor(us)
 
-    const fromCount = move.from - move.to
+    const fromCount = Math.abs(move.from - move.to)
     const fromPiece = this._board[move.from]
     this._board[move.from] = this._board[move.to]
     if (this._board[move.from]) this._board[move.from].type = move.piece // to undo any promotions
@@ -1780,52 +1762,30 @@ export class Chess {
       if (move.flags & BITS.KSIDE_CASTLE) {
         castlingTo = ROOKS[us][KING].from
         castlingFrom = ROOKS[us][KING].to
-        if (castlingFrom != castlingTo) {
-          const fromCastlingPiece = this._board[castlingFrom]
-          this._board[castlingTo] = this._board[castlingFrom]
-          delete this._board[castlingFrom]
-          if (
-            fromCount <= -1 &&
-            fromCastlingPiece &&
-            fromCastlingPiece.type === KING
-          ) {
-            this._board[move.from] = fromCastlingPiece
-          }
-          if (
-            fromCount <= -1 &&
-            fromCastlingPiece &&
-            fromCastlingPiece.type === ROOK
-          ) {
-            this._board[castlingTo] = fromCastlingPiece
-          }
-          if (fromCount <= -1 && fromPiece && fromPiece.type === ROOK) {
-            this._board[castlingTo] = fromPiece
-          }
-        }
       } else {
         castlingTo = ROOKS[us][QUEEN].from
         castlingFrom = ROOKS[us][QUEEN].to
-        if (castlingFrom != castlingTo) {
-          const fromCastlingPiece = this._board[castlingFrom]
-          this._board[castlingTo] = this._board[castlingFrom]
-          delete this._board[castlingFrom]
-          if (
-            fromCount >= 1 &&
-            fromCastlingPiece &&
-            fromCastlingPiece.type === KING
-          ) {
-            this._board[move.from] = fromCastlingPiece
-          }
-          if (
-            fromCount >= 1 &&
-            fromCastlingPiece &&
-            fromCastlingPiece.type === ROOK
-          ) {
-            this._board[castlingTo] = fromCastlingPiece
-          }
-          if (fromCount >= 1 && fromPiece && fromPiece.type === ROOK) {
-            this._board[castlingTo] = fromPiece
-          }
+      }
+      if (castlingFrom != castlingTo) {
+        const fromCastlingPiece = this._board[castlingFrom]
+        this._board[castlingTo] = this._board[castlingFrom]
+        delete this._board[castlingFrom]
+        if (
+          fromCount >= 1 &&
+          fromCastlingPiece &&
+          fromCastlingPiece.type === KING
+        ) {
+          this._board[move.from] = fromCastlingPiece
+        }
+        if (
+          fromCount >= 1 &&
+          fromCastlingPiece &&
+          fromCastlingPiece.type === ROOK
+        ) {
+          this._board[castlingTo] = fromCastlingPiece
+        }
+        if (fromCount >= 1 && fromPiece && fromPiece.type === ROOK) {
+          this._board[castlingTo] = fromPiece
         }
       }
     }
