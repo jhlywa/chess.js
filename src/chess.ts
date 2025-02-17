@@ -413,7 +413,7 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
   }
 
   // 5th criterion: 3th field is a valid castle-string?
-  if (/[^kKqQ-]/.test(tokens[2])) {
+  if (/[^kKqQabcdefghABCDEFGH-]/.test(tokens[2])) {
     return { ok: false, error: 'Invalid FEN: castling availability is invalid' }
   }
 
@@ -633,6 +633,13 @@ export class Chess {
   private _history: History[] = []
   private _comments: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
+  private _castlingSymbols: Record<string, string> = {
+    wk: '',
+    wq: '',
+    bk: '',
+    bq: '',
+  }
+  private _fen = ''
 
   // tracks number of times a position has been seen for repetition checking
   private _positionCount: Record<string, number> = {}
@@ -653,6 +660,7 @@ export class Chess {
     this._comments = {}
     this._header = preserveHeaders ? this._header : {}
     this._positionCount = {}
+    this._fen = ''
 
     /*
      * Delete the SetUp and FEN headers (if preserved), the board is empty and
@@ -665,6 +673,8 @@ export class Chess {
 
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
     let tokens = fen.split(/\s+/)
+
+    const is960 = !/[^abcdefghABCDEFGH-]/.test(tokens[2])
 
     // append commonly omitted fen tokens
     if (tokens.length >= 2 && tokens.length < 6) {
@@ -705,17 +715,39 @@ export class Chess {
 
     this._turn = tokens[1] as Color
 
-    if (tokens[2].indexOf('K') > -1) {
-      this._castling.w |= BITS.KSIDE_CASTLE
+    let found = ''
+    for (const c of !is960 ? 'K' : 'HGFEDCBA') {
+      if (tokens[2].indexOf(c) > -1) {
+        found = c
+        this._castling.w |= BITS.KSIDE_CASTLE
+        this._castlingSymbols.wk = c
+        break
+      }
     }
-    if (tokens[2].indexOf('Q') > -1) {
-      this._castling.w |= BITS.QSIDE_CASTLE
+    for (const c of !is960 ? 'Q' : 'HGFEDCBA') {
+      if (c === found) continue
+      if (tokens[2].indexOf(c) > -1) {
+        this._castling.w |= BITS.QSIDE_CASTLE
+        this._castlingSymbols.wq = c
+        break
+      }
     }
-    if (tokens[2].indexOf('k') > -1) {
-      this._castling.b |= BITS.KSIDE_CASTLE
+    found = ''
+    for (const c of !is960 ? 'k' : 'hgfedcba') {
+      if (tokens[2].indexOf(c) > -1) {
+        found = c
+        this._castling.b |= BITS.KSIDE_CASTLE
+        this._castlingSymbols.bk = c
+        break
+      }
     }
-    if (tokens[2].indexOf('q') > -1) {
-      this._castling.b |= BITS.QSIDE_CASTLE
+    for (const c of !is960 ? 'q' : 'hgfedcba') {
+      if (c === found) continue
+      if (tokens[2].indexOf(c) > -1) {
+        this._castling.b |= BITS.QSIDE_CASTLE
+        this._castlingSymbols.bq = c
+        break
+      }
     }
 
     this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
@@ -724,6 +756,8 @@ export class Chess {
 
     this._updateSetup(fen)
     this._incPositionCount(fen)
+
+    this._fen = fen
   }
 
   fen() {
@@ -759,16 +793,16 @@ export class Chess {
 
     let castling = ''
     if (this._castling[WHITE] & BITS.KSIDE_CASTLE) {
-      castling += 'K'
+      castling += this._castlingSymbols.wk
     }
     if (this._castling[WHITE] & BITS.QSIDE_CASTLE) {
-      castling += 'Q'
+      castling += this._castlingSymbols.wq
     }
     if (this._castling[BLACK] & BITS.KSIDE_CASTLE) {
-      castling += 'k'
+      castling += this._castlingSymbols.bk
     }
     if (this._castling[BLACK] & BITS.QSIDE_CASTLE) {
-      castling += 'q'
+      castling += this._castlingSymbols.bq
     }
 
     // do we have an empty castling flag?
@@ -846,7 +880,11 @@ export class Chess {
   }
 
   reset() {
-    this.load(DEFAULT_POSITION)
+    if (this._fen === '') {
+      this.load(DEFAULT_POSITION)
+    } else {
+      this.load(this._fen)
+    }
   }
 
   get(square: Square): Piece | undefined {
