@@ -1,19 +1,35 @@
 {
   "name": "chess.js",
-  "version": "0.1.0",
-  "description": "A Javascript chess library for chess move generation/validation, piece placement/movement, and check/checkmate/draw detection",
-  "author": "Jeff Hlywa <jhlywa@gmail.com> (https://github.com/jhlywa)",
-  "contributors": [
-    "Steve Bragg (https://github.com/2sb18)",
-    "E. Azer Koçulu (https://github.com/azer)",
-    "Falco Nogatz (https://github.com/fnogatz)",
-    "Stiff (https://github.com/stiff)"
-  ],
-  "keywords": ["chess"],
-  "main": "chess.js",
-
-  "repository" : {
-    "type" : "git",
-    "url" : "http://github.com/jhlywa/chess.js.git"
+  "version": "1.0.0",
+  "license": "BSD-2-Clause",
+  "main": "dist/cjs/chess.js",
+  "module": "dist/esm/chess.js",
+  "types": "dist/types/chess.d.ts",
+  "homepage": "https://github.com/jhlywa/chess.js",
+  "author": "Jeff Hlywa <jhlywa@gmail.com>",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+    "check": "npm run format:check && npm run lint && npm run test && npm run build",
+    "clean": "rm -rf ./dist",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint src/ --ext .ts",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jhlywa/chess.js"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.17.0",
+    "@typescript-eslint/parser": "^5.17.0",
+    "eslint": "^8.12.0",
+    "jest": "^27.0.6",
+    "jest-extended": "^2.0.0",
+    "prettier": "^3.1.0",
+    "ts-jest": "^27.0.4",
+    "typescript": "^4.6.3"
   }
 }
