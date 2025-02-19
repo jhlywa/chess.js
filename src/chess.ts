@@ -796,7 +796,6 @@ export class Chess {
       this._castlingSymbols.bqc = ''
     }
 
-
     this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
     this._halfMoves = parseInt(tokens[4], 10)
     this._moveNumber = parseInt(tokens[5], 10)
@@ -1042,7 +1041,8 @@ export class Chess {
       this._board[ROOKS[WHITE][QUEEN].from]?.color !== WHITE
     ) {
       this._castling.w &= ~BITS.QSIDE_CASTLE
-      this._castlingSymbols.wq = this._castling.w & BITS.QSIDE_CASTLE ? this._castlingSymbols.wqc : ''
+      this._castlingSymbols.wq =
+        this._castling.w & BITS.QSIDE_CASTLE ? this._castlingSymbols.wqc : ''
     }
 
     if (
@@ -1051,7 +1051,8 @@ export class Chess {
       this._board[ROOKS[WHITE][KING].from]?.color !== WHITE
     ) {
       this._castling.w &= ~BITS.KSIDE_CASTLE
-      this._castlingSymbols.wq = this._castling.w & BITS.KSIDE_CASTLE ? this._castlingSymbols.wkc : ''
+      this._castlingSymbols.wq =
+        this._castling.w & BITS.KSIDE_CASTLE ? this._castlingSymbols.wkc : ''
     }
 
     if (
@@ -1060,7 +1061,8 @@ export class Chess {
       this._board[ROOKS[BLACK][QUEEN].from]?.color !== BLACK
     ) {
       this._castling.b &= ~BITS.QSIDE_CASTLE
-      this._castlingSymbols.bq = this._castling.b & BITS.QSIDE_CASTLE ? this._castlingSymbols.bqc : ''
+      this._castlingSymbols.bq =
+        this._castling.b & BITS.QSIDE_CASTLE ? this._castlingSymbols.bqc : ''
     }
 
     if (
@@ -1069,7 +1071,8 @@ export class Chess {
       this._board[ROOKS[BLACK][KING].from]?.color !== BLACK
     ) {
       this._castling.b &= ~BITS.KSIDE_CASTLE
-      this._castlingSymbols.bk = this._castling.b & BITS.KSIDE_CASTLE ? this._castlingSymbols.bkc : ''
+      this._castlingSymbols.bk =
+        this._castling.b & BITS.KSIDE_CASTLE ? this._castlingSymbols.bkc : ''
     }
   }
 
