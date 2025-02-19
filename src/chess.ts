@@ -635,9 +635,13 @@ export class Chess {
   private _castling: Record<Color, number> = { w: 0, b: 0 }
   private _castlingSymbols: Record<string, string> = {
     wk: '',
+    wkc: '',
     wq: '',
+    wqc: '',
     bk: '',
+    bkc: '',
     bq: '',
+    bqc: '',
   }
   private _fen = ''
 
@@ -715,24 +719,23 @@ export class Chess {
 
     this._turn = tokens[1] as Color
 
+    let count = 0
     let countK = 0
     let countQ = 0
     if (tokens[2] === '-') {
       this._castling.w = 0
-      this._castlingSymbols.wk = ''
-      this._castlingSymbols.wq = ''
       this._castling.b = 0
-      this._castlingSymbols.bk = ''
-      this._castlingSymbols.bq = ''
     } else {
       countK = 0
       for (const c of !IS_XFEN ? 'K' : 'HGFEDCBA') {
         if (
           tokens[2].indexOf(c) > -1 &&
-          countK < Ox88.h1 - this._kings[WHITE]
+          countK < Ox88.h1 - KINGS[WHITE][KING].from
         ) {
           this._castling.w |= BITS.KSIDE_CASTLE
           this._castlingSymbols.wk = c
+          this._castlingSymbols.wkc = c
+          count++
           break
         }
         countK++
@@ -741,10 +744,12 @@ export class Chess {
       for (const c of !IS_XFEN ? 'Q' : 'ABCDEFGH') {
         if (
           tokens[2].indexOf(c) > -1 &&
-          countQ < this._kings[WHITE] - Ox88.a1
+          countQ < KINGS[WHITE][QUEEN].from - Ox88.a1
         ) {
           this._castling.w |= BITS.QSIDE_CASTLE
           this._castlingSymbols.wq = c
+          this._castlingSymbols.wqc = c
+          count++
           break
         }
         countQ++
@@ -753,10 +758,12 @@ export class Chess {
       for (const c of !IS_XFEN ? 'k' : 'hgfedcba') {
         if (
           tokens[2].indexOf(c) > -1 &&
-          countK < Ox88.h8 - this._kings[BLACK]
+          countK < Ox88.h8 - KINGS[BLACK][KING].from
         ) {
           this._castling.b |= BITS.KSIDE_CASTLE
           this._castlingSymbols.bk = c
+          this._castlingSymbols.bkc = c
+          count++
           break
         }
         countK++
@@ -765,15 +772,30 @@ export class Chess {
       for (const c of !IS_XFEN ? 'q' : 'abcdefgh') {
         if (
           tokens[2].indexOf(c) > -1 &&
-          countQ < this._kings[BLACK] - Ox88.a8
+          countQ < KINGS[BLACK][QUEEN].from - Ox88.a8
         ) {
           this._castling.b |= BITS.QSIDE_CASTLE
           this._castlingSymbols.bq = c
+          this._castlingSymbols.bqc = c
+          count++
           break
         }
         countQ++
       }
     }
+    if (count == 0) {
+      this._castling.w = 0
+      this._castlingSymbols.wk = ''
+      this._castlingSymbols.wkc = ''
+      this._castlingSymbols.wq = ''
+      this._castlingSymbols.wqc = ''
+      this._castling.b = 0
+      this._castlingSymbols.bk = ''
+      this._castlingSymbols.bkc = ''
+      this._castlingSymbols.bq = ''
+      this._castlingSymbols.bqc = ''
+    }
+
 
     this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
     this._halfMoves = parseInt(tokens[4], 10)
@@ -1020,6 +1042,7 @@ export class Chess {
       this._board[ROOKS[WHITE][QUEEN].from]?.color !== WHITE
     ) {
       this._castling.w &= ~BITS.QSIDE_CASTLE
+      this._castlingSymbols.wq = this._castling.w & BITS.QSIDE_CASTLE ? this._castlingSymbols.wqc : ''
     }
 
     if (
@@ -1028,6 +1051,7 @@ export class Chess {
       this._board[ROOKS[WHITE][KING].from]?.color !== WHITE
     ) {
       this._castling.w &= ~BITS.KSIDE_CASTLE
+      this._castlingSymbols.wq = this._castling.w & BITS.KSIDE_CASTLE ? this._castlingSymbols.wkc : ''
     }
 
     if (
@@ -1036,6 +1060,7 @@ export class Chess {
       this._board[ROOKS[BLACK][QUEEN].from]?.color !== BLACK
     ) {
       this._castling.b &= ~BITS.QSIDE_CASTLE
+      this._castlingSymbols.bq = this._castling.b & BITS.QSIDE_CASTLE ? this._castlingSymbols.bqc : ''
     }
 
     if (
@@ -1044,6 +1069,7 @@ export class Chess {
       this._board[ROOKS[BLACK][KING].from]?.color !== BLACK
     ) {
       this._castling.b &= ~BITS.KSIDE_CASTLE
+      this._castlingSymbols.bk = this._castling.b & BITS.KSIDE_CASTLE ? this._castlingSymbols.bkc : ''
     }
   }
 
