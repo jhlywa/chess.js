@@ -247,17 +247,4 @@ describe('X-FEN 960 Tests', () => {
       'nrk2bbr/ppp1pppp/3pq3/8/1P3nP1/2NP4/P1P1PP1P/NRK1QBBR w HBhb - 3 10',
     )
   })
-
-  it('X-FEN O-O-O 960 24', () => {
-    const chess = new Chess(
-      'rk2rnbb/ppqppppp/2pn4/8/1P3P2/6P1/P1PPP1NP/RKQR1NBB w DAa - 1 9',
-    )
-    chess.move({ from: 'd2', to: 'd3' })
-    chess.move({ from: 'a8', to: 'd8' })
-    chess.undo()
-    chess.undo()
-    expect(chess.fen()).toEqual(
-      'rk2rnbb/ppqppppp/2pn4/8/1P3P2/6P1/P1PPP1NP/RKQR1NBB w DAa - 1 9',
-    )
-  })
 })

@@ -1490,10 +1490,7 @@ export class Chess {
             castlingFrom + (KINGS[us][KING].to - KINGS[us][KING].from)
 
           const countAttacked = KINGS[us][KING].to - KINGS[us][KING].from
-          const countRookWay =
-            us == WHITE
-              ? ROOKS[us][KING].from - ROOKS[us][KING].to
-              : ROOKS[us][KING].to - ROOKS[us][KING].from
+          const countRookWay = ROOKS[us][KING].from - ROOKS[us][KING].to
 
           const countOccupied =
             Math.max(ROOKS[us][KING].from, KINGS[us][KING].to) -
@@ -1528,7 +1525,7 @@ export class Chess {
           ) {
             if (
               castlingTo > castlingFrom &&
-              noAttackedCount > Math.abs(countRookWay)
+              Math.abs(noAttackedCount) > Math.abs(countRookWay)
             ) {
               addMove(
                 moves,
@@ -1563,10 +1560,9 @@ export class Chess {
             castlingFrom - (KINGS[us][QUEEN].from - KINGS[us][QUEEN].to)
 
           const countAttacked = KINGS[us][QUEEN].from - KINGS[us][QUEEN].to
-          const countRookWay =
-            us == WHITE
-              ? ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from - 1
-              : ROOKS[us][QUEEN].from - ROOKS[us][QUEEN].to + 1
+
+          const countRookWay = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from - 1
+
           const countOccupied =
             KINGS[us][QUEEN].from -
             Math.min(ROOKS[us][QUEEN].from, KINGS[us][QUEEN].to)
@@ -1600,7 +1596,7 @@ export class Chess {
           ) {
             if (
               castlingFrom > castlingTo &&
-              noAttackedCount > Math.abs(countRookWay)
+              Math.abs(noAttackedCount) > Math.abs(countRookWay)
             ) {
               addMove(
                 moves,
