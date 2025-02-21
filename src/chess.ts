@@ -1477,7 +1477,11 @@ export class Chess {
      */
 
     if (forPiece === undefined || forPiece === KING) {
-      if (!singleSquare || lastSquare === this._kings[us]) {
+      if (
+        !singleSquare ||
+        lastSquare === undefined ||
+        lastSquare === this._kings[us]
+      ) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
           const castlingFrom = this._kings[us]
@@ -1518,10 +1522,7 @@ export class Chess {
             noAttacked &&
             noAttackedCount > 0
           ) {
-            if (
-              castlingTo > castlingFrom &&
-              Math.abs(noAttackedCount) > Math.abs(countRookWay)
-            ) {
+            if (castlingTo > castlingFrom && noAttackedCount > countRookWay) {
               addMove(
                 moves,
                 us,
@@ -1555,7 +1556,6 @@ export class Chess {
             castlingFrom - (KINGS[us][QUEEN].from - KINGS[us][QUEEN].to)
 
           const countAttacked = KINGS[us][QUEEN].from - KINGS[us][QUEEN].to
-
           const countRookWay = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from - 1
 
           const countOccupied =
@@ -1589,10 +1589,7 @@ export class Chess {
             noAttacked &&
             noAttackedCount > 0
           ) {
-            if (
-              castlingFrom > castlingTo &&
-              Math.abs(noAttackedCount) > Math.abs(countRookWay)
-            ) {
+            if (castlingFrom > castlingTo && noAttackedCount > countRookWay) {
               addMove(
                 moves,
                 us,
