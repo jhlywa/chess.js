@@ -982,14 +982,26 @@ export class Chess {
       }
     }
 
-    if (type === KING && !this._board[sq]) {
-      KINGS[color][KING].from = sq
-      KINGS[color][QUEEN].from = sq
-    }
-
     this._board[sq] = { type: type as PieceSymbol, color: color as Color }
 
     if (type === KING) {
+      if (this._kings[color] === EMPTY) {
+        if (color === BLACK) {
+          if (sq >= Ox88.a8 && sq <= Ox88.h8) {
+            KINGS[color][QUEEN].from = sq
+          }
+          if (sq >= Ox88.a8 && sq <= Ox88.h8) {
+            KINGS[color][KING].from = sq
+          }
+        } else {
+          if (sq >= Ox88.a1 && sq <= Ox88.h1) {
+            KINGS[color][QUEEN].from = sq
+          }
+          if (sq >= Ox88.a1 && sq <= Ox88.h1) {
+            KINGS[color][KING].from = sq
+          }
+        }
+      }
       this._kings[color] = sq
     }
 
@@ -1477,11 +1489,7 @@ export class Chess {
      */
 
     if (forPiece === undefined || forPiece === KING) {
-      if (
-        !singleSquare ||
-        lastSquare === undefined ||
-        lastSquare === this._kings[us]
-      ) {
+      if (!singleSquare || lastSquare === this._kings[us]) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
           const castlingFrom = this._kings[us]
@@ -1522,7 +1530,10 @@ export class Chess {
             noAttacked &&
             noAttackedCount > 0
           ) {
-            if (castlingTo > castlingFrom && noAttackedCount > countRookWay) {
+            if (
+              castlingTo > castlingFrom &&
+              noAttackedCount > Math.abs(countRookWay)
+            ) {
               addMove(
                 moves,
                 us,
@@ -1589,7 +1600,10 @@ export class Chess {
             noAttacked &&
             noAttackedCount > 0
           ) {
-            if (castlingFrom > castlingTo && noAttackedCount > countRookWay) {
+            if (
+              castlingFrom > castlingTo &&
+              noAttackedCount > Math.abs(countRookWay)
+            ) {
               addMove(
                 moves,
                 us,
