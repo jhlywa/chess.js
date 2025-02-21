@@ -1,4 +1,4 @@
-import { Chess } from '../src/chess'
+import { Chess, Square } from '../src/chess'
 import 'jest-extended'
 
 describe('X-FEN 960 Tests', () => {
@@ -245,6 +245,17 @@ describe('X-FEN 960 Tests', () => {
     chess.undo()
     expect(chess.fen()).toEqual(
       'nrk2bbr/ppp1pppp/3pq3/8/1P3nP1/2NP4/P1P1PP1P/NRK1QBBR w HBhb - 3 10',
+    )
+  })
+
+  it('X-FEN O-O-O 960 24', () => {
+    const chess = new Chess(
+      'nnrkbbrq/pppppppp/8/8/8/8/PPPPPPPP/NNRKBBRQ w GCgc - 0 1',
+    )
+    const moves = chess.moves({ square: 'g1', verbose: true })
+    expect(moves.length).toEqual(0)
+    expect(chess.fen()).toEqual(
+      'nnrkbbrq/pppppppp/8/8/8/8/PPPPPPPP/NNRKBBRQ w GCgc - 0 1',
     )
   })
 })

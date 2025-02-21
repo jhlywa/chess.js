@@ -1476,13 +1476,8 @@ export class Chess {
      *   b) doing single square move generation on the king's square
      */
 
-    if (forPiece === undefined || forPiece === KING || forPiece === ROOK) {
-      if (
-        !singleSquare ||
-        lastSquare === this._kings[us] ||
-        lastSquare === ROOKS[us][KING].from ||
-        lastSquare === ROOKS[us][QUEEN].from
-      ) {
+    if (forPiece === undefined || forPiece === KING) {
+      if (!singleSquare || lastSquare === this._kings[us]) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
           const castlingFrom = this._kings[us]
@@ -1892,7 +1887,6 @@ export class Chess {
 
     const fromCount = Math.abs(move.from - move.to)
     const fromPiece = this._board[move.from]
-    const toPiece = this._board[move.to]
     this._board[move.from] = this._board[move.to]
     if (this._board[move.from]) this._board[move.from].type = move.piece // to undo any promotions
     delete this._board[move.to]
