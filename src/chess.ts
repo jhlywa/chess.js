@@ -626,8 +626,8 @@ export class Chess {
   // tracks number of times a position has been seen for repetition checking
   private _positionCount: Record<string, number> = {}
 
-  constructor(fen = DEFAULT_POSITION) {
-    this.load(fen)
+  constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
+    this.load(fen, { skipValidation })
   }
 
   clear({ preserveHeaders = false } = {}) {

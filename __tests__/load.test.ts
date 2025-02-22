@@ -80,3 +80,22 @@ test('load - skipValidation = true', () => {
   const fen = '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQ1BN1 b - - 1 2'
   expect(() => chess.load(fen, { skipValidation: true })).not.toThrow()
 })
+
+test('Chess constructor - skipValidation = false', () => {
+  expect(() => {
+    // white king is missing from fen
+    const _chess = new Chess(
+      '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQ1BN1 b - - 1 2',
+    )
+  }).toThrowError()
+})
+
+test('Chess constructor - skipValidation = true', () => {
+  expect(() => {
+    // white king is missing from fen
+    const _chess = new Chess(
+      '1nbqkbn1/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/1NBQ1BN1 b - - 1 2',
+      { skipValidation: false },
+    )
+  }).toThrowError()
+})
