@@ -3250,6 +3250,7 @@ test('perft - 960 - position 542', () => {
   const chess = new Chess(
     'rn1qnbbr/pp2pppp/2ppk3/8/2PP4/3Q1N2/PP2PPPP/RNK2BBR w HA - 1 9',
   )
+  const moves = chess.moves()
   expect(chess.perft(1)).toBe(34)
 })
 test('perft - 960 - position 543', () => {
