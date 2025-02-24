@@ -648,8 +648,8 @@ export class Chess {
   // tracks number of times a position has been seen for repetition checking
   private _positionCount: Record<string, number> = {}
 
-  constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
-    this.load(fen, { skipValidation })
+  constructor(fen = DEFAULT_POSITION) {
+    this.load(fen)
   }
 
   clear({ preserveHeaders = false } = {}) {
@@ -1497,23 +1497,21 @@ export class Chess {
             castlingFrom + (KINGS[us][KING].to - KINGS[us][KING].from)
 
           const countAttacked = KINGS[us][KING].to - KINGS[us][KING].from
-          const ca = countAttacked >= 0
+          const countAttackedPositive = countAttacked >= 0
           const countRookWay = ROOKS[us][KING].from - ROOKS[us][KING].to
           const countOccupied =
             Math.max(ROOKS[us][KING].from, KINGS[us][KING].to) -
             KINGS[us][KING].from
-          const co = countOccupied >= 0
+          const countOccupiedPositive = countOccupied >= 0
 
           let noAttacked = true
           let noAttackedCount = 0
           for (
             let i = 0;
-            ca ? i <= countAttacked : i >= countAttacked;
-            ca ? ++i : --i
+            countAttackedPositive ? i <= countAttacked : i >= countAttacked;
+            countAttackedPositive ? ++i : --i
           ) {
-            if (
-              !this._attacked(them, ca ? castlingFrom + i : castlingFrom - i)
-            ) {
+            if (!this._attacked(them, castlingFrom + i)) {
               noAttackedCount++
             } else {
               noAttacked = false
@@ -1523,31 +1521,27 @@ export class Chess {
           let noOccupiedCount = 0
           for (
             let i = 1;
-            ca ? i <= countOccupied : i >= countOccupied;
-            ca ? ++i : --i
+            countAttackedPositive ? i <= countOccupied : i >= countOccupied;
+            countAttackedPositive ? ++i : --i
           ) {
-            const index = ca ? castlingFrom + i : castlingTo - i
-            if (
-              !this._board[index] ||
-              this._board[index].type === ROOK ||
-              this._board[index].type === ROOK
-            ) {
+            const index = castlingFrom + i
+            if (!this._board[index] || this._board[index].type === ROOK) {
               noOccupiedCount++
             } else {
               noOccupied = false
             }
           }
           if (
-            ca &&
-            co &&
+            countAttackedPositive &&
+            countOccupiedPositive &&
             noOccupied &&
             noOccupiedCount > 0 &&
             noAttacked &&
             noAttackedCount > 0
           ) {
             if (
-              ca &&
-              co &&
+              countAttackedPositive &&
+              countOccupiedPositive &&
               castlingTo > castlingFrom &&
               noAttackedCount > countRookWay
             ) {
@@ -1584,23 +1578,21 @@ export class Chess {
             castlingFrom - (KINGS[us][QUEEN].from - KINGS[us][QUEEN].to)
 
           const countAttacked = KINGS[us][QUEEN].from - KINGS[us][QUEEN].to
-          const ca = countAttacked >= 0
+          const countAttackedPositive = countAttacked >= 0
           const countRookWay = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from - 1
           const countOccupied =
             KINGS[us][QUEEN].from -
             Math.min(ROOKS[us][QUEEN].from, KINGS[us][QUEEN].to)
-          const co = countOccupied >= 0
+          const countOccupiedPositive = countOccupied >= 0
 
           let noAttacked = true
           let noAttackedCount = 0
           for (
             let i = 0;
-            ca ? i <= countAttacked : i >= countAttacked;
-            ca ? ++i : --i
+            countAttackedPositive ? i <= countAttacked : i >= countAttacked;
+            countAttackedPositive ? ++i : --i
           ) {
-            if (
-              !this._attacked(them, ca ? castlingFrom - i : castlingFrom + i)
-            ) {
+            if (!this._attacked(them, castlingFrom - i)) {
               noAttackedCount++
             } else {
               noAttacked = false
@@ -1610,31 +1602,27 @@ export class Chess {
           let noOccupiedCount = 0
           for (
             let i = 1;
-            ca ? i <= countOccupied : i >= countOccupied;
-            ca ? ++i : --i
+            countAttackedPositive ? i <= countOccupied : i >= countOccupied;
+            countAttackedPositive ? ++i : --i
           ) {
-            const index = ca ? castlingFrom - i : castlingTo + i
-            if (
-              !this._board[index] ||
-              this._board[index].type === ROOK ||
-              this._board[index].type === KING
-            ) {
+            const index = castlingFrom - i
+            if (!this._board[index] || this._board[index].type === ROOK) {
               noOccupiedCount++
             } else {
               noOccupied = false
             }
           }
           if (
-            ca &&
-            co &&
+            countAttackedPositive &&
+            countOccupiedPositive &&
             noOccupied &&
             noOccupiedCount > 0 &&
             noAttacked &&
             noAttackedCount > 0
           ) {
             if (
-              ca &&
-              co &&
+              countAttackedPositive &&
+              countOccupiedPositive &&
               castlingFrom > castlingTo &&
               noAttackedCount > countRookWay
             ) {
@@ -1763,6 +1751,7 @@ export class Chess {
     const them = swapColor(us)
     this._push(move)
 
+    const fromPiece = this._board[move.from]
     const toPiece = this._board[move.to]
     const toCount = Math.abs(move.to - move.from)
     this._board[move.to] = this._board[move.from]
