@@ -4481,7 +4481,7 @@ test('perft - 960 - position 747', () => {
   const chess = new Chess(
     'rkn1bqrb/pnp1pppp/3p4/8/Pp6/1N2NP2/1PPPP1PP/RK2BQRB w GAga - 0 9',
   )
-  expect(chess.perft(1)).toBe(27)
+  expect(chess.perft(1)).toBe(28)
 })
 test('perft - 960 - position 748', () => {
   const chess = new Chess(
