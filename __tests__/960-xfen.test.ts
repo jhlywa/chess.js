@@ -216,7 +216,7 @@ describe('X-FEN 960 Tests', () => {
       'nnrkbbrq/pppppppp/8/8/8/8/PPPPPPPP/NNRKBBRQ w GCgc - 0 1',
     )
     const moves = chess.moves({ square: 'g1', verbose: true })
-    expect(moves.length).toEqual(0)
+    expect(moves.length).toEqual(1)
     expect(chess.fen()).toEqual(
       'nnrkbbrq/pppppppp/8/8/8/8/PPPPPPPP/NNRKBBRQ w GCgc - 0 1',
     )
@@ -270,6 +270,16 @@ describe('X-FEN 960 Tests', () => {
     chess.move({ from: 'a8', to: 'd8' })
     expect(chess.fen()).toEqual(
       '2krbnqb/pprpppp1/4n2p/2p5/P7/3PN1NP/1PP1PPP1/RKR1B1QB w CA - 3 10',
+    )
+  })
+  it('X-FEN O-O 960 27', () => {
+    const chess = new Chess(
+      'qnbrnbkr/pppppppp/8/8/8/8/PPPPPPPP/QNBRNBKR w HDhd - 0 1',
+    )
+    chess.loadPgn('1. e3 a6 2. Be2 f6 3. d3 Kf7')
+    chess.move({ from: 'h1', to: 'f1' })
+    expect(chess.fen()).toEqual(
+      'qnbrnb1r/1ppppkpp/p4p2/8/8/3PP3/PPP1BPPP/QNBRNRK1 b - - 2 4',
     )
   })
 })
