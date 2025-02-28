@@ -102,15 +102,18 @@ export const DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K
 export const SQUARES = ['a8', 'b8', 'c8', ..., 'f1', 'g1', 'h1']
 ```
 
-### Constructor: Chess([ fen ], { skipValidation = false } = {})
+### Constructor: Chess([ fen ], { skipValidation = false, enable960 = false} = {})
 
 The Chess() constructor creates a new chess object that default to the initial
 board position. It accepts two optional parameters : a string which specifies
 the board configuration in
 [Forsyth-Edwards Notation (FEN)](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation),
-and an object with a `skipValidation` boolean. By default the constructor will
-throw an exception if an invalid FEN string is provided. This behavior can be
-skipped by setting the `skipValidation` boolean.
+and an object with a `skipValidation` boolean and/or an `enable960` boolean. By
+default the constructor will throw an exception if an invalid FEN string is
+provided. This behavior can be skipped by setting the `skipValidation` boolean.
+Setting `enable960` to `true`, enables Chess960 support. When Chess960 support
+is enabled, moving a king onto a rook with a castling-right will perform a
+kingside or queenside castle.
 
 ```ts
 import { Chess } from 'chess.js'
@@ -270,6 +273,18 @@ const chess = new Chess()
 
 chess.getCastlingRights(BLACK) // black can castle queenside only
 // -> { 'k': false, 'q': true }
+```
+
+### .getCastlingSquares(color)
+
+Returns the squares containing a rook that has a castling-right. If the
+castling-right for a rook no longer exists, an empty string is returned.
+
+```ts
+const chess = new Chess('2r2kr1/8/8/8/8/8/8/1K6 w q - 0 1', {enable960: true})
+
+chess.getCastlingSquares(BLACK)) // black can castle queenside only
+// -> { 'k': '', 'q': 'c8' }
 ```
 
 ### .getComment()
@@ -523,6 +538,12 @@ chess.move('Ng8')
 chess.isThreefoldRepetition()
 // -> true
 ```
+
+### .isVariantChess960()
+
+Returns `true` if Chess960 support has been enabled, otherwise, returns `false`.
+Chess960 support can be enabled either by the `enable960` property in the
+constructor or by the `setVariantChess960()` method.
 
 ### .load(fen: string, { skipValidation = false, preserveHeaders = false } = {})
 
@@ -926,6 +947,17 @@ chess.setHeader('Black', 'Mikhail Tal')
 // { 'White': 'Robert James Fischer', 'Black': 'Mikhail Tal' }
 ```
 
+### .setVariantChess960()
+
+Enables Chess960 support.
+
+```ts
+let chess = new Chess('2r2kr1/8/8/8/8/8/8/1K6 b q - 0 1', { enable960: true })
+chess.move('f8c8') // move black king onto queenside rook
+chess.fen()
+// -> '2kr2r1/8/8/8/8/8/8/1K6 w - - 1 2'
+```
+
 ### .squareColor(square)
 
 Returns the color of the square ('light' or 'dark').
@@ -983,10 +1015,23 @@ chess.undo()
 // -> null
 ```
 
-### validateFen(fen):
+### generateChess960Fen()
+
+This static function returns a random Chess960 position in FEN format. The
+standard starting position is a valid Chess960 position and may be returned.
+
+```ts
+import { generateChess960Fen } from 'chess.js'
+
+generateChess960Fen()
+// -> nbqrnkbr/pppppppp/8/8/8/8/PPPPPPPP/NBQRNKBR w KQkq - 0 1
+```
+
+### validateFen(fen, { enable960 = false } = {}):
 
 This static function returns a validation object specifying validity or the
-errors found within the FEN string.
+errors found within the FEN string. The `enable960` option allows the characters
+A-Ha-h to appear in the castling field of the FEN.
 
 ```ts
 import { validateFen } from 'chess.js'
