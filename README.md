@@ -196,26 +196,26 @@ const chess = new Chess()
 
 chess.board()
 // -> [[{square: 'a8', type: 'r', color: 'b'},
-        {square: 'b8', type: 'n', color: 'b'},
-        {square: 'c8', type: 'b', color: 'b'},
-        {square: 'd8', type: 'q', color: 'b'},
-        {square: 'e8', type: 'k', color: 'b'},
-        {square: 'f8', type: 'b', color: 'b'},
-        {square: 'g8', type: 'n', color: 'b'},
-        {square: 'h8', type: 'r', color: 'b'}],
-        [...],
-        [...],
-        [...],
-        [...],
-        [...],
-        [{square: 'a1', type: 'r', color: 'w'},
-         {square: 'b1', type: 'n', color: 'w'},
-         {square: 'c1', type: 'b', color: 'w'},
-         {square: 'd1', type: 'q', color: 'w'},
-         {square: 'e1', type: 'k', color: 'w'},
-         {square: 'f1', type: 'b', color: 'w'},
-         {square: 'g1', type: 'n', color: 'w'},
-         {square: 'h1', type: 'r', color: 'w'}]]
+//      {square: 'b8', type: 'n', color: 'b'},
+//      {square: 'c8', type: 'b', color: 'b'},
+//      {square: 'd8', type: 'q', color: 'b'},
+//      {square: 'e8', type: 'k', color: 'b'},
+//      {square: 'f8', type: 'b', color: 'b'},
+//      {square: 'g8', type: 'n', color: 'b'},
+//      {square: 'h8', type: 'r', color: 'b'}],
+//      [...],
+//      [...],
+//      [...],
+//      [...],
+//      [...],
+//      [{square: 'a1', type: 'r', color: 'w'},
+//       {square: 'b1', type: 'n', color: 'w'},
+//       {square: 'c1', type: 'b', color: 'w'},
+//       {square: 'd1', type: 'q', color: 'w'},
+//       {square: 'e1', type: 'k', color: 'w'},
+//       {square: 'f1', type: 'b', color: 'w'},
+//       {square: 'g1', type: 'n', color: 'w'},
+//       {square: 'h1', type: 'r', color: 'w'}]]
 ```
 
 ### .clear({ preserveHeaders = false } = {})
@@ -243,6 +243,23 @@ chess.move('f4')
 
 chess.fen()
 // -> 'rnbqkbnr/pppp1ppp/8/4p3/4PP2/8/PPPP2PP/RNBQKBNR b KQkq - 0 2'
+```
+
+### .findPiece(piece)
+
+Returns a list containing the squares where the requested piece is located.
+Returns an empty list if the piece is not on the board.
+
+```ts
+const chess = new Chess()
+
+chess.findPiece({ type: KING, color: BLACK })
+// -> ['e8']
+chess.findPiece({ type: BISHOP, color: WHITE })
+// -> ['c1', 'f1']
+chess.remove('d1')
+chess.findPiece({ type: QUEEN, color: WHITE })
+// -> []
 ```
 
 ### .get(square)
