@@ -272,6 +272,7 @@ describe('X-FEN 960 Tests', () => {
       '2krbnqb/pprpppp1/4n2p/2p5/P7/3PN1NP/1PP1PPP1/RKR1B1QB w CA - 3 10',
     )
   })
+
   it('X-FEN O-O 960 27', () => {
     const chess = new Chess(
       'qnbrnbkr/pppppppp/8/8/8/8/PPPPPPPP/QNBRNBKR w HDhd - 0 1',
@@ -281,5 +282,56 @@ describe('X-FEN 960 Tests', () => {
     expect(chess.fen()).toEqual(
       'qnbrnb1r/1ppppkpp/p4p2/8/8/3PP3/PPP1BPPP/QNBRNRK1 b - - 2 4',
     )
+  })
+
+  it('X-FEN O-O 960 28', () => {
+    const chess = new Chess(
+      'rnbkrbqn/p1pp1ppp/4p3/1p6/8/BPN3P1/P1PPPP1P/R2KRBQN w AEae - 2 9',
+    )
+    chess.loadPgn('9. Bh3 c6 10. Qg2 g6')
+    chess.move({ from: 'd1', to: 'g1' })
+    expect(chess.fen()).toEqual(
+      'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R4RKN b ea - 1 11',
+    )
+  })
+
+  it('X-FEN O-O 960 28', () => {
+    const chess = new Chess(
+      'rnbkrbqn/p1pp1ppp/4p3/1p6/8/BPN3P1/P1PPPP1P/R2KRBQN w AEae - 2 9',
+    )
+    chess.loadPgn('9. Bh3 c6 10. Qg2 g6')
+    expect(chess.moves().length).toBe(36)
+    chess.move({ from: 'd1', to: 'g1' })
+    expect(chess.fen()).toEqual(
+      'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R4RKN b ea - 1 11',
+    )
+  })
+
+  it('X-FEN O-O 960 29', () => {
+    const chess = new Chess(
+      'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R2KR2N w EAea - 0 11',
+    )
+    const moves = chess.moves()
+    expect(moves.length).toBe(36)
+    chess.move({ from: 'd1', to: 'g1' })
+    expect(chess.fen()).toEqual(
+      'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R4RKN b ea - 1 11',
+    )
+  })
+
+  it('X-FEN O-O 960 30', () => {
+    const chess = new Chess(
+      'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R2KR2N w EAea - 0 11',
+    )
+    const moves = chess.moves({ square: 'a1', piece: 'r' })
+    expect(moves.length).toBe(3)
+  })
+
+  it('X-FEN O-O 960 31', () => {
+    const chess = new Chess(
+      'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R2KR2N w EAea - 0 11',
+    )
+    const moves = chess.moves({ square: 'a1' })
+    expect(moves.length).toBe(3)
   })
 })

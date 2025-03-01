@@ -1545,6 +1545,7 @@ export class Chess {
             noAttackedCount > 0
           ) {
             if (
+              lastSquare != ROOKS[us][QUEEN].from &&
               countAttackedPositive &&
               countOccupiedPositive &&
               castlingTo > castlingFrom &&
@@ -1653,6 +1654,7 @@ export class Chess {
             noAttackedCount > 0
           ) {
             if (
+              lastSquare != ROOKS[us][QUEEN].from &&
               countAttackedPositive &&
               countOccupiedPositive &&
               castlingFrom > castlingTo &&
