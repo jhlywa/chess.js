@@ -1586,6 +1586,7 @@ export class Chess {
                 }
               }
               if (
+                lastSquare != KINGS[us][KING].from &&
                 (!this._board[ROOKS[us][KING].to] ||
                   this._board[ROOKS[us][KING].to].type === KING) &&
                 castlingFrom > castlingTo &&
@@ -1695,6 +1696,7 @@ export class Chess {
                 }
               }
               if (
+                lastSquare != KINGS[us][QUEEN].from &&
                 (!this._board[ROOKS[us][QUEEN].to] ||
                   this._board[ROOKS[us][QUEEN].to].type === KING) &&
                 castlingFrom > castlingTo &&

@@ -334,4 +334,12 @@ describe('X-FEN 960 Tests', () => {
     const moves = chess.moves({ square: 'a1' })
     expect(moves.length).toBe(3)
   })
+
+  it('X-FEN O-O 960 32', () => {
+    const chess = new Chess(
+      'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R2KR2N w EAea - 0 11',
+    )
+    const moves = chess.moves({ square: 'd1' })
+    expect(moves.length).toBe(2)
+  })
 })
