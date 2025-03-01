@@ -842,7 +842,8 @@ export class Chess {
     return this._board[Ox88[square]]
   }
 
-  getSquareByPiece(piece: Piece): Square | undefined {
+  findPiece(piece: Piece): Square[] {
+    const squares: Square[] = []
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       // did we run off the end of the board
       if (i & 0x88) {
@@ -860,11 +861,11 @@ export class Chess {
         this._board[i].color === piece.color &&
         this._board[i].type === piece.type
       ) {
-        return algebraic(i)
+        squares.push(algebraic(i))
       }
     }
 
-    return undefined
+    return squares
   }
 
   put(
