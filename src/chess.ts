@@ -1491,19 +1491,19 @@ export class Chess {
     if (forPiece === undefined || forPiece === KING || forPiece === ROOK) {
       if (
         !singleSquare ||
-        lastSquare === this._kings[us] ||
+        lastSquare === KINGS[us][KING].from ||
+        lastSquare === KINGS[us][QUEEN].from ||
         lastSquare === ROOKS[us][KING].from ||
         lastSquare === ROOKS[us][QUEEN].from
       ) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
-          const castlingFrom = this._kings[us]
-          const castlingTo =
-            castlingFrom + (KINGS[us][KING].to - KINGS[us][KING].from)
+          const castlingFrom = KINGS[us][KING].from
+          const castlingTo = KINGS[us][KING].to
 
           const countAttacked = KINGS[us][KING].to - KINGS[us][KING].from
           const countAttackedPositive = countAttacked >= 0
-          const countRookWay = ROOKS[us][KING].from - ROOKS[us][KING].to - 1
+          const countRookWay = ROOKS[us][KING].from - ROOKS[us][KING].to
           const countOccupied =
             Math.max(ROOKS[us][KING].from, KINGS[us][KING].to) -
             KINGS[us][KING].from
@@ -1537,8 +1537,6 @@ export class Chess {
             }
           }
           if (
-            countAttackedPositive &&
-            countOccupiedPositive &&
             noOccupied &&
             noOccupiedCount > 0 &&
             noAttacked &&
@@ -1549,7 +1547,7 @@ export class Chess {
               countAttackedPositive &&
               countOccupiedPositive &&
               castlingTo > castlingFrom &&
-              noAttackedCount > countRookWay
+              noAttackedCount >= countRookWay
             ) {
               addMove(
                 moves,
@@ -1609,13 +1607,12 @@ export class Chess {
 
         // queen-side castling
         if (this._castling[us] & BITS.QSIDE_CASTLE) {
-          const castlingFrom = this._kings[us]
-          const castlingTo =
-            castlingFrom - (KINGS[us][QUEEN].from - KINGS[us][QUEEN].to)
+          const castlingFrom = KINGS[us][QUEEN].from
+          const castlingTo = KINGS[us][QUEEN].to
 
           const countAttacked = KINGS[us][QUEEN].from - KINGS[us][QUEEN].to
           const countAttackedPositive = countAttacked >= 0
-          const countRookWay = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from - 1
+          const countRookWay = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from
           const countOccupied =
             KINGS[us][QUEEN].from -
             Math.min(ROOKS[us][QUEEN].from, KINGS[us][QUEEN].to)
@@ -1659,7 +1656,7 @@ export class Chess {
               countAttackedPositive &&
               countOccupiedPositive &&
               castlingFrom > castlingTo &&
-              noAttackedCount > countRookWay
+              noAttackedCount >= countRookWay
             ) {
               addMove(
                 moves,
@@ -1671,8 +1668,8 @@ export class Chess {
                 BITS.QSIDE_CASTLE,
               )
             } else {
-              const castlingFrom = ROOKS[us][QUEEN].to
-              const castlingTo = ROOKS[us][QUEEN].from
+              const castlingFrom = ROOKS[us][QUEEN].from
+              const castlingTo = ROOKS[us][QUEEN].to
               const countAttacked = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from
               const countAttackedPositive = countAttacked >= 0
               const countOccupied =
@@ -1688,7 +1685,7 @@ export class Chess {
                   : i >= countOccupied + 1;
                 countAttackedPositive ? ++i : --i
               ) {
-                const index = castlingTo + i
+                const index = castlingFrom + i
                 if (!this._board[index] || this._board[index].type === KING) {
                   noOccupiedCount++
                 } else {
@@ -1699,15 +1696,15 @@ export class Chess {
                 lastSquare != KINGS[us][QUEEN].from &&
                 (!this._board[ROOKS[us][QUEEN].to] ||
                   this._board[ROOKS[us][QUEEN].to].type === KING) &&
-                castlingFrom > castlingTo &&
+                castlingFrom < castlingTo &&
                 noOccupied &&
-                noOccupiedCount >= 0
+                noOccupiedCount > 0
               ) {
                 addMove(
                   moves,
                   us,
-                  ROOKS[us][QUEEN].from,
-                  ROOKS[us][QUEEN].to,
+                  castlingFrom,
+                  castlingTo,
                   ROOK,
                   undefined,
                   BITS.QSIDE_CASTLE,
