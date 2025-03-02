@@ -635,17 +635,21 @@ export class Chess {
   private _castling: Record<Color, number> = { w: 0, b: 0 }
   private _castlingSymbols: Record<string, string> = {
     wk: '',
+    wkc: '',
     wq: '',
+    wqc: '',
     bk: '',
+    bkc: '',
     bq: '',
+    bqc: '',
   }
   private _fen = ''
 
   // tracks number of times a position has been seen for repetition checking
   private _positionCount: Record<string, number> = {}
 
-  constructor(fen = DEFAULT_POSITION) {
-    this.load(fen)
+  constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
+    this.load(fen, { skipValidation })
   }
 
   clear({ preserveHeaders = false } = {}) {
@@ -674,8 +678,6 @@ export class Chess {
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
     let tokens = fen.split(/\s+/)
 
-    const is960 = !/[^abcdefghABCDEFGH-]/.test(tokens[2])
-
     // append commonly omitted fen tokens
     if (tokens.length >= 2 && tokens.length < 6) {
       const adjustments = ['-', '-', '0', '1']
@@ -683,6 +685,8 @@ export class Chess {
     }
 
     tokens = fen.split(/\s+/)
+
+    const IS_XFEN = !/[^abcdefghABCDEFGH-]/.test(tokens[2])
 
     if (!skipValidation) {
       const { ok, error } = validateFen(fen)
@@ -715,38 +719,63 @@ export class Chess {
 
     this._turn = tokens[1] as Color
 
-    let found = ''
-    for (const c of !is960 ? 'K' : 'HGFEDCBA') {
-      if (tokens[2].indexOf(c) > -1) {
-        found = c
-        this._castling.w |= BITS.KSIDE_CASTLE
-        this._castlingSymbols.wk = c
-        break
+    let countK = 0
+    let countQ = 0
+    if (tokens[2] === '-') {
+      this._castling.w = 0
+      this._castling.b = 0
+    } else {
+      countK = 0
+      for (const c of !IS_XFEN ? 'K' : 'HGFEDCBA') {
+        if (
+          tokens[2].indexOf(c) > -1 &&
+          countK <= Ox88.h1 - KINGS[WHITE][KING].from
+        ) {
+          this._castling.w |= BITS.KSIDE_CASTLE
+          this._castlingSymbols.wk = c
+          this._castlingSymbols.wkc = c
+          break
+        }
+        countK++
       }
-    }
-    for (const c of !is960 ? 'Q' : 'HGFEDCBA') {
-      if (c === found) continue
-      if (tokens[2].indexOf(c) > -1) {
-        this._castling.w |= BITS.QSIDE_CASTLE
-        this._castlingSymbols.wq = c
-        break
+      countQ = 0
+      for (const c of !IS_XFEN ? 'Q' : 'ABCDEFGH') {
+        if (
+          tokens[2].indexOf(c) > -1 &&
+          countQ <= KINGS[WHITE][QUEEN].from - Ox88.a1
+        ) {
+          this._castling.w |= BITS.QSIDE_CASTLE
+          this._castlingSymbols.wq = c
+          this._castlingSymbols.wqc = c
+          break
+        }
+        countQ++
       }
-    }
-    found = ''
-    for (const c of !is960 ? 'k' : 'hgfedcba') {
-      if (tokens[2].indexOf(c) > -1) {
-        found = c
-        this._castling.b |= BITS.KSIDE_CASTLE
-        this._castlingSymbols.bk = c
-        break
+      countK = 0
+      for (const c of !IS_XFEN ? 'k' : 'hgfedcba') {
+        if (
+          tokens[2].indexOf(c) > -1 &&
+          countK <= Ox88.h8 - KINGS[BLACK][KING].from
+        ) {
+          this._castling.b |= BITS.KSIDE_CASTLE
+          this._castlingSymbols.bk = c
+          this._castlingSymbols.bkc = c
+          break
+        }
+        countK++
       }
-    }
-    for (const c of !is960 ? 'q' : 'hgfedcba') {
-      if (c === found) continue
-      if (tokens[2].indexOf(c) > -1) {
-        this._castling.b |= BITS.QSIDE_CASTLE
-        this._castlingSymbols.bq = c
-        break
+      countQ = 0
+      for (const c of !IS_XFEN ? 'q' : 'abcdefgh') {
+        if (
+          tokens[2].indexOf(c) > -1 &&
+          countQ <= KINGS[BLACK][QUEEN].from - Ox88.a8
+        ) {
+          this._castling.b |= BITS.QSIDE_CASTLE
+          this._castlingSymbols.bq = c
+          this._castlingSymbols.bqc = c
+          break
+        }
+        countQ++
       }
     }
 
@@ -935,20 +964,45 @@ export class Chess {
       this._kings[currentPieceOnSquare.color] = EMPTY
     }
 
+    if (type === ROOK && !this._board[sq]) {
+      if (color === BLACK) {
+        if (sq >= Ox88.a8 && sq <= Ox88.e8 && EMPTY === this._kings[color]) {
+          ROOKS[color][QUEEN].from = sq
+        }
+        if (sq >= Ox88.c8 && sq <= Ox88.h8 && sq > this._kings[color]) {
+          ROOKS[color][KING].from = sq
+        }
+      } else {
+        if (sq >= Ox88.a1 && sq <= Ox88.e1 && EMPTY === this._kings[color]) {
+          ROOKS[color][QUEEN].from = sq
+        }
+        if (sq >= Ox88.c1 && sq <= Ox88.h1 && sq > this._kings[color]) {
+          ROOKS[color][KING].from = sq
+        }
+      }
+    }
+
     this._board[sq] = { type: type as PieceSymbol, color: color as Color }
 
     if (type === KING) {
-      this._kings[color] = sq
-      KINGS[color][KING].from = sq
-      KINGS[color][QUEEN].from = sq
-    }
-
-    if (type === ROOK) {
-      if (-1 == this._kings[color]) {
-        ROOKS[color][QUEEN].from = sq
-      } else {
-        ROOKS[color][KING].from = sq
+      if (this._kings[color] === EMPTY) {
+        if (color === BLACK) {
+          if (sq >= Ox88.a8 && sq <= Ox88.h8) {
+            KINGS[color][QUEEN].from = sq
+          }
+          if (sq >= Ox88.a8 && sq <= Ox88.h8) {
+            KINGS[color][KING].from = sq
+          }
+        } else {
+          if (sq >= Ox88.a1 && sq <= Ox88.h1) {
+            KINGS[color][QUEEN].from = sq
+          }
+          if (sq >= Ox88.a1 && sq <= Ox88.h1) {
+            KINGS[color][KING].from = sq
+          }
+        }
       }
+      this._kings[color] = sq
     }
 
     return true
@@ -982,6 +1036,8 @@ export class Chess {
       this._board[ROOKS[WHITE][QUEEN].from]?.color !== WHITE
     ) {
       this._castling.w &= ~BITS.QSIDE_CASTLE
+      this._castlingSymbols.wq =
+        this._castling.w & BITS.QSIDE_CASTLE ? this._castlingSymbols.wqc : ''
     }
 
     if (
@@ -990,6 +1046,8 @@ export class Chess {
       this._board[ROOKS[WHITE][KING].from]?.color !== WHITE
     ) {
       this._castling.w &= ~BITS.KSIDE_CASTLE
+      this._castlingSymbols.wq =
+        this._castling.w & BITS.KSIDE_CASTLE ? this._castlingSymbols.wkc : ''
     }
 
     if (
@@ -998,6 +1056,8 @@ export class Chess {
       this._board[ROOKS[BLACK][QUEEN].from]?.color !== BLACK
     ) {
       this._castling.b &= ~BITS.QSIDE_CASTLE
+      this._castlingSymbols.bq =
+        this._castling.b & BITS.QSIDE_CASTLE ? this._castlingSymbols.bqc : ''
     }
 
     if (
@@ -1006,6 +1066,8 @@ export class Chess {
       this._board[ROOKS[BLACK][KING].from]?.color !== BLACK
     ) {
       this._castling.b &= ~BITS.KSIDE_CASTLE
+      this._castlingSymbols.bk =
+        this._castling.b & BITS.KSIDE_CASTLE ? this._castlingSymbols.bkc : ''
     }
   }
 
@@ -1426,107 +1488,228 @@ export class Chess {
      *   b) doing single square move generation on the king's square
      */
 
-    if (forPiece === undefined || forPiece === KING) {
-      if (!singleSquare || lastSquare === this._kings[us]) {
+    if (forPiece === undefined || forPiece === KING || forPiece === ROOK) {
+      if (
+        !singleSquare ||
+        lastSquare === KINGS[us][KING].from ||
+        lastSquare === KINGS[us][QUEEN].from ||
+        lastSquare === ROOKS[us][KING].from ||
+        lastSquare === ROOKS[us][QUEEN].from
+      ) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
-          const castlingFrom = this._kings[us]
-          const castlingTo =
-            castlingFrom + KINGS[us][KING].to - KINGS[us][KING].from
+          const castlingFrom = KINGS[us][KING].from
+          const castlingTo = KINGS[us][KING].to
 
-          if (castlingTo != castlingFrom) {
-            const countAttacked = KINGS[us][KING].to - KINGS[us][KING].from
-            const countOccupied =
-              Math.max(ROOKS[us][KING].from, KINGS[us][KING].to) -
-              KINGS[us][KING].from
+          const countAttacked = KINGS[us][KING].to - KINGS[us][KING].from
+          const countAttackedPositive = countAttacked >= 0
+          const countRookWay = ROOKS[us][KING].from - ROOKS[us][KING].to
+          const countOccupied =
+            Math.max(ROOKS[us][KING].from, KINGS[us][KING].to) -
+            KINGS[us][KING].from
+          const countOccupiedPositive = countOccupied >= 0
 
-            let noAttacked = true
-            let noAttackedCount = 0
-            for (let i = 0; i <= countAttacked; ++i) {
-              if (!this._attacked(them, castlingFrom + i)) {
-                noAttackedCount++
-              } else {
-                noAttacked = false
-              }
+          let noAttacked = true
+          let noAttackedCount = 0
+          for (
+            let i = 0;
+            countAttackedPositive ? i <= countAttacked : i >= countAttacked;
+            countAttackedPositive ? ++i : --i
+          ) {
+            if (!this._attacked(them, castlingFrom + i)) {
+              noAttackedCount++
+            } else {
+              noAttacked = false
             }
-            let noOccupied = true
-            let noOccupiedCount = 0
-            for (let i = 1; i <= countOccupied; ++i) {
-              if (
-                !this._board[castlingFrom + i] ||
-                this._board[castlingFrom + i].type === ROOK
-              ) {
-                noOccupiedCount++
-              } else {
-                noOccupied = false
-              }
+          }
+          let noOccupied = true
+          let noOccupiedCount = 0
+          for (
+            let i = 1;
+            countAttackedPositive ? i <= countOccupied : i >= countOccupied;
+            countAttackedPositive ? ++i : --i
+          ) {
+            const index = castlingFrom + i
+            if (!this._board[index] || this._board[index].type === ROOK) {
+              noOccupiedCount++
+            } else {
+              noOccupied = false
             }
+          }
+          if (
+            noOccupied &&
+            noOccupiedCount > 0 &&
+            noAttacked &&
+            noAttackedCount > 0
+          ) {
             if (
-              noOccupied &&
-              noOccupiedCount > 0 &&
-              noAttacked &&
-              noAttackedCount > 0
+              lastSquare != ROOKS[us][QUEEN].from &&
+              countAttackedPositive &&
+              countOccupiedPositive &&
+              castlingTo > castlingFrom &&
+              noAttackedCount >= countRookWay
             ) {
               addMove(
                 moves,
                 us,
-                this._kings[us],
+                castlingFrom,
                 castlingTo,
                 KING,
                 undefined,
                 BITS.KSIDE_CASTLE,
               )
+            } else {
+              const castlingFrom = ROOKS[us][KING].from
+              const castlingTo = ROOKS[us][KING].to
+              const countAttacked = ROOKS[us][KING].from - ROOKS[us][KING].to
+              const countAttackedPositive = countAttacked >= 0
+              const countOccupied =
+                ROOKS[us][KING].from -
+                Math.min(KINGS[us][KING].from, ROOKS[us][KING].to)
+
+              let noOccupied = true
+              let noOccupiedCount = 0
+              for (
+                let i = 1;
+                countAttackedPositive
+                  ? i <= countOccupied - 1
+                  : i >= countOccupied + 1;
+                countAttackedPositive ? ++i : --i
+              ) {
+                const index = castlingFrom + i
+                if (!this._board[index] || this._board[index].type === KING) {
+                  noOccupiedCount++
+                } else {
+                  noOccupied = false
+                }
+              }
+              if (
+                lastSquare != KINGS[us][KING].from &&
+                (!this._board[ROOKS[us][KING].to] ||
+                  this._board[ROOKS[us][KING].to].type === KING) &&
+                castlingFrom > castlingTo &&
+                noOccupied &&
+                noOccupiedCount >= 0
+              ) {
+                addMove(
+                  moves,
+                  us,
+                  ROOKS[us][KING].from,
+                  ROOKS[us][KING].to,
+                  ROOK,
+                  undefined,
+                  BITS.KSIDE_CASTLE,
+                )
+              }
             }
           }
         }
 
         // queen-side castling
         if (this._castling[us] & BITS.QSIDE_CASTLE) {
-          const castlingFrom = this._kings[us]
-          const castlingTo =
-            castlingFrom - (KINGS[us][QUEEN].from - KINGS[us][QUEEN].to)
-          if (castlingTo != castlingFrom) {
-            const countAttacked = KINGS[us][QUEEN].from - KINGS[us][QUEEN].to
-            const countOccupied =
-              KINGS[us][QUEEN].from -
-              Math.min(ROOKS[us][QUEEN].from, KINGS[us][QUEEN].to)
+          const castlingFrom = KINGS[us][QUEEN].from
+          const castlingTo = KINGS[us][QUEEN].to
 
-            let noAttacked = true
-            let noAttackedCount = 0
-            for (let i = 0; i <= countAttacked; ++i) {
-              if (!this._attacked(them, castlingFrom - i)) {
-                noAttackedCount++
-              } else {
-                noAttacked = false
-              }
+          const countAttacked = KINGS[us][QUEEN].from - KINGS[us][QUEEN].to
+          const countAttackedPositive = countAttacked >= 0
+          const countRookWay = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from
+          const countOccupied =
+            KINGS[us][QUEEN].from -
+            Math.min(ROOKS[us][QUEEN].from, KINGS[us][QUEEN].to)
+          const countOccupiedPositive = countOccupied >= 0
+
+          let noAttacked = true
+          let noAttackedCount = 0
+          for (
+            let i = 0;
+            countAttackedPositive ? i <= countAttacked : i >= countAttacked;
+            countAttackedPositive ? ++i : --i
+          ) {
+            if (!this._attacked(them, castlingFrom - i)) {
+              noAttackedCount++
+            } else {
+              noAttacked = false
             }
-            let noOccupied = true
-            let noOccupiedCount = 0
-            for (let i = 1; i <= countOccupied; ++i) {
-              if (
-                !this._board[castlingFrom - i] ||
-                this._board[castlingFrom - i].type === ROOK
-              ) {
-                noOccupiedCount++
-              } else {
-                noOccupied = false
-              }
+          }
+          let noOccupied = true
+          let noOccupiedCount = 0
+          for (
+            let i = 1;
+            countAttackedPositive ? i <= countOccupied : i >= countOccupied;
+            countAttackedPositive ? ++i : --i
+          ) {
+            const index = castlingFrom - i
+            if (!this._board[index] || this._board[index].type === ROOK) {
+              noOccupiedCount++
+            } else {
+              noOccupied = false
             }
+          }
+          if (
+            noOccupied &&
+            noOccupiedCount > 0 &&
+            noAttacked &&
+            noAttackedCount > 0
+          ) {
             if (
-              noOccupied &&
-              noOccupiedCount > 0 &&
-              noAttacked &&
-              noAttackedCount > 0
+              lastSquare != ROOKS[us][QUEEN].from &&
+              countAttackedPositive &&
+              countOccupiedPositive &&
+              castlingFrom > castlingTo &&
+              noAttackedCount >= countRookWay
             ) {
               addMove(
                 moves,
                 us,
-                this._kings[us],
+                castlingFrom,
                 castlingTo,
                 KING,
                 undefined,
                 BITS.QSIDE_CASTLE,
               )
+            } else {
+              const castlingFrom = ROOKS[us][QUEEN].from
+              const castlingTo = ROOKS[us][QUEEN].to
+              const countAttacked = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from
+              const countAttackedPositive = countAttacked >= 0
+              const countOccupied =
+                ROOKS[us][QUEEN].to -
+                Math.min(KINGS[us][QUEEN].from, ROOKS[us][QUEEN].from)
+
+              let noOccupied = true
+              let noOccupiedCount = 0
+              for (
+                let i = 1;
+                countAttackedPositive
+                  ? i <= countOccupied - 1
+                  : i >= countOccupied + 1;
+                countAttackedPositive ? ++i : --i
+              ) {
+                const index = castlingFrom + i
+                if (!this._board[index] || this._board[index].type === KING) {
+                  noOccupiedCount++
+                } else {
+                  noOccupied = false
+                }
+              }
+              if (
+                lastSquare != KINGS[us][QUEEN].from &&
+                (!this._board[ROOKS[us][QUEEN].to] ||
+                  this._board[ROOKS[us][QUEEN].to].type === KING) &&
+                castlingFrom < castlingTo &&
+                noOccupied &&
+                noOccupiedCount > 0
+              ) {
+                addMove(
+                  moves,
+                  us,
+                  castlingFrom,
+                  castlingTo,
+                  ROOK,
+                  undefined,
+                  BITS.QSIDE_CASTLE,
+                )
+              }
             }
           }
         }
@@ -1650,13 +1833,11 @@ export class Chess {
     }
 
     // if we moved the king
-    if (this._board[move.to] && this._board[move.to].type === KING) {
+    if (move.piece === KING) {
       this._kings[us] = move.to
-
       // if we castled, move the rook next to the king
       if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
         let castlingTo: number, castlingFrom: number
-
         if (move.flags & BITS.KSIDE_CASTLE) {
           castlingTo = ROOKS[us][KING].to
           castlingFrom = ROOKS[us][KING].from
@@ -1687,9 +1868,41 @@ export class Chess {
           }
         }
       }
-
       // turn off castling
       this._castling[us] = 0
+    }
+
+    // if we moved the rook
+    if (move.piece === ROOK) {
+      // if we castled, move the king next to the rook
+      if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+        let castlingTo: number, castlingFrom: number
+        if (move.flags & BITS.KSIDE_CASTLE) {
+          castlingTo = KINGS[us][KING].to
+          castlingFrom = KINGS[us][KING].from
+        } else {
+          castlingTo = KINGS[us][QUEEN].to
+          castlingFrom = KINGS[us][QUEEN].from
+        }
+        if (this._board[castlingTo]) {
+          delete this._board[castlingTo]
+        }
+        if (toPiece && toPiece.type === KING) {
+          this._board[castlingTo] = toPiece
+        } else {
+          delete this._board[castlingFrom]
+          this._board[castlingTo] = {
+            type: KING as PieceSymbol,
+            color: us as Color,
+          }
+          this._kings[us] = castlingTo
+        }
+        if (toPiece && toPiece.type === KING) {
+          this._board[castlingTo] = toPiece
+        }
+        // turn off castling
+        this._castling[us] = 0
+      }
     }
 
     // turn off castling if we move a rook
@@ -1795,34 +2008,69 @@ export class Chess {
       }
     }
 
-    if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-      let castlingTo: number, castlingFrom: number
-      if (move.flags & BITS.KSIDE_CASTLE) {
-        castlingTo = ROOKS[us][KING].from
-        castlingFrom = ROOKS[us][KING].to
-      } else {
-        castlingTo = ROOKS[us][QUEEN].from
-        castlingFrom = ROOKS[us][QUEEN].to
+    // if we moved the king
+    if (move.piece === KING) {
+      this._kings[us] = move.from
+
+      if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+        let castlingTo: number, castlingFrom: number
+        if (move.flags & BITS.KSIDE_CASTLE) {
+          castlingTo = ROOKS[us][KING].from
+          castlingFrom = ROOKS[us][KING].to
+        } else {
+          castlingTo = ROOKS[us][QUEEN].from
+          castlingFrom = ROOKS[us][QUEEN].to
+        }
+        if (castlingFrom != castlingTo) {
+          const fromCastlingPiece = this._board[castlingFrom]
+          this._board[castlingTo] = this._board[castlingFrom]
+          delete this._board[castlingFrom]
+          if (
+            fromCount >= 1 &&
+            fromCastlingPiece &&
+            fromCastlingPiece.type === KING
+          ) {
+            this._board[move.from] = fromCastlingPiece
+          }
+          if (
+            fromCount >= 1 &&
+            fromCastlingPiece &&
+            fromCastlingPiece.type === ROOK
+          ) {
+            this._board[castlingTo] = fromCastlingPiece
+          }
+          if (fromCount >= 1 && fromPiece && fromPiece.type === ROOK) {
+            this._board[castlingTo] = fromPiece
+          }
+        }
       }
-      if (castlingFrom != castlingTo) {
-        const fromCastlingPiece = this._board[castlingFrom]
-        this._board[castlingTo] = this._board[castlingFrom]
-        delete this._board[castlingFrom]
-        if (
-          fromCount >= 1 &&
-          fromCastlingPiece &&
-          fromCastlingPiece.type === KING
-        ) {
-          this._board[move.from] = fromCastlingPiece
+    }
+
+    // if we moved the rook
+    if (move.piece === ROOK) {
+      // if we castled, move the king next to the rook
+      if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+        let castlingTo: number, castlingFrom: number
+        if (move.flags & BITS.KSIDE_CASTLE) {
+          castlingTo = KINGS[us][KING].from
+          castlingFrom = KINGS[us][KING].to
+        } else {
+          castlingTo = KINGS[us][QUEEN].from
+          castlingFrom = KINGS[us][QUEEN].to
         }
-        if (
-          fromCount >= 1 &&
-          fromCastlingPiece &&
-          fromCastlingPiece.type === ROOK
-        ) {
-          this._board[castlingTo] = fromCastlingPiece
+        if (this._board[castlingFrom]) {
+          delete this._board[castlingFrom]
         }
-        if (fromCount >= 1 && fromPiece && fromPiece.type === ROOK) {
+        if (fromPiece && fromPiece.type === KING) {
+          this._board[move.from] = fromPiece
+        } else {
+          this._board[castlingTo] = {
+            type: KING as PieceSymbol,
+            color: us as Color,
+          }
+          this._kings[us] = castlingTo
+        }
+        if (fromPiece && fromPiece.type === KING) {
           this._board[castlingTo] = fromPiece
         }
       }
