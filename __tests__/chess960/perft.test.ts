@@ -1,12 +1,14 @@
 import { Chess } from '../../src/chess'
 // Data for exercising perft().
 
-// The table below contains every Chess960 starting position after nine random
-// moves were made (which resulted in the FENS shown in the table). The six
-// fields following each FEN string are the number of nodes generated when
-// searching to the indicated depth. The default search depth for testing is 2.
-// If you have the time and processing power, the depth can be increased.
-// Source of data https://www.chessprogramming.org/Chess960_Perft_Results
+/**
+ * The table below contains every Chess960 starting position after nine random
+ * moves were made (which resulted in the FENs shown in the table). The six
+ * fields following each FEN string are the number of nodes generated when
+ * searching to the indicated depth. The default search depth for testing is 2.
+ * If you have the time and processing power, the depth can be increased.
+ * Source of data https://www.chessprogramming.org/Chess960_Perft_Results
+ */
 
 // Fields: #   FEN(6 tokens)   Depth1   Depth2   Depth3   Depth4   Depth5   Depth6
 const perftData = `
@@ -974,26 +976,62 @@ const perftData = `
   .trim()
   .split('\n')
 
-/**
- * Edit DEPTH as needed.
- *    Depth of 2 takes about five seconds to test all 960 positions.
- *    Depth of 3 takes about a minute to test all 960 positions.
- *    Depth of 4 takes about twenty minutes to test all 960 positions.
- *    Depth of 5 takes about thirty seconds to test a single position.
- *    Depth of 6 takes about thirty minutes to test a single position.
- */
-const DEPTH = 2
+// Parse the '--perft' command-line parameter.
+const [argDepth, argBeg, argNum] = (
+  process.argv.filter((arg) => arg.startsWith('--perft'))[0] || ''
+)
+  .substring('--perft='.length)
+  .split(',')
+  .map((str) => parseInt(str))
 
-// Edit BEG and END as needed to restrict the number of positions to test.
-const BEG = 0
-const END = BEG + 960
+// Restrict a value beteen a min and max, inclusive.
+const clampVal = (val: number, min: number, max: number) => {
+  return Math.min(Math.max(val, min), max)
+}
+
+/**
+ * Edit defaultDepth, defaultBeg, defaultNum as needed.
+ *   defaultDepth   The value that is passed to perft() function.
+ *   defaultBeg     The starting position number to run.
+ *   defaultNum     The number of positions to run.
+ *
+ * The default values can be overridden with the --perft command-line parameter:
+ *    npm test -- __tests__/chess960/perft.test.ts --perft=DEPTH,BEG,NUM
+ *
+ * Examples of the --perft parameter:
+ *    --perft=4       Run all positions at depth 4.
+ *    --perft=,,9     Run first nine positions.
+ *    --perft=,28,3   Run positions 28, 29, 30.
+ *    --preft=6,45,1  Run position 45 at depth 6.
+ *
+ * DEPTH of 2 takes about five seconds to test all 960 positions.
+ * DEPTH of 3 takes about a minute to test all 960 positions.
+ * DEPTH of 4 takes about twenty minutes to test all 960 positions.
+ * DEPTH of 5 takes about thirty seconds to test a single position.
+ * DEPTH of 6 takes about thirty minutes to test a single position.
+ */
+
+const defaultDepth = 2
+const defaultBeg = 1
+const defaultNum = perftData.length
+
+const DEPTH = clampVal(argDepth || defaultDepth, 1, 6)
+const BEG_TEST_NUM = clampVal(argBeg || defaultBeg, 1, defaultNum)
+const END_TEST_NUM = clampVal(
+  BEG_TEST_NUM + (argNum || defaultNum) - 1,
+  1,
+  defaultNum,
+)
 
 describe(
-  'run perft at depth ' + DEPTH + ' for positions ' + BEG + ' to ' + END,
+  'run perft at depth ' +
+    DEPTH +
+    ' for positions ' +
+    BEG_TEST_NUM +
+    ' to ' +
+    END_TEST_NUM,
   () => {
-    for (let i = 0; i < perftData.length; i++) {
-      if (i < BEG || i >= END) continue
-
+    for (let i = BEG_TEST_NUM - 1; i < END_TEST_NUM; i++) {
       test('testing position ' + (i + 1), () => {
         const line = perftData[i]
 
