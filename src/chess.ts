@@ -1594,8 +1594,8 @@ export class Chess {
                 addMove(
                   moves,
                   us,
-                  ROOKS[us][KING].from,
-                  ROOKS[us][KING].to,
+                  castlingFrom,
+                  castlingTo,
                   ROOK,
                   undefined,
                   BITS.KSIDE_CASTLE,
