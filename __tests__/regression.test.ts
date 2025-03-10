@@ -39,7 +39,7 @@ describe('Regression Tests', () => {
       '1. Rh6#',
     ]
     chess.loadPgn(pgn.join('\n'))
-    expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1')
+    expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b - - 1 1')
   })
 
   it('Github Issue #85 (black) - SetUp and FEN should be accepted in loadPgn', () => {
@@ -52,7 +52,7 @@ describe('Regression Tests', () => {
     ]
     chess.loadPgn(pgn.join('\n'))
     expect(chess.fen()).toBe(
-      'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2',
+      'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w - - 1 2',
     )
   })
 
