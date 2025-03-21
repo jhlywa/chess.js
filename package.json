@@ -15,7 +15,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint src/ --ext .ts",
-    "test": "vitest"
+    "test": "vitest --ui"
   },
   "repository": {
     "type": "git",
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
+    "@vitest/ui": "^3.0.9",
     "dedent": "^1.5.3",
     "eslint": "^8.12.0",
     "prettier": "^3.1.0",
