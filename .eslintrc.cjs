@@ -27,6 +27,5 @@ module.exports = {
         format: ['PascalCase'],
       },
     ],
-    'multiline-comment-style': ['error', 'starred-block'],
   },
-}
+};
