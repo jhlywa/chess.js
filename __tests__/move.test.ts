@@ -295,3 +295,17 @@ test('move - works - queenside castling', () => {
     expect(chess.fen()).toEqual(next)
   }
 })
+
+test('move - works - ambiguous capitalization in move notation', () => {
+  /*
+   * Some positions and moves may be ambiguous when using the permissive
+   * parser. For example, in this position: ,
+   * the move b1c3 may be interpreted as Nc3 or B1c3 (a disambiguated bishop
+   * move). In these cases, the permissive parser will default to the most
+   * basic interpretation (which is b1c3 parsing to Nc3).
+   */
+  const chess = new Chess('6k1/8/8/B7/8/8/8/BN4K1 w - - 0 1')
+  const move = chess.move('b1c3')
+  expect(move.san).not.toEqual('B1c3')
+  expect(move.san).toEqual('Nc3')
+})

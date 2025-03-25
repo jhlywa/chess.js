@@ -1,4 +1,4 @@
-import { Chess } from '../src/chess'
+import { BLACK, Chess, WHITE } from '../src/chess'
 import { split, fileToString } from './utils'
 
 describe('PGN', () => {
@@ -104,6 +104,43 @@ describe('PGN', () => {
     expect(chess.header()).toEqual(chess2.header())
   })
 
+  test('pgn - works - begins on correct turn - black', () => {
+    const chess = new Chess()
+    chess.loadPgn('1. e4')
+    expect(chess.turn()).toBe(BLACK)
+  })
+
+  test('pgn - works - begins on correct turn - white', () => {
+    const chess = new Chess()
+    chess.loadPgn('1. e4 e5')
+    expect(chess.turn()).toBe(WHITE)
+  })
+
+  test('pgn - works - begins on correct turn when empty', () => {
+    const chess = new Chess()
+    const pgn = `
+  [White "LichessAborter"]
+  [Black "PoorSap"]
+
+*`
+    chess.loadPgn(pgn)
+    expect(chess.turn()).toBe(WHITE)
+  })
+
+  test('pgn - works - supports removing non-existent header', () => {
+    const chess = new Chess()
+    const pgn = `
+  [White "LichessAborter"]
+  [Black "PoorSap"]
+
+  *`
+
+    chess.loadPgn(pgn)
+
+    const exists = chess.removeHeader('Non-existent')
+    expect(exists).toEqual(false)
+  })
+
   positions.forEach((position, i) => {
     it(`Postion: ${i}`, () => {
       const chess = new Chess()
@@ -119,6 +156,11 @@ describe('PGN', () => {
 
       // verify the fen in the final position
       expect(chess.fen()).toBe(position.fen)
+
+      // verify expected number of moves
+      const expectedMoves =
+        Math.floor(position.moves.split(/\s+/).length / 2) + 1
+      expect(chess.moveNumber()).toEqual(expectedMoves)
 
       chess.header(...position.header)
 
