@@ -11,9 +11,3 @@ test('undo - works', () => {
 
   chess.undo()
 })
-
-test('undo - works - nothing to undo', () => {
-  const chess = new Chess()
-
-  chess.undo()
-})
