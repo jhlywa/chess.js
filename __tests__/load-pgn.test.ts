@@ -253,6 +253,34 @@ test('loadPgn - works - FEN and SetUp tag', () => {
   expect(chess.fen()).toEqual(fen)
 })
 
+test('loadPgn - strict - SetUp tag requires FEN tag', () => {
+  const chess = new Chess()
+  const pgn = `
+[White "Paul Morphy"]
+[Black "Duke Karl / Count Isouard"]
+[SetUp "1"]
+
+17.Rd8# 1-0`
+
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrow(
+    'Invalid PGN: FEN tag must be supplied with SetUp tag',
+  )
+})
+
+test('loadPgn - strict - FEN and SetUp tag', () => {
+  const chess = new Chess()
+  const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
+  const pgn = `
+[White "Paul Morphy"]
+[Black "Duke Karl / Count Isouard"]
+[SetUp "1"]
+[FEN "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]
+
+17.Rd8# 1-0`
+  chess.loadPgn(pgn, { strict: true })
+  expect(chess.fen()).toEqual(fen)
+})
+
 test("loadPgn - works - prunes numeric annotation glyphs (NAG's)", () => {
   const chess = new Chess()
   const fen = 'r2r2k1/5pp1/p1p2q2/PpP1p3/1PnbP2p/5R2/2Q1BPPP/2B2RK1 b - - 3 27'
