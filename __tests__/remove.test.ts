@@ -1,17 +1,48 @@
-import {
-  Chess,
-  Square,
-  QUEEN,
-  WHITE,
-  KNIGHT,
-  BISHOP,
-  BLACK,
-} from '../src/chess'
+import { Chess, Square, QUEEN, WHITE } from '../src/chess'
 
 test('remove - returns piece', () => {
   const chess = new Chess()
   expect(chess.remove('d1')).toEqual({ type: QUEEN, color: WHITE })
   expect(chess.get('d1')).toEqual(undefined)
+})
+
+test('remove - reaching initial position deletes setup headers', () => {
+  const chess = new Chess()
+  chess.loadPgn(`[SetUp "1"]
+    [FEN "rnbqkbnr/pppppppp/p7/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]
+
+*`)
+
+  chess.remove('a6')
+
+  const headers = chess.getHeaders()
+  expect(headers['Setup']).toBeUndefined()
+  expect(headers['FEN']).toBeUndefined()
+})
+
+test('remove - if a move has been made, reaching initial position does not delete setup headers', () => {
+  const chess = new Chess()
+  chess.loadPgn(`[SetUp "1"]
+    [FEN "rnbqkbnr/pppppppp/p7/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]
+
+*`)
+
+  // Shuffle the knights
+  chess.move('Nf3')
+  chess.move('Nf6')
+  chess.move('Ng1')
+  chess.move('Ng8')
+
+  // Reach the initial position.
+  chess.remove('a6')
+
+  /**
+   * The FEN header should not have been deleted despite reach
+   * initial position. However, Setup header may have been deleted
+   * unrelatedly.
+   */
+  const headers = chess.getHeaders()
+  expect(headers['FEN']).toBeDefined()
 })
 
 test('remove - returns undefined for empty square', () => {
