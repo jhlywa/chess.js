@@ -121,3 +121,42 @@ test('remove - removing white pawn clears black en passant square 2', () => {
   chess.remove('b5')
   expect(chess.moves()).not.toContain('bxc6')
 })
+
+test('remove - reaching initial position deletes setup headers', () => {
+  const chess = new Chess()
+  chess.loadPgn(`[SetUp "1"]
+    [FEN "rnbqkbnr/pppppppp/p7/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]
+
+*`)
+
+  chess.remove('a6')
+
+  const headers = chess.getHeaders()
+  expect(headers['Setup']).toBeUndefined()
+  expect(headers['FEN']).toBeUndefined()
+})
+
+test('remove - if a move has been made, reaching initial position does not delete setup headers', () => {
+  const chess = new Chess()
+  chess.loadPgn(`[SetUp "1"]
+    [FEN "rnbqkbnr/pppppppp/p7/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"]
+
+*`)
+
+  // Shuffle the knights
+  chess.move('Nf3')
+  chess.move('Nf6')
+  chess.move('Ng1')
+  chess.move('Ng8')
+
+  // Reach the initial position.
+  chess.remove('a6')
+
+  /**
+   * The FEN header should not have been deleted despite reach
+   * initial position. However, Setup header may have been deleted
+   * unrelatedly.
+   */
+  const headers = chess.getHeaders()
+  expect(headers['FEN']).toBeDefined()
+})
