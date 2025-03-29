@@ -201,6 +201,49 @@ const BITS: Record<string, number> = {
   QSIDE_CASTLE: 64,
 }
 
+// the purpose of this is to fix the order of header tags; these are in order of the spec's tag definitions
+const HEADER_TEMPLATE: Record<string, string|null> = {
+  // mandatory Seven Tag Roster:
+  Event: "?",
+  Site: "?",
+  Date: '????.??.??',
+  Round: "?",
+  White: "?",
+  Black: "?",
+  Result: "*",
+  //supplemental tags; null values will not be output
+  WhiteTitle: null,
+  BlackTitle: null,
+  WhiteElo: null,
+  BlackElo: null,
+  WhiteUSCF: null,
+  BlackUSCF: null,
+  WhiteNA: null,
+  BlackNA: null,
+  WhiteType: null,
+  BlackType: null,
+  EventDate: null,
+  EventSponsor: null,
+  Section: null,
+  Stage: null,
+  Board: null,
+  Opening: null,
+  Variation: null,
+  SubVariation: null,
+  ECO: null,
+  NIC: null,
+  Time: null,
+  UTCTime: null,
+  UTCDate: null,
+  TimeControl: null,
+  SetUp: null,
+  FEN: null,
+  Termination: null,
+  Annotator: null,
+  Mode: null,
+  PlyCount: null,
+}
+
 /*
  * NOTES ABOUT 0x88 MOVE GENERATION ALGORITHM
  * ----------------------------------------------------------------------------
