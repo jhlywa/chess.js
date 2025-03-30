@@ -64,7 +64,7 @@ describe('PGN', () => {
     {
       // testing maxWidth being small and having no comments
       moves: `f3 e5 g4 Qh4#`,
-      header: [],
+      headerTags: <Record<string, string>> {Result: "0-1"},
       maxWidth: 1,
       pgn: fileToString('pgn/2.pgn'),
       fen: 'rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3',

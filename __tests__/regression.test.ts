@@ -1,6 +1,6 @@
 import { Chess, SEVEN_TAG_ROSTER } from '../src/chess'
 import 'jest-extended'
-import { SEVEN_TAG_ROSTER_STRING } from './utils'
+import { diffChars, SEVEN_TAG_ROSTER_STRING } from './utils'
 
 describe('Regression Tests', () => {
   it('Github Issue #30 - move generateion - single square bug', () => {
@@ -239,7 +239,6 @@ describe('Regression Tests', () => {
     const chess = new Chess()
     chess.loadPgn('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
     expect(chess.pgn()).toBe( `${SEVEN_TAG_ROSTER_STRING}
-
 1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O *`)
   })
 
