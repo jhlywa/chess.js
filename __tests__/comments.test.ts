@@ -166,7 +166,7 @@ describe('Format Comments', () => {
       ['1. e4 {good', 'move} e5', '{classical', 'response} *'].join('\n'),
     )
     expect(chess.pgn({ maxWidth: 2 })).toEndWith(
-      ['1.', 'e4', '{good', 'move}', 'e5', '{classical', 'response}', ' *'].join(
+      ['1.', 'e4', '{good', 'move}', 'e5', '{classical', 'response}', '*'].join(
         '\n',
       ),
     )
