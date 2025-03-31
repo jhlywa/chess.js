@@ -1927,14 +1927,14 @@ export class Chess {
     return this._header
   }
 
-  setHeader(key: string, value: string): Record<string, string|null> {
+  // TODO: value validation per spec
+  setHeader(key: string, value: string): Record<string, string> {
     this._header[key] = value
-    return this._header
+    return this.getHeaders()  
   }
 
   removeHeader(key: string): boolean {
     if (key in this._header) {
-      // delete this._header[key]
       this._header[key] = SEVEN_TAG_ROSTER[key] || null
       return true
     }
