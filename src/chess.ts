@@ -1929,7 +1929,7 @@ export class Chess {
 
   // TODO: value validation per spec
   setHeader(key: string, value: string): Record<string, string> {
-    this._header[key] = value
+    this._header[key] = value??SEVEN_TAG_ROSTER[key]??null
     return this.getHeaders()  
   }
 
