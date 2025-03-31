@@ -5,16 +5,16 @@ export function split(s: string) {
   return s.split(/\s+|\n/)
 }
 
-export function diffChars(str1:string, str2:string) {
-  let diff = "";
-  const maxLength = Math.max(str1.length, str2.length);
+export function diffChars(str1: string, str2: string) {
+  let diff = ''
+  const maxLength = Math.max(str1.length, str2.length)
 
   for (let i = 0; i < maxLength; i++) {
     if (str1[i] !== str2[i]) {
-      diff += `(${str1[i] || ''} -> ${str2[i] || ''})`;
+      diff += `(${str1[i] || ''} -> ${str2[i] || ''})`
     }
   }
-  return diff;
+  return diff
 }
 
 export function fileToString(filename: string) {

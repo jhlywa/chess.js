@@ -161,7 +161,9 @@ describe('Format Comments', () => {
     chess.setComment('good   move')
     chess.move('e5')
     chess.setComment('classical response')
-    expect(chess.pgn()).toEndWith('1. e4 {good   move} e5 {classical response} *')
+    expect(chess.pgn()).toEndWith(
+      '1. e4 {good   move} e5 {classical response} *',
+    )
     expect(chess.pgn({ maxWidth: 16 })).toEndWith(
       ['1. e4 {good', 'move} e5', '{classical', 'response} *'].join('\n'),
     )

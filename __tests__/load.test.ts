@@ -60,7 +60,7 @@ test('load - preserveHeaders = false', () => {
   chess.setHeader('White', 'Magnus Carlsen')
   chess.setHeader('Black', 'Viswanathan Anand')
   chess.load(DEFAULT_POSITION)
-  expect(chess.getHeaders()).toEqual({...SEVEN_TAG_ROSTER})
+  expect(chess.getHeaders()).toEqual({ ...SEVEN_TAG_ROSTER })
 })
 
 test('load - preserveHeaders = true', () => {
@@ -68,7 +68,8 @@ test('load - preserveHeaders = true', () => {
   chess.setHeader('White', 'Magnus Carlsen')
   chess.setHeader('Black', 'Viswanathan Anand')
   chess.load(DEFAULT_POSITION, { preserveHeaders: true })
-  expect(chess.getHeaders()).toEqual({ ...SEVEN_TAG_ROSTER,
+  expect(chess.getHeaders()).toEqual({
+    ...SEVEN_TAG_ROSTER,
     White: 'Magnus Carlsen',
     Black: 'Viswanathan Anand',
   })

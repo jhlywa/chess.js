@@ -122,7 +122,7 @@ describe('Regression Tests', () => {
     const chess = new Chess()
     chess.loadPgn(pgn.join('\n'))
     chess.clear()
-    expect(chess.getHeaders()).toEqual({...SEVEN_TAG_ROSTER})
+    expect(chess.getHeaders()).toEqual({ ...SEVEN_TAG_ROSTER })
   })
 
   it('Github Issue #191 - whitespace before closing bracket', () => {
@@ -187,7 +187,7 @@ describe('Regression Tests', () => {
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment}',
     )
     expect(chess.history()).toEqual(history)
-    expect(chess.header()['Result']).toBe("*")
+    expect(chess.header()['Result']).toBe('*')
 
     // trailing comment - end of game marker after comment
     chess.loadPgn(
@@ -195,7 +195,7 @@ describe('Regression Tests', () => {
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment} *',
     )
     expect(chess.history()).toEqual(history)
-    expect(chess.getHeaders()['Result']).toBe("*")
+    expect(chess.getHeaders()['Result']).toBe('*')
 
     // trailing comment - end of game marker before comment
     chess.loadPgn(
@@ -203,7 +203,7 @@ describe('Regression Tests', () => {
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 * {comment}',
     )
     expect(chess.history()).toEqual(history)
-    expect(chess.getHeaders()['Result']).toBe("*")
+    expect(chess.getHeaders()['Result']).toBe('*')
 
     // trailing comment with PGN header - no end of game marker
     chess.loadPgn(
@@ -214,7 +214,7 @@ describe('Regression Tests', () => {
         '6. Bxc6 {comment}',
     )
     expect(chess.history()).toEqual(history)
-    expect(chess.getHeaders()['Result']).toBe("*")
+    expect(chess.getHeaders()['Result']).toBe('*')
 
     // trailing comment with result header - end of game marker after comment
     chess.loadPgn(
@@ -238,7 +238,7 @@ describe('Regression Tests', () => {
   it('Github Issue #286 - pgn should not generate sloppy moves', () => {
     const chess = new Chess()
     chess.loadPgn('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
-    expect(chess.pgn()).toBe( `${SEVEN_TAG_ROSTER_STRING}
+    expect(chess.pgn()).toBe(`${SEVEN_TAG_ROSTER_STRING}
 1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O *`)
   })
 

@@ -7,7 +7,7 @@ test('clear', () => {
 
   chess.clear()
   expect(chess.fen()).toEqual('8/8/8/8/8/8/8/8 w - - 0 1')
-  expect(chess.getHeaders()).toEqual({...SEVEN_TAG_ROSTER})
+  expect(chess.getHeaders()).toEqual({ ...SEVEN_TAG_ROSTER })
 })
 
 test('clear - preserveHeaders = true', () => {
@@ -18,7 +18,8 @@ test('clear - preserveHeaders = true', () => {
   chess.clear({ preserveHeaders: true })
 
   expect(chess.fen()).toEqual('8/8/8/8/8/8/8/8 w - - 0 1')
-  expect(chess.getHeaders()).toEqual({...SEVEN_TAG_ROSTER, 
+  expect(chess.getHeaders()).toEqual({
+    ...SEVEN_TAG_ROSTER,
     White: 'Magnus Carlsen',
     Black: 'Viswanathan Anand',
   })
