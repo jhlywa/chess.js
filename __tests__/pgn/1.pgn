@@ -1,14 +1,14 @@
 [Event "Reykjavik WCh"]
 [Site "Reykjavik WCh"]
 [Date "1972.01.07"]
-[EventDate "?"]
 [Round "6"]
-[Result "1-0"]
 [White "Robert James Fischer"]
 [Black "Boris Spassky"]
-[ECO "D59"]
+[Result "1-0"]
 [WhiteElo "?"]
 [BlackElo "?"]
+[EventDate "?"]
+[ECO "D59"]
 [PlyCount "81"]
 
 1. c4 e6 2. Nf3 d5 3. d4 Nf6 4. Nc3 Be7 5. Bg5 O-O 6. e3 h6

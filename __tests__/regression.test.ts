@@ -1,5 +1,6 @@
-import { Chess } from '../src/chess'
+import { Chess, SEVEN_TAG_ROSTER } from '../src/chess'
 import 'jest-extended'
+import { diffChars, SEVEN_TAG_ROSTER_STRING } from './utils'
 
 describe('Regression Tests', () => {
   it('Github Issue #30 - move generateion - single square bug', () => {
@@ -61,7 +62,7 @@ describe('Regression Tests', () => {
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
     chess.move('f7')
     const result = chess.pgn()
-    expect(result.match(/(45\. f7)$/)?.[0]).toBe('45. f7')
+    expect(result.match(/(45\. f7 \*)$/)?.[0]).toBe('45. f7 *')
   })
 
   it('Github Issue #98 (black) - Wrong movement number after setting a position via FEN', () => {
@@ -69,7 +70,7 @@ describe('Regression Tests', () => {
     chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 b - - 1 45')
     chess.move('Rf1+')
     const result = chess.pgn()
-    expect(result.match(/(45\. \.\.\. Rf1\+)$/)?.[0]).toBe('45. ... Rf1+')
+    expect(result.match(/(45\. \.\.\. Rf1\+ \*)$/)?.[0]).toBe('45. ... Rf1+ *')
   })
 
   it('Github Issue #129 loadPgn() should not clear headers if PGN contains SetUp and FEN tags', () => {
@@ -100,10 +101,10 @@ describe('Regression Tests', () => {
       FEN: 'rnbqkb1r/1p3ppp/p2ppn2/6B1/3NP3/2N5/PPP2PPP/R2QKB1R w KQkq - 0 1',
       SetUp: '1',
     }
-    expect(chess.header()).toEqual(expected)
+    expect(chess.getHeaders()).toEqual(expected)
   })
 
-  it('Github Issue #129 clear() should clear the board and delete all headers', () => {
+  it('Github Issue #129 clear() should clear the board and delete all non-mandatory headers', () => {
     const pgn = [
       '[Event "Test Olympiad"]',
       '[Site "Earth"]',
@@ -121,7 +122,7 @@ describe('Regression Tests', () => {
     const chess = new Chess()
     chess.loadPgn(pgn.join('\n'))
     chess.clear()
-    expect(chess.header()).toEqual({})
+    expect(chess.getHeaders()).toEqual({ ...SEVEN_TAG_ROSTER })
   })
 
   it('Github Issue #191 - whitespace before closing bracket', () => {
@@ -186,7 +187,7 @@ describe('Regression Tests', () => {
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment}',
     )
     expect(chess.history()).toEqual(history)
-    expect(chess.header()['Result']).toBeUndefined()
+    expect(chess.header()['Result']).toBe('*')
 
     // trailing comment - end of game marker after comment
     chess.loadPgn(
@@ -194,7 +195,7 @@ describe('Regression Tests', () => {
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 {comment} *',
     )
     expect(chess.history()).toEqual(history)
-    expect(chess.header()['Result']).toBeUndefined()
+    expect(chess.getHeaders()['Result']).toBe('*')
 
     // trailing comment - end of game marker before comment
     chess.loadPgn(
@@ -202,7 +203,7 @@ describe('Regression Tests', () => {
         '4. d4 Bd7 5. Nc3 Nf6 6. Bxc6 * {comment}',
     )
     expect(chess.history()).toEqual(history)
-    expect(chess.header()['Result']).toBeUndefined()
+    expect(chess.getHeaders()['Result']).toBe('*')
 
     // trailing comment with PGN header - no end of game marker
     chess.loadPgn(
@@ -213,7 +214,7 @@ describe('Regression Tests', () => {
         '6. Bxc6 {comment}',
     )
     expect(chess.history()).toEqual(history)
-    expect(chess.header()['Result']).toBeUndefined()
+    expect(chess.getHeaders()['Result']).toBe('*')
 
     // trailing comment with result header - end of game marker after comment
     chess.loadPgn(
@@ -237,11 +238,12 @@ describe('Regression Tests', () => {
   it('Github Issue #286 - pgn should not generate sloppy moves', () => {
     const chess = new Chess()
     chess.loadPgn('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
-    expect(chess.pgn()).toBe('1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O')
+    expect(chess.pgn()).toBe(`${SEVEN_TAG_ROSTER_STRING}
+1. e4 d5 2. Nf3 Nd7 3. Bb5 Nf6 4. O-O *`)
   })
 
   it('Github Issue #321 - strict parser should always run before permissive', () => {
-    let chess = new Chess()
+    const chess = new Chess()
     // these test examples are lifted from the github issue
     chess.load('r4rk1/4nqpp/1p1p4/2pPpp2/bPP1P3/R1B1NQ2/P4PPP/1R4K1 w - - 0 28')
     chess.move('bxc5')
@@ -270,7 +272,7 @@ describe('Regression Tests', () => {
   })
 
   it('Github Issue #326b - ignore whitespace in line after header (loadPgn)', () => {
-    let chess = new Chess()
+    const chess = new Chess()
     const pgn = `
     [white "player a"]
          [black "player b"]

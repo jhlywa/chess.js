@@ -1,4 +1,4 @@
-import { Chess, DEFAULT_POSITION } from '../src/chess'
+import { Chess, DEFAULT_POSITION, SEVEN_TAG_ROSTER } from '../src/chess'
 
 test('load - default position', () => {
   const chess = new Chess()
@@ -57,18 +57,19 @@ test('load - missing FEN tokens (no castling rights, ep square, or move numbers)
 
 test('load - preserveHeaders = false', () => {
   const chess = new Chess()
-  chess.header('White', 'Magnus Carlsen')
-  chess.header('Black', 'Viswanathan Anand')
+  chess.setHeader('White', 'Magnus Carlsen')
+  chess.setHeader('Black', 'Viswanathan Anand')
   chess.load(DEFAULT_POSITION)
-  expect(chess.header()).toEqual({})
+  expect(chess.getHeaders()).toEqual({ ...SEVEN_TAG_ROSTER })
 })
 
 test('load - preserveHeaders = true', () => {
   const chess = new Chess()
-  chess.header('White', 'Magnus Carlsen')
-  chess.header('Black', 'Viswanathan Anand')
+  chess.setHeader('White', 'Magnus Carlsen')
+  chess.setHeader('Black', 'Viswanathan Anand')
   chess.load(DEFAULT_POSITION, { preserveHeaders: true })
-  expect(chess.header()).toEqual({
+  expect(chess.getHeaders()).toEqual({
+    ...SEVEN_TAG_ROSTER,
     White: 'Magnus Carlsen',
     Black: 'Viswanathan Anand',
   })

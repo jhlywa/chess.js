@@ -554,7 +554,7 @@ chess.load('4r3/8/2p2PPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 try {
   chess.load('8/4p3/8/8/8/8/4P3/6K1 w - - 1 45')
 } catch (e) {
-  console.log(e)
+  console.error(e)
 }
 // -> Error: Invalid FEN: missing black king
 

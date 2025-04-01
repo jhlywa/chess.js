@@ -201,6 +201,62 @@ const BITS: Record<string, number> = {
   QSIDE_CASTLE: 64,
 }
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
+// these are required, according to spec
+export const SEVEN_TAG_ROSTER: Record<string, string> = {
+  Event: '?',
+  Site: '?',
+  Date: '????.??.??',
+  Round: '?',
+  White: '?',
+  Black: '?',
+  Result: '*',
+}
+
+/**
+ * These nulls are placeholders to fix the order of tags (as they appear in PGN spec); null values will be
+ * eliminated in getHeaders()
+ */
+const SUPLEMENTAL_TAGS: Record<string, string | null> = {
+  WhiteTitle: null,
+  BlackTitle: null,
+  WhiteElo: null,
+  BlackElo: null,
+  WhiteUSCF: null,
+  BlackUSCF: null,
+  WhiteNA: null,
+  BlackNA: null,
+  WhiteType: null,
+  BlackType: null,
+  EventDate: null,
+  EventSponsor: null,
+  Section: null,
+  Stage: null,
+  Board: null,
+  Opening: null,
+  Variation: null,
+  SubVariation: null,
+  ECO: null,
+  NIC: null,
+  Time: null,
+  UTCTime: null,
+  UTCDate: null,
+  TimeControl: null,
+  SetUp: null,
+  FEN: null,
+  Termination: null,
+  Annotator: null,
+  Mode: null,
+  PlyCount: null,
+}
+
+const HEADER_TEMPLATE = {
+  ...SEVEN_TAG_ROSTER,
+  ...SUPLEMENTAL_TAGS,
+}
+/* eslint-enable @typescript-eslint/naming-convention */
+
 /*
  * NOTES ABOUT 0x88 MOVE GENERATION ALGORITHM
  * ----------------------------------------------------------------------------
@@ -614,7 +670,7 @@ function trimFen(fen: string): string {
 export class Chess {
   private _board = new Array<Piece>(128)
   private _turn: Color = WHITE
-  private _header: Record<string, string> = {}
+  private _header: Record<string, string | null> = {}
   private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
   private _epSquare = -1
   private _halfMoves = 0
@@ -640,7 +696,7 @@ export class Chess {
     this._moveNumber = 1
     this._history = []
     this._comments = {}
-    this._header = preserveHeaders ? this._header : {}
+    this._header = preserveHeaders ? this._header : { ...HEADER_TEMPLATE }
     this._positionCount = {}
 
     /*
@@ -648,8 +704,8 @@ export class Chess {
      * these headers don't make sense in this state. They'll get added later
      * via .load() or .put()
      */
-    delete this._header['SetUp']
-    delete this._header['FEN']
+    this._header['SetUp'] = null
+    this._header['FEN'] = null
   }
 
   load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
@@ -829,8 +885,8 @@ export class Chess {
       this._header['SetUp'] = '1'
       this._header['FEN'] = fen
     } else {
-      delete this._header['SetUp']
-      delete this._header['FEN']
+      this._header['SetUp'] = null
+      this._header['FEN'] = null
     }
   }
 
@@ -1716,8 +1772,12 @@ export class Chess {
       /*
        * TODO: order of enumerated properties in header object is not
        * guaranteed, see ECMA-262 spec (section 12.6.4)
+       *
+       * By using HEADER_TEMPLATE, the order of tags should be preserved; we
+       * do have to check for null placeholders, though, and omit them
        */
-      result.push('[' + i + ' "' + this._header[i] + '"]' + newline)
+      const headerTag = this._header[i]
+      if (headerTag) result.push(`[${i} "${this._header[i]}"]` + newline)
       headerExists = true
     }
 
@@ -1781,10 +1841,8 @@ export class Chess {
       moves.push(appendComment(moveString))
     }
 
-    // is there a result?
-    if (typeof this._header.Result !== 'undefined') {
-      moves.push(this._header.Result)
-    }
+    // is there a result? (there ALWAYS has to be a result according to spec; see Seven Tag Roster)
+    moves.push(this._header.Result || '*')
 
     /*
      * history should be back to what it was before we started generating PGN,
@@ -1856,10 +1914,10 @@ export class Chess {
     return result.join('')
   }
 
-  /*
-   * @deprecated Use `setHeader` and `getHeaders` instead.
+  /**
+   * @deprecated Use `setHeader` and `getHeaders` instead. This method will return null header tags (which is not what you want)
    */
-  header(...args: string[]): Record<string, string> {
+  header(...args: string[]): Record<string, string | null> {
     for (let i = 0; i < args.length; i += 2) {
       if (typeof args[i] === 'string' && typeof args[i + 1] === 'string') {
         this._header[args[i]] = args[i + 1]
@@ -1868,21 +1926,29 @@ export class Chess {
     return this._header
   }
 
+  // TODO: value validation per spec
   setHeader(key: string, value: string): Record<string, string> {
-    this._header[key] = value
-    return this._header
+    this._header[key] = value ?? SEVEN_TAG_ROSTER[key] ?? null
+    return this.getHeaders()
   }
 
   removeHeader(key: string): boolean {
     if (key in this._header) {
-      delete this._header[key]
+      this._header[key] = SEVEN_TAG_ROSTER[key] || null
       return true
     }
     return false
   }
 
+  // return only non-null headers (omit placemarker nulls)
   getHeaders(): Record<string, string> {
-    return this._header
+    const nonNullHeaders: Record<string, string> = {}
+    for (const [key, value] of Object.entries(this._header)) {
+      if (value !== null) {
+        nonNullHeaders[key] = value
+      }
+    }
+    return nonNullHeaders
   }
 
   loadPgn(
@@ -2095,8 +2161,12 @@ export class Chess {
      * result tag is missing
      */
 
-    if (result && Object.keys(this._header).length && !this._header['Result']) {
-      this.header('Result', result)
+    if (
+      result &&
+      Object.keys(this._header).length &&
+      this._header['Result'] !== result
+    ) {
+      this.setHeader('Result', result)
     }
   }
 

@@ -10,14 +10,12 @@ describe('PGN', () => {
         Bxf6 h5 Bxg5 Bg2 Kxg2 Kf5 Bh4 Kg4 Bg3 Kf5 e4+ Kg4 e5 h4 Bxh4 Kxh4 e6 c5
         bxc5 bxc5 e7 c4 bxc4 Kg4 e8=Q Kf5 Qe5+ Kg4 Re4#`,
 
-      header: [
-        'White',
-        'Jeff Hlywa',
-        'Black',
-        'Steve Bragg',
-        'GreatestGameEverPlayed?',
-        'True',
-      ],
+      headerTags: <Record<string, string>>{
+        White: 'Jeff Hlywa',
+        Black: 'Steve Bragg',
+        Result: '1-0',
+        'GreatestGameEverPlayed?': 'True',
+      },
       maxWidth: 19,
       newlineChar: '<br />',
       pgn: fileToString('pgn/0.pgn'),
@@ -30,32 +28,20 @@ describe('PGN', () => {
         Nd4 Qf8 Nxe6 fxe6 e4 d4 f4 Qe7 e5 Rb8 Bc4 Kh8 Qh3 Nf8 b3 a5 f5 exf5
         Rxf5 Nh7 Rcf1 Qd8 Qg3 Re7 h4 Rbb7 e6 Rbc7 Qe5 Qe8 a4 Qd8 R1f2 Qe8 R2f3
         Qd8 Bd3 Qe8 Qe4 Nf6 Rxf6 gxf6 Rxf6 Kg8 Bc4 Kh8 Qf4`,
-      header: [
-        'Event',
-        'Reykjavik WCh',
-        'Site',
-        'Reykjavik WCh',
-        'Date',
-        '1972.01.07',
-        'EventDate',
-        '?',
-        'Round',
-        '6',
-        'Result',
-        '1-0',
-        'White',
-        'Robert James Fischer',
-        'Black',
-        'Boris Spassky',
-        'ECO',
-        'D59',
-        'WhiteElo',
-        '?',
-        'BlackElo',
-        '?',
-        'PlyCount',
-        '81',
-      ],
+      headerTags: <Record<string, string>>{
+        Event: 'Reykjavik WCh',
+        Site: 'Reykjavik WCh',
+        Date: '1972.01.07',
+        EventDate: '?',
+        Round: '6',
+        Result: '1-0',
+        White: 'Robert James Fischer',
+        Black: 'Boris Spassky',
+        ECO: 'D59',
+        WhiteElo: '?',
+        BlackElo: '?',
+        PlyCount: '81',
+      },
       maxWidth: 65,
       pgn: fileToString('pgn/1.pgn'),
       fen: '4q2k/2r1r3/4PR1p/p1p5/P1Bp1Q1P/1P6/6P1/6K1 b - - 4 41',
@@ -63,7 +49,7 @@ describe('PGN', () => {
     {
       // testing maxWidth being small and having no comments
       moves: `f3 e5 g4 Qh4#`,
-      header: [],
+      headerTags: <Record<string, string>>{ Result: '0-1' },
       maxWidth: 1,
       pgn: fileToString('pgn/2.pgn'),
       fen: 'rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3',
@@ -91,6 +77,7 @@ describe('PGN', () => {
 
     const chess2 = new Chess()
     const pgn2 = `
+  [White "?"]
   [Black "Duke Karl / Count Isouard"]
   [fEn "1n2kb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2KR4 w k - 0 17"]
 
@@ -162,12 +149,15 @@ describe('PGN', () => {
         Math.floor(position.moves.split(/\s+/).length / 2) + 1
       expect(chess.moveNumber()).toEqual(expectedMoves)
 
-      chess.header(...position.header)
+      for (const key in position.headerTags) {
+        chess.setHeader(key, position.headerTags[key])
+      }
 
       const pgn = chess.pgn({
         maxWidth: position.maxWidth,
         newline: position.newlineChar,
       })
+
       expect(pgn).toEqual(position.pgn)
     })
   })
