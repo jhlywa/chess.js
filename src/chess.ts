@@ -677,12 +677,15 @@ export class Chess {
   private _moveNumber = 0
   private _history: History[] = []
   private _comments: Record<string, string> = {}
+  private _glyphs: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
   // tracks number of times a position has been seen for repetition checking
   private _positionCount: Record<string, number> = {}
 
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
+    this._comments = {}
+    this._glyphs = {}
     this.load(fen, { skipValidation })
   }
 
@@ -892,6 +895,8 @@ export class Chess {
 
   reset() {
     this.load(DEFAULT_POSITION)
+    this._comments = {}
+    this._glyphs = {}
   }
 
   get(square: Square): Piece | undefined {
@@ -2129,7 +2134,6 @@ export class Chess {
     moves = moves.filter((move) => move !== '')
 
     let result = ''
-
     for (let halfMove = 0; halfMove < moves.length; halfMove++) {
       const comment = decodeComment(moves[halfMove])
       if (comment !== undefined) {
@@ -2137,21 +2141,28 @@ export class Chess {
         continue
       }
 
-      const move = this._moveFromSan(moves[halfMove], strict)
+      const glyphMatch = moves[halfMove].match(/(!!|\?\?|!\?|\?!|!|\?)$/)
+      const symbol = glyphMatch ? glyphMatch[1] : ''
+      const san = glyphMatch
+        ? moves[halfMove].slice(0, -symbol.length)
+        : moves[halfMove]
 
-      // invalid move
+      const move = this._moveFromSan(san, strict)
+
       if (move == null) {
-        // was the move an end of game marker
         if (TERMINATION_MARKERS.indexOf(moves[halfMove]) > -1) {
           result = moves[halfMove]
         } else {
           throw new Error(`Invalid move in PGN: ${moves[halfMove]}`)
         }
       } else {
-        // reset the end of game marker if making a valid move
         result = ''
         this._makeMove(move)
         this._incPositionCount(this.fen())
+
+        if (symbol) {
+          this._glyphs[this.fen()] = symbol
+        }
       }
     }
 
@@ -2544,11 +2555,17 @@ export class Chess {
     return comment
   }
 
-  getComments(): { fen: string; comment: string }[] {
+  getComments(): Array<{
+    fen: string
+    comment: string
+    symbol?: string
+  }> {
     this._pruneComments()
-    return Object.keys(this._comments).map((fen: string) => {
-      return { fen: fen, comment: this._comments[fen] }
-    })
+    return Object.entries(this._comments).map(([fen, comment]) => ({
+      fen,
+      comment,
+      ...(this._glyphs[fen] ? { symbol: this._glyphs[fen] } : {}),
+    }))
   }
 
   /**
