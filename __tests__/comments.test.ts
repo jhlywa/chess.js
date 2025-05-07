@@ -1,6 +1,50 @@
 import { Chess } from '../src/chess'
 import 'jest-extended'
 
+describe('Suffix-Only Support', () => {
+  it('captures multiple suffixes and comments', () => {
+    const chess = new Chess()
+    const pgn =
+      '1. c4 {English Opening} ' +
+      'e5!? {Aggressive} ' +
+      '2. Nf3!! {Best Move} ' +
+      'Nc6?? {Blunder} *'
+
+    chess.loadPgn(pgn)
+
+    const fen1 = 'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1'
+    const fen2 = 'rnbqkbnr/pppp1ppp/8/4p3/2P5/8/PP1PPPPP/RNBQKBNR w KQkq - 0 2'
+    const fen3 =
+      'rnbqkbnr/pppp1ppp/8/4p3/2P5/5N2/PP1PPPPP/RNBQKB1R b KQkq - 1 2'
+    const fen4 =
+      'r1bqkbnr/pppp1ppp/2n5/4p3/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq - 2 3'
+
+    expect(chess.fen()).toEqual(fen4)
+
+    expect(chess.getComments()).toEqual([
+      {
+        fen: fen1,
+        comment: 'English Opening',
+      },
+      {
+        fen: fen2,
+        comment: 'Aggressive',
+        suffix: '!?',
+      },
+      {
+        fen: fen3,
+        comment: 'Best Move',
+        suffix: '!!',
+      },
+      {
+        fen: fen4,
+        comment: 'Blunder',
+        suffix: '??',
+      },
+    ])
+  })
+})
+
 describe('Manipulate Comments', () => {
   it('no comments', () => {
     const chess = new Chess()
