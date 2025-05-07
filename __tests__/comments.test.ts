@@ -1,8 +1,8 @@
 import { Chess } from '../src/chess'
 import 'jest-extended'
 
-describe('Glyph-Only Support', () => {
-  it('captures multiple glyphs and comments', () => {
+describe('Suffix-Only Support', () => {
+  it('captures multiple suffixes and comments', () => {
     const chess = new Chess()
     const pgn =
       '1. c4 {English Opening} ' +
