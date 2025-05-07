@@ -29,17 +29,17 @@ describe('Glyph-Only Support', () => {
       {
         fen: fen2,
         comment: 'Aggressive',
-        symbol: '!?',
+        suffix: '!?',
       },
       {
         fen: fen3,
         comment: 'Best Move',
-        symbol: '!!',
+        suffix: '!!',
       },
       {
         fen: fen4,
         comment: 'Blunder',
-        symbol: '??',
+        suffix: '??',
       },
     ])
   })

@@ -677,7 +677,7 @@ export class Chess {
   private _moveNumber = 0
   private _history: History[] = []
   private _comments: Record<string, string> = {}
-  private _glyphs: Record<string, string> = {}
+  private _suffixes: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
   // tracks number of times a position has been seen for repetition checking
@@ -685,7 +685,7 @@ export class Chess {
 
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
     this._comments = {}
-    this._glyphs = {}
+    this._suffixes = {}
     this.load(fen, { skipValidation })
   }
 
@@ -896,7 +896,7 @@ export class Chess {
   reset() {
     this.load(DEFAULT_POSITION)
     this._comments = {}
-    this._glyphs = {}
+    this._suffixes = {}
   }
 
   get(square: Square): Piece | undefined {
@@ -2141,10 +2141,10 @@ export class Chess {
         continue
       }
 
-      const glyphMatch = moves[halfMove].match(/(!!|\?\?|!\?|\?!|!|\?)$/)
-      const symbol = glyphMatch ? glyphMatch[1] : ''
-      const san = glyphMatch
-        ? moves[halfMove].slice(0, -symbol.length)
+      const suffixMatch = moves[halfMove].match(/(!!|\?\?|!\?|\?!|!|\?)$/)
+      const suffix = suffixMatch ? suffixMatch[1] : ''
+      const san = suffix
+        ? moves[halfMove].slice(0, -suffix.length)
         : moves[halfMove]
 
       const move = this._moveFromSan(san, strict)
@@ -2160,8 +2160,8 @@ export class Chess {
         this._makeMove(move)
         this._incPositionCount(this.fen())
 
-        if (symbol) {
-          this._glyphs[this.fen()] = symbol
+        if (suffix) {
+          this._suffixes[this.fen()] = suffix
         }
       }
     }
@@ -2558,13 +2558,13 @@ export class Chess {
   getComments(): Array<{
     fen: string
     comment: string
-    symbol?: string
+    suffix?: string
   }> {
     this._pruneComments()
     return Object.entries(this._comments).map(([fen, comment]) => ({
       fen,
       comment,
-      ...(this._glyphs[fen] ? { symbol: this._glyphs[fen] } : {}),
+      ...(this._suffixes[fen] ? { suffix: this._suffixes[fen] } : {}),
     }))
   }
 
