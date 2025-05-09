@@ -1255,7 +1255,7 @@ export class Chess {
   }
 
   isGameOver(): boolean {
-    return this.isCheckmate() || this.isStalemate() || this.isDraw()
+    return this.isCheckmate() || this.isDraw()
   }
 
   moves(): string[]

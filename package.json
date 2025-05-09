@@ -17,7 +17,8 @@
     "lint": "eslint src/ --ext .ts",
     "parser": "peggy -c peggy.config.mjs",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "bench": "tsx benchmarks/bench.ts"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,9 @@
     "jest-extended": "^2.0.0",
     "peggy": "^4.2.0",
     "prettier": "^3.1.0",
+    "tinybench": "^4.0.1",
     "ts-jest": "^27.0.4",
+    "tsx": "^4.19.4",
     "typescript": "^4.6.3"
   }
 }
