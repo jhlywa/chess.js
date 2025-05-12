@@ -841,7 +841,7 @@ export class Chess {
           this._board[square]?.color === color &&
           this._board[square]?.type === PAWN
         ) {
-          // if the pawn makes an ep capture, does it leave it's king in check?
+          // if the pawn makes an ep capture, does it leave its king in check?
           this._makeMove({
             color,
             from: square,
