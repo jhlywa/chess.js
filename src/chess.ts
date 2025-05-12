@@ -771,7 +771,7 @@ export class Chess {
     this._incPositionCount(fen)
   }
 
-  fen() {
+  fen({ forceEnpassantSquare = false }: { forceEnpassantSquare?: boolean } = {}) {
     let empty = 0
     let fen = ''
 
@@ -824,7 +824,9 @@ export class Chess {
      * only print the ep square if en passant is a valid move (pawn is present
      * and ep capture is not pinned)
      */
-    if (this._epSquare !== EMPTY) {
+    if (this._epSquare !== EMPTY && forceEnpassantSquare) {
+      epSquare = algebraic(this._epSquare)
+    } else if (this._epSquare !== EMPTY) {
       const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
       const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
 
