@@ -9,14 +9,16 @@
   "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "scripts": {
     "prepare": "npm run build",
-    "build": "tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json",
+    "build": "npm run parser && tsc -b ./tsconfig.cjs.json ./tsconfig.esm.json ./tsconfig.types.json && copyfiles -f src/pgn.js dist/cjs && copyfiles -f src/pgn.js dist/esm",
     "check": "npm run format:check && npm run lint && npm run test && npm run build",
-    "clean": "rm -rf ./dist",
+    "clean": "rm -rf ./dist; rm -f src/pgn.js src/pgn.d.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint src/ --ext .ts",
+    "parser": "peggy -c peggy.config.mjs",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "bench": "tsx benchmarks/bench.ts"
   },
   "repository": {
     "type": "git",
@@ -26,11 +28,15 @@
     "@types/jest": "^27.4.1",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.12.0",
     "jest": "^27.0.6",
     "jest-extended": "^2.0.0",
+    "peggy": "^4.2.0",
     "prettier": "^3.1.0",
+    "tinybench": "^4.0.1",
     "ts-jest": "^27.0.4",
+    "tsx": "^4.19.4",
     "typescript": "^4.6.3"
   }
 }
