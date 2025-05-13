@@ -51,6 +51,40 @@ export type Square =
     'a2' | 'b2' | 'c2' | 'd2' | 'e2' | 'f2' | 'g2' | 'h2' |
     'a1' | 'b1' | 'c1' | 'd1' | 'e1' | 'f1' | 'g1' | 'h1'
 
+export const SUFFIX_LIST = [
+  '!!',
+  '!',
+  '!?',
+  '?!',
+  '?',
+  '??',
+  '□',
+  '=/=',
+  '+=',
+  '=+',
+  '+−',
+  '−+',
+  '+−−',
+  '−++',
+  '∞',
+  '∓',
+  '=',
+  '⟳',
+  '↑',
+  '⇆',
+  '∇',
+  'N',
+  'T',
+  '⨀',
+  '⨁',
+  '⨂',
+  '⨄',
+  '⊕',
+  '⊗',
+] as const
+
+export type Suffix = (typeof SUFFIX_LIST)[number]
+
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -677,12 +711,15 @@ export class Chess {
   private _moveNumber = 0
   private _history: History[] = []
   private _comments: Record<string, string> = {}
+  private _suffixes: Record<string, string> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
   // tracks number of times a position has been seen for repetition checking
   private _positionCount: Record<string, number> = {}
 
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
+    this._comments = {}
+    this._suffixes = {}
     this.load(fen, { skipValidation })
   }
 
@@ -892,6 +929,8 @@ export class Chess {
 
   reset() {
     this.load(DEFAULT_POSITION)
+    this._comments = {}
+    this._suffixes = {}
   }
 
   get(square: Square): Piece | undefined {
@@ -2013,13 +2052,23 @@ export class Chess {
 
     while (node) {
       if (node.move) {
-        const move = this._moveFromSan(node.move, strict)
+        const rawSuffix = node.suffix
+        const suffix = Array.isArray(rawSuffix)
+          ? rawSuffix.join('')
+          : typeof rawSuffix === 'string'
+            ? rawSuffix
+            : ''
 
-        if (move == null) {
+        const san = node.move
+        const move = this._moveFromSan(san, strict)
+        if (!move) {
           throw new Error(`Invalid move in PGN: ${node.move}`)
-        } else {
-          this._makeMove(move)
-          this._incPositionCount(this.fen())
+        }
+
+        this._makeMove(move)
+        this._incPositionCount(this.fen())
+        if (suffix) {
+          this._suffixes[this.fen()] = suffix
         }
       }
 
@@ -2420,11 +2469,38 @@ export class Chess {
     return comment
   }
 
-  getComments(): { fen: string; comment: string }[] {
+  getComments(): { fen: string; comment: string; suffix?: string }[] {
     this._pruneComments()
     return Object.keys(this._comments).map((fen: string) => {
-      return { fen: fen, comment: this._comments[fen] }
+      const entry: { fen: string; comment: string; suffix?: string } = {
+        fen,
+        comment: this._comments[fen],
+      }
+      if (this._suffixes[fen]) {
+        entry.suffix = this._suffixes[fen]
+      }
+      return entry
     })
+  }
+
+  /**
+   * Set or overwrite the suffix annotation for the given position (or current).
+   * Throws if the suffix isn’t one of the allowed SUFFIX_LIST values.
+   */
+  setSuffix(suffix: Suffix, fen?: string): void {
+    if (!SUFFIX_LIST.includes(suffix)) {
+      throw new Error(`Invalid suffix annotation: ${suffix}`)
+    }
+    const key = fen || this.fen()
+    this._suffixes[key] = suffix
+  }
+
+  /**
+   * Remove the suffix annotation for the given position (or current).
+   */
+  public removeSuffix(fen?: string): void {
+    const key = fen || this.fen()
+    delete this._suffixes[key]
   }
 
   /**
