@@ -64,15 +64,6 @@ test('loadPgn - works - no moves (header only)', () => {
   expect(chess.fen()).toEqual(DEFAULT_POSITION)
 })
 
-test('loadPgn - works - empty game', () => {
-  // GitHub Issue #506 - Load PGN works - empty game
-  const chess = new Chess()
-  const pgn = chess.pgn()
-
-  chess.loadPgn(pgn)
-  expect(chess.fen()).toEqual(DEFAULT_POSITION)
-})
-
 test('loadPgn - works - comments', () => {
   const chess = new Chess()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'

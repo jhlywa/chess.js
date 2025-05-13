@@ -1,6 +1,3 @@
 node_modules/
 coverage/
 dist/
-
-src/pgn.js
-src/pgn.d.ts

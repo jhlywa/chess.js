@@ -25,8 +25,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-import { parse } from './pgn'
-
 export const WHITE = 'w'
 export const BLACK = 'b'
 
@@ -396,6 +394,8 @@ const ROOKS = {
 }
 
 const SECOND_RANK = { b: RANK_7, w: RANK_2 }
+
+const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
 
 // Extracts the zero-based rank of an 0x88 square.
 function rank(square: number): number {
@@ -844,7 +844,7 @@ export class Chess {
           this._board[square]?.color === color &&
           this._board[square]?.type === PAWN
         ) {
-          // if the pawn makes an ep capture, does it leave its king in check?
+          // if the pawn makes an ep capture, does it leave it's king in check?
           this._makeMove({
             color,
             from: square,
@@ -1967,18 +1967,60 @@ export class Chess {
       return str.replace(/\\/g, '\\')
     }
 
-    // If newlineChar is not the default, replace all instances with \n
-    if (newlineChar !== '\r?\n') {
-      pgn = pgn.replace(new RegExp(mask(newlineChar), 'g'), '\n')
+    function parsePgnHeader(header: string): { [key: string]: string } {
+      const headerObj: Record<string, string> = {}
+      const headers = header.split(new RegExp(mask(newlineChar)))
+      let key = ''
+      let value = ''
+
+      for (let i = 0; i < headers.length; i++) {
+        const regex = /^\s*\[\s*([A-Za-z]+)\s*"(.*)"\s*\]\s*$/
+        key = headers[i].replace(regex, '$1')
+        value = headers[i].replace(regex, '$2')
+        if (key.trim().length > 0) {
+          headerObj[key] = value
+        }
+      }
+
+      return headerObj
     }
 
-    const parsedPgn = parse(pgn)
+    // strip whitespace from head/tail of PGN block
+    pgn = pgn.trim()
+
+    /*
+     * RegExp to split header. Takes advantage of the fact that header and movetext
+     * will always have a blank line between them (ie, two newline_char's). Handles
+     * case where movetext is empty by matching newlineChar until end of string is
+     * matched - effectively trimming from the end extra newlineChar.
+     *
+     * With default newline_char, will equal:
+     * /^(\[((?:\r?\n)|.)*\])((?:\s*\r?\n){2}|(?:\s*\r?\n)*$)/
+     */
+    const headerRegex = new RegExp(
+      '^(\\[((?:' +
+        mask(newlineChar) +
+        ')|.)*\\])' +
+        '((?:\\s*' +
+        mask(newlineChar) +
+        '){2}|(?:\\s*' +
+        mask(newlineChar) +
+        ')*$)',
+    )
+
+    // If no header given, begin with moves.
+    const headerRegexResults = headerRegex.exec(pgn)
+    const headerString = headerRegexResults
+      ? headerRegexResults.length >= 2
+        ? headerRegexResults[1]
+        : ''
+      : ''
 
     // Put the board in the starting position
     this.reset()
 
     // parse PGN header
-    const headers = parsedPgn.headers
+    const headers = parsePgnHeader(headerString)
     let fen = ''
 
     for (const key in headers) {
@@ -2014,60 +2056,115 @@ export class Chess {
       }
     }
 
-    let node = parsedPgn.root
+    /*
+     * NB: the regexes below that delete move numbers, recursive annotations,
+     * and numeric annotation glyphs may also match text in comments. To
+     * prevent this, we transform comments by hex-encoding them in place and
+     * decoding them again after the other tokens have been deleted.
+     *
+     * While the spec states that PGN files should be ASCII encoded, we use
+     * {en,de}codeURIComponent here to support arbitrary UTF8 as a convenience
+     * for modern users
+     */
 
-    while (node) {
-      if (node.move) {
-        const move = this._moveFromSan(node.move, strict)
+    function toHex(s: string): string {
+      return Array.from(s)
+        .map(function (c) {
+          /*
+           * encodeURI doesn't transform most ASCII characters, so we handle
+           * these ourselves
+           */
+          return c.charCodeAt(0) < 128
+            ? c.charCodeAt(0).toString(16)
+            : encodeURIComponent(c).replace(/%/g, '').toLowerCase()
+        })
+        .join('')
+    }
 
-        if (move == null) {
-          throw new Error(`Invalid move in PGN: ${node.move}`)
-        } else {
-          this._makeMove(move)
-          this._incPositionCount(this.fen())
-        }
+    function fromHex(s: string): string {
+      return s.length == 0
+        ? ''
+        : decodeURIComponent('%' + (s.match(/.{1,2}/g) || []).join('%'))
+    }
+
+    const encodeComment = function (s: string): string {
+      s = s.replace(new RegExp(mask(newlineChar), 'g'), ' ')
+      return `{${toHex(s.slice(1, s.length - 1))}}`
+    }
+
+    const decodeComment = function (s: string) {
+      if (s.startsWith('{') && s.endsWith('}')) {
+        return fromHex(s.slice(1, s.length - 1))
+      }
+    }
+
+    // delete header to get the moves
+    let ms = pgn
+      .replace(headerString, '')
+      .replace(
+        // encode comments so they don't get deleted below
+        new RegExp(`({[^}]*})+?|;([^${mask(newlineChar)}]*)`, 'g'),
+        function (_match, bracket, semicolon) {
+          return bracket !== undefined
+            ? encodeComment(bracket)
+            : ' ' + encodeComment(`{${semicolon.slice(1)}}`)
+        },
+      )
+      .replace(new RegExp(mask(newlineChar), 'g'), ' ')
+
+    // delete recursive annotation variations
+    const ravRegex = /(\([^()]+\))+?/g
+    while (ravRegex.test(ms)) {
+      ms = ms.replace(ravRegex, '')
+    }
+
+    // delete move numbers
+    ms = ms.replace(/\d+\.(\.\.)?/g, '')
+
+    // delete ... indicating black to move
+    ms = ms.replace(/\.\.\./g, '')
+
+    /* delete numeric annotation glyphs */
+    ms = ms.replace(/\$\d+/g, '')
+
+    // trim and get array of moves
+    let moves = ms.trim().split(new RegExp(/\s+/))
+
+    // delete empty entries
+    moves = moves.filter((move) => move !== '')
+
+    let result = ''
+    for (let halfMove = 0; halfMove < moves.length; halfMove++) {
+      const comment = decodeComment(moves[halfMove])
+      if (comment !== undefined) {
+        this._comments[this.fen()] = comment
+        continue
       }
 
+      const suffixMatch = moves[halfMove].match(/(!!|\?\?|!\?|\?!|!|\?)$/)
+      const suffix = suffixMatch ? suffixMatch[1] : ''
+      const san = suffix
+        ? moves[halfMove].slice(0, -suffix.length)
+        : moves[halfMove]
 
-/* delete numeric annotation glyphs */
-ms = ms.replace(/\$\d+/g, '')
+      const move = this._moveFromSan(san, strict)
 
-// master now parses PGN into a node tree; assume `root` is that parsed tree:
-const root = parsePgnToNodeTree(ms, { newlineChar, strict })
-let node = root.variations[0]
-let result = ''
+      if (move == null) {
+        if (TERMINATION_MARKERS.indexOf(moves[halfMove]) > -1) {
+          result = moves[halfMove]
+        } else {
+          throw new Error(`Invalid move in PGN: ${moves[halfMove]}`)
+        }
+      } else {
+        result = ''
+        this._makeMove(move)
+        this._incPositionCount(this.fen())
 
-while (node) {
-  // 1) comments
-  if (node.comment !== undefined) {
-    this._comments[this.fen()] = node.comment
-  }
-
-  // 2) your suffix annotation logic
-  const suffixMatch = node.san.match(/(!!|\?\?|!\?|\?!|!|\?)$/)
-  const suffix      = suffixMatch ? suffixMatch[1] : ''
-  const san         = suffix
-    ? node.san.slice(0, -suffix.length)
-    : node.san
-
-  // 3) apply the move stripped of its suffix
-  const move = this._moveFromSan(san, strict)
-  if (move) {
-    this._makeMove(move)
-    this._incPositionCount(this.fen())
-    if (suffix) {
-      this._suffixes[this.fen()] = suffix
+        if (suffix) {
+          this._suffixes[this.fen()] = suffix
+        }
+      }
     }
-    result = ''
-  } else if (TERMINATION_MARKERS.includes(node.san)) {
-    result = node.san
-  } else {
-    throw new Error(`Invalid move in PGN: ${node.san}`)
-  }
-
-  // 4) descend into the main line
-  node = node.variations[0]
-}
 
     /*
      * Per section 8.2.6 of the PGN spec, the Result tag pair must match match
@@ -2075,7 +2172,6 @@ while (node) {
      * result tag is missing
      */
 
-    const result = parsedPgn.result
     if (
       result &&
       Object.keys(this._header).length &&
