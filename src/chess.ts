@@ -27,6 +27,34 @@
 
 import { parse } from './pgn'
 
+const MASK64 = 0xffffffffffffffffn
+
+function rotl(x: bigint, k: bigint): bigint {
+  return ((x << k) | (x >> (64n - k))) & 0xffffffffffffffffn
+}
+
+function wrappingMul(x: bigint, y: bigint) {
+  return (x * y) & MASK64
+}
+
+let state = 0xa187eb39cdcaed8f31c4b365b102e01en
+
+// xoroshiro128**
+export function rand() {
+  let s0 = BigInt(state & MASK64)
+  let s1 = BigInt((state >> 64n) & MASK64)
+
+  const result = wrappingMul(rotl(wrappingMul(s0, 5n), 7n), 9n)
+
+  s1 ^= s0
+  s0 = (rotl(s0, 24n) ^ s1 ^ (s1 << 16n)) & MASK64
+  s1 = rotl(s1, 37n)
+
+  state = (s1 << 64n) | s0
+
+  return result
+}
+
 export const WHITE = 'w'
 export const BLACK = 'b'
 
