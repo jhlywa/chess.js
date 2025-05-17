@@ -1,6 +1,8 @@
-import { rand } from '../src/chess'
+import { xoroshiro128 } from '../src/chess'
 
 test('rand', () => {
+  const rand = xoroshiro128(0xa187eb39cdcaed8f31c4b365b102e01en)
+
   const results = Array.from({ length: 5 }, () => rand().toString(16))
 
   // values take from reference implementation
