@@ -13,6 +13,10 @@ test('move - works - standard algebraic notation', () => {
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.after).toEqual(chess.fen())
   expect(chess.fen()).toEqual(next)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - standard algebraic notation (mates)', () => {
@@ -28,6 +32,10 @@ test('move - works - standard algebraic notation (mates)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - standard algebraic notation (white en passant)', () => {
@@ -50,6 +58,10 @@ test('move - works - standard algebraic notation (white en passant)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - standard algebraic notation (black en passant)', () => {
@@ -71,6 +83,10 @@ test('move - works - standard algebraic notation (black en passant)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - standard algebraic notation (pin disambiguates piece)', () => {
@@ -92,6 +108,10 @@ test('move - works - standard algebraic notation (pin disambiguates piece)', () 
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - permissive parser (accepts overly disambiguated piece)', () => {
@@ -111,6 +131,10 @@ test('move - works - permissive parser (accepts overly disambiguated piece)', ()
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - permissive parser (accepts correctly disambiguated piece)', () => {
@@ -130,6 +154,10 @@ test('move - works - permissive parser (accepts correctly disambiguated piece)',
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - strict - throws Error - overly disambiguated piece', () => {
@@ -157,6 +185,10 @@ test('move - works - verbose', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(true)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - verbose - promotion field ignored if not promoting', () => {
@@ -171,6 +203,10 @@ test('move - works - verbose - promotion field ignored if not promoting', () => 
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(true)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - verbose - under promotion', () => {
@@ -186,6 +222,10 @@ test('move - works - verbose - under promotion', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - throws Error - verbose (illegal move)', () => {
@@ -214,6 +254,10 @@ test('move - works - permissive parser (piece capture without x)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - permissive parser (pawn capture without x)', () => {
@@ -234,6 +278,10 @@ test('move - works - permissive parser (pawn capture without x)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - permissive parser (en passant capture without x)', () => {
@@ -254,6 +302,10 @@ test('move - works - permissive parser (en passant capture without x)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+
+  expect(chess.hash().toString(16)).toEqual(new Chess(next).hash().toString(16))
+  chess.undo()
+  expect(chess.hash().toString(16)).toEqual(new Chess(fen).hash().toString(16))
 })
 
 test('move - works - kingside castling', () => {
@@ -273,6 +325,14 @@ test('move - works - kingside castling', () => {
     expect(move.isQueensideCastle()).toEqual(false)
     expect(move.after).toEqual(chess.fen())
     expect(chess.fen()).toEqual(next)
+
+    expect(chess.hash().toString(16)).toEqual(
+      new Chess(next).hash().toString(16),
+    )
+    chess.undo()
+    expect(chess.hash().toString(16)).toEqual(
+      new Chess(fen).hash().toString(16),
+    )
   }
 })
 
@@ -293,6 +353,14 @@ test('move - works - queenside castling', () => {
     expect(move.isQueensideCastle()).toEqual(true)
     expect(move.after).toEqual(chess.fen())
     expect(chess.fen()).toEqual(next)
+
+    expect(chess.hash().toString(16)).toEqual(
+      new Chess(next).hash().toString(16),
+    )
+    chess.undo()
+    expect(chess.hash().toString(16)).toEqual(
+      new Chess(fen).hash().toString(16),
+    )
   }
 })
 
