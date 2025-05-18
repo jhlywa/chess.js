@@ -699,14 +699,6 @@ function strippedSan(move: string): string {
   return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
 }
 
-function trimFen(fen: string): string {
-  /*
-   * remove last two fields in FEN string as they're not needed when checking
-   * for repetition
-   */
-  return fen.split(' ').slice(0, 4).join(' ')
-}
-
 export class Chess {
   private _board = new Array<Piece>(128)
   private _turn: Color = WHITE
@@ -722,7 +714,7 @@ export class Chess {
   private _hash = 0n
 
   // tracks number of times a position has been seen for repetition checking
-  private _positionCount: Record<string, number> = {}
+  private _positionCount = new Map<bigint, number>()
 
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
     this.load(fen, { skipValidation })
@@ -740,7 +732,7 @@ export class Chess {
     this._comments = {}
     this._header = preserveHeaders ? this._header : { ...HEADER_TEMPLATE }
     this._hash = this._computeHash()
-    this._positionCount = {}
+    this._positionCount = new Map<bigint, number>()
 
     /*
      * Delete the SetUp and FEN headers (if preserved), the board is empty and
@@ -812,7 +804,7 @@ export class Chess {
 
     this._hash = this._computeHash()
     this._updateSetup(fen)
-    this._incPositionCount(fen)
+    this._incPositionCount()
   }
 
   fen() {
@@ -1361,7 +1353,7 @@ export class Chess {
   }
 
   isThreefoldRepetition(): boolean {
-    return this._getPositionCount(this.fen()) >= 3
+    return this._getPositionCount(this.hash()) >= 3
   }
 
   isDrawByFiftyMoves(): boolean {
@@ -1701,7 +1693,7 @@ export class Chess {
     const prettyMove = new Move(this, moveObj)
 
     this._makeMove(moveObj)
-    this._incPositionCount(prettyMove.after)
+    this._incPositionCount()
     return prettyMove
   }
 
@@ -1847,10 +1839,11 @@ export class Chess {
   }
 
   undo(): Move | null {
+    const hash = this._hash
     const move = this._undoMove()
     if (move) {
       const prettyMove = new Move(this, move)
-      this._decPositionCount(prettyMove.after)
+      this._decPositionCount(hash)
       return prettyMove
     }
     return null
@@ -2180,7 +2173,7 @@ export class Chess {
           throw new Error(`Invalid move in PGN: ${node.move}`)
         } else {
           this._makeMove(move)
-          this._incPositionCount(this.fen())
+          this._incPositionCount()
         }
       }
 
@@ -2507,29 +2500,26 @@ export class Chess {
 
   /*
    * Keeps track of position occurrence counts for the purpose of repetition
-   * checking. All three methods (`_inc`, `_dec`, and `_get`) trim the
-   * irrelevent information from the fen, initialising new positions, and
-   * removing old positions from the record if their counts are reduced to 0.
+   * checking. Old positions are removed from the map if their counts are reduced to 0.
    */
-  private _getPositionCount(fen: string): number {
-    const trimmedFen = trimFen(fen)
-    return this._positionCount[trimmedFen] || 0
+  private _getPositionCount(hash: bigint): number {
+    return this._positionCount.get(hash) ?? 0
   }
 
-  private _incPositionCount(fen: string) {
-    const trimmedFen = trimFen(fen)
-    if (this._positionCount[trimmedFen] === undefined) {
-      this._positionCount[trimmedFen] = 0
-    }
-    this._positionCount[trimmedFen] += 1
+  private _incPositionCount() {
+    this._positionCount.set(
+      this._hash,
+      (this._positionCount.get(this._hash) ?? 0) + 1,
+    )
   }
 
-  private _decPositionCount(fen: string) {
-    const trimmedFen = trimFen(fen)
-    if (this._positionCount[trimmedFen] === 1) {
-      delete this._positionCount[trimmedFen]
+  private _decPositionCount(hash: bigint) {
+    const currentCount = this._positionCount.get(hash) ?? 0
+
+    if (currentCount === 1) {
+      this._positionCount.delete(hash)
     } else {
-      this._positionCount[trimmedFen] -= 1
+      this._positionCount.set(hash, currentCount - 1)
     }
   }
 
