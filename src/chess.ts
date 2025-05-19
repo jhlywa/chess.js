@@ -1958,13 +1958,9 @@ export class Chess {
       newlineChar = '\r?\n',
     }: { strict?: boolean; newlineChar?: string } = {},
   ) {
-    function mask(str: string): string {
-      return str.replace(/\\/g, '\\')
-    }
-
     // If newlineChar is not the default, replace all instances with \n
     if (newlineChar !== '\r?\n') {
-      pgn = pgn.replace(new RegExp(mask(newlineChar), 'g'), '\n')
+      pgn = pgn.replace(new RegExp(newlineChar, 'g'), '\n')
     }
 
     const parsedPgn = parse(pgn)
