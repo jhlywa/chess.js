@@ -80,7 +80,7 @@ line
 	= comment:comment? moves:move* { return lineToTree(rootNode(comment), ...moves.flat()) }
 
 move
-	= _ moveNumber? _ san:san suffix:suffixAnnotation? _ nag:nag?  _ comment:comment? variations:variation* { return node(san, suffix, nag, comment, variations) }
+	= _ moveNumber? _ san:san suffix:suffixAnnotation? nag:nag*  _ comment:comment? variations:variation* { return node(san, suffix, nag, comment, variations) }
 
 moveNumber "move number"
     = [0-9]*[.]? _ [.]*
@@ -92,7 +92,7 @@ suffixAnnotation "suffix annotation"
 	= [!?] |1..2|
 
 nag "NAG"
-	= '$'[0-9]+
+	= _ '$' nag:$[0-9]+ { return nag }
 
 comment
 	= braceComment / restOfLineComment
