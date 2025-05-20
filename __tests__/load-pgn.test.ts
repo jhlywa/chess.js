@@ -213,6 +213,7 @@ test('loadPgn - works - preserves RAV inside comments', () => {
     {
       fen: '3q1rk1/1b1rbp1p/p2ppnp1/1p6/3BPP2/P1NB3Q/1PP3PP/4RR1K w - - 0 18',
       comment: ' (0.05 → 1.03) Inaccuracy. The best move was h6. ',
+      suffix: ['?'],
     },
   ]
   const pgn = `

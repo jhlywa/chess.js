@@ -29,17 +29,17 @@ describe('Suffix-Only Support', () => {
       {
         fen: fen2,
         comment: 'Aggressive',
-        suffix: '!?',
+        suffix: ['!', '?'],
       },
       {
         fen: fen3,
         comment: 'Best Move',
-        suffix: '!!',
+        suffix: ['!', '!'],
       },
       {
         fen: fen4,
         comment: 'Blunder',
-        suffix: '??',
+        suffix: ['?', '?'],
       },
     ])
   })
