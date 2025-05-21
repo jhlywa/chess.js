@@ -51,6 +51,10 @@ export type Square =
     'a2' | 'b2' | 'c2' | 'd2' | 'e2' | 'f2' | 'g2' | 'h2' |
     'a1' | 'b1' | 'c1' | 'd1' | 'e1' | 'f1' | 'g1' | 'h1'
 
+export const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'] as const
+
+export type Suffix = (typeof SUFFIX_LIST)[number]
+
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -677,12 +681,15 @@ export class Chess {
   private _moveNumber = 0
   private _history: History[] = []
   private _comments: Record<string, string> = {}
+  private _suffixes: Record<string, Suffix> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
   // tracks number of times a position has been seen for repetition checking
   private _positionCount: Record<string, number> = {}
 
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
+    this._comments = {}
+    this._suffixes = {}
     this.load(fen, { skipValidation })
   }
 
@@ -892,6 +899,8 @@ export class Chess {
 
   reset() {
     this.load(DEFAULT_POSITION)
+    this._comments = {}
+    this._suffixes = {}
   }
 
   get(square: Square): Piece | undefined {
@@ -2009,13 +2018,18 @@ export class Chess {
 
     while (node) {
       if (node.move) {
-        const move = this._moveFromSan(node.move, strict)
+        const suffix = node.suffix
 
-        if (move == null) {
+        const move = this._moveFromSan(node.move, strict)
+        if (!move) {
           throw new Error(`Invalid move in PGN: ${node.move}`)
-        } else {
-          this._makeMove(move)
-          this._incPositionCount(this.fen())
+        }
+
+        this._makeMove(move)
+        this._incPositionCount(this.fen())
+
+        if (suffix) {
+          this._suffixes[this.fen()] = suffix as Suffix
         }
       }
 
@@ -2416,11 +2430,62 @@ export class Chess {
     return comment
   }
 
-  getComments(): { fen: string; comment: string }[] {
+  getComments(): { fen: string; comment: string; suffix?: string }[] {
     this._pruneComments()
-    return Object.keys(this._comments).map((fen: string) => {
-      return { fen: fen, comment: this._comments[fen] }
-    })
+
+    const allFenKeys = new Set<string>()
+    Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen))
+    Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen))
+
+    const result: { fen: string; comment: string; suffix?: string }[] = []
+
+    for (const fen of allFenKeys) {
+      const commentContent = this._comments[fen]
+      const suffixAnnotation = this._suffixes[fen]
+
+      const entry: { fen: string; comment: string; suffix?: string } = {
+        fen: fen,
+        comment: commentContent !== undefined ? commentContent : '',
+      }
+
+      if (suffixAnnotation !== undefined) {
+        entry.suffix = suffixAnnotation
+      }
+
+      result.push(entry)
+    }
+
+    return result
+  }
+
+  /**
+   * Get the suffix annotation for the given position (or current one).
+   */
+  public getSuffix(fen?: string): Suffix | undefined {
+    const key = fen ?? this.fen()
+    return this._suffixes[key]
+  }
+
+  /**
+   * Set or overwrite the suffix annotation for the given position (or current).
+   * Throws if the suffix isn’t one of the allowed SUFFIX_LIST values.
+   */
+  public setSuffix(suffix: Suffix, fen?: string): void {
+    if (!SUFFIX_LIST.includes(suffix)) {
+      throw new Error(`Invalid suffix: ${suffix}`)
+    }
+    this._suffixes[fen || this.fen()] = suffix
+  }
+
+  /**
+   * Remove the suffix annotation for the given position (or current).
+   */
+
+  public removeSuffix(fen?: string): Suffix | undefined {
+    const key = fen || this.fen()
+    const old = this._suffixes[key]
+    delete this._suffixes[key]
+    return old
   }
 
   /**
