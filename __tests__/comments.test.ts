@@ -29,19 +29,78 @@ describe('Suffix-Only Support', () => {
       {
         fen: fen2,
         comment: 'Aggressive',
-        suffix: ['!', '?'],
+        suffix: '!?',
       },
       {
         fen: fen3,
         comment: 'Best Move',
-        suffix: ['!', '!'],
+        suffix: '!!',
       },
       {
         fen: fen4,
         comment: 'Blunder',
-        suffix: ['?', '?'],
+        suffix: '??',
       },
     ])
+  })
+})
+
+describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
+  it('should correctly handle comments, suffixes, and suffix-only cases from PGN loading', () => {
+    const chess = new Chess()
+    const pgn =
+      '1. c4 {Comment for c4} e5!? {Comment and Suffix for e5} 2. Nf3!! Nc6 *'
+
+    chess.loadPgn(pgn)
+
+    const fenC4 = 'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1'
+    const fenE5 = 'rnbqkbnr/pppp1ppp/8/4p3/2P5/8/PP1PPPPP/RNBQKBNR w KQkq - 0 2'
+    const fenNf3 =
+      'rnbqkbnr/pppp1ppp/8/4p3/2P5/5N2/PP1PPPPP/RNBQKB1R b KQkq - 1 2'
+    const fenNc6 =
+      'r1bqkbnr/pppp1ppp/2n5/4p3/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq - 2 3'
+
+    expect(chess.fen()).toEqual(fenNc6)
+
+    const commentsResult = chess.getComments()
+
+    const expectedComments = [
+      {
+        fen: fenC4,
+        comment: 'Comment for c4',
+      },
+      {
+        fen: fenE5,
+        comment: 'Comment and Suffix for e5',
+        suffix: '!?',
+      },
+      {
+        fen: fenNf3,
+        comment: '',
+        suffix: '!!',
+      },
+    ]
+
+    expect(commentsResult).toEqual(expectedComments)
+  })
+
+  it('should handle manually set suffix-only with an empty comment string for the current FEN', () => {
+    const chess = new Chess()
+    chess.move('g3')
+    const currentFen = chess.fen()
+
+    chess.setSuffix('?!')
+
+    const commentsResult = chess.getComments()
+
+    const entryForCurrentFen = commentsResult.find((c) => c.fen === currentFen)
+
+    expect(entryForCurrentFen).toBeDefined()
+    expect(entryForCurrentFen).toEqual({
+      fen: currentFen,
+      comment: '',
+      suffix: '?!',
+    })
   })
 })
 

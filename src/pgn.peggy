@@ -89,7 +89,7 @@ san "standard algebraic notation"
 	= $([a-zA-Z][a-zA-Z0-9-=+#]+)
 
 suffixAnnotation "suffix annotation"
-	= [!?] |1..2|
+	= $[!?] |1..2|
 
 nag "NAG"
 	= '$'[0-9]+

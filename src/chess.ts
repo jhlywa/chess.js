@@ -2436,16 +2436,30 @@ export class Chess {
 
   getComments(): { fen: string; comment: string; suffix?: string }[] {
     this._pruneComments()
-    return Object.keys(this._comments).map((fen: string) => {
+
+    const allFenKeys = new Set<string>()
+    Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen))
+    Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen))
+
+    const result: { fen: string; comment: string; suffix?: string }[] = []
+
+    for (const fen of allFenKeys) {
+      const commentContent = this._comments[fen]
+      const suffixAnnotation = this._suffixes[fen]
+
       const entry: { fen: string; comment: string; suffix?: string } = {
-        fen,
-        comment: this._comments[fen],
+        fen: fen,
+        comment: commentContent !== undefined ? commentContent : '',
       }
-      if (this._suffixes[fen]) {
-        entry.suffix = this._suffixes[fen]
+
+      if (suffixAnnotation !== undefined) {
+        entry.suffix = suffixAnnotation
       }
-      return entry
-    })
+
+      result.push(entry)
+    }
+
+    return result
   }
 
   /**
