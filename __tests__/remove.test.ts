@@ -13,27 +13,21 @@ test('remove - returns piece', () => {
   expect(chess.remove('d1')).toEqual({ type: QUEEN, color: WHITE })
   expect(chess.get('d1')).toEqual(undefined)
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - returns undefined for empty square', () => {
   const chess = new Chess()
   expect(chess.remove('e4')).toEqual(undefined)
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - returns undefined for invalid square', () => {
   const chess = new Chess()
   expect(chess.remove('bad_square' as Square)).toEqual(undefined)
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing white kingside rook loses castling right', () => {
@@ -42,9 +36,7 @@ test('remove - removing white kingside rook loses castling right', () => {
   chess.remove('h1')
   expect(chess.moves()).not.toContain('O-O')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing white queenside rook loses castling right', () => {
@@ -53,9 +45,7 @@ test('remove - removing white queenside rook loses castling right', () => {
   chess.remove('a1')
   expect(chess.moves()).not.toContain('O-O-O')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing white king loses castling rights', () => {
@@ -76,9 +66,7 @@ test('remove - removing black kingside rook loses castling right', () => {
   chess.remove('h8')
   expect(chess.moves()).not.toContain('O-O')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing black queenside rook loses castling right', () => {
@@ -87,9 +75,7 @@ test('remove - removing black queenside rook loses castling right', () => {
   chess.remove('a8')
   expect(chess.moves()).not.toContain('O-O-O')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing black king loses castling rights', () => {
@@ -112,9 +98,7 @@ test('remove - removing white pawn clears en passant square', () => {
   chess.remove('f4')
   expect(chess.moves()).not.toContain('gxf3')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing black pawn clears white en passant square 1', () => {
@@ -125,9 +109,7 @@ test('remove - removing black pawn clears white en passant square 1', () => {
   chess.remove('g4')
   expect(chess.moves()).not.toContain('gxf3')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing black pawn clears white en passant square 2', () => {
@@ -138,9 +120,7 @@ test('remove - removing black pawn clears white en passant square 2', () => {
   chess.remove('b4')
   expect(chess.moves()).not.toContain('bxc3')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing black pawn clears en passant square', () => {
@@ -151,9 +131,7 @@ test('remove - removing black pawn clears en passant square', () => {
   chess.remove('f5')
   expect(chess.moves()).not.toContain('gxf6')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing white pawn clears black en passant square 1', () => {
@@ -164,9 +142,7 @@ test('remove - removing white pawn clears black en passant square 1', () => {
   chess.remove('g5')
   expect(chess.moves()).not.toContain('gxf6')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - removing white pawn clears black en passant square 2', () => {
@@ -177,9 +153,7 @@ test('remove - removing white pawn clears black en passant square 2', () => {
   chess.remove('b5')
   expect(chess.moves()).not.toContain('bxc6')
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - reaching initial position deletes setup headers', () => {
@@ -195,9 +169,7 @@ test('remove - reaching initial position deletes setup headers', () => {
   expect(headers['Setup']).toBeUndefined()
   expect(headers['FEN']).toBeUndefined()
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('remove - if a move has been made, reaching initial position does not delete setup headers', () => {
@@ -224,7 +196,5 @@ test('remove - if a move has been made, reaching initial position does not delet
   const headers = chess.getHeaders()
   expect(headers['FEN']).toBeDefined()
 
-  expect(chess.hash()).toEqual(
-    new Chess(chess.fen()).hash(),
-  )
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
