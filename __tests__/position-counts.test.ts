@@ -3,22 +3,22 @@ import { Chess as ChessClass, DEFAULT_POSITION } from '../src/chess'
 // We need to use `Chess as any` to access private property
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/naming-convention
 const Chess = ChessClass as any
-const defaultHash = new Chess(DEFAULT_POSITION).hash()
+const defaultHash = BigInt('0x' + new Chess(DEFAULT_POSITION).hash())
 const e4Fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
-const e4Hash = new Chess(e4Fen).hash()
+const e4Hash = BigInt('0x' + new Chess(e4Fen).hash())
 
 test('positionCount - counts repeated positions', () => {
   const chess = new Chess()
   expect(chess._getPositionCount(defaultHash)).toBe(1)
 
-  const hashes: string[] = [defaultHash]
+  const hashes: bigint[] = [defaultHash]
   const moves: string[] = ['Nf3', 'Nf6', 'Ng1', 'Ng8']
   for (const move of moves) {
     for (const hash of hashes) {
       expect(chess._getPositionCount(hash)).toBe(1)
     }
     chess.move(move)
-    hashes.push(chess.hash())
+    hashes.push(BigInt('0x' + chess.hash()))
   }
   expect(chess._getPositionCount(defaultHash)).toBe(2)
   expect(chess._positionCount.size).toBe(4)
@@ -58,7 +58,7 @@ test('positionCount - resets when loading FEN', () => {
   const newFen =
     'rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'
   chess.load(newFen)
-  const newHash = chess.hash()
+  const newHash = BigInt('0x' + chess.hash())
 
   expect(chess._getPositionCount(defaultHash)).toBe(0)
   expect(chess._getPositionCount(e4Hash)).toBe(0)
@@ -75,16 +75,22 @@ test('positionCount - resets when loading PGN', () => {
   expect(chess._getPositionCount(e4Hash)).toBe(0)
   expect(
     chess._getPositionCount(
-      new Chess(
-        'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1',
-      ).hash(),
+      BigInt(
+        '0x' +
+          new Chess(
+            'rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1',
+          ).hash(),
+      ),
     ),
   ).toBe(1)
   expect(
     chess._getPositionCount(
-      new Chess(
-        'rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2',
-      ).hash(),
+      BigInt(
+        '0x' +
+          new Chess(
+            'rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2',
+          ).hash(),
+      ),
     ),
   ).toBe(1)
   expect(chess._positionCount.size).toBe(3)

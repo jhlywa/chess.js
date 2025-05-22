@@ -1267,8 +1267,8 @@ export class Chess {
     return square === -1 ? false : this._attacked(swapColor(color), square)
   }
 
-  hash(): bigint {
-    return this._hash
+  hash(): string {
+    return this._hash.toString(16)
   }
 
   isAttacked(square: Square, attackedBy: Color): boolean {
@@ -1353,7 +1353,7 @@ export class Chess {
   }
 
   isThreefoldRepetition(): boolean {
-    return this._getPositionCount(this.hash()) >= 3
+    return this._getPositionCount(this._hash) >= 3
   }
 
   isDrawByFiftyMoves(): boolean {
