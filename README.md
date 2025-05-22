@@ -340,11 +340,11 @@ chess.getHeaders()
 
 ### .hash()
 
-Returns a unique 64-bit bigint hash for the current position.
+Returns a unique 64-bit hash as a hexidecimal string for the current position.
 
 ```ts
 chess.hash()
-// -> 3762458558257837166n
+// -> '3436f01fd716346e'
 ```
 
 ### .history([ options ])
