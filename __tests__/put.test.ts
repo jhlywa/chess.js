@@ -22,6 +22,10 @@ test('put', () => {
   }
   expect(chess.put(piece, 'a1')).toEqual(true)
   expect(chess.get('a1')).toEqual(piece)
+
+  expect(chess.hash()).toEqual(
+    new Chess(chess.fen(), { skipValidation: true }).hash(),
+  )
 })
 
 //test('put - capitalized square', () => {
@@ -67,6 +71,10 @@ test('put - allow two kings if overwriting the same square', () => {
   const piece: Piece = { type: KING, color: WHITE }
   expect(chess.put(piece, 'a2')).toEqual(true)
   expect(chess.put(piece, 'a2')).toEqual(true)
+
+  expect(chess.hash()).toEqual(
+    new Chess(chess.fen(), { skipValidation: true }).hash(),
+  )
 })
 
 test('put - replacing white kingside rook loses castling right', () => {
@@ -74,6 +82,8 @@ test('put - replacing white kingside rook loses castling right', () => {
 
   chess.put({ type: KNIGHT, color: WHITE }, 'h1')
   expect(chess.moves()).not.toContain('O-O')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - replacing white queenside rook loses castling right', () => {
@@ -81,6 +91,8 @@ test('put - replacing white queenside rook loses castling right', () => {
 
   chess.put({ type: KNIGHT, color: WHITE }, 'a1')
   expect(chess.moves()).not.toContain('O-O-O')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - replacing white king loses castling rights', () => {
@@ -89,6 +101,10 @@ test('put - replacing white king loses castling rights', () => {
   chess.put({ type: KNIGHT, color: WHITE }, 'e1')
   expect(chess.moves()).not.toContain('O-O')
   expect(chess.moves()).not.toContain('O-O-O')
+
+  expect(chess.hash()).toEqual(
+    new Chess(chess.fen(), { skipValidation: true }).hash(),
+  )
 })
 
 test('put - replacing black kingside rook loses castling right', () => {
@@ -96,6 +112,8 @@ test('put - replacing black kingside rook loses castling right', () => {
 
   chess.put({ type: KNIGHT, color: BLACK }, 'h8')
   expect(chess.moves()).not.toContain('O-O')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - replacing black queenside rook loses castling right', () => {
@@ -103,6 +121,8 @@ test('put - replacing black queenside rook loses castling right', () => {
 
   chess.put({ type: KNIGHT, color: BLACK }, 'a8')
   expect(chess.moves()).not.toContain('O-O-O')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - replacing black king loses castling rights', () => {
@@ -111,6 +131,10 @@ test('put - replacing black king loses castling rights', () => {
   chess.put({ type: KNIGHT, color: BLACK }, 'e8')
   expect(chess.moves()).not.toContain('O-O')
   expect(chess.moves()).not.toContain('O-O-O')
+
+  expect(chess.hash()).toEqual(
+    new Chess(chess.fen(), { skipValidation: true }).hash(),
+  )
 })
 
 test('put - replacing white pawn clears en passant square', () => {
@@ -120,6 +144,8 @@ test('put - replacing white pawn clears en passant square', () => {
 
   chess.put({ type: KNIGHT, color: WHITE }, 'f4')
   expect(chess.moves()).not.toContain('gxf3')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - occupying white en passant square clears it', () => {
@@ -129,6 +155,8 @@ test('put - occupying white en passant square clears it', () => {
 
   chess.put({ type: KNIGHT, color: BLACK }, 'f3')
   expect(chess.moves()).not.toContain('gxf3')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - occupying white starting square clears en passant square', () => {
@@ -138,6 +166,8 @@ test('put - occupying white starting square clears en passant square', () => {
 
   chess.put({ type: KNIGHT, color: WHITE }, 'f2')
   expect(chess.moves()).not.toContain('gxf3')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - replacing black pawn clears white en passant square 1', () => {
@@ -147,6 +177,8 @@ test('put - replacing black pawn clears white en passant square 1', () => {
 
   chess.put({ type: BISHOP, color: BLACK }, 'g4')
   expect(chess.moves()).not.toContain('gxf3')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - replacing black pawn clears white en passant square 2', () => {
@@ -156,6 +188,8 @@ test('put - replacing black pawn clears white en passant square 2', () => {
 
   chess.put({ type: BISHOP, color: BLACK }, 'b4')
   expect(chess.moves()).not.toContain('bxc3')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - replacing black pawn clears en passant square', () => {
@@ -165,6 +199,8 @@ test('put - replacing black pawn clears en passant square', () => {
 
   chess.put({ type: KNIGHT, color: BLACK }, 'f5')
   expect(chess.moves()).not.toContain('gxf6')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - occupying black en passant square clears it', () => {
@@ -174,6 +210,8 @@ test('put - occupying black en passant square clears it', () => {
 
   chess.put({ type: KNIGHT, color: WHITE }, 'f6')
   expect(chess.moves()).not.toContain('gxf6')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - occupying black starting square clears en passant square', () => {
@@ -183,6 +221,8 @@ test('put - occupying black starting square clears en passant square', () => {
 
   chess.put({ type: KNIGHT, color: BLACK }, 'f7')
   expect(chess.moves()).not.toContain('gxf6')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - replacing white pawn clears black en passant square 1', () => {
@@ -192,6 +232,8 @@ test('put - replacing white pawn clears black en passant square 1', () => {
 
   chess.put({ type: BISHOP, color: WHITE }, 'g5')
   expect(chess.moves()).not.toContain('gxf6')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
 test('put - replacing white pawn clears black en passant square 2', () => {
@@ -201,4 +243,6 @@ test('put - replacing white pawn clears black en passant square 2', () => {
 
   chess.put({ type: BISHOP, color: WHITE }, 'b5')
   expect(chess.moves()).not.toContain('bxc6')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })

@@ -338,6 +338,15 @@ chess.getHeaders()
 // -> { White: 'Morphy', Black: 'Anderssen', Date: '1858-??-??' }
 ```
 
+### .hash()
+
+Returns a unique 64-bit hash as a hexidecimal string for the current position.
+
+```ts
+chess.hash()
+// -> '3436f01fd716346e'
+```
+
 ### .history([ options ])
 
 Returns a list containing the moves of the current game. Options is an optional
