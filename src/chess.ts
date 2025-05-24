@@ -1187,71 +1187,62 @@ export class Chess {
   private _attacked(color: Color, square: number, verbose: true): Square[]
   private _attacked(color: Color, square: number, verbose?: boolean) {
     const attackers: Square[] = []
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      // did we run off the end of the board
-      if (i & 0x88) {
-        i += 7
-        continue
-      }
 
-      // if empty square or wrong color
-      if (this._board[i] === undefined || this._board[i].color !== color) {
-        continue
-      }
+    for (const pieceSymbol of PIECE_SYMBOLS) {
+      for (const i of this._pieceLists[color][pieceSymbol]) {
+        const difference = i - square
 
-      const piece = this._board[i]
-      const difference = i - square
+        // skip - to/from square are the same
+        if (difference === 0) {
+          continue
+        }
 
-      // skip - to/from square are the same
-      if (difference === 0) {
-        continue
-      }
+        const index = difference + 119
 
-      const index = difference + 119
+        if (ATTACKS[index] & PIECE_MASKS[pieceSymbol]) {
+          if (pieceSymbol === PAWN) {
+            if (
+              (difference > 0 && color === WHITE) ||
+              (difference <= 0 && color === BLACK)
+            ) {
+              if (!verbose) {
+                return true
+              } else {
+                attackers.push(algebraic(i))
+              }
+            }
+            continue
+          }
 
-      if (ATTACKS[index] & PIECE_MASKS[piece.type]) {
-        if (piece.type === PAWN) {
-          if (
-            (difference > 0 && piece.color === WHITE) ||
-            (difference <= 0 && piece.color === BLACK)
-          ) {
+          // if the piece is a knight or a king
+          if (pieceSymbol === 'n' || pieceSymbol === 'k') {
             if (!verbose) {
               return true
             } else {
               attackers.push(algebraic(i))
+              continue
             }
           }
-          continue
-        }
 
-        // if the piece is a knight or a king
-        if (piece.type === 'n' || piece.type === 'k') {
-          if (!verbose) {
-            return true
-          } else {
-            attackers.push(algebraic(i))
-            continue
+          const offset = RAYS[index]
+          let j = i + offset
+
+          let blocked = false
+          while (j !== square) {
+            if (this._board[j] != null) {
+              blocked = true
+              break
+            }
+            j += offset
           }
-        }
 
-        const offset = RAYS[index]
-        let j = i + offset
-
-        let blocked = false
-        while (j !== square) {
-          if (this._board[j] != null) {
-            blocked = true
-            break
-          }
-          j += offset
-        }
-
-        if (!blocked) {
-          if (!verbose) {
-            return true
-          } else {
-            attackers.push(algebraic(i))
-            continue
+          if (!blocked) {
+            if (!verbose) {
+              return true
+            } else {
+              attackers.push(algebraic(i))
+              continue
+            }
           }
         }
       }
@@ -1500,33 +1491,33 @@ export class Chess {
         let to: number
         if (type === PAWN) {
           // single square, non-capturing
-        to = from + PAWN_OFFSETS[us][0]
-        if (!this._board[to]) {
-          addMove(moves, us, from, to, PAWN)
+          to = from + PAWN_OFFSETS[us][0]
+          if (!this._board[to]) {
+            addMove(moves, us, from, to, PAWN)
 
-          // double square
-          to = from + PAWN_OFFSETS[us][1]
-          if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
-            addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN)
+            // double square
+            to = from + PAWN_OFFSETS[us][1]
+            if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
+              addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN)
+            }
           }
-        }
 
-        // pawn captures
-        for (let j = 2; j < 4; j++) {
-          to = from + PAWN_OFFSETS[us][j]
-          if (to & 0x88) continue
+          // pawn captures
+          for (let j = 2; j < 4; j++) {
+            to = from + PAWN_OFFSETS[us][j]
+            if (to & 0x88) continue
 
-          if (this._board[to]?.color === them) {
-            addMove(
-              moves,
-              us,
-              from,
-              to,
-              PAWN,
-              this._board[to].type,
-              BITS.CAPTURE,
-            )
-          } else if (to === this._epSquare) {
+            if (this._board[to]?.color === them) {
+              addMove(
+                moves,
+                us,
+                from,
+                to,
+                PAWN,
+                this._board[to].type,
+                BITS.CAPTURE,
+              )
+            } else if (to === this._epSquare) {
               addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
             }
           }
