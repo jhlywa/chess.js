@@ -207,12 +207,12 @@ test('attackers - no attackers', () => {
 
 test('attackers - readme tests', () => {
   const chess = new Chess()
-  expect(chess.attackers('f3')).toEqual(['e2', 'g2', 'g1'])
-  expect(chess.attackers('e2')).toEqual(['d1', 'e1', 'f1', 'g1'])
-  expect(chess.attackers('f6')).toEqual([])
+  expect(chess.attackers('f3')).toIncludeSameMembers(['e2', 'g2', 'g1'])
+  expect(chess.attackers('e2')).toIncludeSameMembers(['d1', 'e1', 'f1', 'g1'])
+  expect(chess.attackers('f6')).toIncludeSameMembers([])
   chess.move('e4')
-  expect(chess.attackers('f6')).toEqual(['g8', 'e7', 'g7'])
-  expect(chess.attackers('f3', WHITE)).toEqual(['g2', 'd1', 'g1'])
+  expect(chess.attackers('f6')).toIncludeSameMembers(['g8', 'e7', 'g7'])
+  expect(chess.attackers('f3', WHITE)).toIncludeSameMembers(['g2', 'd1', 'g1'])
   chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
-  expect(chess.attackers('c6', BLACK)).toEqual(['e7'])
+  expect(chess.attackers('c6', BLACK)).toIncludeSameMembers(['e7'])
 })

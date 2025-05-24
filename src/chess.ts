@@ -78,7 +78,8 @@ export const QUEEN = 'q'
 export const KING = 'k'
 
 export type Color = 'w' | 'b'
-export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
+export const PIECE_SYMBOLS = ['p', 'n', 'b', 'r', 'q', 'k'] as const
+export type PieceSymbol = (typeof PIECE_SYMBOLS)[number]
 
 // prettier-ignore
 export type Square =
@@ -111,7 +112,6 @@ type InternalMove = {
 
 interface History {
   move: InternalMove
-  kings: Record<Color, number>
   turn: Color
   castling: Record<Color, number>
   epSquare: number
@@ -703,7 +703,10 @@ export class Chess {
   private _board = new Array<Piece>(128)
   private _turn: Color = WHITE
   private _header: Record<string, string | null> = {}
-  private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
+  private _pieceLists: Record<Color, Record<PieceSymbol, number[]>> = {
+    w: { p: [], n: [], b: [], r: [], q: [], k: [] },
+    b: { p: [], n: [], b: [], r: [], q: [], k: [] },
+  }
   private _epSquare = -1
   private _halfMoves = 0
   private _moveNumber = 0
@@ -722,7 +725,10 @@ export class Chess {
 
   clear({ preserveHeaders = false } = {}) {
     this._board = new Array<Piece>(128)
-    this._kings = { w: EMPTY, b: EMPTY }
+    this._pieceLists = {
+      w: { p: [], n: [], b: [], r: [], q: [], k: [] },
+      b: { p: [], n: [], b: [], r: [], q: [], k: [] },
+    }
     this._turn = WHITE
     this._castling = { w: 0, b: 0 }
     this._epSquare = EMPTY
@@ -1034,6 +1040,7 @@ export class Chess {
   private _set(sq: number, piece: Piece) {
     this._hash ^= this._pieceKey(sq)
     this._board[sq] = piece
+    this._pieceLists[piece.color][piece.type].push(sq)
     this._hash ^= this._pieceKey(sq)
   }
 
@@ -1056,38 +1063,41 @@ export class Chess {
     // don't let the user place more than one king
     if (
       type == KING &&
-      !(this._kings[color] == EMPTY || this._kings[color] == sq)
+      !(
+        this._pieceLists[color][KING][0] == undefined ||
+        this._pieceLists[color][KING][0] == sq
+      )
     ) {
       return false
     }
 
-    const currentPieceOnSquare = this._board[sq]
-
-    // if one of the kings will be replaced by the piece from args, set the `_kings` respective entry to `EMPTY`
-    if (currentPieceOnSquare && currentPieceOnSquare.type === KING) {
-      this._kings[currentPieceOnSquare.color] = EMPTY
+    if (this._board[sq]) {
+      this._clear(sq)
     }
-
     this._set(sq, { type: type as PieceSymbol, color: color as Color })
-
-    if (type === KING) {
-      this._kings[color] = sq
-    }
 
     return true
   }
 
   private _clear(sq: number) {
     this._hash ^= this._pieceKey(sq)
+
+    const piece = this._board[sq]
+    const list = this._pieceLists[piece.color][piece.type]
+    const index = list.indexOf(sq)
+    list[index] = list[list.length - 1]
+    list.pop()
+
     delete this._board[sq]
   }
 
   remove(square: Square): Piece | undefined {
     const piece = this.get(square)
-    this._clear(Ox88[square])
-    if (piece && piece.type === KING) {
-      this._kings[piece.color] = EMPTY
+    if (!piece) {
+      return
     }
+
+    this._clear(Ox88[square])
 
     this._updateCastlingRights()
     this._updateEnPassantSquare()
@@ -1177,71 +1187,62 @@ export class Chess {
   private _attacked(color: Color, square: number, verbose: true): Square[]
   private _attacked(color: Color, square: number, verbose?: boolean) {
     const attackers: Square[] = []
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      // did we run off the end of the board
-      if (i & 0x88) {
-        i += 7
-        continue
-      }
 
-      // if empty square or wrong color
-      if (this._board[i] === undefined || this._board[i].color !== color) {
-        continue
-      }
+    for (const pieceSymbol of PIECE_SYMBOLS) {
+      for (const i of this._pieceLists[color][pieceSymbol]) {
+        const difference = i - square
 
-      const piece = this._board[i]
-      const difference = i - square
+        // skip - to/from square are the same
+        if (difference === 0) {
+          continue
+        }
 
-      // skip - to/from square are the same
-      if (difference === 0) {
-        continue
-      }
+        const index = difference + 119
 
-      const index = difference + 119
+        if (ATTACKS[index] & PIECE_MASKS[pieceSymbol]) {
+          if (pieceSymbol === PAWN) {
+            if (
+              (difference > 0 && color === WHITE) ||
+              (difference <= 0 && color === BLACK)
+            ) {
+              if (!verbose) {
+                return true
+              } else {
+                attackers.push(algebraic(i))
+              }
+            }
+            continue
+          }
 
-      if (ATTACKS[index] & PIECE_MASKS[piece.type]) {
-        if (piece.type === PAWN) {
-          if (
-            (difference > 0 && piece.color === WHITE) ||
-            (difference <= 0 && piece.color === BLACK)
-          ) {
+          // if the piece is a knight or a king
+          if (pieceSymbol === 'n' || pieceSymbol === 'k') {
             if (!verbose) {
               return true
             } else {
               attackers.push(algebraic(i))
+              continue
             }
           }
-          continue
-        }
 
-        // if the piece is a knight or a king
-        if (piece.type === 'n' || piece.type === 'k') {
-          if (!verbose) {
-            return true
-          } else {
-            attackers.push(algebraic(i))
-            continue
+          const offset = RAYS[index]
+          let j = i + offset
+
+          let blocked = false
+          while (j !== square) {
+            if (this._board[j] != null) {
+              blocked = true
+              break
+            }
+            j += offset
           }
-        }
 
-        const offset = RAYS[index]
-        let j = i + offset
-
-        let blocked = false
-        while (j !== square) {
-          if (this._board[j] != null) {
-            blocked = true
-            break
-          }
-          j += offset
-        }
-
-        if (!blocked) {
-          if (!verbose) {
-            return true
-          } else {
-            attackers.push(algebraic(i))
-            continue
+          if (!blocked) {
+            if (!verbose) {
+              return true
+            } else {
+              attackers.push(algebraic(i))
+              continue
+            }
           }
         }
       }
@@ -1263,8 +1264,10 @@ export class Chess {
   }
 
   private _isKingAttacked(color: Color): boolean {
-    const square = this._kings[color]
-    return square === -1 ? false : this._attacked(swapColor(color), square)
+    const square = this._pieceLists[color][KING][0]
+    return square === undefined
+      ? false
+      : this._attacked(swapColor(color), square)
   }
 
   hash(): string {
@@ -1474,85 +1477,80 @@ export class Chess {
       }
     }
 
-    for (let from = firstSquare; from <= lastSquare; from++) {
-      // did we run off the end of the board
-      if (from & 0x88) {
-        from += 7
+    for (const pieceSymbol of PIECE_SYMBOLS) {
+      if (forPiece && forPiece !== pieceSymbol) {
         continue
       }
-
-      // empty square or opponent, skip
-      if (!this._board[from] || this._board[from].color === them) {
-        continue
-      }
-      const { type } = this._board[from]
-
-      let to: number
-      if (type === PAWN) {
-        if (forPiece && forPiece !== type) continue
-
-        // single square, non-capturing
-        to = from + PAWN_OFFSETS[us][0]
-        if (!this._board[to]) {
-          addMove(moves, us, from, to, PAWN)
-
-          // double square
-          to = from + PAWN_OFFSETS[us][1]
-          if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
-            addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN)
-          }
+      for (const from of this._pieceLists[us][pieceSymbol]) {
+        if (singleSquare && from !== firstSquare) {
+          continue
         }
 
-        // pawn captures
-        for (let j = 2; j < 4; j++) {
-          to = from + PAWN_OFFSETS[us][j]
-          if (to & 0x88) continue
+        const { type } = this._board[from]
 
-          if (this._board[to]?.color === them) {
-            addMove(
-              moves,
-              us,
-              from,
-              to,
-              PAWN,
-              this._board[to].type,
-              BITS.CAPTURE,
-            )
-          } else if (to === this._epSquare) {
-            addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
+        let to: number
+        if (type === PAWN) {
+          // single square, non-capturing
+          to = from + PAWN_OFFSETS[us][0]
+          if (!this._board[to]) {
+            addMove(moves, us, from, to, PAWN)
+
+            // double square
+            to = from + PAWN_OFFSETS[us][1]
+            if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
+              addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN)
+            }
           }
-        }
-      } else {
-        if (forPiece && forPiece !== type) continue
 
-        for (let j = 0, len = PIECE_OFFSETS[type].length; j < len; j++) {
-          const offset = PIECE_OFFSETS[type][j]
-          to = from
+          // pawn captures
+          for (let j = 2; j < 4; j++) {
+            to = from + PAWN_OFFSETS[us][j]
+            if (to & 0x88) continue
 
-          while (true) {
-            to += offset
-            if (to & 0x88) break
-
-            if (!this._board[to]) {
-              addMove(moves, us, from, to, type)
-            } else {
-              // own color, stop loop
-              if (this._board[to].color === us) break
-
+            if (this._board[to]?.color === them) {
               addMove(
                 moves,
                 us,
                 from,
                 to,
-                type,
+                PAWN,
                 this._board[to].type,
                 BITS.CAPTURE,
               )
-              break
+            } else if (to === this._epSquare) {
+              addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
             }
+          }
+        } else {
+          for (let j = 0, len = PIECE_OFFSETS[type].length; j < len; j++) {
+            const offset = PIECE_OFFSETS[type][j]
+            to = from
 
-            /* break, if knight or king */
-            if (type === KNIGHT || type === KING) break
+            while (true) {
+              to += offset
+              if (to & 0x88) break
+
+              if (!this._board[to]) {
+                addMove(moves, us, from, to, type)
+              } else {
+                // own color, stop loop
+                if (this._board[to].color === us) break
+
+                addMove(
+                  moves,
+                  us,
+                  from,
+                  to,
+                  type,
+                  this._board[to].type,
+                  BITS.CAPTURE,
+                )
+                break
+              }
+
+              /* break, if knight or king */
+              if (type === KNIGHT || type === KING) break
+            }
           }
         }
       }
@@ -1565,23 +1563,23 @@ export class Chess {
      */
 
     if (forPiece === undefined || forPiece === KING) {
-      if (!singleSquare || lastSquare === this._kings[us]) {
+      if (!singleSquare || lastSquare === this._pieceLists[us][KING][0]) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
-          const castlingFrom = this._kings[us]
+          const castlingFrom = this._pieceLists[us][KING][0]
           const castlingTo = castlingFrom + 2
 
           if (
             !this._board[castlingFrom + 1] &&
             !this._board[castlingTo] &&
-            !this._attacked(them, this._kings[us]) &&
+            !this._attacked(them, this._pieceLists[us][KING][0]) &&
             !this._attacked(them, castlingFrom + 1) &&
             !this._attacked(them, castlingTo)
           ) {
             addMove(
               moves,
               us,
-              this._kings[us],
+              this._pieceLists[us][KING][0],
               castlingTo,
               KING,
               undefined,
@@ -1592,21 +1590,21 @@ export class Chess {
 
         // queen-side castling
         if (this._castling[us] & BITS.QSIDE_CASTLE) {
-          const castlingFrom = this._kings[us]
+          const castlingFrom = this._pieceLists[us][KING][0]
           const castlingTo = castlingFrom - 2
 
           if (
             !this._board[castlingFrom - 1] &&
             !this._board[castlingFrom - 2] &&
             !this._board[castlingFrom - 3] &&
-            !this._attacked(them, this._kings[us]) &&
+            !this._attacked(them, this._pieceLists[us][KING][0]) &&
             !this._attacked(them, castlingFrom - 1) &&
             !this._attacked(them, castlingTo)
           ) {
             addMove(
               moves,
               us,
-              this._kings[us],
+              this._pieceLists[us][KING][0],
               castlingTo,
               KING,
               undefined,
@@ -1621,7 +1619,7 @@ export class Chess {
      * return all pseudo-legal moves (this includes moves that allow the king
      * to be captured)
      */
-    if (!legal || this._kings[us] === -1) {
+    if (!legal || this._pieceLists[us][KING][0] === undefined) {
       return moves
     }
 
@@ -1700,7 +1698,6 @@ export class Chess {
   private _push(move: InternalMove) {
     this._history.push({
       move,
-      kings: { b: this._kings.b, w: this._kings.w },
       turn: this._turn,
       castling: { b: this._castling.b, w: this._castling.w },
       epSquare: this._epSquare,
@@ -1715,6 +1712,10 @@ export class Chess {
     this._board[to] = this._board[from]
     delete this._board[from]
 
+    const piece = this._board[to]
+    const list = this._pieceLists[piece.color][piece.type]
+    list[list.indexOf(from)] = to
+
     this._hash ^= this._pieceKey(to)
   }
 
@@ -1726,8 +1727,8 @@ export class Chess {
     this._hash ^= this._epKey()
     this._hash ^= this._castlingKey()
 
-    if (move.captured) {
-      this._hash ^= this._pieceKey(move.to)
+    if (move.captured && !(move.flags & BITS.EP_CAPTURE)) {
+      this._clear(move.to)
     }
 
     this._movePiece(move.from, move.to)
@@ -1749,8 +1750,6 @@ export class Chess {
 
     // if we moved the king
     if (this._board[move.to].type === KING) {
-      this._kings[us] = move.to
-
       // if we castled, move the rook next to the king
       if (move.flags & BITS.KSIDE_CASTLE) {
         const castlingTo = move.to - 1
@@ -1860,7 +1859,6 @@ export class Chess {
 
     const move = old.move
 
-    this._kings = old.kings
     this._turn = old.turn
     this._castling = old.castling
     this._epSquare = old.epSquare
