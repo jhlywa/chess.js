@@ -78,7 +78,8 @@ export const QUEEN = 'q'
 export const KING = 'k'
 
 export type Color = 'w' | 'b'
-export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
+export const PIECE_SYMBOLS = ['p', 'n', 'b', 'r', 'q', 'k'] as const
+export type PieceSymbol = (typeof PIECE_SYMBOLS)[number]
 
 // prettier-ignore
 export type Square =
@@ -1485,24 +1486,20 @@ export class Chess {
       }
     }
 
-    for (let from = firstSquare; from <= lastSquare; from++) {
-      // did we run off the end of the board
-      if (from & 0x88) {
-        from += 7
+    for (const pieceSymbol of PIECE_SYMBOLS) {
+      if (forPiece && forPiece !== pieceSymbol) {
         continue
       }
+      for (const from of this._pieceLists[us][pieceSymbol]) {
+        if (singleSquare && from !== firstSquare) {
+          continue
+        }
 
-      // empty square or opponent, skip
-      if (!this._board[from] || this._board[from].color === them) {
-        continue
-      }
-      const { type } = this._board[from]
+        const { type } = this._board[from]
 
-      let to: number
-      if (type === PAWN) {
-        if (forPiece && forPiece !== type) continue
-
-        // single square, non-capturing
+        let to: number
+        if (type === PAWN) {
+          // single square, non-capturing
         to = from + PAWN_OFFSETS[us][0]
         if (!this._board[to]) {
           addMove(moves, us, from, to, PAWN)
@@ -1530,40 +1527,39 @@ export class Chess {
               BITS.CAPTURE,
             )
           } else if (to === this._epSquare) {
-            addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
-          }
-        }
-      } else {
-        if (forPiece && forPiece !== type) continue
-
-        for (let j = 0, len = PIECE_OFFSETS[type].length; j < len; j++) {
-          const offset = PIECE_OFFSETS[type][j]
-          to = from
-
-          while (true) {
-            to += offset
-            if (to & 0x88) break
-
-            if (!this._board[to]) {
-              addMove(moves, us, from, to, type)
-            } else {
-              // own color, stop loop
-              if (this._board[to].color === us) break
-
-              addMove(
-                moves,
-                us,
-                from,
-                to,
-                type,
-                this._board[to].type,
-                BITS.CAPTURE,
-              )
-              break
+              addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
             }
+          }
+        } else {
+          for (let j = 0, len = PIECE_OFFSETS[type].length; j < len; j++) {
+            const offset = PIECE_OFFSETS[type][j]
+            to = from
 
-            /* break, if knight or king */
-            if (type === KNIGHT || type === KING) break
+            while (true) {
+              to += offset
+              if (to & 0x88) break
+
+              if (!this._board[to]) {
+                addMove(moves, us, from, to, type)
+              } else {
+                // own color, stop loop
+                if (this._board[to].color === us) break
+
+                addMove(
+                  moves,
+                  us,
+                  from,
+                  to,
+                  type,
+                  this._board[to].type,
+                  BITS.CAPTURE,
+                )
+                break
+              }
+
+              /* break, if knight or king */
+              if (type === KNIGHT || type === KING) break
+            }
           }
         }
       }
