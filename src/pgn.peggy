@@ -83,10 +83,10 @@ move
 	= _ moveNumber? _ san:san suffix:suffixAnnotation? nag:nag*  _ comment:comment? variations:variation* { return node(san, suffix, nag, comment, variations) }
 
 moveNumber "move number"
-    = [0-9]*[.]? _ [.]*
+    = [0-9]*'.' _ [.]*
 
 san "standard algebraic notation"
-	= $([a-zA-Z][a-zA-Z0-9-=+#]+)
+	= "O-O-O" / "O-O" / "0-0-0" / "0-0" / $([a-zA-Z][a-zA-Z1-8-=+#]+)
 
 suffixAnnotation "suffix annotation"
 	= [!?] |1..2|

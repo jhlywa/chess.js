@@ -2255,7 +2255,15 @@ export class Chess {
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
   private _moveFromSan(move: string, strict = false): InternalMove | null {
     // strip off any move decorations: e.g Nf3+?! becomes Nf3
-    const cleanMove = strippedSan(move)
+    let cleanMove = strippedSan(move)
+
+    if (!strict) {
+      if (cleanMove === '0-0') {
+        cleanMove = 'O-O'
+      } else if (cleanMove === '0-0-0') {
+        cleanMove = 'O-O-O'
+      }
+    }
 
     let pieceType = inferPieceType(cleanMove)
     let moves = this._moves({ legal: true, piece: pieceType })

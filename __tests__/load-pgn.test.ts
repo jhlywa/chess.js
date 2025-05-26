@@ -624,6 +624,22 @@ Kh4-h5 68. Qf8-h8# 1-0`
   expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
+test('loadPgn - works - permissive parser (0-0 & 0-0-0)', () => {
+  const chess = new Chess()
+  const fen = 'rnbq1rk1/ppp1bppp/4pn2/3p4/3P1B2/2N5/PPPQPPPP/2KR1BNR w - - 4 6'
+  const pgn = `
+1. d4 d5 2. Nc3 Nf6 3. Bf4 e6 4. Qd2 Be7 5. 0-0-0 0-0 *`
+
+  // the strict parser shouldn't handle this
+  expect(() => chess.loadPgn(pgn, { strict: true })).toThrowError()
+
+  // the permissive parser should accept it
+  chess.loadPgn(pgn)
+  expect(chess.fen()).toEqual(fen)
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+})
+
 test('loadPgn - works - permissive parser (FEN without SetUp tag)', () => {
   const chess = new Chess()
   const fen = '1n1Rkb1r/p4ppp/4q3/4p1B1/4P3/8/PPP2PPP/2K5 b k - 1 17'
