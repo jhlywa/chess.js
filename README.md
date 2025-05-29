@@ -228,10 +228,12 @@ chess.fen()
 // -> '8/8/8/8/8/8/8/8 w - - 0 1' <- empty board
 ```
 
-### .fen()
+### .fen({ forceEnpassantSquare = false) = {})
 
 Returns the FEN string for the current position. Note, the en passant square is
 only included if the side-to-move can legally capture en passant.
+
+The enpassant square will always be included if forceEnpassantSquare is true.
 
 ```ts
 const chess = new Chess()
