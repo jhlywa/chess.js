@@ -282,4 +282,27 @@ describe('Regression Tests', () => {
 
     chess.loadPgn(pgn)
   })
+
+  it('Github Issue #113 - cannot parse pgn not starting with move number 1', () => {
+    const chess = new Chess()
+    const pgn = `[Event "SampleSite"]
+    [Site "?"]
+    [Date "2008-01-04"]
+    [Round "2"]
+    [White "Zhou Jianchao"]
+    [Black "Fidaeyee, H."]
+    [Result "1-0"]
+    [BlackElo "2074"]
+    [FEN "1n1r3r/1k2q1p1/1bp1p2p/5p2/2Pp1B2/5QN1/5PPP/RR4K1 w - - 0 29"]
+    [PlyCount "1"]
+    [SetUp "1"]
+    [SourceDate "2012.04.30"]
+    [WhiteElo "2551"]
+
+    29. Rxb6+ Kxb6 30. Qb3+ Qb4 31. Qxb4# 1-0`
+
+    chess.loadPgn(pgn)
+
+    expect(chess.moveNumber()).toBe(31)
+  })
 })
