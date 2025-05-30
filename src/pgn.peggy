@@ -86,7 +86,7 @@ moveNumber "move number"
     = [0-9]*'.' _ [.]*
 
 san "standard algebraic notation"
-	= "O-O-O" / "O-O" / "0-0-0" / "0-0" / $([a-zA-Z][a-zA-Z1-8-=+#]+)
+	= $(("O-O-O" / "O-O" / "0-0-0" / "0-0" / [a-zA-Z][a-zA-Z1-8-=]+) [+#]?)
 
 suffixAnnotation "suffix annotation"
 	= [!?] |1..2|
