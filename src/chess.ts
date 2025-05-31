@@ -1652,7 +1652,7 @@ export class Chess {
   }
 
   move(
-    move: string | { from: string; to: string; promotion?: string },
+    move: string | { from: string; to: string; promotion?: string } | null,
     { strict = false }: { strict?: boolean } = {},
   ): Move {
     /*
@@ -1673,6 +1673,8 @@ export class Chess {
 
     if (typeof move === 'string') {
       moveObj = this._moveFromSan(move, strict)
+    } else if (move === null){
+      moveObj = this._moveFromSan(SAN_NULLMOVE, strict)
     } else if (typeof move === 'object') {
       const moves = this._moves()
 
@@ -1697,6 +1699,12 @@ export class Chess {
         throw new Error(`Invalid move: ${JSON.stringify(move)}`)
       }
     }
+
+    //disallow null moves when in check
+    if (this.isCheck() && moveObj.flags & BITS.NULL_MOVE){
+      throw new Error('Null move not allowed when in check')
+    }
+
 
     /*
      * need to make a copy of move because we can't generate SAN after the move
@@ -1739,7 +1747,7 @@ export class Chess {
       if (us === BLACK) {
         this._moveNumber++
       }
-
+      this._halfMoves++
       this._turn = them
 
       this._epSquare = EMPTY
@@ -2269,17 +2277,16 @@ export class Chess {
       }
     }
 
-    if (!(move.flags & BITS.NULL_MOVE)) {
-      this._makeMove(move)
-      if (this.isCheck()) {
-        if (this.isCheckmate()) {
-          output += '#'
-        } else {
-          output += '+'
-        }
+    this._makeMove(move)
+    if (this.isCheck()) {
+      if (this.isCheckmate()) {
+        output += '#'
+      } else {
+        output += '+'
       }
-      this._undoMove()
     }
+    this._undoMove()
+    
 
     return output
   }
