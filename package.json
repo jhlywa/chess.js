@@ -1,6 +1,6 @@
 {
   "name": "chess.js",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "license": "BSD-2-Clause",
   "main": "dist/cjs/chess.js",
   "module": "dist/esm/chess.js",
