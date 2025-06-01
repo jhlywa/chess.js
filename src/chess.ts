@@ -1673,7 +1673,7 @@ export class Chess {
 
     if (typeof move === 'string') {
       moveObj = this._moveFromSan(move, strict)
-    } else if (move === null){
+    } else if (move === null) {
       moveObj = this._moveFromSan(SAN_NULLMOVE, strict)
     } else if (typeof move === 'object') {
       const moves = this._moves()
@@ -1701,10 +1701,9 @@ export class Chess {
     }
 
     //disallow null moves when in check
-    if (this.isCheck() && moveObj.flags & BITS.NULL_MOVE){
+    if (this.isCheck() && moveObj.flags & BITS.NULL_MOVE) {
       throw new Error('Null move not allowed when in check')
     }
-
 
     /*
      * need to make a copy of move because we can't generate SAN after the move
@@ -2286,7 +2285,6 @@ export class Chess {
       }
     }
     this._undoMove()
-    
 
     return output
   }
