@@ -1,4 +1,5 @@
 import { Chess, xoroshiro128 } from '../src/chess'
+import { expect, test } from 'vitest'
 
 // Very basic hash tests, more extensive testing is done as part of the move and load pgn tests.
 

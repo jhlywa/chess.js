@@ -1,4 +1,5 @@
 import { Chess as ChessClass, DEFAULT_POSITION } from '../src/chess'
+import { expect, test } from 'vitest'
 
 // We need to use `Chess as any` to access private property
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/naming-convention

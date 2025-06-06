@@ -1,4 +1,5 @@
 import { Chess } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('move - works - standard algebraic notation', () => {
   const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'

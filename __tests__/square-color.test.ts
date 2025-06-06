@@ -1,4 +1,5 @@
 import { Chess, type Square } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('squareColor should return light for light squares', () => {
   const chess = new Chess()

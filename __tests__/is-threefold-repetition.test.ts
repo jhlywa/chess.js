@@ -1,5 +1,6 @@
 import { Chess } from '../src/chess'
 import { split } from './utils'
+import { expect, test } from 'vitest'
 
 test('isThreefoldRepetition', () => {
   /* Fischer - Petrosian, Buenos Aires, 1971 */

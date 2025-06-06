@@ -7,6 +7,7 @@ import {
   BLACK,
   DEFAULT_POSITION,
 } from '../src/chess'
+import { expect, test } from 'vitest'
 
 function areAttacked(chess: Chess, squares: Square[], color: Color) {
   return squares.reduce(

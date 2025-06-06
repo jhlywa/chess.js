@@ -1,4 +1,5 @@
 import { Chess } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('perft - position 1', () => {
   const chess = new Chess()

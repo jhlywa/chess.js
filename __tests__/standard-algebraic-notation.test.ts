@@ -1,6 +1,6 @@
 import { Chess, DEFAULT_POSITION } from '../src/chess'
 import { split } from './utils'
-import 'jest-extended'
+import { expect, test } from 'vitest'
 
 const positions = [
   {
@@ -49,6 +49,6 @@ const positions = [
 positions.forEach(({ fen, moves }, i) => {
   test(`standard algebraic notation - ${i}`, () => {
     const chess = new Chess(fen)
-    expect(chess.moves()).toIncludeSameMembers(split(moves))
+    expect(chess.moves()).to.have.members(split(moves))
   })
 })

@@ -1,4 +1,5 @@
 import { Chess } from '../src/chess'
+import { describe, expect, it } from 'vitest'
 
 describe('ASCII Board', () => {
   it('Draws an ASCII board', () => {

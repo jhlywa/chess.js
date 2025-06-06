@@ -1,4 +1,5 @@
 import { Chess } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('isGameOver - works - stalemate', () => {
   const chess = new Chess('8/8/5k2/p4p1p/P4K1P/1r6/8/8 w - - 0 2')

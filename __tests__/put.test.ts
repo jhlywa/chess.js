@@ -11,6 +11,7 @@ import {
   ROOK,
   KING,
 } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('put', () => {
   const chess = new Chess()

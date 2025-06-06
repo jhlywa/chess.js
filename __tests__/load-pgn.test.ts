@@ -1,4 +1,5 @@
 import { Chess, DEFAULT_POSITION, SEVEN_TAG_ROSTER } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('loadPgn - works', () => {
   const chess = new Chess()

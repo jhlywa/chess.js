@@ -1,4 +1,5 @@
 import { Chess, Square, PAWN, WHITE, BLACK } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('get', () => {
   const chess = new Chess()

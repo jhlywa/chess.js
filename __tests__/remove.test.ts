@@ -7,6 +7,7 @@ import {
   BISHOP,
   BLACK,
 } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('remove - returns piece', () => {
   const chess = new Chess()
