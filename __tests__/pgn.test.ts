@@ -1,5 +1,6 @@
 import { BLACK, Chess, WHITE } from '../src/chess'
 import { split, fileToString } from './utils'
+import { describe, expect, it, test } from 'vitest'
 
 describe('PGN', () => {
   const positions = [

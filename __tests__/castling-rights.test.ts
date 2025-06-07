@@ -1,4 +1,5 @@
 import { BLACK, Chess, KING, QUEEN, WHITE } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('setCastlingRights - clear white kingside', () => {
   const chess = new Chess()

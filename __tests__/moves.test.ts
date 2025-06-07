@@ -1,18 +1,18 @@
 import { Chess, Square, Move } from '../src/chess'
 import { split } from './utils'
-import 'jest-extended'
+import { expect, test } from 'vitest'
 
 test('moves', () => {
   const chess = new Chess()
   const moves = `a3 a4 b3 b4 c3 c4 d3 d4 e3 e4 f3 f4 g3 g4 h3 h4 Na3 Nc3 Nf3
                  Nh3`
-  expect(chess.moves()).toIncludeSameMembers(split(moves))
+  expect(chess.moves()).to.have.members(split(moves))
 })
 
 test('moves - single square', () => {
   const chess = new Chess()
   const moves = 'e3 e4'
-  expect(chess.moves({ square: 'e2' })).toIncludeSameMembers(split(moves))
+  expect(chess.moves({ square: 'e2' })).to.have.members(split(moves))
 })
 
 test('moves - single square - invalid square', () => {
@@ -32,7 +32,7 @@ test('moves - single square - pinned piece', () => {
 test('moves - single square - promotion', () => {
   const chess = new Chess('8/k7/8/8/8/8/7p/K7 b - - 0 1')
   const moves = 'h1=N h1=B h1=R+ h1=Q+'
-  expect(chess.moves({ square: 'h2' })).toIncludeSameMembers(split(moves))
+  expect(chess.moves({ square: 'h2' })).to.have.members(split(moves))
 })
 
 test('moves - single square - castling', () => {
@@ -40,7 +40,7 @@ test('moves - single square - castling', () => {
     'r1bq1rk1/1pp2ppp/p1np1n2/2b1p3/2B1P3/2NP1N2/PPPBQPPP/R3K2R w KQ - 0 8',
   )
   const moves = 'Kf1 Kd1 O-O O-O-O'
-  expect(chess.moves({ square: 'e1' })).toIncludeSameMembers(split(moves))
+  expect(chess.moves({ square: 'e1' })).to.have.members(split(moves))
 })
 
 test('moves - single square - no castling', () => {
@@ -48,7 +48,7 @@ test('moves - single square - no castling', () => {
     'r1bq1rk1/1pp2ppp/p1np1n2/2b1p3/2B1P3/2NP1N2/PPPBQPPP/R3K2R w - - 0 8',
   )
   const moves = 'Kf1 Kd1'
-  expect(chess.moves({ square: 'e1' })).toIncludeSameMembers(split(moves))
+  expect(chess.moves({ square: 'e1' })).to.have.members(split(moves))
 })
 
 test('moves - single square - trapped king', () => {
@@ -71,6 +71,7 @@ test('moves - single square - verbose', () => {
       lan: 'd2d1q',
       before: '8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1',
       after: '8/7K/8/8/1R6/k7/1R6/3q4 w - - 0 2',
+      captured: undefined,
     },
     {
       color: 'b',
@@ -83,6 +84,7 @@ test('moves - single square - verbose', () => {
       lan: 'd2d1r',
       before: '8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1',
       after: '8/7K/8/8/1R6/k7/1R6/3r4 w - - 0 2',
+      captured: undefined,
     },
     {
       color: 'b',
@@ -95,6 +97,7 @@ test('moves - single square - verbose', () => {
       lan: 'd2d1b',
       before: '8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1',
       after: '8/7K/8/8/1R6/k7/1R6/3b4 w - - 0 2',
+      captured: undefined,
     },
     {
       color: 'b',
@@ -107,17 +110,18 @@ test('moves - single square - verbose', () => {
       lan: 'd2d1n',
       before: '8/7K/8/8/1R6/k7/1R1p4/8 b - - 0 1',
       after: '8/7K/8/8/1R6/k7/1R6/3n4 w - - 0 2',
+      captured: undefined,
     },
   ]
-  expect(
-    chess.moves({ square: 'd2', verbose: true }),
-  ).toIncludeAllPartialMembers(moves)
+  expect(chess.moves({ square: 'd2', verbose: true })).to.have.deep.members(
+    moves,
+  )
 })
 
 test('moves - piece', () => {
   const chess = new Chess()
   const moves = 'Na3 Nc3 Nf3 Nh3'
-  expect(chess.moves({ piece: 'n' })).toIncludeSameMembers(split(moves))
+  expect(chess.moves({ piece: 'n' })).to.have.members(split(moves))
 })
 
 test('moves - piece - en passante', () => {
@@ -125,7 +129,7 @@ test('moves - piece - en passante', () => {
     'rnbq1rk1/4bpp1/p2p1n1p/Ppp1p3/2B1P3/2NP1N1P/1PP2PP1/R1BQ1RK1 w - b6 0 10',
   )
   const moves = 'axb6 b3 b4 d4 g3 g4 h4'
-  expect(chess.moves({ piece: 'p' })).toIncludeSameMembers(split(moves))
+  expect(chess.moves({ piece: 'p' })).to.have.members(split(moves))
 })
 
 test('moves - piece - no such piece', () => {
@@ -152,6 +156,8 @@ test('moves - piece - verbose', () => {
       piece: 'r',
       san: 'Ra2',
       to: 'a2',
+      captured: undefined,
+      promotion: undefined,
     },
     {
       after:
@@ -165,6 +171,8 @@ test('moves - piece - verbose', () => {
       piece: 'r',
       san: 'Rab1',
       to: 'b1',
+      captured: undefined,
+      promotion: undefined,
     },
     {
       after:
@@ -178,6 +186,8 @@ test('moves - piece - verbose', () => {
       piece: 'r',
       san: 'Rc2',
       to: 'c2',
+      captured: undefined,
+      promotion: undefined,
     },
     {
       after: 'r4rk1/1p4p1/p1n1p2p/2p1p1q1/4P1N1/P1RP3P/1P2QPP1/R5K1 b - - 0 19',
@@ -191,6 +201,7 @@ test('moves - piece - verbose', () => {
       piece: 'r',
       san: 'Rxc3',
       to: 'c3',
+      promotion: undefined,
     },
     {
       after:
@@ -204,6 +215,8 @@ test('moves - piece - verbose', () => {
       piece: 'r',
       san: 'Rd1',
       to: 'd1',
+      captured: undefined,
+      promotion: undefined,
     },
     {
       after:
@@ -217,6 +230,8 @@ test('moves - piece - verbose', () => {
       piece: 'r',
       san: 'Re1',
       to: 'e1',
+      captured: undefined,
+      promotion: undefined,
     },
     {
       after:
@@ -230,6 +245,8 @@ test('moves - piece - verbose', () => {
       piece: 'r',
       san: 'Rf1',
       to: 'f1',
+      captured: undefined,
+      promotion: undefined,
     },
     {
       after:
@@ -243,12 +260,12 @@ test('moves - piece - verbose', () => {
       piece: 'r',
       san: 'Rcb1',
       to: 'b1',
+      captured: undefined,
+      promotion: undefined,
     },
   ]
 
-  expect(chess.moves({ piece: 'r', verbose: true })).toIncludeAllPartialMembers(
-    moves,
-  )
+  expect(chess.moves({ piece: 'r', verbose: true })).to.have.deep.members(moves)
 })
 
 test('moves - square and piece', () => {
@@ -256,7 +273,7 @@ test('moves - square and piece', () => {
     '5rk1/1p3rp1/p1n1p3/2p1p2p/2PpP1qP/P2P2P1/1P2QP1K/3R1R2 w - - 0 23',
   )
   const moves = 'Qd2 Qc2 Qe1 Qe3 Qf3 Qxg4'
-  expect(chess.moves({ square: 'e2', piece: 'q' })).toIncludeSameMembers(
+  expect(chess.moves({ square: 'e2', piece: 'q' })).to.have.members(
     split(moves),
   )
 })

@@ -1,4 +1,5 @@
 import { Chess } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('insufficient material - k vs k', () => {
   const chess = new Chess('8/8/8/8/8/8/8/k6K w - - 0 1')

@@ -1,4 +1,5 @@
 import { Chess } from '../src/chess'
+import { describe, expect, it } from 'vitest'
 
 describe('Board Tests', () => {
   const tests = [

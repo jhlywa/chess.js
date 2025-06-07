@@ -1,6 +1,6 @@
 import { Chess, SEVEN_TAG_ROSTER } from '../src/chess'
-import 'jest-extended'
 import { diffChars, SEVEN_TAG_ROSTER_STRING } from './utils'
+import { describe, expect, it } from 'vitest'
 
 describe('Regression Tests', () => {
   it('Github Issue #30 - move generateion - single square bug', () => {
@@ -8,9 +8,7 @@ describe('Regression Tests', () => {
       'rnbqk2r/ppp1pp1p/5n1b/3p2pQ/1P2P3/B1N5/P1PP1PPP/R3KBNR b KQkq - 3 5',
     )
     const moves: string[] = []
-    expect(chess.moves({ square: 'f1', verbose: true })).toIncludeSameMembers(
-      moves,
-    )
+    expect(chess.moves({ square: 'f1', verbose: true })).to.have.members(moves)
   })
 
   it('Github Issue #32 - castling flag reappearing', () => {

@@ -1,4 +1,5 @@
 import { Chess } from '../src/chess'
+import { describe, expect, it, test } from 'vitest'
 
 describe('.load() / .fen() should be symmetric', () => {
   const validPositions = [

@@ -1,5 +1,5 @@
 import { Chess } from '../src/chess'
-import 'jest-extended'
+import { describe, expect, it } from 'vitest'
 
 describe('Manipulate Comments', () => {
   it('no comments', () => {
@@ -9,7 +9,7 @@ describe('Manipulate Comments', () => {
     chess.move('e4')
     expect(chess.getComment()).toBeUndefined()
     expect(chess.getComments()).toEqual([])
-    expect(chess.pgn()).toEndWith('1. e4 *')
+    expect(chess.pgn().endsWith('1. e4 *')).toBe(true)
   })
 
   it('comment for initial position', () => {
@@ -19,7 +19,7 @@ describe('Manipulate Comments', () => {
     expect(chess.getComments()).toEqual([
       { fen: chess.fen(), comment: 'starting position' },
     ])
-    expect(chess.pgn()).toEndWith('{starting position} *')
+    expect(chess.pgn().endsWith('{starting position} *')).toBe(true)
   })
 
   it('comment for first move', () => {
@@ -32,7 +32,7 @@ describe('Manipulate Comments', () => {
     chess.move('e5')
     expect(chess.getComment()).toBeUndefined()
     expect(chess.getComments()).toEqual([{ fen: e4, comment: 'good move' }])
-    expect(chess.pgn()).toEndWith('1. e4 {good move} e5 *')
+    expect(chess.pgn().endsWith('1. e4 {good move} e5 *')).toBe(true)
   })
 
   it('comment for last move', () => {
@@ -44,7 +44,7 @@ describe('Manipulate Comments', () => {
     expect(chess.getComments()).toEqual([
       { fen: chess.fen(), comment: 'dubious move' },
     ])
-    expect(chess.pgn()).toEndWith('1. e4 e6 {dubious move} *')
+    expect(chess.pgn().endsWith('1. e4 e6 {dubious move} *')).toBe(true)
   })
 
   it('comment with brackets', () => {
@@ -62,7 +62,7 @@ describe('Manipulate Comments', () => {
     expect(chess.getComments()).toEqual([
       { fen: initial, comment: 'starting position' },
     ])
-    expect(chess.pgn()).toEndWith('{starting position} *')
+    expect(chess.pgn().endsWith('{starting position} *')).toBe(true)
 
     chess.move('e4')
     const e4 = chess.fen()
@@ -72,7 +72,9 @@ describe('Manipulate Comments', () => {
       { fen: initial, comment: 'starting position' },
       { fen: e4, comment: 'good move' },
     ])
-    expect(chess.pgn()).toEndWith('{starting position} 1. e4 {good move} *')
+    expect(
+      chess.pgn().endsWith('{starting position} 1. e4 {good move} *'),
+    ).toBe(true)
 
     chess.move('e6')
     const e6 = chess.fen()
@@ -83,9 +85,11 @@ describe('Manipulate Comments', () => {
       { fen: e4, comment: 'good move' },
       { fen: e6, comment: 'dubious move' },
     ])
-    expect(chess.pgn()).toEndWith(
-      '{starting position} 1. e4 {good move} e6 {dubious move} *',
-    )
+    expect(
+      chess
+        .pgn()
+        .endsWith('{starting position} 1. e4 {good move} e6 {dubious move} *'),
+    ).toBe(true)
   })
 
   it('remove comments', () => {
@@ -106,13 +110,15 @@ describe('Manipulate Comments', () => {
       { fen: e6, comment: 'dubious move' },
     ])
     expect(chess.removeComment()).toEqual('dubious move')
-    expect(chess.pgn()).toEndWith('{starting position} 1. e4 {good move} e6 *')
+    expect(
+      chess.pgn().endsWith('{starting position} 1. e4 {good move} e6 *'),
+    ).toBe(true)
     expect(chess.removeComment()).toBeUndefined()
     expect(chess.removeComments()).toEqual([
       { fen: initial, comment: 'starting position' },
       { fen: e4, comment: 'good move' },
     ])
-    expect(chess.pgn()).toEndWith('1. e4 e6 *')
+    expect(chess.pgn().endsWith('1. e4 e6 *')).toBe(true)
   })
 
   it('prune comments', () => {
@@ -125,7 +131,7 @@ describe('Manipulate Comments', () => {
     expect(chess.getComments()).toEqual([
       { fen: chess.fen(), comment: 'positional' },
     ])
-    expect(chess.pgn()).toEndWith('1. d4 {positional} *')
+    expect(chess.pgn().endsWith('1. d4 {positional} *')).toBe(true)
   })
 
   it('clear comments', () => {
@@ -161,17 +167,32 @@ describe('Format Comments', () => {
     chess.setComment('good   move')
     chess.move('e5')
     chess.setComment('classical response')
-    expect(chess.pgn()).toEndWith(
-      '1. e4 {good   move} e5 {classical response} *',
-    )
-    expect(chess.pgn({ maxWidth: 16 })).toEndWith(
-      ['1. e4 {good', 'move} e5', '{classical', 'response} *'].join('\n'),
-    )
-    expect(chess.pgn({ maxWidth: 2 })).toEndWith(
-      ['1.', 'e4', '{good', 'move}', 'e5', '{classical', 'response}', '*'].join(
-        '\n',
-      ),
-    )
+    expect(
+      chess.pgn().endsWith('1. e4 {good   move} e5 {classical response} *'),
+    ).toBe(true)
+    expect(
+      chess
+        .pgn({ maxWidth: 16 })
+        .endsWith(
+          ['1. e4 {good', 'move} e5', '{classical', 'response} *'].join('\n'),
+        ),
+    ).toBe(true)
+    expect(
+      chess
+        .pgn({ maxWidth: 2 })
+        .endsWith(
+          [
+            '1.',
+            'e4',
+            '{good',
+            'move}',
+            'e5',
+            '{classical',
+            'response}',
+            '*',
+          ].join('\n'),
+        ),
+    ).toBe(true)
   })
 })
 
@@ -255,7 +276,7 @@ describe('Load Comments', () => {
     it(`load ${test.name}`, () => {
       const chess = new Chess()
       chess.loadPgn(test.input)
-      expect(chess.pgn()).toEndWith(test.output + ' *')
+      expect(chess.pgn().endsWith(test.output + ' *')).toBe(true)
     })
   })
 })

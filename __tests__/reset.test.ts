@@ -1,4 +1,5 @@
 import { Chess, DEFAULT_POSITION } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('reset', () => {
   const chess = new Chess()

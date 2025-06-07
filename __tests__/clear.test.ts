@@ -1,4 +1,5 @@
 import { Chess, SEVEN_TAG_ROSTER } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('clear', () => {
   const chess = new Chess()
