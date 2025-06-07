@@ -219,6 +219,7 @@ const FLAGS: Record<string, string> = {
   PROMOTION: 'p',
   KSIDE_CASTLE: 'k',
   QSIDE_CASTLE: 'q',
+  NULL_MOVE: '-',
 }
 
 // prettier-ignore
@@ -241,6 +242,7 @@ const BITS: Record<string, number> = {
   PROMOTION: 16,
   KSIDE_CASTLE: 32,
   QSIDE_CASTLE: 64,
+  NULL_MOVE: 128,
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -436,6 +438,10 @@ const ROOKS = {
 }
 
 const SECOND_RANK = { b: RANK_7, w: RANK_2 }
+
+const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
+
+const SAN_NULLMOVE = '--'
 
 // Extracts the zero-based rank of an 0x88 square.
 function rank(square: number): number {
@@ -1646,7 +1652,7 @@ export class Chess {
   }
 
   move(
-    move: string | { from: string; to: string; promotion?: string },
+    move: string | { from: string; to: string; promotion?: string } | null,
     { strict = false }: { strict?: boolean } = {},
   ): Move {
     /*
@@ -1667,6 +1673,8 @@ export class Chess {
 
     if (typeof move === 'string') {
       moveObj = this._moveFromSan(move, strict)
+    } else if (move === null) {
+      moveObj = this._moveFromSan(SAN_NULLMOVE, strict)
     } else if (typeof move === 'object') {
       const moves = this._moves()
 
@@ -1690,6 +1698,11 @@ export class Chess {
       } else {
         throw new Error(`Invalid move: ${JSON.stringify(move)}`)
       }
+    }
+
+    //disallow null moves when in check
+    if (this.isCheck() && moveObj.flags & BITS.NULL_MOVE) {
+      throw new Error('Null move not allowed when in check')
     }
 
     /*
@@ -1728,6 +1741,18 @@ export class Chess {
     const us = this._turn
     const them = swapColor(us)
     this._push(move)
+
+    if (move.flags & BITS.NULL_MOVE) {
+      if (us === BLACK) {
+        this._moveNumber++
+      }
+      this._halfMoves++
+      this._turn = them
+
+      this._epSquare = EMPTY
+
+      return
+    }
 
     this._hash ^= this._epKey()
     this._hash ^= this._castlingKey()
@@ -1879,6 +1904,10 @@ export class Chess {
 
     const us = this._turn
     const them = swapColor(us)
+
+    if (move.flags & BITS.NULL_MOVE) {
+      return move
+    }
 
     this._movePiece(move.to, move.from)
 
@@ -2225,6 +2254,8 @@ export class Chess {
       output = 'O-O'
     } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O'
+    } else if (move.flags & BITS.NULL_MOVE) {
+      return SAN_NULLMOVE
     } else {
       if (move.piece !== PAWN) {
         const disambiguator = getDisambiguator(move, moves)
@@ -2269,6 +2300,18 @@ export class Chess {
       } else if (cleanMove === '0-0-0') {
         cleanMove = 'O-O-O'
       }
+    }
+
+    //first implementation of null with a dummy move (black king moves from a8 to a8), maybe this can be implemented better
+    if (cleanMove == SAN_NULLMOVE) {
+      const res: InternalMove = {
+        color: this._turn,
+        from: 0,
+        to: 0,
+        piece: 'k',
+        flags: BITS.NULL_MOVE,
+      }
+      return res
     }
 
     let pieceType = inferPieceType(cleanMove)
