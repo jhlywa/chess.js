@@ -954,6 +954,19 @@ chess.setHeader('Black', 'Mikhail Tal')
 // { 'White': 'Robert James Fischer', 'Black': 'Mikhail Tal' }
 ```
 
+### .setTurn(color)
+
+Sets the side to move. If the color is changed it returns true, if the color
+remains unchanged it returns false. If a player is in check, attempting to
+change the color to turn will throw an exception.
+
+```ts
+chess.setTurn('b')
+// -> true
+chess.setTurn('b')
+// -> false
+```
+
 ### .squareColor(square)
 
 Returns the color of the square ('light' or 'dark').
