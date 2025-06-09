@@ -224,6 +224,13 @@ describe('Load Comments', () => {
       output: '{ great game } 1. e4 e5',
     },
     {
+      name: 'initial comment with black starting first',
+      input:
+        '[SetUp "1"]\n[FEN "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1"]\n\n{ great game } 1. ... Nc6',
+      output:
+        '[SetUp "1"]\n[FEN "rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1"]\n\n{ great game } 1. ... Nc6',
+    },
+    {
       name: 'empty bracket comment',
       input: '1. e4 {}',
       output: '1. e4 {}',
