@@ -2489,6 +2489,15 @@ export class Chess {
     return nodes
   }
 
+  setTurn(color: Color): boolean {
+    if (this._turn == color) {
+      return false
+    }
+
+    this.move('--')
+    return true
+  }
+
   turn(): Color {
     return this._turn
   }
