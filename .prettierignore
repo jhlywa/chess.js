@@ -1,3 +1,6 @@
 coverage/
 package-lock.json
 src/pgn.*
+website/.docusaurus/
+website/build/
+website/versioned_docs/**/*.md
