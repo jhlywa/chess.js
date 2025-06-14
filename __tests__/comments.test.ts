@@ -29,17 +29,17 @@ describe('Suffix-Only Support', () => {
       {
         fen: fen2,
         comment: 'Aggressive',
-        suffix: '!?',
+        suffixAnnotation: '!?',
       },
       {
         fen: fen3,
         comment: 'Best Move',
-        suffix: '!!',
+        suffixAnnotation: '!!',
       },
       {
         fen: fen4,
         comment: 'Blunder',
-        suffix: '??',
+        suffixAnnotation: '??',
       },
     ])
   })
@@ -72,12 +72,11 @@ describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
       {
         fen: fenE5,
         comment: 'Comment and Suffix for e5',
-        suffix: '!?',
+        suffixAnnotation: '!?',
       },
       {
         fen: fenNf3,
-        comment: '',
-        suffix: '!!',
+        suffixAnnotation: '!!',
       },
     ]
 
@@ -98,8 +97,7 @@ describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
     expect(entryForCurrentFen).toBeDefined()
     expect(entryForCurrentFen).toEqual({
       fen: currentFen,
-      comment: '',
-      suffix: '?!',
+      suffixAnnotation: '?!',
     })
   })
 })

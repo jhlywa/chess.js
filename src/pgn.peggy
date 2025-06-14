@@ -3,11 +3,11 @@
   	return comment !== null ? { comment, variations: [] } : { variations: []}
   }
 
-  function node(move, suffix, nag, comment, variations) {
+  function node(move, suffixAnnotation, nag, comment, variations) {
   	const node = { move, variations }
 
-    if (suffix) {
-    	node.suffix = suffix
+    if (suffixAnnotation) {
+    	node.suffixAnnotation = suffixAnnotation
     }
 
     if (nag) {
@@ -80,7 +80,7 @@ line
 	= comment:comment? moves:move* { return lineToTree(rootNode(comment), ...moves.flat()) }
 
 move
-	= _ moveNumber? _ san:san suffix:suffixAnnotation? _ nag:nag?  _ comment:comment? variations:variation* { return node(san, suffix, nag, comment, variations) }
+	= _ moveNumber? _ san:san suffixAnnotation:suffixAnnotation? _ nag:nag?  _ comment:comment? variations:variation* { return node(san, suffixAnnotation, nag, comment, variations) }
 
 moveNumber "move number"
     = [0-9]*[.]? _ [.]*

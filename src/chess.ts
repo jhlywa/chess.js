@@ -2022,7 +2022,7 @@ export class Chess {
 
     while (node) {
       if (node.move) {
-        const suffix = node.suffix
+        const suffixAnnotation = node.suffixAnnotation
 
         const move = this._moveFromSan(node.move, strict)
         if (!move) {
@@ -2032,8 +2032,8 @@ export class Chess {
         this._makeMove(move)
         this._incPositionCount(this.fen())
 
-        if (suffix) {
-          this._suffixes[this.fen()] = suffix as Suffix
+        if (suffixAnnotation) {
+          this._suffixes[this.fen()] = suffixAnnotation as Suffix
         }
       }
 
@@ -2434,26 +2434,29 @@ export class Chess {
     return comment
   }
 
-  getComments(): { fen: string; comment: string; suffix?: string }[] {
+  getComments(): { fen: string; comment?: string; suffixAnnotation?: string }[] {
     this._pruneComments()
 
     const allFenKeys = new Set<string>()
     Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen))
     Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen))
 
-    const result: { fen: string; comment: string; suffix?: string }[] = []
+    const result: { fen: string; comment?: string; suffixAnnotation?: string }[] = []
 
     for (const fen of allFenKeys) {
       const commentContent = this._comments[fen]
       const suffixAnnotation = this._suffixes[fen]
 
-      const entry: { fen: string; comment: string; suffix?: string } = {
+      const entry: { fen: string; comment?: string; suffixAnnotation?: string } = {
         fen: fen,
-        comment: commentContent !== undefined ? commentContent : '',
+      }
+
+      if (commentContent !== undefined) {
+        entry.comment = commentContent
       }
 
       if (suffixAnnotation !== undefined) {
-        entry.suffix = suffixAnnotation
+        entry.suffixAnnotation = suffixAnnotation
       }
 
       result.push(entry)
@@ -2472,7 +2475,7 @@ export class Chess {
 
   /**
    * Set or overwrite the suffix annotation for the given position (or current).
-   * Throws if the suffix isn’t one of the allowed SUFFIX_LIST values.
+   * Throws if the suffix isn't one of the allowed SUFFIX_LIST values.
    */
   public setSuffix(suffix: Suffix, fen?: string): void {
     if (!SUFFIX_LIST.includes(suffix)) {
