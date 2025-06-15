@@ -212,6 +212,16 @@ test('loadPgn - works - move annotations (including check symbols)', () => {
   expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
+test('loadPgn - works - multiple NAGs', () => {
+  const chess = new Chess()
+  const fen = 'rnbqkbnr/pppp1ppp/4p3/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2'
+  const pgn = '1.e4 $1 $14 2. e6 $6 2.d4'
+  chess.loadPgn(pgn)
+  expect(chess.fen()).toEqual(fen)
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+})
+
 test('loadPgn - works - prunes recursive annotation variations (RAV)', () => {
   const chess = new Chess()
   const pgn = "1. e4 ( 1. d4 { Queen's pawn } d5 ( 1... Nf6 ) ) e5"
