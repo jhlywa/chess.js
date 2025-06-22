@@ -1,17 +1,13 @@
 {{
   function rootNode(comment) {
-  	return comment !== null ? { comment, variations: [] } : { variations: []}
+  	return comment !== null ? { comment, nags: [], variations: [] } : { nags: [], variations: []}
   }
 
-  function node(move, suffix, nag, comment, variations) {
-  	const node = { move, variations }
+  function node(move, suffix, nags, comment, variations) {
+  	const node = { move, nags, variations }
 
     if (suffix) {
     	node.suffix = suffix
-    }
-
-    if (nag) {
-    	node.nag = nag
     }
 
     if (comment !== null) {
@@ -80,7 +76,7 @@ line
 	= comment:comment? moves:move* { return lineToTree(rootNode(comment), ...moves.flat()) }
 
 move
-	= _ moveNumber? _ san:san suffix:suffixAnnotation? nag:nag*  _ comment:comment? variations:variation* { return node(san, suffix, nag, comment, variations) }
+	= _ moveNumber? _ san:san suffix:suffixAnnotation? nags:nag*  _ comment:comment? variations:variation* { return node(san, suffix, nags, comment, variations) }
 
 moveNumber "move number"
     = [0-9]*'.' _ [.]*
