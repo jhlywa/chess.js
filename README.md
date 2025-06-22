@@ -1,3 +1,5 @@
+![logo](./chessjslogo.svg)
+
 # chess.js
 
 [![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/jhlywa/chess.js/node.js.yml)](https://github.com/jhlywa/chess.js/actions)
