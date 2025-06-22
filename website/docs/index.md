@@ -511,6 +511,18 @@ chess.isGameOver()
 // -> true
 ```
 
+### .isPromotion(\{ from: Square, to: Square \})
+
+This is a convenience method to allow user interfaces to know when a promotion
+dialog should be triggered. The function takes a from and to square and returns
+true if the move is a promotion and false if not.
+
+```ts
+const chess = new Chess('8/1PQ2pk1/3p2p1/3qp3/8/4P3/7p/2K5 w - - 0 56')
+chess.isPromotion({ from: 'b7', to: 'b8' })
+// -> true
+```
+
 ### .isStalemate()
 
 Returns true or false if the side to move has been stalemated.
