@@ -440,8 +440,6 @@ const ROOKS = {
 
 const SECOND_RANK = { b: RANK_7, w: RANK_2 }
 
-const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
-
 const SAN_NULLMOVE = '--'
 
 // Extracts the zero-based rank of an 0x88 square.
