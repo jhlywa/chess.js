@@ -1,0 +1,46 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/api-extractor/v7/api-extractor.schema.json",
+  "mainEntryPointFilePath": "<projectFolder>/dist/types/chess.d.ts",
+  "newlineKind": "lf",
+  "compiler": {
+    "tsconfigFilePath": "<projectFolder>/tsconfig.api.json"
+  },
+  "apiReport": {
+    "enabled": true
+  },
+  "docModel": {
+    "enabled": false
+  },
+  "dtsRollup": {
+    "enabled": false
+  },
+  "tsdocMetadata": {
+    "enabled": false
+  },
+  "messages": {
+    "compilerMessageReporting": {
+      "default": {
+        "logLevel": "warning"
+      }
+    },
+    "extractorMessageReporting": {
+      "default": {
+        "logLevel": "warning"
+      },
+      "ae-missing-release-tag": {
+        "logLevel": "none"
+      }
+    },
+    "tsdocMessageReporting": {
+      "default": {
+        "logLevel": "warning"
+      },
+      "tsdoc-at-sign-in-word": {
+        "logLevel": "none"
+      },
+      "tsdoc-undefined-tag": {
+        "logLevel": "none"
+      }
+    }
+  }
+}
