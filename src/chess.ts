@@ -115,6 +115,7 @@ interface History {
   turn: Color
   castling: Record<Color, number>
   epSquare: number
+  fenEpSquare: number
   halfMoves: number
   moveNumber: number
 }
@@ -711,6 +712,7 @@ export class Chess {
   private _header: Record<string, string | null> = {}
   private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
   private _epSquare = -1
+  private _fenEpSquare = -1
   private _halfMoves = 0
   private _moveNumber = 0
   private _history: History[] = []
@@ -732,6 +734,7 @@ export class Chess {
     this._turn = WHITE
     this._castling = { w: 0, b: 0 }
     this._epSquare = EMPTY
+    this._fenEpSquare = EMPTY
     this._halfMoves = 0
     this._moveNumber = 1
     this._history = []
@@ -805,6 +808,7 @@ export class Chess {
     }
 
     this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
+    this._fenEpSquare = this._epSquare
     this._halfMoves = parseInt(tokens[4], 10)
     this._moveNumber = parseInt(tokens[5], 10)
 
@@ -868,10 +872,10 @@ export class Chess {
      * only print the ep square if en passant is a valid move (pawn is present
      * and ep capture is not pinned)
      */
-    if (this._epSquare !== EMPTY) {
+    if (this._fenEpSquare !== EMPTY) {
       if (forceEnpassantSquare) {
-        epSquare = algebraic(this._epSquare)
-      } else {
+        epSquare = algebraic(this._fenEpSquare)
+      } else if (this._epSquare !== EMPTY) {
         const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
         const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
 
@@ -1723,6 +1727,7 @@ export class Chess {
       turn: this._turn,
       castling: { b: this._castling.b, w: this._castling.w },
       epSquare: this._epSquare,
+      fenEpSquare: this._fenEpSquare,
       halfMoves: this._halfMoves,
       moveNumber: this._moveNumber,
     })
@@ -1835,6 +1840,8 @@ export class Chess {
         epSquare = move.to + 16
       }
 
+      this._fenEpSquare = epSquare
+
       if (
         (!((move.to - 1) & 0x88) &&
           this._board[move.to - 1]?.type === PAWN &&
@@ -1850,6 +1857,7 @@ export class Chess {
       }
     } else {
       this._epSquare = EMPTY
+      this._fenEpSquare = EMPTY
     }
 
     // reset the 50 move counter if a pawn is moved or a piece is captured
@@ -1895,6 +1903,7 @@ export class Chess {
     this._turn = old.turn
     this._castling = old.castling
     this._epSquare = old.epSquare
+    this._fenEpSquare = old.fenEpSquare
     this._halfMoves = old.halfMoves
     this._moveNumber = old.moveNumber
 
