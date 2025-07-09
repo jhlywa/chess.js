@@ -1389,6 +1389,12 @@ export class Chess {
     return this.isCheckmate() || this.isDraw()
   }
 
+  isPromotion({ from, to }: { from: Square; to: Square }): boolean {
+    return this._moves({ square: from, piece: 'p' }).some(
+      (move) => move.to === Ox88[to] && move.promotion,
+    )
+  }
+
   moves(): string[]
   moves({ square }: { square: Square }): string[]
   moves({ piece }: { piece: PieceSymbol }): string[]
