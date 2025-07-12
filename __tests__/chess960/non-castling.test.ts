@@ -1,4 +1,5 @@
 import { Chess } from '../../src/chess'
+import { expect, test } from 'vitest'
 
 // If the king makes a normal move one space left or right (without the
 // intention to castle) it should not be mistaken for a castling-move.
