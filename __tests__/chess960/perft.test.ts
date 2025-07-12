@@ -977,13 +977,20 @@ const perftData = `
   .trim()
   .split('\n')
 
-// Parse the '--perft' command-line parameter.
-const [argDepth, argBeg, argNum] = (
-  process.argv.filter((arg) => arg.startsWith('--perft'))[0] || ''
-)
-  .substring('--perft='.length)
-  .split(',')
-  .map((str) => parseInt(str))
+/**
+ * Vitest allows reading variables from a file, but does not support passing
+ * command-line arguments to tests. Fortunately a '--mode' parameter can be
+ * specified on the command-line which is accessible from within a test as
+ * 'import.meta.env.MODE'. This is not the intended use of '--mode', but we
+ * will abuse it for our own ends.
+ *
+ * When tests are run in the normal manner (using 'npm test'), the value of
+ * 'import.meta.env.MODE' will be set to 'test' which will cause
+ * 'argDepth', 'argBeg', and 'argNum' to be undefined, resulting in default
+ * values being used.
+ */
+const userArg = import.meta.env.MODE
+const [argDepth, argBeg, argNum]  = userArg.split(',').map((str) => parseInt(str))
 
 // Restrict a value beteen a min and max, inclusive.
 const clampVal = (val: number, min: number, max: number) => {
@@ -996,14 +1003,14 @@ const clampVal = (val: number, min: number, max: number) => {
  *   defaultBeg     The starting position number to run.
  *   defaultNum     The number of positions to run.
  *
- * The default values can be overridden with the --perft command-line parameter:
- *    npm test -- __tests__/chess960/perft.test.ts --perft=DEPTH,BEG,NUM
+ * By abusing vitest's '--mode' parameter, we can supply values on the command-line:
+ *    vitest --run  __tests__/chess960/perft.test.ts --mode=DEPTH,BEG,NUM
  *
- * Examples of the --perft parameter:
- *    --perft=4       Run all positions at depth 4.
- *    --perft=,,9     Run first nine positions.
- *    --perft=,28,3   Run positions 28, 29, 30.
- *    --preft=6,45,1  Run position 45 at depth 6.
+ * Examples of the '--mode' parameter:
+ *    --mode=4       Run all positions at depth 4.
+ *    --mode=,,9     Run first nine positions.
+ *    --mode=,28,3   Run positions 28, 29, 30.
+ *    --mode=6,45,1  Run position 45 at depth 6.
  *
  * DEPTH of 2 takes about five seconds to test all 960 positions.
  * DEPTH of 3 takes about a minute to test all 960 positions.
