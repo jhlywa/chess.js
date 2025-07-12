@@ -990,7 +990,9 @@ const perftData = `
  * values being used.
  */
 const userArg = import.meta.env.MODE
-const [argDepth, argBeg, argNum]  = userArg.split(',').map((str) => parseInt(str))
+const [argDepth, argBeg, argNum] = userArg
+  .split(',')
+  .map((str) => parseInt(str))
 
 // Restrict a value beteen a min and max, inclusive.
 const clampVal = (val: number, min: number, max: number) => {

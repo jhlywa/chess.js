@@ -1023,43 +1023,43 @@ export class Chess {
       if (forceEnpassantSquare) {
         epSquare = algebraic(this._fenEpSquare)
       } else if (this._epSquare !== EMPTY) {
-      const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
-      const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
+        const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
+        const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
 
-      for (const square of squares) {
-        // is the square off the board?
-        if (square & 0x88) {
-          continue
-        }
+        for (const square of squares) {
+          // is the square off the board?
+          if (square & 0x88) {
+            continue
+          }
 
-        const color = this._turn
+          const color = this._turn
 
-        // is there a pawn that can capture the epSquare?
-        if (
-          this._board[square]?.color === color &&
-          this._board[square]?.type === PAWN
-        ) {
-          // if the pawn makes an ep capture, does it leave it's king in check?
-          this._makeMove({
-            color,
-            from: square,
-            to: this._epSquare,
-            piece: PAWN,
-            captured: PAWN,
-            flags: BITS.EP_CAPTURE,
-          })
-          const isLegal = !this._isKingAttacked(color)
-          this._undoMove()
+          // is there a pawn that can capture the epSquare?
+          if (
+            this._board[square]?.color === color &&
+            this._board[square]?.type === PAWN
+          ) {
+            // if the pawn makes an ep capture, does it leave it's king in check?
+            this._makeMove({
+              color,
+              from: square,
+              to: this._epSquare,
+              piece: PAWN,
+              captured: PAWN,
+              flags: BITS.EP_CAPTURE,
+            })
+            const isLegal = !this._isKingAttacked(color)
+            this._undoMove()
 
-          // if ep is legal, break and set the ep square in the FEN output
-          if (isLegal) {
-            epSquare = algebraic(this._epSquare)
-            break
+            // if ep is legal, break and set the ep square in the FEN output
+            if (isLegal) {
+              epSquare = algebraic(this._epSquare)
+              break
+            }
           }
         }
       }
     }
-  }
 
     return [
       fen,
@@ -1842,8 +1842,8 @@ export class Chess {
         throw new Error(`Invalid move: ${move}`)
       } else {
         if (move) {
-            // Remove internal flag so that it does not appear in the error message.
-            delete move.castle960Flag
+          // Remove internal flag so that it does not appear in the error message.
+          delete move.castle960Flag
         }
         throw new Error(`Invalid move: ${JSON.stringify(move)}`)
       }
@@ -1889,7 +1889,6 @@ export class Chess {
 
     this._hash ^= this._pieceKey(to)
   }
-
 
   private _makeMove(move: InternalMove) {
     const us = this._turn
@@ -1944,7 +1943,7 @@ export class Chess {
         this._hash ^= this._pieceKey(rookFrom)
         this._hash ^= this._pieceKey(rookTo)
         if (rookFrom !== move.to && rookFrom != rookTo) {
-           delete this._board[rookFrom]
+          delete this._board[rookFrom]
         }
       } else if (move.flags & BITS.QSIDE_CASTLE) {
         const rookFrom = move.rookSq as number
@@ -1953,7 +1952,7 @@ export class Chess {
         this._hash ^= this._pieceKey(rookFrom)
         this._hash ^= this._pieceKey(rookTo)
         if (rookFrom !== move.to && rookFrom != rookTo) {
-           delete this._board[rookFrom]
+          delete this._board[rookFrom]
         }
       }
 
@@ -2111,11 +2110,7 @@ export class Chess {
         rookFrom = move.to + 1
       }
       this._board[rookTo] = { type: ROOK, color: us }
-      if (
-        rookFrom &&
-        rookFrom !== move.from &&
-        rookFrom !== rookTo
-      ) {
+      if (rookFrom && rookFrom !== move.from && rookFrom !== rookTo) {
         this._movePiece(rookFrom, rookTo)
       }
     }
