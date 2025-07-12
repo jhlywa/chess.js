@@ -1,4 +1,5 @@
 import { Chess } from '../../src/chess'
+import { describe, expect, test } from 'vitest'
 // Data for exercising perft().
 
 /**
