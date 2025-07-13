@@ -29,7 +29,7 @@ test.each([
 ])(
   'moving black king from b8 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('5rk1/8/8/8/8/8/8/1K6 w - - 1 2')
   },
@@ -44,7 +44,7 @@ test.each([
 ])(
   'moving black king from c8 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('5rk1/8/8/8/8/8/8/2K5 w - - 1 2')
   },
@@ -58,7 +58,7 @@ test.each([
 ])(
   'moving black king from d8 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('5rk1/8/8/8/8/8/8/3K4 w - - 1 2')
   },
@@ -71,7 +71,7 @@ test.each([
 ])(
   'moving black king from e8 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('5rk1/8/8/8/8/8/8/4K3 w - - 1 2')
   },
@@ -83,7 +83,7 @@ test.each([
 ])(
   'moving black king from f8 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('5rk1/8/8/8/8/8/8/5K2 w - - 1 2')
   },
@@ -92,7 +92,7 @@ test.each([
 test.each([{ fen: '6kr/8/8/8/8/8/8/6K1 b k - 0 1', move: 'g8h8' }])(
   'moving black king from g8 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('5rk1/8/8/8/8/8/8/6K1 w - - 1 2')
   },
@@ -103,7 +103,7 @@ test.each([{ fen: '6kr/8/8/8/8/8/8/6K1 b k - 0 1', move: 'g8h8' }])(
 test.each([{ fen: 'rk6/8/8/8/8/8/8/1K6 b q - 0 1', move: 'b8a8' }])(
   'moving black king from b8 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('2kr4/8/8/8/8/8/8/1K6 w - - 1 2')
   },
@@ -115,7 +115,7 @@ test.each([
 ])(
   'moving black king from c8 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('2kr4/8/8/8/8/8/8/2K5 w - - 1 2')
   },
@@ -128,7 +128,7 @@ test.each([
 ])(
   'moving black king from d8 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('2kr4/8/8/8/8/8/8/3K4 w - - 1 2')
   },
@@ -142,7 +142,7 @@ test.each([
 ])(
   'moving black king from e8 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('2kr4/8/8/8/8/8/8/4K3 w - - 1 2')
   },
@@ -157,7 +157,7 @@ test.each([
 ])(
   'moving black king from f8 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('2kr4/8/8/8/8/8/8/5K2 w - - 1 2')
   },
@@ -173,7 +173,7 @@ test.each([
 ])(
   'moving black king from g8 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('2kr4/8/8/8/8/8/8/6K1 w - - 1 2')
   },
@@ -184,7 +184,7 @@ test.each([
 test.each([{ fen: '1k6/8/8/8/8/8/8/RK6 w Q - 0 1', move: 'b1a1' }])(
   'moving white king from c1 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('1k6/8/8/8/8/8/8/2KR4 b - - 1 1')
   },
@@ -196,7 +196,7 @@ test.each([
 ])(
   'moving white king from c1 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('2k5/8/8/8/8/8/8/2KR4 b - - 1 1')
   },
@@ -209,7 +209,7 @@ test.each([
 ])(
   'moving white king from d1 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('3k4/8/8/8/8/8/8/2KR4 b - - 1 1')
   },
@@ -223,7 +223,7 @@ test.each([
 ])(
   'moving white king from e1 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('4k3/8/8/8/8/8/8/2KR4 b - - 1 1')
   },
@@ -238,7 +238,7 @@ test.each([
 ])(
   'moving white king from f1 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('5k2/8/8/8/8/8/8/2KR4 b - - 1 1')
   },
@@ -254,7 +254,7 @@ test.each([
 ])(
   'moving white king from g1 onto rook with queenside castling-right will castle queenside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('6k1/8/8/8/8/8/8/2KR4 b - - 1 1')
   },
@@ -272,7 +272,7 @@ test.each([
 ])(
   'moving white king from b1 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('1k6/8/8/8/8/8/8/5RK1 b - - 1 1')
   },
@@ -287,7 +287,7 @@ test.each([
 ])(
   'moving white king from c1 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('2k5/8/8/8/8/8/8/5RK1 b - - 1 1')
   },
@@ -301,7 +301,7 @@ test.each([
 ])(
   'moving white king from d1 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('3k4/8/8/8/8/8/8/5RK1 b - - 1 1')
   },
@@ -314,7 +314,7 @@ test.each([
 ])(
   'moving white king from e1 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('4k3/8/8/8/8/8/8/5RK1 b - - 1 1')
   },
@@ -326,7 +326,7 @@ test.each([
 ])(
   'moving white king from f1 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('5k2/8/8/8/8/8/8/5RK1 b - - 1 1')
   },
@@ -335,7 +335,7 @@ test.each([
 test.each([{ fen: '6k1/8/8/8/8/8/8/6KR w K - 0 1', move: 'g1h1' }])(
   'moving white king from g1 onto rook with kingside castling-right will castle kingside',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move(dat.move)
     expect(chess.fen()).toEqual('6k1/8/8/8/8/8/8/5RK1 b - - 1 1')
   },
@@ -371,7 +371,7 @@ test.each([
 ])(
   'moving black king onto kingside rook without castling-right will throw error',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     expect(() => {
       chess.move(dat.move)
     }).toThrow('Invalid move:')
@@ -408,7 +408,7 @@ test.each([
 ])(
   'moving black king onto queenside rook without castling-right will throw error',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     expect(() => {
       chess.move(dat.move)
     }).toThrow('Invalid move:')
@@ -445,7 +445,7 @@ test.each([
 ])(
   'moving white king onto kingside rook without castling-right will throw error',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     expect(() => {
       chess.move(dat.move)
     }).toThrow('Invalid move:')
@@ -482,7 +482,7 @@ test.each([
 ])(
   'moving white king onto queenside rook without castling-right will throw error',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     expect(() => {
       chess.move(dat.move)
     }).toThrow('Invalid move:')
@@ -497,7 +497,7 @@ test.each([
   { fen: '1k3Kr1/8/8/8/8/8/8/8 b k - 0 1', move: 'b8g8' },
   { fen: '1k4br/8/8/8/8/8/8/1K6 b k - 0 1', move: 'b8h8' },
 ])('black castle kingside will fail if piece is on castle path', (dat) => {
-  const chess = new Chess(dat.fen, { enable960: true })
+  const chess = new Chess(dat.fen, { chess960: true })
   expect(() => chess.move(dat.move)).toThrow('Invalid move:')
 })
 
@@ -509,7 +509,7 @@ test.each([
   { fen: '4rKk1/8/8/8/8/8/8/8 b q - 0 1', move: 'g8e8' },
   { fen: '4brk1/8/8/8/8/8/8/6K1 b q - 0 1', move: 'g8f8' },
 ])('black castle queenside will fail if piece is on castle path', (dat) => {
-  const chess = new Chess(dat.fen, { enable960: true })
+  const chess = new Chess(dat.fen, { chess960: true })
   expect(() => chess.move(dat.move)).toThrow('Invalid move:')
 })
 
@@ -521,7 +521,7 @@ test.each([
   { fen: '8/8/8/8/8/8/8/4RkK1 w Q - 0 1', move: 'g1e1' },
   { fen: '6k1/8/8/8/8/8/8/4NRK1 w Q - 0 1', move: 'g1f1' },
 ])('white castle queenside will fail if piece is on castle path', (dat) => {
-  const chess = new Chess(dat.fen, { enable960: true })
+  const chess = new Chess(dat.fen, { chess960: true })
   expect(() => chess.move(dat.move)).toThrow('Invalid move:')
 })
 
@@ -533,7 +533,7 @@ test.each([
   { fen: '8/8/8/8/8/8/8/1K3kR1 w K - 0 1', move: 'b1g1' },
   { fen: '1k6/8/8/8/8/8/8/1K2n2R w K - 0 1', move: 'b1h1' },
 ])('white castle kingside will fail if piece is on castle path', (dat) => {
-  const chess = new Chess(dat.fen, { enable960: true })
+  const chess = new Chess(dat.fen, { chess960: true })
   expect(() => chess.move(dat.move)).toThrow('Invalid move:')
 })
 
@@ -545,7 +545,7 @@ test.each([
   { fen: '1k4r1/8/8/8/8/5R2/8/1K6 b k - 0 1', move: 'b8g8' },
   { fen: '1k5r/8/8/8/8/6R1/8/1K6 b k - 0 1', move: 'b8h8' },
 ])('black kingside castle will fail if castle path is under attack', (dat) => {
-  const chess = new Chess(dat.fen, { enable960: true })
+  const chess = new Chess(dat.fen, { chess960: true })
   expect(() => chess.move(dat.move)).toThrow('Invalid move:')
 })
 
@@ -557,7 +557,7 @@ test.each([
   { fen: '4r1k1/3K4/8/8/8/8/8/8 b q - 0 1', move: 'g8e8' },
   { fen: '5rk1/1P6/8/8/8/8/8/6K1 b q - 0 1', move: 'g8f8' },
 ])('black queenside castle will fail if castle path is under attack', (dat) => {
-  const chess = new Chess(dat.fen, { enable960: true })
+  const chess = new Chess(dat.fen, { chess960: true })
   expect(() => chess.move(dat.move)).toThrow('Invalid move:')
 })
 
@@ -569,7 +569,7 @@ test.each([
   { fen: '6k1/8/2r5/8/8/8/8/4R1K1 w Q - 0 1', move: 'g1e1' },
   { fen: '6k1/8/8/8/8/8/1p6/5RK1 w Q - 0 1', move: 'g1f1' },
 ])('white queenside castle will fail if castle path is under attack', (dat) => {
-  const chess = new Chess(dat.fen, { enable960: true })
+  const chess = new Chess(dat.fen, { chess960: true })
   expect(() => chess.move(dat.move)).toThrow('Invalid move:')
 })
 
@@ -581,6 +581,6 @@ test.each([
   { fen: '1k6/8/5r2/8/8/8/8/1K4R1 w K - 0 1', move: 'b1g1' },
   { fen: '1k6/8/8/8/8/8/7p/1K5R w K - 0 1', move: 'b1h1' },
 ])('white kingside castle will fail if castle path is under attack', (dat) => {
-  const chess = new Chess(dat.fen, { enable960: true })
+  const chess = new Chess(dat.fen, { chess960: true })
   expect(() => chess.move(dat.move)).toThrow('Invalid move:')
 })

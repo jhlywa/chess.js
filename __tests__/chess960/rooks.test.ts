@@ -10,7 +10,7 @@ test.each([
 ])(
   'black king can castle kingside with inner rook, but not outer rook',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move('h8h7') // move outer rook
     chess.move('b1a1') // opponent move
     chess.move(dat.move) // castle
@@ -27,7 +27,7 @@ test.each([
 ])(
   'black king can castle kingside with outer rook, but not inner rook',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     expect(() => {
       chess.move('b8c8')
     }).toThrow('Invalid move:')
@@ -47,7 +47,7 @@ test.each([
 ])(
   'black king can castle queenside with outer rook, but not inner rook',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move('f8f7') // move inner rook
     chess.move('g1h1') // opponent move
     chess.move(dat.move) // castle
@@ -64,7 +64,7 @@ test.each([
 ])(
   'black king can castle queenside with inner rook, but not outer rook',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move('a8a7') // move outer rook
     chess.move('g1h1') // opponent move
     chess.move(dat.move) // castle
@@ -81,7 +81,7 @@ test.each([
 ])(
   'white king can castle kingside with inner rook, but not outer rook',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move('h1h2') // move outer rook
     chess.move('b8a8') // opponent move
     chess.move(dat.move) // castle
@@ -98,7 +98,7 @@ test.each([
 ])(
   'white king can castle kingside with outer rook, but not inner rook',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     expect(() => {
       chess.move('b1c1')
     }).toThrow('Invalid move:')
@@ -118,7 +118,7 @@ test.each([
 ])(
   'white king can castle queenside with outer rook, but not inner rook',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move('f1f2') // move inner rook
     chess.move('g8h8') // opponent move
     chess.move(dat.move) // castle
@@ -135,7 +135,7 @@ test.each([
 ])(
   'white king can castle queenside with inner rook, but not outer rook',
   (dat) => {
-    const chess = new Chess(dat.fen, { enable960: true })
+    const chess = new Chess(dat.fen, { chess960: true })
     chess.move('a1a2') // move outer rook
     chess.move('g8h8') // opponent move
     chess.move(dat.move) // castle

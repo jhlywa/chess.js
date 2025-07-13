@@ -77,7 +77,7 @@ test.each([
 ])(
   'white king should not castle kingside when moved one space right',
   ({ before, after }) => {
-    const chess = new Chess(before, { enable960: true })
+    const chess = new Chess(before, { chess960: true })
     chess.move(moveWhiteKingRight(before))
     expect(chess.fen()).toEqual(after)
   },
@@ -111,7 +111,7 @@ test.each([
 ])(
   'white king should not castle queenside when moved one space left',
   ({ before, after }) => {
-    const chess = new Chess(before, { enable960: true })
+    const chess = new Chess(before, { chess960: true })
     chess.move(moveWhiteKingLeft(before))
     expect(chess.fen()).toEqual(after)
   },
@@ -145,7 +145,7 @@ test.each([
 ])(
   'black king should not castle kingside when moved one space right',
   ({ before, after }) => {
-    const chess = new Chess(before, { enable960: true })
+    const chess = new Chess(before, { chess960: true })
     chess.move(moveBlackKingRight(before))
     expect(chess.fen()).toEqual(after)
   },
@@ -179,7 +179,7 @@ test.each([
 ])(
   'black king should not castle queenside when moved one space left',
   ({ before, after }) => {
-    const chess = new Chess(before, { enable960: true })
+    const chess = new Chess(before, { chess960: true })
     chess.move(moveBlackKingLeft(before))
     expect(chess.fen()).toEqual(after)
   },

@@ -121,6 +121,11 @@ interface History {
   moveNumber: number
 }
 
+/**
+ * The chosen mechanic to indicate castling in Chess960 is to move the king
+ * onto the rook. This is an 'illegal' move and must be caught and corrected
+ * prior to the normal move-processing logic. PreMove facilitates that.
+ */
 type PreMove = {
   from: string
   to: string
@@ -484,7 +489,7 @@ function swapColor(color: Color): Color {
 
 export function validateFen(
   fen: string,
-  { enable960 = false } = {},
+  { chess960 = false } = {},
 ): { ok: boolean; error?: string } {
   // 1st criterion: 6 space-seperated fields?
   const tokens = fen.split(/\s+/)
@@ -524,7 +529,7 @@ export function validateFen(
   if (castleFlags.length > 4) {
     return { ok: false, error: 'Invalid FEN: castling field is too long' }
   }
-  const regex = enable960 ? /[^A-HKQa-hkq]/ : /[^KQkq]/
+  const regex = chess960 ? /[^A-HKQa-hkq]/ : /[^KQkq]/
   if (regex.test(castleFlags) && castleFlags !== '-') {
     return { ok: false, error: 'Invalid FEN: castling availability is invalid' }
   }
@@ -746,13 +751,14 @@ export class Chess {
   // tracks number of times a position has been seen for repetition checking
   private _positionCount = new Map<bigint, number>()
   private _variant = VARIANT.STANDARD
+  private _loadedFen = DEFAULT_POSITION
 
   constructor(
     fen = DEFAULT_POSITION,
-    { skipValidation = false, enable960 = false } = {},
+    { skipValidation = false, chess960 = false } = {},
   ) {
-    this._variant = enable960 ? VARIANT.CHESS960 : VARIANT.STANDARD
-    this.load(fen, { skipValidation })
+    this._variant = chess960 ? VARIANT.CHESS960 : VARIANT.STANDARD
+    this.load(fen, { skipValidation, chess960 })
   }
 
   clear({ preserveHeaders = false } = {}) {
@@ -769,6 +775,7 @@ export class Chess {
     this._header = preserveHeaders ? this._header : { ...HEADER_TEMPLATE }
     this._hash = this._computeHash()
     this._positionCount = new Map<bigint, number>()
+    this._loadedFen = DEFAULT_POSITION
     // Do not reset 'this._variant' field because loading a FEN string calls this method.
 
     /*
@@ -780,7 +787,10 @@ export class Chess {
     this._header['FEN'] = null
   }
 
-  load(fen: string, { skipValidation = false, preserveHeaders = false } = {}) {
+  load(
+    fen: string,
+    { skipValidation = false, preserveHeaders = false, chess960 = false } = {},
+  ) {
     let tokens = fen.split(/\s+/)
 
     // append commonly omitted fen tokens
@@ -791,9 +801,13 @@ export class Chess {
 
     tokens = fen.split(/\s+/)
 
+    if (chess960) {
+      this._setChess960()
+    }
+
     if (!skipValidation) {
       const { ok, error } = validateFen(fen, {
-        enable960: this.isVariantChess960(),
+        chess960: this.isChess960(),
       })
       if (!ok) {
         throw new Error(error)
@@ -828,7 +842,7 @@ export class Chess {
     const castleChars = castleField.split('')
     const isLengthOk = castleField.length <= 4
     const isCharsUnique = new Set(castleChars).size === castleChars.length
-    const exclRegex = this.isVariantChess960() ? /[^A-HKQa-hkq]/ : /[^KQkq]/
+    const exclRegex = this.isChess960() ? /[^A-HKQa-hkq]/ : /[^KQkq]/
     const isValidChars = !exclRegex.test(castleField)
     const isDash = castleField === '-'
 
@@ -844,7 +858,7 @@ export class Chess {
         wqs: [], // white queenside
       }
 
-      const flagsRegex = this.isVariantChess960() ? /[A-HKQa-hkq]/g : /[KQkq]/g
+      const flagsRegex = this.isChess960() ? /[A-HKQa-hkq]/g : /[KQkq]/g
       const matches = castleField.match(flagsRegex) || []
       matches.forEach((ch) => {
         if (inf.w.castling.isQueensidePossible && ch == 'Q') {
@@ -937,6 +951,8 @@ export class Chess {
     this._hash = this._computeHash()
     this._updateSetup(fen)
     this._incPositionCount()
+
+    this._loadedFen = fen
   }
 
   fen({
@@ -1039,7 +1055,7 @@ export class Chess {
             this._board[square]?.color === color &&
             this._board[square]?.type === PAWN
           ) {
-            // if the pawn makes an ep capture, does it leave it's king in check?
+            // if the pawn makes an ep capture, does it leave its king in check?
             this._makeMove({
               color,
               from: square,
@@ -1148,7 +1164,7 @@ export class Chess {
   }
 
   reset() {
-    this.load(DEFAULT_POSITION)
+    this.load(this._loadedFen)
   }
 
   get(square: Square): Piece | undefined {
@@ -2131,7 +2147,7 @@ export class Chess {
      * If Chess960 is enabled and the 'Variant' header already exists, assume
      * the header is correct and do not modify it, otherwise set it.
      */
-    if (this.isVariantChess960() && !this.getHeaders()['Variant']) {
+    if (this.isChess960() && !this.getHeaders()['Variant']) {
       this.setHeader('Variant', 'Chess960')
     }
 
@@ -2356,7 +2372,7 @@ export class Chess {
       headers['Variant'] === 'Chess960' ||
       headers['Variant'] === 'Fischerandom'
     ) {
-      this.setVariantChess960()
+      this._setChess960()
     }
 
     /*
@@ -2405,7 +2421,7 @@ export class Chess {
     }
 
     /*
-     * Per section 8.2.6 of the PGN spec, the Result tag pair must match match
+     * Per section 8.2.6 of the PGN spec, the Result tag pair must match
      * the termination marker. Only do this when headers are present, but the
      * result tag is missing
      */
@@ -2801,6 +2817,10 @@ export class Chess {
     this._comments = currentComments
   }
 
+  private _setChess960() {
+    this._variant = VARIANT.CHESS960
+  }
+
   getComment(): string {
     return this._comments[this.fen()]
   }
@@ -2898,15 +2918,14 @@ export class Chess {
     return this._moveNumber
   }
 
-  setVariantChess960() {
-    this._variant = VARIANT.CHESS960
-  }
-
-  isVariantChess960() {
+  isChess960() {
     return this._variant === VARIANT.CHESS960
   }
 
-  getCastlingSquares(color: Color): { [KING]: string; [QUEEN]: string } {
+  getCastlingSquares(color: Color): {
+    [KING]: string | undefined
+    [QUEEN]: string | undefined
+  } {
     const kingside = ROOKS[color].filter(
       (obj) => obj.flag === BITS.KSIDE_CASTLE,
     )[0]
@@ -2914,12 +2933,61 @@ export class Chess {
       (obj) => obj.flag === BITS.QSIDE_CASTLE,
     )[0]
     return {
-      [KING]: kingside ? algebraic(kingside.square) : '',
-      [QUEEN]: queenside ? algebraic(queenside.square) : '',
+      [KING]: kingside ? algebraic(kingside.square) : undefined,
+      [QUEEN]: queenside ? algebraic(queenside.square) : undefined,
     }
   }
 
-  // Returns info about position of kings and rooks; castling-rights are ignored.
+  /**
+   * Castling in Chess960 is complicated. This function gathers info about the
+   * location of kings and rooks, ignoring castling-rights. Gathering this
+   * info works fine for a Standard variant, but is overkill.
+   * Since castling in Standard chess is so much simpler than in Chess960,
+   * it may be desirable to refactor this function into two separate functions:
+   * one for Standard chess and one for Chess960.
+   *
+   * In the chess world (i.e. Standard and Chess960 game), 'kingside' means the
+   * four rightmost columns of the board, and 'queenside' means the four
+   * leftmost columns of the board.
+   *
+   * In this function 'kingside' and 'queenside' mean something different.
+   * 'kingside' means 'to the right' of whatever column the king is in.
+   * 'queenside' means 'to the left' of whatever column the king is in.
+   *
+   * 'isQueenSidePossible', 'isKingsidePossible', 'areKingsInSameCol',
+   * 'mirroredKingsideRooks', 'mirroredQueensideRooks' are simply for
+   * convenience because they are computed from the other fields.
+   *
+   * The returned object looks like this:
+   * {
+   *    b: {                        // Black
+   *      king,                     // Column [0-7] of the black king, or -1 if king is not in row 8.
+   *      kingsideRooks,            // Columns [0-7] of all rooks to the right of the king.
+   *      queensideRooks,           // Columns [0-7] of all rooks to the left of the king.
+   *      leftmostQueensideRookSq,  // The Ox88 square of leftmost queenside rook or undefined if no king or no rook.
+   *      rightmostKingsideRookSq,  // The Ox88 square of rightmost kingside rook or undefined if no king or no rook.
+   *      castling: {
+   *        isQueensidePossible,    // True if a rook exists anywhere to the left of the king,
+   *        isKingsidePossible,     // True if a rook exists anywhere to the right of the king,
+   *      },
+   *    },
+   *    w: {                        // White (Fields below are similar to 'b' fields, above.)
+   *      king,
+   *      kingsideRooks,
+   *      queensideRooks,
+   *      leftmostQueensideRookSq,
+   *      rightmostKingsideRookSq,
+   *      castling: {
+   *        isQueensidePossible,
+   *        isKingsidePossible,
+   *      },
+   *    },
+   *    areKingsInSameCol:          // True if kings are in the same column.
+   *    mirroredKingsideRooks:      // Columns [0-7] of all rooks mirrored on the kingside.
+   *    mirroredQueensideRooks:     // Columns [0-7] of all rooks mirrored on the queenside.
+   * }
+   *
+   */
   private _getKingAndRookInfo() {
     const range = (start: number, end: number) =>
       new Array(end - start + 1).fill(undefined).map((_, i) => i + start)
@@ -2947,24 +3015,22 @@ export class Chess {
     const bKingsideRooks = bRooks.filter((n) => bKing >= 0 && n > bKing)
     const wKingsideRooks = wRooks.filter((n) => wKing >= 0 && n > wKing)
 
-    const is960 = this.isVariantChess960()
+    const is960 = this.isChess960()
 
     return {
       b: {
-        king: bKing, // Column [0-7] of the black king, or -1 if king is not in row 8.
-        kingsideRooks: bKingsideRooks, // Columns [0-7] of all rooks on the kingside.
-        queensideRooks: bQueensideRooks, // Columns [0-7] of all rooks on the queenside.
-        leftmostQueensideRookSq: Ox88.a8 + bQueensideRooks[0], // The Ox88 square of leftmost queenside rook or undefined if no king or no rook.
+        king: bKing,
+        kingsideRooks: bKingsideRooks,
+        queensideRooks: bQueensideRooks,
+        leftmostQueensideRookSq: Ox88.a8 + bQueensideRooks[0],
         rightmostKingsideRookSq:
-          Ox88.a8 + bKingsideRooks[bKingsideRooks.length - 1], // The Ox88 square of rightmost kingside rook or undefined if no king or no rook.
+          Ox88.a8 + bKingsideRooks[bKingsideRooks.length - 1],
         castling: {
-          // True if a rook exists anywhere to the left of the king.
           isQueensidePossible: is960
             ? bKing >= 0 && bKing != 7 && bQueensideRooks.length > 0
             : bKing == 4 &&
               bQueensideRooks.length == 1 &&
               bQueensideRooks[0] == 0,
-          // True if a rook exists anywhere to the right of the king.
           isKingsidePossible: is960
             ? bKing > 0 && bKingsideRooks.length > 0
             : bKing == 4 &&
@@ -2992,13 +3058,10 @@ export class Chess {
               wKingsideRooks[0] == 7,
         },
       },
-      // True if kings are in the same column.
       areKingsInSameCol: bKing >= 0 && wKing >= 0 && bKing === wKing,
-      // Columns [0-7] of all rooks mirrored on the kingside.
       mirroredKingsideRooks: bKingsideRooks.filter((n) =>
         wKingsideRooks.includes(n),
       ),
-      // Columns [0-7] of all rooks mirrored on the queenside.
       mirroredQueensideRooks: bQueensideRooks.filter((n) =>
         wQueensideRooks.includes(n),
       ),
@@ -3048,13 +3111,22 @@ export class Chess {
     return false
   }
 
+  /**
+   * If the game variant is not Chess960, then this function is a 'no-op' and
+   * simply returns the 'moves' parameter that was passed to it.
+   *
+   * If the game variant is Chess960 then 'moves' is filtered based on
+   * whether castling is desired or not.
+   */
   _filterMoves(moves: InternalMove[], move: PreMove): InternalMove[] {
-    if (this.isVariantChess960()) {
+    if (this.isChess960()) {
       return move.castle960Flag
         ? moves.filter(
+            // return all castling moves
             (mv) => mv.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE),
           )
         : moves.filter(
+            // return all non-castling moves
             (mv) => mv.flags & (~BITS.KSIDE_CASTLE | ~BITS.QSIDE_CASTLE),
           )
     }
@@ -3062,8 +3134,13 @@ export class Chess {
   }
 
   /**
-   * Adjust an invalid king-onto-rook move to a 'normal' castling move. If
-   * adjustment is made, set the corresponding castling flag.
+   * If the game variant is not Chess960, then this function is basically a
+   * 'no-op' and (almost literally) returns whatever move was passed to it.
+   *
+   * If the game variant is Chess960 and an 'illegal' king-onto-rook move is
+   * made (to indicate a desire to castle) the 'illegal' move is converted to
+   * a normal castling move and the 'castle960Flag' is set to indicate the
+   * type of castling move.
    */
   _preprocessMove(
     move: string | { from: string; to: string; promotion?: string } | null,
@@ -3081,8 +3158,8 @@ export class Chess {
       mv = move // string or null
     }
 
-    if (mv && this.isVariantChess960()) {
-      // Convert square-to-square move (e.g. 'a4a7') to an object; ignore any other moves (e.g. 'Bxe5').
+    if (mv && this.isChess960()) {
+      // Convert algebraic move (e.g. 'a4a7') to an object; ignore other move types (e.g. 'Bxe5').
       if (typeof move === 'string' && /^[a-h]\d[a-h]\d$/i.test(move)) {
         mv = {
           from: move.substring(0, 2).toLowerCase(),
@@ -3090,7 +3167,7 @@ export class Chess {
         }
       }
       if (typeof mv === 'object') {
-        const row = mv.from.charAt(1) // Extract the row (rank).
+        const row = mv.from.charAt(1)
         if (this._isCastlingOntoRook(mv, BITS.KSIDE_CASTLE)) {
           mv.to = 'g' + row
           mv.castle960Flag = BITS.KSIDE_CASTLE
@@ -3104,7 +3181,16 @@ export class Chess {
   }
 }
 
-export function generateChess960Fen() {
+/**
+ * Generate a random Chess960 starting position.
+ * Note: The DEFAULT_POSITION is a valid Chess960 starting position, and will
+ *       (should) be generated, on average, once every 960 times. This function
+ *       makes no attempt to exclude the DEFAULT_POSITION from being returned.
+ *       As of this writing (2025) FIDE rules forbid the DEFAULT_POSITON in
+ *       Chess960 tournaments. Some tournaments also forbid DEFAULT_POSITION
+ *       with king and queen swapped.
+ */
+export function getRandom960Position() {
   function rnd(n: number): number {
     return Math.floor(Math.random() * n)
   }
@@ -3135,8 +3221,8 @@ export function generateChess960Fen() {
   const n2Val = rnd(4) // Select one of the four remaining squares for a knight.
 
   const row: Array<string> = Array(8).fill('') // Create array with eight positions.
-  row[b1Val] = 'b' // Place black bishop.
-  row[b2Val] = 'b' // Place white bishop.
+  row[b1Val] = 'b' // Place dark-square bishop.
+  row[b2Val] = 'b' // Place light-square bishop.
   row[place(row, qVal)] = 'q' // Place queen.
   row[place(row, n1Val)] = 'n' // Place knight.
   row[place(row, n2Val)] = 'n' // Place knight.
@@ -3168,6 +3254,12 @@ export function generateChess960Fen() {
   return [board, color, castle, enpassant, halfmove, movenum].join(' ')
 }
 
+/**
+ * us: BLACK or WHITE
+ * flag: BITS.KSIDE_CASTLE or BITS.QSIDE_CASTLE
+ * returns the Ox88 square of the rook with the specified color and castling
+ * right, otherwise, returns -1 if no such rook is found.
+ */
 function findRookWithCastlingRight(us: Color, flag: number): number {
   const rook = ROOKS[us].filter((rk) => flag & rk.flag)
   return rook.length == 1 ? rook[0].square : -1
