@@ -311,7 +311,10 @@ corners), this will not return any more information than can be retrieved via
 information that `.getCastlingRights()` cannot.
 
 ```ts
-const chess = new Chess('qbrnnbk1/2pp2pr/p6p/1p2pp2/8/P3PP2/1PPP2PP/QR1NNBKR w Kq - 0 19', {chess960: true})
+const chess = new Chess(
+  'qbrnnbk1/2pp2pr/p6p/1p2pp2/8/P3PP2/1PPP2PP/QR1NNBKR w Kq - 0 19',
+  { chess960: true },
+)
 
 chess.getCastlingSquares(BLACK)
 // -> { 'k': undefined, 'q': 'c8' }
