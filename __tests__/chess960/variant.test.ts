@@ -1,13 +1,17 @@
-import { Chess } from '../../src/chess'
+import { Chess, STANDARD_POSITION } from '../../src/chess'
 import { expect, test } from 'vitest'
 
 test('initial game variant should be standard', () => {
   const chess = new Chess()
-  expect(chess.isVariantChess960()).toEqual(false)
+  expect(chess.isChess960()).toEqual(false)
 })
 
-test('should be able to set chess960 game variant', () => {
-  const chess = new Chess()
-  chess.setVariantChess960()
-  expect(chess.isVariantChess960()).toEqual(true)
+test('should be able to set chess960 game variant as true', () => {
+  const chess = new Chess(STANDARD_POSITION, { chess960: true })
+  expect(chess.isChess960()).toEqual(true)
+})
+
+test('should be able to set chess960 game variant as false', () => {
+  const chess = new Chess(STANDARD_POSITION, { chess960: false })
+  expect(chess.isChess960()).toEqual(false)
 })

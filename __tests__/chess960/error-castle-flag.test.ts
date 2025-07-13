@@ -11,7 +11,7 @@ import { expect, test } from 'vitest'
 
 test('when castling through check, error message should not include the castle960Flag property', () => {
   const chess = new Chess('1k6/8/8/8/3r4/8/8/1K4R1 w K - 0 1', {
-    enable960: true,
+    chess960: true,
   })
   expect(() => chess.move('b1g1')).toThrow(
     'Invalid move: {"from":"b1","to":"g1"}',
@@ -20,7 +20,7 @@ test('when castling through check, error message should not include the castle96
 
 test('when castling path is obstructed, error message should not include the castle960Flag property', () => {
   const chess = new Chess('1k6/8/8/8/8/8/8/1K1N2R1 w K - 0 1', {
-    enable960: true,
+    chess960: true,
   })
   expect(() => chess.move('b1g1')).toThrow(
     'Invalid move: {"from":"b1","to":"g1"}',

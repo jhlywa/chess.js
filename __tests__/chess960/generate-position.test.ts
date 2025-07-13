@@ -1,4 +1,4 @@
-import { generateChess960Fen } from '../../src/chess'
+import { getRandom960Position } from '../../src/chess'
 import { expect, test } from 'vitest'
 
 function areBishopsOnDifferentColorSquares(
@@ -75,10 +75,10 @@ function checkFen(fen: string) {
 }
 
 test('generated chess960 fen should be valid', () => {
-  // The fen returned is randomly generated. If there is a problems, it may
+  // The fen returned is randomly generated. If there is a problem, it may
   // be impossible to reproduce.
   for (let i = 0; i < 50; i++) {
     // Run multiple times to exercise function.
-    checkFen(generateChess960Fen())
+    checkFen(getRandom960Position())
   }
 })

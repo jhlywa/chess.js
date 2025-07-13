@@ -84,7 +84,7 @@ test.each([
 ])(
   'should enable all castling rights when kings and rooks are aligned (every combination)',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(true)
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(true)
     expect(chess.getCastlingRights(WHITE)[KING]).toEqual(true)
@@ -122,7 +122,7 @@ test.each([
 ])(
   'should enable black queenside castling-right when black rook is on queenside (every combination)',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(true)
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(false)
     expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(false)
@@ -160,7 +160,7 @@ test.each([
 ])(
   'should enable black kingside castling-right when black rook is on kingside (every combination)',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(false)
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(true)
     expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(false)
@@ -198,7 +198,7 @@ test.each([
 ])(
   'should enable white queenside castling-right when white rook is on queenside (every combination)',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(false)
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(false)
     expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(true)
@@ -236,7 +236,7 @@ test.each([
 ])(
   'should enable white kingside castling-right when white rook is on kingside (every combination)',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(false)
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(false)
     expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(false)
@@ -255,7 +255,7 @@ test.each([
 ])(
   'should disable black queenside castling-right when black king is on h-column',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(false)
   },
 )
@@ -271,7 +271,7 @@ test.each([
 ])(
   'should disable black kingside castling-right when black king is on a-column',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(false)
   },
 )
@@ -287,7 +287,7 @@ test.each([
 ])(
   'should disable white queenside castling-right when white king is in h-column',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(false)
   },
 )
@@ -303,7 +303,7 @@ test.each([
 ])(
   'should disable white kingside castling-right when white king is in a-column',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(WHITE)[KING]).toEqual(false)
   },
 )
@@ -334,7 +334,7 @@ test.each([
 ])(
   'should disable all castling rights when castle flags are repeated',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     //expect(chess.fen()).toEqual('r3k2r/8/8/8/8/8/8/R3K2R w - - 0 1')
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(false)
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(false)
@@ -354,7 +354,7 @@ test.each([
 ])(
   'should disable black castling-rights when black king is not on row 8',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(false)
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(false)
   },
@@ -371,7 +371,7 @@ test.each([
 ])(
   'should disable white castling-rights when white king is not on row 1',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(WHITE)[KING]).toEqual(false)
     expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(false)
   },
@@ -379,8 +379,7 @@ test.each([
 
 test('should disable black queenside castling-right when black queenside rook is missing', () => {
   const chess = new Chess()
-  chess.setVariantChess960()
-  chess.load('5k1r/8/8/8/8/8/8/1R3K1R w KQkq - 0 1')
+  chess.load('5k1r/8/8/8/8/8/8/1R3K1R w KQkq - 0 1', { chess960: true })
   expect(chess.getCastlingRights(BLACK)[KING]).toEqual(true)
   expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(false)
   expect(chess.getCastlingRights(WHITE)[KING]).toEqual(true)
@@ -389,8 +388,7 @@ test('should disable black queenside castling-right when black queenside rook is
 
 test('should disable black kingside castling-right when black kingside rook is missing', () => {
   const chess = new Chess()
-  chess.setVariantChess960()
-  chess.load('1r3k2/8/8/8/8/8/8/1R3K1R w KQkq - 0 1')
+  chess.load('1r3k2/8/8/8/8/8/8/1R3K1R w KQkq - 0 1', { chess960: true })
   expect(chess.getCastlingRights(BLACK)[KING]).toEqual(false)
   expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(true)
   expect(chess.getCastlingRights(WHITE)[KING]).toEqual(true)
@@ -399,8 +397,7 @@ test('should disable black kingside castling-right when black kingside rook is m
 
 test('should disable white queenside castling-right when white queenside rook is missing', () => {
   const chess = new Chess()
-  chess.setVariantChess960()
-  chess.load('1r3k1r/8/8/8/8/8/8/5K1R w KQkq - 0 1')
+  chess.load('1r3k1r/8/8/8/8/8/8/5K1R w KQkq - 0 1', { chess960: true })
   expect(chess.getCastlingRights(BLACK)[KING]).toEqual(true)
   expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(true)
   expect(chess.getCastlingRights(WHITE)[KING]).toEqual(true)
@@ -409,8 +406,7 @@ test('should disable white queenside castling-right when white queenside rook is
 
 test('should disable white kingside castling-right when white kingside rook is missing', () => {
   const chess = new Chess()
-  chess.setVariantChess960()
-  chess.load('1r3k1r/8/8/8/8/8/8/1R3K2 w KQkq - 0 1')
+  chess.load('1r3k1r/8/8/8/8/8/8/1R3K2 w KQkq - 0 1', { chess960: true })
   expect(chess.getCastlingRights(BLACK)[KING]).toEqual(true)
   expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(true)
   expect(chess.getCastlingRights(WHITE)[KING]).toEqual(false)
@@ -426,7 +422,7 @@ test.each([
 ])(
   'should disable black queenside castling-rights when more than one black queenside rook is specified',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(false)
   },
 )
@@ -440,7 +436,7 @@ test.each([
 ])(
   'should disable black kingside castling rights when more than one black kingside rook is specified',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(false)
   },
 )
@@ -454,7 +450,7 @@ test.each([
 ])(
   'should disable white queenside castling-rights when more than one white queenside rook is specified',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(false)
   },
 )
@@ -468,7 +464,7 @@ test.each([
 ])(
   'should disable white kingside castling rights when more than one white kingside rook is specified',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(false)
   },
 )
@@ -482,7 +478,7 @@ test.each([
 ])(
   'should enable white queenside castling-rights when white inner queenside rook is specified',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(true)
   },
 )
@@ -496,7 +492,7 @@ test.each([
 ])(
   'should enable white kingside castling-rights when white inner kingside rook is specified',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(WHITE)[KING]).toEqual(true)
   },
 )
@@ -510,7 +506,7 @@ test.each([
 ])(
   'should enable black queenside castling-right when black inner queenside rook is specified',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(true)
   },
 )
@@ -568,7 +564,7 @@ test.each([
 ])(
   'should enable black kingside castling-right when black inner kingside rook and flag are present',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[KING]).toEqual(true)
   },
 )
@@ -626,7 +622,7 @@ test.each([
 ])(
   'should enable white kingside castling-right when white inner kingside rook and flag are present',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(WHITE)[KING]).toEqual(true)
   },
 )
@@ -684,7 +680,7 @@ test.each([
 ])(
   'should enable white queenside castling-right when white inner queenside rook and flag are present',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(true)
   },
 )
@@ -742,7 +738,7 @@ test.each([
 ])(
   'should enable black queenside castling-right when black inner queenside rook and flag are present',
   (fen) => {
-    const chess = new Chess(fen, { enable960: true })
+    const chess = new Chess(fen, { chess960: true })
     expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(true)
   },
 )

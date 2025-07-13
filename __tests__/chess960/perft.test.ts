@@ -1072,7 +1072,7 @@ describe(
         const fen = [board, color, flags, enpassant, halfmove, fullmove].join(
           ' ',
         )
-        const chess = new Chess(fen, { enable960: true })
+        const chess = new Chess(fen, { chess960: true })
         expect(chess.perft(DEPTH)).toEqual(nodeCounts['d' + DEPTH])
       })
     }
