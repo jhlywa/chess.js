@@ -961,7 +961,8 @@ chess.getHeaders()
 
 ### .reset()
 
-Reset the board to the initial starting position.
+Reset the board to the most recently loaded FEN. If no FEN has been loaded,
+reset the board to the standard starting position of Classical chess.
 
 ### .setCastlingRights(color, rights)
 
