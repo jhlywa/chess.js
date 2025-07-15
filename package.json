@@ -1,11 +1,13 @@
 {
   "name": "chess.js",
+  "description": "TypeScript library for chess move generation, validation, execution, and game state - everything but the AI.",
   "version": "1.4.0",
   "license": "BSD-2-Clause",
   "main": "dist/cjs/chess.js",
   "module": "dist/esm/chess.js",
   "types": "dist/types/chess.d.ts",
   "homepage": "https://github.com/jhlywa/chess.js",
+  "keywords": ["chess", "fen", "pgn", "typescript"],
   "author": "Jeff Hlywa <jhlywa@gmail.com>",
   "scripts": {
     "prepare": "npm run build",
