@@ -9,10 +9,10 @@ function checkSquares(
   fen: string,
 ): void {
   const chess = new Chess(fen, { chess960: true })
-  expect(chess.getCastlingSquares(BLACK)[KING]).toEqual(blackKingSq)
-  expect(chess.getCastlingSquares(BLACK)[QUEEN]).toEqual(blackQueenSq)
-  expect(chess.getCastlingSquares(WHITE)[KING]).toEqual(whiteKingSq)
-  expect(chess.getCastlingSquares(WHITE)[QUEEN]).toEqual(whiteQueenSq)
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual(blackKingSq)
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(blackQueenSq)
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual(whiteKingSq)
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(whiteQueenSq)
 }
 
 const UNDEF = undefined

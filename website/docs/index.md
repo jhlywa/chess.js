@@ -291,26 +291,18 @@ indicates whether the right is available or not for both kingside and queenside.
 Note this does not indicate if such a move is legal or not in the current
 position as checks etc. also need to be considered.
 
+If a castling-right is available, the square containing the rook that has the
+castling-right will be returned, otherwise `undefined` will be returned.
+
+For a Classical game of chess, any returned square will always be one of `a1`,
+`a8`, `h1`, `h8`. A Chess960 game may return other squares.
+
 ```ts
 const chess = new Chess()
 
 chess.getCastlingRights(BLACK) // black can castle queenside only
-// -> { 'k': false, 'q': true }
-```
+// -> { 'k': undefined, 'q': 'h8' }
 
-### .getCastlingSquares(color)
-
-Gets the castling squares for the given color. An object is returned which
-contains the squares that have a rook that is allowed to castle. Note this does
-not indicate if such a move is legal or not in the current position as checks
-etc. also need to be considered.
-
-For a Standard game of chess (where the rooks are always on the outermost
-corners), this will not return any more information than can be retrieved via
-`getCastlingRights()`, however, for a Chess960 game, this will return
-information that `.getCastlingRights()` cannot.
-
-```ts
 const chess = new Chess(
   'qbrnnbk1/2pp2pr/p6p/1p2pp2/8/P3PP2/1PPP2PP/QR1NNBKR w Kq - 0 19',
   { chess960: true },
@@ -318,7 +310,6 @@ const chess = new Chess(
 
 chess.getCastlingSquares(BLACK)
 // -> { 'k': undefined, 'q': 'c8' }
-
 chess.getCastlingSquares(WHITE)
 // -> { 'k': 'h1', 'q': undefined }
 ```
@@ -982,6 +973,13 @@ Sets the castling rights for the given color. Returns true if the change was
 successfully made. False will be returned when the position doesn't allow the
 requested change i.e. if the corresponding king or rook is not on it's starting
 square.
+
+Setting a castling-right always operates on the outer-most rook. This is
+immaterial for a Chess960 game that has no inner-rook, or for a Classical game.
+If you wish to set a castling-right on an inner-rook of a Chess960 game, the
+outer-rook(s) must be removed from the board, then the castling-right can be set
+(on the formerly inner-rook), then the outer-rook(s) must be re-added to the
+board.
 
 ```ts
 // white can't castle kingside but can castle queenside
