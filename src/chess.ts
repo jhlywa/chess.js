@@ -846,11 +846,14 @@ export class Chess {
     const isValidChars = !exclRegex.test(castleField)
     const isDash = castleField === '-'
 
+    // Decode the castling field
     if (
       (isLengthOk && isCharsUnique && (isValidChars || isDash)) ||
       skipValidation
     ) {
       const inf = this._getKingAndRookInfo()
+
+      // Find rooks that have castling rights based on castling field in FEN.
       const rk: Record<string, number[]> = {
         bks: [], // black kingside
         bqs: [], // black queenside
@@ -861,6 +864,7 @@ export class Chess {
       const flagsRegex = this.isChess960() ? /[A-HKQa-hkq]/g : /[KQkq]/g
       const matches = castleField.match(flagsRegex) || []
       matches.forEach((ch) => {
+        // Handle 'KQkq' castling characters.
         if (inf.w.castling.isQueensidePossible && ch == 'Q') {
           rk.wqs.push(inf.w.leftmostQueensideRookSq)
         }
@@ -874,6 +878,7 @@ export class Chess {
           rk.bks.push(inf.b.rightmostKingsideRookSq)
         }
 
+        // Handle 'A-H' castling characters.
         const wRookCol = ch.charCodeAt(0) - 'A'.charCodeAt(0)
         if (
           inf.w.castling.isQueensidePossible &&
@@ -888,6 +893,7 @@ export class Chess {
           rk.wks.push(Ox88.a1 + wRookCol)
         }
 
+        // Handle 'a-h' castling characters.
         const bRookCol = ch.charCodeAt(0) - 'a'.charCodeAt(0)
         if (
           inf.b.castling.isQueensidePossible &&
@@ -903,29 +909,24 @@ export class Chess {
         }
       })
 
-      if (
-        rk.bks.length <= 1 &&
-        rk.bqs.length <= 1 &&
-        rk.wks.length <= 1 &&
-        rk.wqs.length <= 1
-      ) {
-        if (rk.bks.length == 1) {
-          this._castling.b |= BITS.KSIDE_CASTLE
-        }
-        if (rk.bqs.length == 1) {
-          this._castling.b |= BITS.QSIDE_CASTLE
-        }
-        if (rk.wks.length == 1) {
-          this._castling.w |= BITS.KSIDE_CASTLE
-        }
-        if (rk.wqs.length == 1) {
-          this._castling.w |= BITS.QSIDE_CASTLE
-        }
+      // Set the castling rights.
+      if (rk.bks.length == 1) {
+        this._castling.b |= BITS.KSIDE_CASTLE
+      }
+      if (rk.bqs.length == 1) {
+        this._castling.b |= BITS.QSIDE_CASTLE
+      }
+      if (rk.wks.length == 1) {
+        this._castling.w |= BITS.KSIDE_CASTLE
+      }
+      if (rk.wqs.length == 1) {
+        this._castling.w |= BITS.QSIDE_CASTLE
       }
 
-      // Update ROOKS based on calculated castling rights.
-      const bCastlingRights = this.getCastlingRights(BLACK)
-      const wCastlingRights = this.getCastlingRights(WHITE)
+      const bCastlingRights = this._getCastlingRights(BLACK)
+      const wCastlingRights = this._getCastlingRights(WHITE)
+
+      // Update ROOKS squares that are able to castle.
       ROOKS.w = []
       ROOKS.b = []
 
@@ -989,8 +990,8 @@ export class Chess {
     }
 
     const inf = this._getKingAndRookInfo()
-    const bCastlingRights = this.getCastlingRights(BLACK)
-    const wCastlingRights = this.getCastlingRights(WHITE)
+    const bCastlingRights = this._getCastlingRights(BLACK)
+    const wCastlingRights = this._getCastlingRights(WHITE)
     let castling = ''
 
     if (wCastlingRights[KING]) {
@@ -1293,26 +1294,6 @@ export class Chess {
     }
     if (inf.b.castling.isKingsidePossible) {
       this._castling.b |= BITS.KSIDE_CASTLE
-    }
-
-    if (
-      this._castling.b & BITS.QSIDE_CASTLE &&
-      this._castling.w & BITS.QSIDE_CASTLE
-    ) {
-      if (!inf.areKingsInSameCol || inf.mirroredQueensideRooks.length == 0) {
-        this._castling.b &= ~BITS.QSIDE_CASTLE
-        this._castling.w &= ~BITS.QSIDE_CASTLE
-      }
-    }
-
-    if (
-      this._castling.b & BITS.KSIDE_CASTLE &&
-      this._castling.w & BITS.KSIDE_CASTLE
-    ) {
-      if (!inf.areKingsInSameCol || inf.mirroredKingsideRooks.length == 0) {
-        this._castling.b &= ~BITS.KSIDE_CASTLE
-        this._castling.w &= ~BITS.KSIDE_CASTLE
-      }
     }
 
     this._hash ^= this._castlingKey()
@@ -1740,7 +1721,7 @@ export class Chess {
      *   a) generating all moves, or
      *   b) doing single square move generation on the king's square
      */
-    const castlingRights = this.getCastlingRights(us)
+    const castlingRights = this._getCastlingRights(us)
 
     if (forPiece === undefined || forPiece === KING) {
       if (!singleSquare || lastSquare === this._kings[us]) {
@@ -2880,9 +2861,9 @@ export class Chess {
     if (typeof isKingsideRightWanted !== 'undefined') {
       if (isKingsideCastlePossible) {
         if (isKingsideRightWanted) {
-          this._castling[color] |= BITS.KSIDE_CASTLE
+          this._addCastlingRook(color, BITS.KSIDE_CASTLE)
         } else {
-          this._castling[color] &= ~BITS.KSIDE_CASTLE
+          this._removeCastlingRook(color, BITS.KSIDE_CASTLE)
         }
       } else {
         if (isKingsideRightWanted) {
@@ -2894,9 +2875,9 @@ export class Chess {
     if (typeof isQueensideRightWanted !== 'undefined') {
       if (isQueensideCastlePossible) {
         if (isQueensideRightWanted) {
-          this._castling[color] |= BITS.QSIDE_CASTLE
+          this._addCastlingRook(color, BITS.QSIDE_CASTLE)
         } else {
-          this._castling[color] &= ~BITS.QSIDE_CASTLE
+          this._removeCastlingRook(color, BITS.QSIDE_CASTLE)
         }
       } else {
         if (isQueensideRightWanted) {
@@ -2907,7 +2888,42 @@ export class Chess {
     return result
   }
 
-  getCastlingRights(color: Color): { [KING]: boolean; [QUEEN]: boolean } {
+  private _removeRook(color: Color, flag: number) {
+    const rk = ROOKS[color]
+    // Loop over 0, 1, or 2 items.
+    for (var i = 0; i < rk.length; i++) {
+      if (rk[i].flag == flag) {
+        rk.splice(i, 1) // Remove 1 item starting at i.
+        break
+      }
+    }
+  }
+
+  private _addCastlingRook(color: Color, flag: number) {
+    this._removeRook(color, flag)
+    const dat = this._getKingAndRookInfo()[color]
+    const square =
+      flag == BITS.QSIDE_CASTLE
+        ? dat.leftmostQueensideRookSq
+        : dat.rightmostKingsideRookSq
+    this._castling[color] |= flag // Set the castling-right.
+    ROOKS[color].push({ square, flag })
+  }
+
+  private _removeCastlingRook(color: Color, flag: number) {
+    this._removeRook(color, flag)
+    const dat = this._getKingAndRookInfo()[color]
+    const square =
+      flag == BITS.QSIDE_CASTLE
+        ? dat.leftmostQueensideRookSq
+        : dat.rightmostKingsideRookSq
+    this._castling[color] &= ~flag // Remove the castling-right
+  }
+
+  private _getCastlingRights(color: Color): {
+    [KING]: string | undefined
+    [QUEEN]: string | undefined
+  } {
     return {
       [KING]: (this._castling[color] & SIDES[KING]) !== 0,
       [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0,
@@ -2922,7 +2938,7 @@ export class Chess {
     return this._variant === VARIANT.CHESS960
   }
 
-  getCastlingSquares(color: Color): {
+  getCastlingRights(color: Color): {
     [KING]: string | undefined
     [QUEEN]: string | undefined
   } {
@@ -2932,9 +2948,13 @@ export class Chess {
     const queenside = ROOKS[color].filter(
       (obj) => obj.flag === BITS.QSIDE_CASTLE,
     )[0]
+
+    const rights = this._getCastlingRights(color)
+
     return {
-      [KING]: kingside ? algebraic(kingside.square) : undefined,
-      [QUEEN]: queenside ? algebraic(queenside.square) : undefined,
+      [KING]: rights[KING] && kingside ? algebraic(kingside.square) : undefined,
+      [QUEEN]:
+        rights[QUEEN] && queenside ? algebraic(queenside.square) : undefined,
     }
   }
 
@@ -2954,8 +2974,7 @@ export class Chess {
    * 'kingside' means 'to the right' of whatever column the king is in.
    * 'queenside' means 'to the left' of whatever column the king is in.
    *
-   * 'isQueenSidePossible', 'isKingsidePossible', 'areKingsInSameCol',
-   * 'mirroredKingsideRooks', 'mirroredQueensideRooks' are simply for
+   * 'isQueenSidePossible', 'isKingsidePossible', are simply for
    * convenience because they are computed from the other fields.
    *
    * The returned object looks like this:
@@ -2982,9 +3001,6 @@ export class Chess {
    *        isKingsidePossible,
    *      },
    *    },
-   *    areKingsInSameCol:          // True if kings are in the same column.
-   *    mirroredKingsideRooks:      // Columns [0-7] of all rooks mirrored on the kingside.
-   *    mirroredQueensideRooks:     // Columns [0-7] of all rooks mirrored on the queenside.
    * }
    *
    */
@@ -3027,7 +3043,7 @@ export class Chess {
           Ox88.a8 + bKingsideRooks[bKingsideRooks.length - 1],
         castling: {
           isQueensidePossible: is960
-            ? bKing >= 0 && bKing != 7 && bQueensideRooks.length > 0
+            ? bKing > 0 && bKing != 7 && bQueensideRooks.length > 0
             : bKing == 4 &&
               bQueensideRooks.length == 1 &&
               bQueensideRooks[0] == 0,
@@ -3047,7 +3063,7 @@ export class Chess {
           Ox88.a1 + wKingsideRooks[wKingsideRooks.length - 1],
         castling: {
           isQueensidePossible: is960
-            ? wKing >= 0 && wKing != 7 && wQueensideRooks.length > 0
+            ? wKing > 0 && wKing != 7 && wQueensideRooks.length > 0
             : wKing == 4 &&
               wQueensideRooks.length == 1 &&
               wQueensideRooks[0] == 0,
@@ -3058,13 +3074,6 @@ export class Chess {
               wKingsideRooks[0] == 7,
         },
       },
-      areKingsInSameCol: bKing >= 0 && wKing >= 0 && bKing === wKing,
-      mirroredKingsideRooks: bKingsideRooks.filter((n) =>
-        wKingsideRooks.includes(n),
-      ),
-      mirroredQueensideRooks: bQueensideRooks.filter((n) =>
-        wQueensideRooks.includes(n),
-      ),
     }
   }
 
