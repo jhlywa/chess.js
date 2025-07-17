@@ -2919,28 +2919,22 @@ export class Chess {
   }
 
   private _getAlgebraicRookSq(str: string, color: Color): string | null {
-    if (str.length == 0 || str.length > 2) {
+    if (str.length != 1) {
       return null
     }
 
-    const file = str.charAt(0).toLowerCase()
-    let rank = str.charAt(1)
+    const file = str.toLowerCase()
     if ('abcdefgh'.indexOf(file) == -1) {
       return null
     }
 
-    if (rank) {
-      if (color == BLACK && rank != '8') {
-        return null
-      }
-      if (color == WHITE && rank != '1') {
-        return null
-      }
-    } else {
-      rank = color == BLACK ? '8' : '1'
-    }
+    const rank = color == BLACK ? '8' : '1'
 
     return file + rank
+  }
+
+  private _fileChr(square: number): string {
+    return algebraic(square).charAt(0)
   }
 
   private _addCastlingRook(
@@ -2955,7 +2949,7 @@ export class Chess {
         return false
       }
       const inf = this._getKingAndRookInfo()[color]
-      str = algebraic(
+      str = this._fileChr(
         flag == BITS.QSIDE_CASTLE
           ? inf.leftmostQueensideRookSq
           : inf.rightmostKingsideRookSq,
@@ -3001,11 +2995,11 @@ export class Chess {
     if (column) {
       str = column
     } else {
-      const rook = findRookWithCastlingRight(color, flag)
-      if (rook == -1) {
+      const rookSq = findRookWithCastlingRight(color, flag)
+      if (rookSq == -1) {
         return false
       }
-      str = algebraic(rook)
+      str = this._fileChr(rookSq)
     }
 
     let algSquare = this._getAlgebraicRookSq(str, color)
@@ -3052,9 +3046,12 @@ export class Chess {
     const rights = this._getCastlingRights(color)
 
     return {
-      [KING]: rights[KING] && kingside ? algebraic(kingside.square) : undefined,
+      [KING]:
+        rights[KING] && kingside ? this._fileChr(kingside.square) : undefined,
       [QUEEN]:
-        rights[QUEEN] && queenside ? algebraic(queenside.square) : undefined,
+        rights[QUEEN] && queenside
+          ? this._fileChr(queenside.square)
+          : undefined,
     }
   }
 

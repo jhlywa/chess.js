@@ -291,17 +291,17 @@ indicates whether the right is available or not for both kingside and queenside.
 Note this does not indicate if such a move is legal or not in the current
 position as checks etc. also need to be considered.
 
-If a castling-right is available, the square containing the rook that has the
-castling-right will be returned, otherwise `undefined` will be returned.
+If a castling-right is available, the file (column) containing the rook that has
+the castling-right will be returned, otherwise `undefined` will be returned.
 
-For a Classical game of chess, any returned square will always be one of `a1`,
-`a8`, `h1`, `h8`. A Chess960 game may return other squares.
+For a Classical game of chess, the returned file will always be `a` or `h`. A
+Chess960 game may return other files.
 
 ```ts
 const chess = new Chess()
 
 chess.getCastlingRights(BLACK) // black can castle queenside only
-// -> { 'k': undefined, 'q': 'h8' }
+// -> { 'k': undefined, 'q': 'h' }
 
 const chess = new Chess(
   'qbrnnbk1/2pp2pr/p6p/1p2pp2/8/P3PP2/1PPP2PP/QR1NNBKR w Kq - 0 19',
@@ -309,9 +309,9 @@ const chess = new Chess(
 )
 
 chess.getCastlingSquares(BLACK)
-// -> { 'k': undefined, 'q': 'c8' }
+// -> { 'k': undefined, 'q': 'c' }
 chess.getCastlingSquares(WHITE)
-// -> { 'k': 'h1', 'q': undefined }
+// -> { 'k': 'h', 'q': undefined }
 ```
 
 ### .getComment()
@@ -975,16 +975,12 @@ requested change i.e. if the corresponding king or rook is not on it's starting
 square.
 
 If 'rights' contains a boolean value, the outer-most rook will be operated on.
-To set a castling-right on an inner-rook for a Chess960 game, supply the file,
-or the square, of the rook. Supplying the file, or square, of a rook for a
-Classical game is also permitted.
+To set a castling-right on an inner-rook for a Chess960 game, supply the file
+(column) of the rook. Supplying the file for a Classical game is also permitted.
 
 ```ts
 // white can't castle kingside but can castle queenside
 chess.setCastlingRights(WHITE, { [KING]: false, [QUEEN]: true })
-
-// white can castle kingside with the rook on 'c1', but cannot castle queenside.
-chess.setCastlingRights(WHITE, { [KING]: 'c1', [QUEEN]: false })
 
 // white can castle kingside with the rook in the 'c' file, but cannot castle queenside.
 chess.setCastlingRights(WHITE, { [KING]: 'c', [QUEEN]: false })
