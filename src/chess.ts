@@ -2848,9 +2848,13 @@ export class Chess {
 
   setCastlingRights(
     color: Color,
-    wantedRights: Partial<Record<typeof KING | typeof QUEEN, boolean>>,
+    wantedRights: Partial<Record<typeof KING | typeof QUEEN, boolean | string>>,
   ): boolean {
     this._updateCastlingRights()
+
+    // Make a backup
+    const savedRooksState = JSON.stringify(ROOKS)
+    const savedCastlingState = JSON.stringify(this._castling)
 
     const isKingsideRightWanted = wantedRights[KING]
     const isQueensideRightWanted = wantedRights[QUEEN]
@@ -2861,9 +2865,17 @@ export class Chess {
     if (typeof isKingsideRightWanted !== 'undefined') {
       if (isKingsideCastlePossible) {
         if (isKingsideRightWanted) {
-          this._addCastlingRook(color, BITS.KSIDE_CASTLE)
+          result =
+            result &&
+            this._addCastlingRook(color, BITS.KSIDE_CASTLE, wantedRights[KING])
         } else {
-          this._removeCastlingRook(color, BITS.KSIDE_CASTLE)
+          result =
+            result &&
+            this._removeCastlingRook(
+              color,
+              BITS.KSIDE_CASTLE,
+              wantedRights[KING],
+            )
         }
       } else {
         if (isKingsideRightWanted) {
@@ -2875,9 +2887,17 @@ export class Chess {
     if (typeof isQueensideRightWanted !== 'undefined') {
       if (isQueensideCastlePossible) {
         if (isQueensideRightWanted) {
-          this._addCastlingRook(color, BITS.QSIDE_CASTLE)
+          result =
+            result &&
+            this._addCastlingRook(color, BITS.QSIDE_CASTLE, wantedRights[QUEEN])
         } else {
-          this._removeCastlingRook(color, BITS.QSIDE_CASTLE)
+          result =
+            result &&
+            this._removeCastlingRook(
+              color,
+              BITS.QSIDE_CASTLE,
+              wantedRights[QUEEN],
+            )
         }
       } else {
         if (isQueensideRightWanted) {
@@ -2885,39 +2905,115 @@ export class Chess {
         }
       }
     }
+    if (!result) {
+      const json = JSON.parse(savedRooksState)
+      ROOKS.w = json.w
+      ROOKS.b = json.b
+      this._castling = JSON.parse(savedCastlingState)
+    }
     return result
   }
 
-  private _removeRook(color: Color, flag: number) {
-    const rk = ROOKS[color]
-    // Loop over 0, 1, or 2 items.
-    for (var i = 0; i < rk.length; i++) {
-      if (rk[i].flag == flag) {
-        rk.splice(i, 1) // Remove 1 item starting at i.
-        break
+  private _getAlgebraicRookSq(str: string, color: Color): string | null {
+    if (str.length == 0 || str.length > 2) {
+      return null
+    }
+
+    const file = str.charAt(0).toLowerCase()
+    let rank = str.charAt(1)
+    if ('abcdefgh'.indexOf(file) == -1) {
+      return null
+    }
+
+    if (rank) {
+      if (color == BLACK && rank != '8') {
+        return null
+      }
+      if (color == WHITE && rank != '1') {
+        return null
+      }
+    } else {
+      rank = color == BLACK ? '8' : '1'
+    }
+
+    return file + rank
+  }
+
+  private _addCastlingRook(
+    color: Color,
+    flag: number,
+    column: boolean | string,
+  ): boolean {
+    let str = ''
+    if (typeof column == 'boolean') {
+      if (!column) {
+        // sanity check. column should never be false.
+        return false
+      }
+      const inf = this._getKingAndRookInfo()[color]
+      str = algebraic(
+        flag == BITS.QSIDE_CASTLE
+          ? inf.leftmostQueensideRookSq
+          : inf.rightmostKingsideRookSq,
+      )
+    } else {
+      str = column
+    }
+    let algSquare = this._getAlgebraicRookSq(str, color)
+
+    if (!algSquare) {
+      return false
+    }
+    const square = Ox88[algSquare]
+    const piece = this._board[square]
+    if (piece && piece.type === ROOK) {
+      // Remove existing rook from ROOKS
+      const rks = ROOKS[color]
+      for (var i = 0; i < rks.length; i++) {
+        if (rks[i].flag == flag) {
+          rks.splice(i, 1) // Remove 1 item starting at i.
+          break
+        }
+      }
+      this._castling[color] |= flag // Set the castling-right.
+      ROOKS[color].push({ square, flag })
+      return true
+    }
+    return false
+  }
+
+  private _removeCastlingRook(
+    color: Color,
+    flag: number,
+    column: boolean | string,
+  ): boolean {
+    let str = ''
+    if (typeof column == 'boolean') {
+      if (column) {
+        // sanity check. column should never be true
+        return false
       }
     }
-  }
+    if (column) {
+      str = column
+    } else {
+      const rook = findRookWithCastlingRight(color, flag)
+      if (rook == -1) {
+        return false
+      }
+      str = algebraic(rook)
+    }
 
-  private _addCastlingRook(color: Color, flag: number) {
-    this._removeRook(color, flag)
-    const dat = this._getKingAndRookInfo()[color]
-    const square =
-      flag == BITS.QSIDE_CASTLE
-        ? dat.leftmostQueensideRookSq
-        : dat.rightmostKingsideRookSq
-    this._castling[color] |= flag // Set the castling-right.
-    ROOKS[color].push({ square, flag })
-  }
-
-  private _removeCastlingRook(color: Color, flag: number) {
-    this._removeRook(color, flag)
-    const dat = this._getKingAndRookInfo()[color]
-    const square =
-      flag == BITS.QSIDE_CASTLE
-        ? dat.leftmostQueensideRookSq
-        : dat.rightmostKingsideRookSq
-    this._castling[color] &= ~flag // Remove the castling-right
+    let algSquare = this._getAlgebraicRookSq(str, color)
+    if (!algSquare) {
+      return false
+    }
+    const square = Ox88[algSquare]
+    if (this._board[square].type === ROOK) {
+      this._castling[color] &= ~flag // Remove the castling-right
+      return true
+    }
+    return false
   }
 
   private _getCastlingRights(color: Color): {

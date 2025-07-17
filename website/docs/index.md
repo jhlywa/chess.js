@@ -962,16 +962,20 @@ successfully made. False will be returned when the position doesn't allow the
 requested change i.e. if the corresponding king or rook is not on it's starting
 square.
 
-Setting a castling-right always operates on the outer-most rook. This is
-immaterial for a Chess960 game that has no inner-rook, or for a Classical game.
-If you wish to set a castling-right on an inner-rook of a Chess960 game, the
-outer-rook(s) must be removed from the board, then the castling-right can be set
-(on the formerly inner-rook), then the outer-rook(s) must be re-added to the
-board.
+If 'rights' contains a boolean value, the outer-most rook will be operated on.
+To set a castling-right on an inner-rook for a Chess960 game, supply the file,
+or the square, of the rook. Supplying the file, or square, of a rook for a
+Classical game is also permitted.
 
 ```ts
 // white can't castle kingside but can castle queenside
 chess.setCastlingRights(WHITE, { [KING]: false, [QUEEN]: true })
+
+// white can castle kingside with the rook on 'c1', but cannot castle queenside.
+chess.setCastlingRights(WHITE, { [KING]: 'c1', [QUEEN]: false })
+
+// white can castle kingside with the rook in the 'c' file, but cannot castle queenside.
+chess.setCastlingRights(WHITE, { [KING]: 'c', [QUEEN]: false })
 ```
 
 ### .setComment(comment)

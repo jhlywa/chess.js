@@ -4,10 +4,6 @@ import { expect, test } from 'vitest'
 // Tests whether castling-rights are set correctly based on the castling flags
 // in the FEN and the king and rook(s) on the board.
 
-// With the current chess.js API, if there are multiple rooks on one side
-// of the king, it is not possible to specify which rook should have castling
-// rights added or removed. The outermost rook is always operated on.
-
 test.each([
   'rkr5/8/8/8/8/8/8/RKR5 w KQkq - 0 1',
   'rk1r4/8/8/8/8/8/8/RK1R4 w KQkq - 0 1',
@@ -844,4 +840,419 @@ test('set black kingside should fail if king is on h-file', () => {
 test('set black kingside should fail if no rooks are on right of king', () => {
   const chess = new Chess('rk6/8/8/8/8/8/8/R4K2 w - - 0 1', { chess960: true })
   expect(chess.setCastlingRights(BLACK, { [KING]: true })).toBeFalsy()
+})
+
+test('set black kingside should fail if no rooks are on right of king', () => {
+  const chess = new Chess('rk6/8/8/8/8/8/8/R4K2 w - - 0 1', { chess960: true })
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'c' })).toBeFalsy()
+})
+
+test('set castling right of black kingside inner rook', () => {
+  const chess = new Chess('rk4rr/8/8/8/8/8/8/5K2 w - - 0 1', { chess960: true })
+  expect(chess.getCastlingRights(BLACK)[KING]).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'g' })).toBeTruthy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('g8')
+})
+
+test('black kingside should set castling rights on inner rook with multiple rooks', (fen, col) => {
+  const chess = new Chess('rrkrrrrr/8/8/8/8/8/8/5K2 w - - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(BLACK)[KING]).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'd' })).toBeTruthy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('d8')
+})
+
+test('black queenside should set castling rights on inner rook with multiple rooks', (fen, col) => {
+  const chess = new Chess('rrrrrkrr/8/8/8/8/8/8/5K2 w - - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'c' })).toBeTruthy()
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('c8')
+})
+
+test('white kingside should set castling rights on inner rook with multiple rooks', (fen, col) => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RRKRRRRR w - - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(WHITE)[KING]).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'd' })).toBeTruthy()
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('d1')
+})
+
+test('white queenside should set castling rights on inner rook with multiple rooks', (fen, col) => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RRRRRKRR w - - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'c' })).toBeTruthy()
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('c1')
+})
+
+test.each([
+  ['rkr4r/8/8/8/8/8/8/5K2 w - - 0 1', 'c'],
+  ['rk1r3r/8/8/8/8/8/8/5K2 w - - 0 1', 'd'],
+  ['rk2r2r/8/8/8/8/8/8/5K2 w - - 0 1', 'e'],
+  ['rk3r1r/8/8/8/8/8/8/5K2 w - - 0 1', 'f'],
+  ['rk4rr/8/8/8/8/8/8/5K2 w - - 0 1', 'g'],
+
+  ['rkr4r/8/8/8/8/8/8/5K2 w - - 0 1', 'c8'],
+  ['rk1r3r/8/8/8/8/8/8/5K2 w - - 0 1', 'd8'],
+  ['rk2r2r/8/8/8/8/8/8/5K2 w - - 0 1', 'e8'],
+  ['rk3r1r/8/8/8/8/8/8/5K2 w - - 0 1', 'f8'],
+  ['rk4rr/8/8/8/8/8/8/5K2 w - - 0 1', 'g8'],
+])('black kingside should set castling rights on inner rook', (fen, arg) => {
+  const chess = new Chess(fen, { chess960: true })
+  expect(chess.getCastlingRights(BLACK)[KING]).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: arg })).toBeTruthy()
+  const square = arg.length == 1 ? arg + '8' : arg
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual(square)
+})
+
+test.each([
+  ['rr4kr/8/8/8/8/8/8/5K2 w - - 0 1', 'b'],
+  ['r1r3kr/8/8/8/8/8/8/5K2 w - - 0 1', 'c'],
+  ['r2r2kr/8/8/8/8/8/8/5K2 w - - 0 1', 'd'],
+  ['r3r1kr/8/8/8/8/8/8/5K2 w - - 0 1', 'e'],
+  ['r4rkr/8/8/8/8/8/8/5K2 w - - 0 1', 'f'],
+
+  ['rr4kr/8/8/8/8/8/8/5K2 w - - 0 1', 'b8'],
+  ['r1r3kr/8/8/8/8/8/8/5K2 w - - 0 1', 'c8'],
+  ['r2r2kr/8/8/8/8/8/8/5K2 w - - 0 1', 'd8'],
+  ['r3r1kr/8/8/8/8/8/8/5K2 w - - 0 1', 'e8'],
+  ['r4rkr/8/8/8/8/8/8/5K2 w - - 0 1', 'f8'],
+])('black queenside should set castling rights on inner rook', (fen, arg) => {
+  const chess = new Chess(fen, { chess960: true })
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: arg })).toBeTruthy()
+  const square = arg.length == 1 ? arg + '8' : arg
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(square)
+})
+
+test.each([
+  ['5k2/8/8/8/8/8/8/RKR4R w - - 0 1', 'c'],
+  ['5k2/8/8/8/8/8/8/RK1R3R w - - 0 1', 'd'],
+  ['5k2/8/8/8/8/8/8/RK2R2R w - - 0 1', 'e'],
+  ['5k2/8/8/8/8/8/8/RK3R1R w - - 0 1', 'f'],
+  ['5k2/8/8/8/8/8/8/RK4RR w - - 0 1', 'g'],
+
+  ['5k2/8/8/8/8/8/8/RKR4R w - - 0 1', 'c1'],
+  ['5k2/8/8/8/8/8/8/RK1R3R w - - 0 1', 'd1'],
+  ['5k2/8/8/8/8/8/8/RK2R2R w - - 0 1', 'e1'],
+  ['5k2/8/8/8/8/8/8/RK3R1R w - - 0 1', 'f1'],
+  ['5k2/8/8/8/8/8/8/RK4RR w - - 0 1', 'g1'],
+])('white kingside should set castling rights on inner rook', (fen, arg) => {
+  const chess = new Chess(fen, { chess960: true })
+  expect(chess.getCastlingRights(WHITE)[KING]).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: arg })).toBeTruthy()
+  const square = arg.length == 1 ? arg + '1' : arg
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual(square)
+})
+
+test.each([
+  ['5k2/8/8/8/8/8/8/RR4KR w - - 0 1', 'b'],
+  ['5k2/8/8/8/8/8/8/R1R3KR w - - 0 1', 'c'],
+  ['5k2/8/8/8/8/8/8/R2R2KR w - - 0 1', 'd'],
+  ['5k2/8/8/8/8/8/8/R3R1KR w - - 0 1', 'e'],
+  ['5k2/8/8/8/8/8/8/R4RKR w - - 0 1', 'f'],
+
+  ['5k2/8/8/8/8/8/8/RR4KR w - - 0 1', 'b1'],
+  ['5k2/8/8/8/8/8/8/R1R3KR w - - 0 1', 'c1'],
+  ['5k2/8/8/8/8/8/8/R2R2KR w - - 0 1', 'd1'],
+  ['5k2/8/8/8/8/8/8/R3R1KR w - - 0 1', 'e1'],
+  ['5k2/8/8/8/8/8/8/R4RKR w - - 0 1', 'f1'],
+])('white queenside should set castling rights on inner rook', (fen, arg) => {
+  const chess = new Chess(fen, { chess960: true })
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: arg })).toBeTruthy()
+  const square = arg.length == 1 ? arg + '1' : arg
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(square)
+})
+
+test('set castling right on inner rooks of black kingside and queenside', () => {
+  const chess = new Chess('rrk3rr/8/8/8/8/8/8/5K2 w - - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(BLACK)[KING]).toBeFalsy()
+  expect(
+    chess.setCastlingRights(BLACK, { [KING]: 'b', [QUEEN]: 'g' }),
+  ).toBeTruthy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('b8')
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('g8')
+})
+
+test('set castling right on inner rooks of white kingside and queenside', () => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RRK3RR w - - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(WHITE)[KING]).toBeFalsy()
+  expect(
+    chess.setCastlingRights(WHITE, { [KING]: 'b', [QUEEN]: 'g' }),
+  ).toBeTruthy()
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('b1')
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('g1')
+})
+
+test('empty string should clear castling right of black kingside', () => {
+  const chess = new Chess('rrk3rr/8/8/8/8/8/8/5K2 w g - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('g8')
+  expect(chess.setCastlingRights(BLACK, { [KING]: '' })).toBeTruthy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toBeFalsy()
+})
+
+test('empty string should clear castling right of black queenside', () => {
+  const chess = new Chess('rrk3rr/8/8/8/8/8/8/5K2 w b - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('b8')
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: '' })).toBeTruthy()
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toBeFalsy()
+})
+
+test('empty string should clear castling right of white kingside', () => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RRK3RR w G - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('g1')
+  expect(chess.setCastlingRights(WHITE, { [KING]: '' })).toBeTruthy()
+  expect(chess.getCastlingRights(WHITE)[KING]).toBeFalsy()
+})
+
+test('empty string should clear castling right of white queenside', () => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RRK3RR w B - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('b1')
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: '' })).toBeTruthy()
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toBeFalsy()
+})
+
+test('boolean arg should operate on outside rook black kingside', () => {
+  const chess = new Chess('rr3krr/8/8/8/8/8/8/5K2 w g - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('g8')
+  expect(chess.setCastlingRights(BLACK, { [KING]: true })).toBeTruthy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('h8')
+})
+
+test('boolean arg should operate on outside rook black queenside', () => {
+  const chess = new Chess('rr3krr/8/8/8/8/8/8/5K2 w b - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('b8')
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: true })).toBeTruthy()
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('a8')
+})
+
+test('boolean arg should operate on outside rook white kingside', () => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RR3KRR w G - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('g1')
+  expect(chess.setCastlingRights(WHITE, { [KING]: true })).toBeTruthy()
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('h1')
+})
+
+test('boolean arg should operate on outside rook white queenside', () => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RR3KRR w B - 0 1', {
+    chess960: true,
+  })
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('b1')
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: true })).toBeTruthy()
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('a1')
+})
+
+test('bad black kingside arg should not alter castling state', () => {
+  const chess = new Chess('rr3krr/8/8/8/8/8/8/5K2 w g - 0 1', {
+    chess960: true,
+  })
+  const sq = 'g8'
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual(sq)
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'badval' })).toBeFalsy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual(sq)
+})
+
+test('bad black queenside arg should not alter castling state', () => {
+  const chess = new Chess('rr3krr/8/8/8/8/8/8/5K2 w b - 0 1', {
+    chess960: true,
+  })
+  const sq = 'b8'
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(sq)
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'badval' })).toBeFalsy()
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(sq)
+})
+
+test('bad white kingside arg should not alter castling state', () => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RR3KRR w G - 0 1', {
+    chess960: true,
+  })
+  const sq = 'g1'
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual(sq)
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'badval' })).toBeFalsy()
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual(sq)
+})
+
+test('bad white queenside arg should not alter castling state', () => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RR3KRR w B - 0 1', {
+    chess960: true,
+  })
+  const sq = 'b1'
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(sq)
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'badval' })).toBeFalsy()
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(sq)
+})
+
+test('black good kingside and bad queenside should not alter castling state', () => {
+  const chess = new Chess('rr3krr/8/8/8/8/8/8/5K2 w bg - 0 1', {
+    chess960: true,
+  })
+  const ksideSq = 'g8'
+  const qsideSq = 'b8'
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual(ksideSq)
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(qsideSq)
+  expect(
+    chess.setCastlingRights(BLACK, { [KING]: 'a8', [QUEEN]: 'badval' }),
+  ).toBeFalsy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual(ksideSq)
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(qsideSq)
+})
+
+test('black good queenside and bad kingside should not alter castling state', () => {
+  const chess = new Chess('rr3krr/8/8/8/8/8/8/5K2 w bg - 0 1', {
+    chess960: true,
+  })
+  const ksideSq = 'g8'
+  const qsideSq = 'b8'
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual(ksideSq)
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(qsideSq)
+  expect(
+    chess.setCastlingRights(BLACK, { [KING]: 'badval', [QUEEN]: 'h8' }),
+  ).toBeFalsy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual(ksideSq)
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual(qsideSq)
+})
+
+test('white good kingside and bad queenside should not alter castling state', () => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RR3KRR w BG - 0 1', {
+    chess960: true,
+  })
+  const ksideSq = 'g1'
+  const qsideSq = 'b1'
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual(ksideSq)
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(qsideSq)
+  expect(
+    chess.setCastlingRights(WHITE, { [KING]: 'a1', [QUEEN]: 'badval' }),
+  ).toBeFalsy()
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual(ksideSq)
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(qsideSq)
+})
+
+test('white good queenside and bad kingside should not alter castling state', () => {
+  const chess = new Chess('5k2/8/8/8/8/8/8/RR3KRR w BG - 0 1', {
+    chess960: true,
+  })
+  const ksideSq = 'g1'
+  const qsideSq = 'b1'
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual(ksideSq)
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(qsideSq)
+  expect(
+    chess.setCastlingRights(WHITE, { [KING]: 'badval', [QUEEN]: 'h1' }),
+  ).toBeFalsy()
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual(ksideSq)
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual(qsideSq)
+})
+
+test('specifing a square not on first or last row should not alter castling state', () => {
+  const chess = new Chess('1r3kr1/8/8/8/8/8/8/1R3KR1 w BGbg - 0 1', {
+    chess960: true,
+  })
+  const ranks = '234567'.split('')
+  const files = 'abcdefgh'.split('')
+  for (var f = 0; f < files.length; f++) {
+    for (var r = 0; r < ranks.length; r++) {
+      const sq = files[f] + ranks[r]
+      expect(chess.setCastlingRights(BLACK, { [KING]: sq })).toBeFalsy()
+      expect(chess.setCastlingRights(BLACK, { [QUEEN]: sq })).toBeFalsy()
+      expect(chess.setCastlingRights(WHITE, { [KING]: sq })).toBeFalsy()
+      expect(chess.setCastlingRights(WHITE, { [QUEEN]: sq })).toBeFalsy()
+    }
+  }
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('g8')
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('b8')
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('g1')
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('b1')
+})
+
+test('specifying a square with no rook should not alter castling state', () => {
+  const chess = new Chess('brnqknrb/8/8/8/8/8/8/BRNQKNRB w BGbg - 0 1', {
+    chess960: true,
+  })
+
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'a' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'a8' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'c' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'c8' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'd' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'd8' })).toBeFalsy()
+
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'f' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'f8' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'h' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'h8' })).toBeFalsy()
+
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'a' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'a8' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'c' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'c8' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'd' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'd8' })).toBeFalsy()
+
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'f' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'f8' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'h' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'h8' })).toBeFalsy()
+
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('g8')
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('b8')
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('g1')
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('b1')
+})
+
+test('specifying an empty square should not alter castling state', () => {
+  const chess = new Chess('1r2k1r1/8/8/8/8/8/8/1R2K1R1 w BGbg - 0 1', {
+    chess960: true,
+  })
+
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'a' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'a8' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'c' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'c8' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'd' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: 'd8' })).toBeFalsy()
+
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'f' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'f8' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'h' })).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: 'h8' })).toBeFalsy()
+
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'a' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'a8' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'c' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'c8' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'd' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: 'd8' })).toBeFalsy()
+
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'f' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'f8' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'h' })).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: 'h8' })).toBeFalsy()
+
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('g8')
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('b8')
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('g1')
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('b1')
 })
