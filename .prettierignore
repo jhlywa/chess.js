@@ -1,4 +1,5 @@
 coverage/
+etc/
 package-lock.json
 src/pgn.*
 website/.docusaurus/

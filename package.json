@@ -12,7 +12,7 @@
   "scripts": {
     "prepare": "npm run build",
     "build": "npm run parser && tsc --noEmit && rollup -c",
-    "check": "npm run format:check && npm run lint && npm run test && npm run build",
+    "check": "npm run format:check && npm run lint && vitest run && npm run build && api-extractor run --verbose",
     "clean": "rm -rf ./dist; rm -f src/pgn.js src/pgn.d.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -21,7 +21,9 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "bench": "tsx benchmarks/bench.ts",
-    "update-version": "tsx update-version.ts"
+    "update-version": "tsx update-version.ts",
+    "api:check": "npm run build && api-extractor run --verbose",
+    "api:update": "npm run build && api-extractor run --local --verbose"
   },
   "repository": {
     "type": "git",
@@ -31,6 +33,7 @@
     "node": ">=18.0.0"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "^7.52.8",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.29.0",
     "@rollup/plugin-commonjs": "^28.0.3",
