@@ -16,7 +16,7 @@ export class Chess {
         skipValidation?: boolean | undefined;
     });
     // (undocumented)
-    ascii(): string;
+    ascii(newline?: string): string;
     // (undocumented)
     attackers(square: Square, attackedBy?: Color): Square[];
     // (undocumented)
