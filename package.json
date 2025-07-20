@@ -30,7 +30,7 @@
     "url": "https://github.com/jhlywa/chess.js"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.52.8",
@@ -38,7 +38,7 @@
     "@eslint/js": "^9.29.0",
     "@rollup/plugin-commonjs": "^28.0.3",
     "@rollup/plugin-typescript": "^12.1.2",
-    "@types/node": "^18.0.0",
+    "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^8.35.0",
     "@typescript-eslint/parser": "^8.35.0",
     "@vitest/coverage-v8": "^3.2.2",
