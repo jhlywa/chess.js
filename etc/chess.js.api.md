@@ -245,7 +245,7 @@ export const KNIGHT = "n";
 // @public (undocumented)
 export class Move {
     // Warning: (ae-forgotten-export) The symbol "InternalMove" needs to be exported by the entry point chess.d.ts
-    constructor(chess: Chess, internal: InternalMove);
+    constructor(internal: InternalMove, san: string, before: string, after: string);
     // (undocumented)
     after: string;
     // (undocumented)
