@@ -2222,29 +2222,29 @@ export class Chess {
 
     let node = parsedPgn.root
 
-   while (node) {
-  if (node.move) {
-    const suffixAnnotation = node.suffixAnnotation;
+    while (node) {
+      if (node.move) {
+        const suffixAnnotation = node.suffixAnnotation
 
-    const move = this._moveFromSan(node.move, strict);
-    if (!move) {
-      throw new Error(`Invalid move in PGN: ${node.move}`);
-    } else {
-      this._makeMove(move);
-      this._incPositionCount(this.fen());
+        const move = this._moveFromSan(node.move, strict)
+        if (!move) {
+          throw new Error(`Invalid move in PGN: ${node.move}`)
+        } else {
+          this._makeMove(move)
+          this._incPositionCount()
 
-      if (suffixAnnotation) {
-        this._suffixes[this.fen()] = suffixAnnotation as Suffix;
+          if (suffixAnnotation) {
+            this._suffixes[this.fen()] = suffixAnnotation as Suffix
+          }
+        }
       }
+
+      if (node.comment !== undefined) {
+        this._comments[this.fen()] = node.comment
+      }
+
+      node = node.variations[0]
     }
-  }
-
-  if (node.comment !== undefined) {
-    this._comments[this.fen()] = node.comment;
-  }
-
-  node = node.variations[0];
-}
 
     /*
      * Per section 8.2.6 of the PGN spec, the Result tag pair must match match
@@ -2664,20 +2664,32 @@ export class Chess {
     return comment
   }
 
-  getComments(): { fen: string; comment?: string; suffixAnnotation?: string }[] {
+  getComments(): {
+    fen: string
+    comment?: string
+    suffixAnnotation?: string
+  }[] {
     this._pruneComments()
 
     const allFenKeys = new Set<string>()
     Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen))
     Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen))
 
-    const result: { fen: string; comment?: string; suffixAnnotation?: string }[] = []
+    const result: {
+      fen: string
+      comment?: string
+      suffixAnnotation?: string
+    }[] = []
 
     for (const fen of allFenKeys) {
       const commentContent = this._comments[fen]
       const suffixAnnotation = this._suffixes[fen]
 
-      const entry: { fen: string; comment?: string; suffixAnnotation?: string } = {
+      const entry: {
+        fen: string
+        comment?: string
+        suffixAnnotation?: string
+      } = {
         fen: fen,
       }
 
