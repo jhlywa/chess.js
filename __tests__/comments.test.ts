@@ -88,7 +88,7 @@ describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
     chess.move('g3')
     const currentFen = chess.fen()
 
-    chess.setSuffix('?!')
+    chess.setSuffixAnnotation('?!')
 
     const commentsResult = chess.getComments()
 

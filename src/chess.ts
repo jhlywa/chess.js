@@ -2710,7 +2710,7 @@ export class Chess {
   /**
    * Get the suffix annotation for the given position (or current one).
    */
-  public getSuffix(fen?: string): Suffix | undefined {
+  public getSuffixAnnotation(fen?: string): Suffix | undefined {
     const key = fen ?? this.fen()
     return this._suffixes[key]
   }
@@ -2719,7 +2719,7 @@ export class Chess {
    * Set or overwrite the suffix annotation for the given position (or current).
    * Throws if the suffix isn't one of the allowed SUFFIX_LIST values.
    */
-  public setSuffix(suffix: Suffix, fen?: string): void {
+  public setSuffixAnnotation(suffix: Suffix, fen?: string): void {
     if (!SUFFIX_LIST.includes(suffix)) {
       throw new Error(`Invalid suffix: ${suffix}`)
     }
@@ -2730,7 +2730,7 @@ export class Chess {
    * Remove the suffix annotation for the given position (or current).
    */
 
-  public removeSuffix(fen?: string): Suffix | undefined {
+  public removeSuffixAnnotation(fen?: string): Suffix | undefined {
     const key = fen || this.fen()
     const old = this._suffixes[key]
     delete this._suffixes[key]
