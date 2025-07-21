@@ -1,4 +1,5 @@
 import { validateFen } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test.each([
   {

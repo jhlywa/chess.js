@@ -1,4 +1,5 @@
 import { Chess, DEFAULT_POSITION } from '../src/chess'
+import { expect, test } from 'vitest'
 
 const checkmates = [
   '8/5r2/4K1q1/4p3/3k4/8/8/8 w - - 0 7',

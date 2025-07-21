@@ -1,6 +1,7 @@
 export default {
   input: 'src/pgn.peggy',
   output: 'src/pgn.js',
+  format: 'es',
   dts: true,
   allowedStartRules: ['pgn'],
   returnTypes: {

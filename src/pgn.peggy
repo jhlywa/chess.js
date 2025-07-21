@@ -1,17 +1,13 @@
 {{
   function rootNode(comment) {
-  	return comment !== null ? { comment, variations: [] } : { variations: []}
+  	return comment !== null ? { comment, nags: [], variations: [] } : { nags: [], variations: []}
   }
 
-  function node(move, suffixAnnotation, nag, comment, variations) {
-  	const node = { move, variations }
+  function node(move, suffixAnnotation, nags, comment, variations) {
+  	const node = { move, nags, variations }
 
     if (suffixAnnotation) {
     	node.suffixAnnotation = suffixAnnotation
-    }
-
-    if (nag) {
-    	node.nag = nag
     }
 
     if (comment !== null) {
@@ -80,19 +76,18 @@ line
 	= comment:comment? moves:move* { return lineToTree(rootNode(comment), ...moves.flat()) }
 
 move
-	= _ moveNumber? _ san:san suffixAnnotation:suffixAnnotation? _ nag:nag?  _ comment:comment? variations:variation* { return node(san, suffixAnnotation, nag, comment, variations) }
-
+	= _ moveNumber? _ san:san suffixAnnotation:suffixAnnotation? nags:nag*  _ comment:comment? variations:variation* { return node(san, suffixAnnotation, nags, comment, variations) }
 moveNumber "move number"
-    = [0-9]*[.]? _ [.]*
+    = [0-9]*'.' _ [.]*
 
 san "standard algebraic notation"
-	= $([a-zA-Z][a-zA-Z0-9-=+#]+)
+	= $(("O-O-O" / "O-O" / "0-0-0" / "0-0" / [a-zA-Z][a-zA-Z1-8-=]+) [+#]?)
 
 suffixAnnotation "suffix annotation"
 	= $[!?] |1..2|
-
+      
 nag "NAG"
-	= '$'[0-9]+
+	= _ '$' nag:$[0-9]+ { return nag }
 
 comment
 	= braceComment / restOfLineComment

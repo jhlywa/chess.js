@@ -2,3 +2,5 @@
 coverage/
 __tests__/
 debug.sh
+benchmarks/
+website/

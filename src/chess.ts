@@ -27,6 +27,46 @@
 
 import { parse } from './pgn'
 
+const MASK64 = 0xffffffffffffffffn
+
+function rotl(x: bigint, k: bigint): bigint {
+  return ((x << k) | (x >> (64n - k))) & 0xffffffffffffffffn
+}
+
+function wrappingMul(x: bigint, y: bigint) {
+  return (x * y) & MASK64
+}
+
+// xoroshiro128**
+export function xoroshiro128(state: bigint) {
+  return function () {
+    let s0 = BigInt(state & MASK64)
+    let s1 = BigInt((state >> 64n) & MASK64)
+
+    const result = wrappingMul(rotl(wrappingMul(s0, 5n), 7n), 9n)
+
+    s1 ^= s0
+    s0 = (rotl(s0, 24n) ^ s1 ^ (s1 << 16n)) & MASK64
+    s1 = rotl(s1, 37n)
+
+    state = (s1 << 64n) | s0
+
+    return result
+  }
+}
+
+const rand = xoroshiro128(0xa187eb39cdcaed8f31c4b365b102e01en)
+
+const PIECE_KEYS = Array.from({ length: 2 }, () =>
+  Array.from({ length: 6 }, () => Array.from({ length: 128 }, () => rand())),
+)
+
+const EP_KEYS = Array.from({ length: 8 }, () => rand())
+
+const CASTLING_KEYS = Array.from({ length: 16 }, () => rand())
+
+const SIDE_KEY = rand()
+
 export const WHITE = 'w'
 export const BLACK = 'b'
 
@@ -79,6 +119,7 @@ interface History {
   turn: Color
   castling: Record<Color, number>
   epSquare: number
+  fenEpSquare: number
   halfMoves: number
   moveNumber: number
 }
@@ -183,6 +224,7 @@ const FLAGS: Record<string, string> = {
   PROMOTION: 'p',
   KSIDE_CASTLE: 'k',
   QSIDE_CASTLE: 'q',
+  NULL_MOVE: '-',
 }
 
 // prettier-ignore
@@ -205,6 +247,7 @@ const BITS: Record<string, number> = {
   PROMOTION: 16,
   KSIDE_CASTLE: 32,
   QSIDE_CASTLE: 64,
+  NULL_MOVE: 128,
 }
 
 /* eslint-disable @typescript-eslint/naming-convention */
@@ -400,6 +443,8 @@ const ROOKS = {
 }
 
 const SECOND_RANK = { b: RANK_7, w: RANK_2 }
+
+const SAN_NULLMOVE = '--'
 
 // Extracts the zero-based rank of an 0x88 square.
 function rank(square: number): number {
@@ -663,20 +708,13 @@ function strippedSan(move: string): string {
   return move.replace(/=/, '').replace(/[+#]?[?!]*$/, '')
 }
 
-function trimFen(fen: string): string {
-  /*
-   * remove last two fields in FEN string as they're not needed when checking
-   * for repetition
-   */
-  return fen.split(' ').slice(0, 4).join(' ')
-}
-
 export class Chess {
   private _board = new Array<Piece>(128)
   private _turn: Color = WHITE
   private _header: Record<string, string | null> = {}
   private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
   private _epSquare = -1
+  private _fenEpSquare = -1
   private _halfMoves = 0
   private _moveNumber = 0
   private _history: History[] = []
@@ -684,8 +722,10 @@ export class Chess {
   private _suffixes: Record<string, Suffix> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
+  private _hash = 0n
+
   // tracks number of times a position has been seen for repetition checking
-  private _positionCount: Record<string, number> = {}
+  private _positionCount = new Map<bigint, number>()
 
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
     this._comments = {}
@@ -699,12 +739,14 @@ export class Chess {
     this._turn = WHITE
     this._castling = { w: 0, b: 0 }
     this._epSquare = EMPTY
+    this._fenEpSquare = EMPTY
     this._halfMoves = 0
     this._moveNumber = 1
     this._history = []
     this._comments = {}
     this._header = preserveHeaders ? this._header : { ...HEADER_TEMPLATE }
-    this._positionCount = {}
+    this._hash = this._computeHash()
+    this._positionCount = new Map<bigint, number>()
 
     /*
      * Delete the SetUp and FEN headers (if preserved), the board is empty and
@@ -771,14 +813,18 @@ export class Chess {
     }
 
     this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
+    this._fenEpSquare = this._epSquare
     this._halfMoves = parseInt(tokens[4], 10)
     this._moveNumber = parseInt(tokens[5], 10)
 
+    this._hash = this._computeHash()
     this._updateSetup(fen)
-    this._incPositionCount(fen)
+    this._incPositionCount()
   }
 
-  fen() {
+  fen({
+    forceEnpassantSquare = false,
+  }: { forceEnpassantSquare?: boolean } = {}) {
     let empty = 0
     let fen = ''
 
@@ -831,39 +877,43 @@ export class Chess {
      * only print the ep square if en passant is a valid move (pawn is present
      * and ep capture is not pinned)
      */
-    if (this._epSquare !== EMPTY) {
-      const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
-      const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
+    if (this._fenEpSquare !== EMPTY) {
+      if (forceEnpassantSquare) {
+        epSquare = algebraic(this._fenEpSquare)
+      } else if (this._epSquare !== EMPTY) {
+        const bigPawnSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
+        const squares = [bigPawnSquare + 1, bigPawnSquare - 1]
 
-      for (const square of squares) {
-        // is the square off the board?
-        if (square & 0x88) {
-          continue
-        }
+        for (const square of squares) {
+          // is the square off the board?
+          if (square & 0x88) {
+            continue
+          }
 
-        const color = this._turn
+          const color = this._turn
 
-        // is there a pawn that can capture the epSquare?
-        if (
-          this._board[square]?.color === color &&
-          this._board[square]?.type === PAWN
-        ) {
-          // if the pawn makes an ep capture, does it leave its king in check?
-          this._makeMove({
-            color,
-            from: square,
-            to: this._epSquare,
-            piece: PAWN,
-            captured: PAWN,
-            flags: BITS.EP_CAPTURE,
-          })
-          const isLegal = !this._isKingAttacked(color)
-          this._undoMove()
+          // is there a pawn that can capture the epSquare?
+          if (
+            this._board[square]?.color === color &&
+            this._board[square]?.type === PAWN
+          ) {
+            // if the pawn makes an ep capture, does it leave its king in check?
+            this._makeMove({
+              color,
+              from: square,
+              to: this._epSquare,
+              piece: PAWN,
+              captured: PAWN,
+              flags: BITS.EP_CAPTURE,
+            })
+            const isLegal = !this._isKingAttacked(color)
+            this._undoMove()
 
-          // if ep is legal, break and set the ep square in the FEN output
-          if (isLegal) {
-            epSquare = algebraic(this._epSquare)
-            break
+            // if ep is legal, break and set the ep square in the FEN output
+            if (isLegal) {
+              epSquare = algebraic(this._epSquare)
+              break
+            }
           }
         }
       }
@@ -877,6 +927,64 @@ export class Chess {
       this._halfMoves,
       this._moveNumber,
     ].join(' ')
+  }
+
+  private _pieceKey(i: number) {
+    if (!this._board[i]) {
+      return 0n
+    }
+
+    const { color, type } = this._board[i]
+
+    const colorIndex = {
+      w: 0,
+      b: 1,
+    }[color]
+
+    const typeIndex = {
+      p: 0,
+      n: 1,
+      b: 2,
+      r: 3,
+      q: 4,
+      k: 5,
+    }[type]
+
+    return PIECE_KEYS[colorIndex][typeIndex][i]
+  }
+
+  private _epKey() {
+    return this._epSquare === EMPTY ? 0n : EP_KEYS[this._epSquare & 7]
+  }
+
+  private _castlingKey() {
+    const index = (this._castling.w >> 5) | (this._castling.b >> 3)
+    return CASTLING_KEYS[index]
+  }
+
+  private _computeHash() {
+    let hash = 0n
+
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+      // did we run off the end of the board
+      if (i & 0x88) {
+        i += 7
+        continue
+      }
+
+      if (this._board[i]) {
+        hash ^= this._pieceKey(i)
+      }
+    }
+
+    hash ^= this._epKey()
+    hash ^= this._castlingKey()
+
+    if (this._turn === 'b') {
+      hash ^= SIDE_KEY
+    }
+
+    return hash
   }
 
   /*
@@ -946,6 +1054,12 @@ export class Chess {
     return false
   }
 
+  private _set(sq: number, piece: Piece) {
+    this._hash ^= this._pieceKey(sq)
+    this._board[sq] = piece
+    this._hash ^= this._pieceKey(sq)
+  }
+
   private _put(
     { type, color }: { type: PieceSymbol; color: Color },
     square: Square,
@@ -977,7 +1091,7 @@ export class Chess {
       this._kings[currentPieceOnSquare.color] = EMPTY
     }
 
-    this._board[sq] = { type: type as PieceSymbol, color: color as Color }
+    this._set(sq, { type: type as PieceSymbol, color: color as Color })
 
     if (type === KING) {
       this._kings[color] = sq
@@ -986,9 +1100,14 @@ export class Chess {
     return true
   }
 
+  private _clear(sq: number) {
+    this._hash ^= this._pieceKey(sq)
+    delete this._board[sq]
+  }
+
   remove(square: Square): Piece | undefined {
     const piece = this.get(square)
-    delete this._board[Ox88[square]]
+    this._clear(Ox88[square])
     if (piece && piece.type === KING) {
       this._kings[piece.color] = EMPTY
     }
@@ -1001,6 +1120,8 @@ export class Chess {
   }
 
   private _updateCastlingRights() {
+    this._hash ^= this._castlingKey()
+
     const whiteKingInPlace =
       this._board[Ox88.e1]?.type === KING &&
       this._board[Ox88.e1]?.color === WHITE
@@ -1039,6 +1160,8 @@ export class Chess {
     ) {
       this._castling.b &= ~BITS.KSIDE_CASTLE
     }
+
+    this._hash ^= this._castlingKey()
   }
 
   private _updateEnPassantSquare() {
@@ -1056,6 +1179,7 @@ export class Chess {
       this._board[currentSquare]?.color !== swapColor(this._turn) ||
       this._board[currentSquare]?.type !== PAWN
     ) {
+      this._hash ^= this._epKey()
       this._epSquare = EMPTY
       return
     }
@@ -1066,6 +1190,7 @@ export class Chess {
       this._board[square]?.type === PAWN
 
     if (!attackers.some(canCapture)) {
+      this._hash ^= this._epKey()
       this._epSquare = EMPTY
     }
   }
@@ -1165,6 +1290,10 @@ export class Chess {
     return square === -1 ? false : this._attacked(swapColor(color), square)
   }
 
+  hash(): string {
+    return this._hash.toString(16)
+  }
+
   isAttacked(square: Square, attackedBy: Color): boolean {
     return this._attacked(attackedBy, Ox88[square])
   }
@@ -1247,7 +1376,7 @@ export class Chess {
   }
 
   isThreefoldRepetition(): boolean {
-    return this._getPositionCount(this.fen()) >= 3
+    return this._getPositionCount(this._hash) >= 3
   }
 
   isDrawByFiftyMoves(): boolean {
@@ -1265,6 +1394,12 @@ export class Chess {
 
   isGameOver(): boolean {
     return this.isCheckmate() || this.isDraw()
+  }
+
+  isPromotion({ from, to }: { from: Square; to: Square }): boolean {
+    return this._moves({ square: from, piece: 'p' }).some(
+      (move) => move.to === Ox88[to] && move.promotion,
+    )
   }
 
   moves(): string[]
@@ -1534,7 +1669,7 @@ export class Chess {
   }
 
   move(
-    move: string | { from: string; to: string; promotion?: string },
+    move: string | { from: string; to: string; promotion?: string } | null,
     { strict = false }: { strict?: boolean } = {},
   ): Move {
     /*
@@ -1555,6 +1690,8 @@ export class Chess {
 
     if (typeof move === 'string') {
       moveObj = this._moveFromSan(move, strict)
+    } else if (move === null) {
+      moveObj = this._moveFromSan(SAN_NULLMOVE, strict)
     } else if (typeof move === 'object') {
       const moves = this._moves()
 
@@ -1580,6 +1717,11 @@ export class Chess {
       }
     }
 
+    //disallow null moves when in check
+    if (this.isCheck() && moveObj.flags & BITS.NULL_MOVE) {
+      throw new Error('Null move not allowed when in check')
+    }
+
     /*
      * need to make a copy of move because we can't generate SAN after the move
      * is made
@@ -1587,7 +1729,7 @@ export class Chess {
     const prettyMove = new Move(this, moveObj)
 
     this._makeMove(moveObj)
-    this._incPositionCount(prettyMove.after)
+    this._incPositionCount()
     return prettyMove
   }
 
@@ -1598,9 +1740,19 @@ export class Chess {
       turn: this._turn,
       castling: { b: this._castling.b, w: this._castling.w },
       epSquare: this._epSquare,
+      fenEpSquare: this._fenEpSquare,
       halfMoves: this._halfMoves,
       moveNumber: this._moveNumber,
     })
+  }
+
+  private _movePiece(from: number, to: number) {
+    this._hash ^= this._pieceKey(from)
+
+    this._board[to] = this._board[from]
+    delete this._board[from]
+
+    this._hash ^= this._pieceKey(to)
   }
 
   private _makeMove(move: InternalMove) {
@@ -1608,21 +1760,40 @@ export class Chess {
     const them = swapColor(us)
     this._push(move)
 
-    this._board[move.to] = this._board[move.from]
-    delete this._board[move.from]
+    if (move.flags & BITS.NULL_MOVE) {
+      if (us === BLACK) {
+        this._moveNumber++
+      }
+      this._halfMoves++
+      this._turn = them
+
+      this._epSquare = EMPTY
+
+      return
+    }
+
+    this._hash ^= this._epKey()
+    this._hash ^= this._castlingKey()
+
+    if (move.captured) {
+      this._hash ^= this._pieceKey(move.to)
+    }
+
+    this._movePiece(move.from, move.to)
 
     // if ep capture, remove the captured pawn
     if (move.flags & BITS.EP_CAPTURE) {
       if (this._turn === BLACK) {
-        delete this._board[move.to - 16]
+        this._clear(move.to - 16)
       } else {
-        delete this._board[move.to + 16]
+        this._clear(move.to + 16)
       }
     }
 
     // if pawn promotion, replace with new piece
     if (move.promotion) {
-      this._board[move.to] = { type: move.promotion, color: us }
+      this._clear(move.to)
+      this._set(move.to, { type: move.promotion, color: us })
     }
 
     // if we moved the king
@@ -1633,13 +1804,11 @@ export class Chess {
       if (move.flags & BITS.KSIDE_CASTLE) {
         const castlingTo = move.to - 1
         const castlingFrom = move.to + 1
-        this._board[castlingTo] = this._board[castlingFrom]
-        delete this._board[castlingFrom]
+        this._movePiece(castlingFrom, castlingTo)
       } else if (move.flags & BITS.QSIDE_CASTLE) {
         const castlingTo = move.to + 1
         const castlingFrom = move.to - 2
-        this._board[castlingTo] = this._board[castlingFrom]
-        delete this._board[castlingFrom]
+        this._movePiece(castlingFrom, castlingTo)
       }
 
       // turn off castling
@@ -1672,15 +1841,36 @@ export class Chess {
       }
     }
 
+    this._hash ^= this._castlingKey()
+
     // if big pawn move, update the en passant square
     if (move.flags & BITS.BIG_PAWN) {
+      let epSquare
+
       if (us === BLACK) {
-        this._epSquare = move.to - 16
+        epSquare = move.to - 16
       } else {
-        this._epSquare = move.to + 16
+        epSquare = move.to + 16
+      }
+
+      this._fenEpSquare = epSquare
+
+      if (
+        (!((move.to - 1) & 0x88) &&
+          this._board[move.to - 1]?.type === PAWN &&
+          this._board[move.to - 1]?.color === them) ||
+        (!((move.to + 1) & 0x88) &&
+          this._board[move.to + 1]?.type === PAWN &&
+          this._board[move.to + 1]?.color === them)
+      ) {
+        this._epSquare = epSquare
+        this._hash ^= this._epKey()
+      } else {
+        this._epSquare = EMPTY
       }
     } else {
       this._epSquare = EMPTY
+      this._fenEpSquare = EMPTY
     }
 
     // reset the 50 move counter if a pawn is moved or a piece is captured
@@ -1697,13 +1887,15 @@ export class Chess {
     }
 
     this._turn = them
+    this._hash ^= SIDE_KEY
   }
 
   undo(): Move | null {
+    const hash = this._hash
     const move = this._undoMove()
     if (move) {
       const prettyMove = new Move(this, move)
-      this._decPositionCount(prettyMove.after)
+      this._decPositionCount(hash)
       return prettyMove
     }
     return null
@@ -1715,21 +1907,37 @@ export class Chess {
       return null
     }
 
+    this._hash ^= this._epKey()
+    this._hash ^= this._castlingKey()
+
     const move = old.move
 
     this._kings = old.kings
     this._turn = old.turn
     this._castling = old.castling
     this._epSquare = old.epSquare
+    this._fenEpSquare = old.fenEpSquare
     this._halfMoves = old.halfMoves
     this._moveNumber = old.moveNumber
+
+    this._hash ^= this._epKey()
+    this._hash ^= this._castlingKey()
+    this._hash ^= SIDE_KEY
 
     const us = this._turn
     const them = swapColor(us)
 
-    this._board[move.from] = this._board[move.to]
-    this._board[move.from].type = move.piece // to undo any promotions
-    delete this._board[move.to]
+    if (move.flags & BITS.NULL_MOVE) {
+      return move
+    }
+
+    this._movePiece(move.to, move.from)
+
+    // to undo any promotions
+    if (move.piece) {
+      this._clear(move.from)
+      this._set(move.from, { type: move.piece, color: us })
+    }
 
     if (move.captured) {
       if (move.flags & BITS.EP_CAPTURE) {
@@ -1740,10 +1948,10 @@ export class Chess {
         } else {
           index = move.to + 16
         }
-        this._board[index] = { type: PAWN, color: them }
+        this._set(index, { type: PAWN, color: them })
       } else {
         // regular capture
-        this._board[move.to] = { type: move.captured, color: them }
+        this._set(move.to, { type: move.captured, color: them })
       }
     }
 
@@ -1756,9 +1964,7 @@ export class Chess {
         castlingTo = move.to - 2
         castlingFrom = move.to + 1
       }
-
-      this._board[castlingTo] = this._board[castlingFrom]
-      delete this._board[castlingFrom]
+      this._movePiece(castlingFrom, castlingTo)
     }
 
     return move
@@ -1967,13 +2173,9 @@ export class Chess {
       newlineChar = '\r?\n',
     }: { strict?: boolean; newlineChar?: string } = {},
   ) {
-    function mask(str: string): string {
-      return str.replace(/\\/g, '\\')
-    }
-
     // If newlineChar is not the default, replace all instances with \n
     if (newlineChar !== '\r?\n') {
-      pgn = pgn.replace(new RegExp(mask(newlineChar), 'g'), '\n')
+      pgn = pgn.replace(new RegExp(newlineChar, 'g'), '\n')
     }
 
     const parsedPgn = parse(pgn)
@@ -2020,29 +2222,29 @@ export class Chess {
 
     let node = parsedPgn.root
 
-    while (node) {
-      if (node.move) {
-        const suffixAnnotation = node.suffixAnnotation
+   while (node) {
+  if (node.move) {
+    const suffixAnnotation = node.suffixAnnotation;
 
-        const move = this._moveFromSan(node.move, strict)
-        if (!move) {
-          throw new Error(`Invalid move in PGN: ${node.move}`)
-        }
+    const move = this._moveFromSan(node.move, strict);
+    if (!move) {
+      throw new Error(`Invalid move in PGN: ${node.move}`);
+    } else {
+      this._makeMove(move);
+      this._incPositionCount(this.fen());
 
-        this._makeMove(move)
-        this._incPositionCount(this.fen())
-
-        if (suffixAnnotation) {
-          this._suffixes[this.fen()] = suffixAnnotation as Suffix
-        }
+      if (suffixAnnotation) {
+        this._suffixes[this.fen()] = suffixAnnotation as Suffix;
       }
-
-      if (node.comment !== undefined) {
-        this._comments[this.fen()] = node.comment
-      }
-
-      node = node.variations[0]
     }
+  }
+
+  if (node.comment !== undefined) {
+    this._comments[this.fen()] = node.comment;
+  }
+
+  node = node.variations[0];
+}
 
     /*
      * Per section 8.2.6 of the PGN spec, the Result tag pair must match match
@@ -2079,6 +2281,8 @@ export class Chess {
       output = 'O-O'
     } else if (move.flags & BITS.QSIDE_CASTLE) {
       output = 'O-O-O'
+    } else if (move.flags & BITS.NULL_MOVE) {
+      return SAN_NULLMOVE
     } else {
       if (move.piece !== PAWN) {
         const disambiguator = getDisambiguator(move, moves)
@@ -2115,7 +2319,27 @@ export class Chess {
   // convert a move from Standard Algebraic Notation (SAN) to 0x88 coordinates
   private _moveFromSan(move: string, strict = false): InternalMove | null {
     // strip off any move decorations: e.g Nf3+?! becomes Nf3
-    const cleanMove = strippedSan(move)
+    let cleanMove = strippedSan(move)
+
+    if (!strict) {
+      if (cleanMove === '0-0') {
+        cleanMove = 'O-O'
+      } else if (cleanMove === '0-0-0') {
+        cleanMove = 'O-O-O'
+      }
+    }
+
+    //first implementation of null with a dummy move (black king moves from a8 to a8), maybe this can be implemented better
+    if (cleanMove == SAN_NULLMOVE) {
+      const res: InternalMove = {
+        color: this._turn,
+        from: 0,
+        to: 0,
+        piece: 'k',
+        flags: BITS.NULL_MOVE,
+      }
+      return res
+    }
 
     let pieceType = inferPieceType(cleanMove)
     let moves = this._moves({ legal: true, piece: pieceType })
@@ -2292,6 +2516,15 @@ export class Chess {
     return nodes
   }
 
+  setTurn(color: Color): boolean {
+    if (this._turn == color) {
+      return false
+    }
+
+    this.move('--')
+    return true
+  }
+
   turn(): Color {
     return this._turn
   }
@@ -2360,29 +2593,26 @@ export class Chess {
 
   /*
    * Keeps track of position occurrence counts for the purpose of repetition
-   * checking. All three methods (`_inc`, `_dec`, and `_get`) trim the
-   * irrelevent information from the fen, initialising new positions, and
-   * removing old positions from the record if their counts are reduced to 0.
+   * checking. Old positions are removed from the map if their counts are reduced to 0.
    */
-  private _getPositionCount(fen: string): number {
-    const trimmedFen = trimFen(fen)
-    return this._positionCount[trimmedFen] || 0
+  private _getPositionCount(hash: bigint): number {
+    return this._positionCount.get(hash) ?? 0
   }
 
-  private _incPositionCount(fen: string) {
-    const trimmedFen = trimFen(fen)
-    if (this._positionCount[trimmedFen] === undefined) {
-      this._positionCount[trimmedFen] = 0
-    }
-    this._positionCount[trimmedFen] += 1
+  private _incPositionCount() {
+    this._positionCount.set(
+      this._hash,
+      (this._positionCount.get(this._hash) ?? 0) + 1,
+    )
   }
 
-  private _decPositionCount(fen: string) {
-    const trimmedFen = trimFen(fen)
-    if (this._positionCount[trimmedFen] === 1) {
-      delete this._positionCount[trimmedFen]
+  private _decPositionCount(hash: bigint) {
+    const currentCount = this._positionCount.get(hash) ?? 0
+
+    if (currentCount === 1) {
+      this._positionCount.delete(hash)
     } else {
-      this._positionCount[trimmedFen] -= 1
+      this._positionCount.set(hash, currentCount - 1)
     }
   }
 

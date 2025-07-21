@@ -1,7 +1,7 @@
 export type Node = {
   move?: string
   suffixAnnotation?: string
-  nag?: string
+  nags: string[]
   comment?: string
   variations: Node[]
 }

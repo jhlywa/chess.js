@@ -1,4 +1,5 @@
 import { Chess, SEVEN_TAG_ROSTER } from '../src/chess'
+import { beforeEach, describe, expect, test } from 'vitest'
 
 describe('Chess Header Methods', () => {
   let chess: Chess

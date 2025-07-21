@@ -8,6 +8,7 @@ import {
   KNIGHT,
   PAWN,
 } from '../src/chess'
+import { expect, test } from 'vitest'
 
 test('findPiece - returns array with the only piece', () => {
   const chess = new Chess()
