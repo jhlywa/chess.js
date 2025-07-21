@@ -59,8 +59,10 @@ runs as part of `npm run check`, but you can also run it directly with
 `npm run api:check`.
 
 If there are any changes, you will need to check that they are intended and
-properly documented (see the next section). Once you are happy with them run
-`npm run api:update` to confirm the changes.
+properly documented. To see the exact changes that have been detected you can do
+a diff between `temp/chess.js.api.md` (new version) and `etc/chess.js.api.md`
+(old version). Once you are happy with them run `npm run api:update` to confirm
+the changes.
 
 ### Documentation
 
