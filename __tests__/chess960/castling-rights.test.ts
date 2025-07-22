@@ -967,40 +967,48 @@ test('set castling right on inner rooks of white kingside and queenside', () => 
   expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('g')
 })
 
-test('empty string should clear castling right of black kingside', () => {
+test('blank or empty string should not clear castling right of black kingside', () => {
   const chess = new Chess('rrk3rr/8/8/8/8/8/8/5K2 w g - 0 1', {
     chess960: true,
   })
   expect(chess.getCastlingRights(BLACK)[KING]).toEqual('g')
-  expect(chess.setCastlingRights(BLACK, { [KING]: '' })).toBeTruthy()
-  expect(chess.getCastlingRights(BLACK)[KING]).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [KING]: '' })).toBeFalsy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('g')
+  expect(chess.setCastlingRights(BLACK, { [KING]: ' ' })).toBeFalsy()
+  expect(chess.getCastlingRights(BLACK)[KING]).toEqual('g')
 })
 
-test('empty string should clear castling right of black queenside', () => {
+test('blank or empty string should not clear castling right of black queenside', () => {
   const chess = new Chess('rrk3rr/8/8/8/8/8/8/5K2 w b - 0 1', {
     chess960: true,
   })
   expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('b')
-  expect(chess.setCastlingRights(BLACK, { [QUEEN]: '' })).toBeTruthy()
-  expect(chess.getCastlingRights(BLACK)[QUEEN]).toBeFalsy()
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: '' })).toBeFalsy()
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('b')
+  expect(chess.setCastlingRights(BLACK, { [QUEEN]: ' ' })).toBeFalsy()
+  expect(chess.getCastlingRights(BLACK)[QUEEN]).toEqual('b')
 })
 
-test('empty string should clear castling right of white kingside', () => {
+test('blank or empty string should not clear castling right of white kingside', () => {
   const chess = new Chess('5k2/8/8/8/8/8/8/RRK3RR w G - 0 1', {
     chess960: true,
   })
   expect(chess.getCastlingRights(WHITE)[KING]).toEqual('g')
-  expect(chess.setCastlingRights(WHITE, { [KING]: '' })).toBeTruthy()
-  expect(chess.getCastlingRights(WHITE)[KING]).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [KING]: '' })).toBeFalsy()
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('g')
+  expect(chess.setCastlingRights(WHITE, { [KING]: ' ' })).toBeFalsy()
+  expect(chess.getCastlingRights(WHITE)[KING]).toEqual('g')
 })
 
-test('empty string should clear castling right of white queenside', () => {
+test('blank or empty string should not clear castling right of white queenside', () => {
   const chess = new Chess('5k2/8/8/8/8/8/8/RRK3RR w B - 0 1', {
     chess960: true,
   })
   expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('b')
-  expect(chess.setCastlingRights(WHITE, { [QUEEN]: '' })).toBeTruthy()
-  expect(chess.getCastlingRights(WHITE)[QUEEN]).toBeFalsy()
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: '' })).toBeFalsy()
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('b')
+  expect(chess.setCastlingRights(WHITE, { [QUEEN]: ' ' })).toBeFalsy()
+  expect(chess.getCastlingRights(WHITE)[QUEEN]).toEqual('b')
 })
 
 test('boolean arg should operate on outside rook black kingside', () => {
