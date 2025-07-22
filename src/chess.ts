@@ -157,12 +157,6 @@ export class Move {
     this.from = fromAlgebraic
     this.to = toAlgebraic
 
-    /*
-     * HACK: The chess['_method']() calls below invoke private methods in the
-     * Chess class to generate SAN and FEN. It's a bit of a hack, but makes the
-     * code cleaner elsewhere.
-     */
-
     this.san = san
     this.lan = fromAlgebraic + toAlgebraic
     this.before = before
