@@ -46,4 +46,5 @@ console.log(chess.pgn())
 ## Contributing
 
 If you have any questions, suggestions, or find any bugs please open an issue.
-PRs are very welcome too.
+PRs are very welcome too, please read the [Contributing Guide](CONTRIBUTING.md)
+first to help make it a smooth process.
