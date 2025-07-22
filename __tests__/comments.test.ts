@@ -1,6 +1,107 @@
 import { Chess } from '../src/chess'
 import { describe, expect, it } from 'vitest'
 
+describe('Suffix-Only Support', () => {
+  it('captures multiple suffixes and comments', () => {
+    const chess = new Chess()
+    const pgn =
+      '1. c4 {English Opening} ' +
+      'e5!? {Aggressive} ' +
+      '2. Nf3!! {Best Move} ' +
+      'Nc6?? {Blunder} *'
+
+    chess.loadPgn(pgn)
+
+    const fen1 = 'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1'
+    const fen2 = 'rnbqkbnr/pppp1ppp/8/4p3/2P5/8/PP1PPPPP/RNBQKBNR w KQkq - 0 2'
+    const fen3 =
+      'rnbqkbnr/pppp1ppp/8/4p3/2P5/5N2/PP1PPPPP/RNBQKB1R b KQkq - 1 2'
+    const fen4 =
+      'r1bqkbnr/pppp1ppp/2n5/4p3/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq - 2 3'
+
+    expect(chess.fen()).toEqual(fen4)
+
+    expect(chess.getComments()).toEqual([
+      {
+        fen: fen1,
+        comment: 'English Opening',
+      },
+      {
+        fen: fen2,
+        comment: 'Aggressive',
+        suffixAnnotation: '!?',
+      },
+      {
+        fen: fen3,
+        comment: 'Best Move',
+        suffixAnnotation: '!!',
+      },
+      {
+        fen: fen4,
+        comment: 'Blunder',
+        suffixAnnotation: '??',
+      },
+    ])
+  })
+})
+
+describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
+  it('should correctly handle comments, suffixes, and suffix-only cases from PGN loading', () => {
+    const chess = new Chess()
+    const pgn =
+      '1. c4 {Comment for c4} e5!? {Comment and Suffix for e5} 2. Nf3!! Nc6 *'
+
+    chess.loadPgn(pgn)
+
+    const fenC4 = 'rnbqkbnr/pppppppp/8/8/2P5/8/PP1PPPPP/RNBQKBNR b KQkq - 0 1'
+    const fenE5 = 'rnbqkbnr/pppp1ppp/8/4p3/2P5/8/PP1PPPPP/RNBQKBNR w KQkq - 0 2'
+    const fenNf3 =
+      'rnbqkbnr/pppp1ppp/8/4p3/2P5/5N2/PP1PPPPP/RNBQKB1R b KQkq - 1 2'
+    const fenNc6 =
+      'r1bqkbnr/pppp1ppp/2n5/4p3/2P5/5N2/PP1PPPPP/RNBQKB1R w KQkq - 2 3'
+
+    expect(chess.fen()).toEqual(fenNc6)
+
+    const commentsResult = chess.getComments()
+
+    const expectedComments = [
+      {
+        fen: fenC4,
+        comment: 'Comment for c4',
+      },
+      {
+        fen: fenE5,
+        comment: 'Comment and Suffix for e5',
+        suffixAnnotation: '!?',
+      },
+      {
+        fen: fenNf3,
+        suffixAnnotation: '!!',
+      },
+    ]
+
+    expect(commentsResult).toEqual(expectedComments)
+  })
+
+  it('should handle manually set suffix-only with an empty comment string for the current FEN', () => {
+    const chess = new Chess()
+    chess.move('g3')
+    const currentFen = chess.fen()
+
+    chess.setSuffixAnnotation('?!')
+
+    const commentsResult = chess.getComments()
+
+    const entryForCurrentFen = commentsResult.find((c) => c.fen === currentFen)
+
+    expect(entryForCurrentFen).toBeDefined()
+    expect(entryForCurrentFen).toEqual({
+      fen: currentFen,
+      suffixAnnotation: '?!',
+    })
+  })
+})
+
 describe('Manipulate Comments', () => {
   it('no comments', () => {
     const chess = new Chess()
