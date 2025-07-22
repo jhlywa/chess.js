@@ -71,3 +71,7 @@ You can view the existing documentation at https://jhlywa.github.io/chess.js
 The documentation is versioned. The file you will need to edit is located at
 `website/docs/index.md`. When the next release is made, a snapshot of this file
 will be published to the documentation site.
+
+The documentation system uses MDX which is Markdown with React, but we do not
+use any React features. The only thing to bear in mind is that outside of code
+blocks curly braces and angled brackets must be escaped with a backslash.
