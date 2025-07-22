@@ -267,6 +267,8 @@ export class Move {
     // (undocumented)
     isKingsideCastle(): boolean;
     // (undocumented)
+    isNullMove(): boolean;
+    // (undocumented)
     isPromotion(): boolean;
     // (undocumented)
     isQueensideCastle(): boolean;

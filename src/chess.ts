@@ -203,6 +203,10 @@ export class Move {
   isBigPawn() {
     return this.flags.indexOf(FLAGS['BIG_PAWN']) > -1
   }
+
+  isNullMove() {
+    return this.flags.indexOf(FLAGS['NULL_MOVE']) > -1
+  }
 }
 
 const EMPTY = -1
