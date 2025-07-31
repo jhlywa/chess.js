@@ -145,7 +145,12 @@ export class Move {
   before: string
   after: string
 
-  constructor(chess: Chess, internal: InternalMove) {
+  constructor(
+    internal: InternalMove,
+    san: string,
+    before: string,
+    after: string,
+  ) {
     const { color, piece, from, to, flags, captured, promotion } = internal
 
     const fromAlgebraic = algebraic(from)
@@ -156,20 +161,10 @@ export class Move {
     this.from = fromAlgebraic
     this.to = toAlgebraic
 
-    /*
-     * HACK: The chess['_method']() calls below invoke private methods in the
-     * Chess class to generate SAN and FEN. It's a bit of a hack, but makes the
-     * code cleaner elsewhere.
-     */
-
-    this.san = chess['_moveToSan'](internal, chess['_moves']({ legal: true }))
+    this.san = san
     this.lan = fromAlgebraic + toAlgebraic
-    this.before = chess.fen()
-
-    // Generate the FEN for the 'after' key
-    chess['_makeMove'](internal)
-    this.after = chess.fen()
-    chess['_undoMove']()
+    this.before = before
+    this.after = after
 
     // Build the text representation of the move flags
     this.flags = ''
@@ -211,6 +206,10 @@ export class Move {
 
   isBigPawn() {
     return this.flags.indexOf(FLAGS['BIG_PAWN']) > -1
+  }
+
+  isNullMove() {
+    return this.flags.indexOf(FLAGS['NULL_MOVE']) > -1
   }
 }
 
@@ -1402,6 +1401,17 @@ export class Chess {
     )
   }
 
+  private _createMove(internal: InternalMove) {
+    const san = this._moveToSan(internal, this._moves({ legal: true }))
+    const before = this.fen()
+
+    this._makeMove(internal)
+    const after = this.fen()
+    this._undoMove()
+
+    return new Move(internal, san, before, after)
+  }
+
   moves(): string[]
   moves({ square }: { square: Square }): string[]
   moves({ piece }: { piece: PieceSymbol }): string[]
@@ -1466,7 +1476,7 @@ export class Chess {
     const moves = this._moves({ square, piece })
 
     if (verbose) {
-      return moves.map((move) => new Move(this, move))
+      return moves.map((move) => this._createMove(move))
     } else {
       return moves.map((move) => this._moveToSan(move, moves))
     }
@@ -1726,7 +1736,7 @@ export class Chess {
      * need to make a copy of move because we can't generate SAN after the move
      * is made
      */
-    const prettyMove = new Move(this, moveObj)
+    const prettyMove = this._createMove(moveObj)
 
     this._makeMove(moveObj)
     this._incPositionCount()
@@ -1894,7 +1904,7 @@ export class Chess {
     const hash = this._hash
     const move = this._undoMove()
     if (move) {
-      const prettyMove = new Move(this, move)
+      const prettyMove = this._createMove(move)
       this._decPositionCount(hash)
       return prettyMove
     }
@@ -2581,7 +2591,7 @@ export class Chess {
       }
 
       if (verbose) {
-        moveHistory.push(new Move(this, move))
+        moveHistory.push(this._createMove(move))
       } else {
         moveHistory.push(this._moveToSan(move, this._moves()))
       }
