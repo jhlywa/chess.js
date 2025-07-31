@@ -178,7 +178,8 @@ Bogo-Indian. } 3...d5 4.Bg2 c6 5.Nf3 Be7 6.O-O Nbd7
 })
 
 test('loadPgn - works - regression test (pinned piece)', () => {
-  /* regression test - broken PGN parser ended up moving the pinned knight at
+  /*
+   * regression test - broken PGN parser ended up moving the pinned knight at
    * c3 and ended up in this position:
    * rnbqk2r/pp1p1ppp/4pn2/1N6/1bPN4/8/PP2PPPP/R1BQKB1R b KQkq - 2 6
    */
@@ -246,6 +247,7 @@ test('loadPgn - works - preserves RAV inside comments', () => {
     {
       fen: '3q1rk1/1b1rbp1p/p2ppnp1/1p6/3BPP2/P1NB3Q/1PP3PP/4RR1K w - - 0 18',
       comment: ' (0.05 → 1.03) Inaccuracy. The best move was h6. ',
+      suffixAnnotation: '?',
     },
   ]
   const pgn = `
