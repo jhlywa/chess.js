@@ -124,18 +124,6 @@ interface History {
   }
 }
 
-/**
- * The chosen mechanic to indicate castling in Chess960 is to move the king
- * onto the rook. This is an 'illegal' move and must be caught and corrected
- * prior to the normal move-processing logic. PreMove facilitates that.
- */
-type PreMove = {
-  from: string
-  to: string
-  promotion?: PieceSymbol
-  castle960Flag?: number
-}
-
 export class Move {
   color: Color
   from: Square
@@ -1797,7 +1785,7 @@ export class Chess {
   }
 
   move(
-    rawMove: string | { from: string; to: string; promotion?: string } | null,
+    move: string | { from: string; to: string; promotion?: string } | null,
     { strict = false }: { strict?: boolean } = {},
   ): Move {
     /*
@@ -1813,7 +1801,29 @@ export class Chess {
      * An optional strict argument may be supplied to tell chess.js to
      * strictly follow the SAN specification.
      */
-    const move = this._preprocessMove(rawMove)
+
+    let isChess960CastlingMove = false
+    if (move && this.isChess960()) {
+      // Convert algebraic move (e.g. 'a4a7') to an object; ignore other move types (e.g. 'Bxe5').
+      if (typeof move === 'string' && /^[a-h]\d[a-h]\d$/i.test(move)) {
+        move = {
+          from: move.substring(0, 2).toLowerCase(),
+          to: move.substring(2, 4).toLowerCase(),
+        }
+      }
+
+      if (typeof move === 'object') {
+        const row = move.from.charAt(1)
+        if (this._isCastlingOntoRook(move, BITS.KSIDE_CASTLE)) {
+          move.to = 'g' + row
+          isChess960CastlingMove = true
+        } else if (this._isCastlingOntoRook(move, BITS.QSIDE_CASTLE)) {
+          move.to = 'c' + row
+          isChess960CastlingMove = true
+        }
+      }
+    }
+
     let moveObj = null
 
     if (typeof move === 'string') {
@@ -1821,7 +1831,7 @@ export class Chess {
     } else if (move === null) {
       moveObj = this._moveFromSan(SAN_NULLMOVE, strict)
     } else if (typeof move === 'object') {
-      const moves = this._filterMoves(this._moves(), move)
+      const moves = this._filterMoves(this._moves(), isChess960CastlingMove)
 
       // convert the pretty move object to an ugly move object
       for (let i = 0, len = moves.length; i < len; i++) {
@@ -1841,10 +1851,6 @@ export class Chess {
       if (typeof move === 'string') {
         throw new Error(`Invalid move: ${move}`)
       } else {
-        if (move) {
-          // Remove internal flag so that it does not appear in the error message.
-          delete move.castle960Flag
-        }
         throw new Error(`Invalid move: ${JSON.stringify(move)}`)
       }
     }
@@ -3222,7 +3228,10 @@ export class Chess {
     return true
   }
 
-  private _isCastlingOntoRook(move: PreMove, castleBits: number): boolean {
+  private _isCastlingOntoRook(
+    move: { from: string; to: string; promotion?: string },
+    castleBits: number,
+  ): boolean {
     const us = this._turn
     if (move.from === algebraic(this._kings[us])) {
       // Is king moving?
@@ -3244,9 +3253,12 @@ export class Chess {
    * If the game variant is Chess960 then 'moves' is filtered based on
    * whether castling is desired or not.
    */
-  private _filterMoves(moves: InternalMove[], move: PreMove): InternalMove[] {
+  private _filterMoves(
+    moves: InternalMove[],
+    is960CastleMove: boolean,
+  ): InternalMove[] {
     if (this.isChess960()) {
-      return move.castle960Flag
+      return is960CastleMove
         ? moves.filter(
             // return all castling moves
             (mv) => mv.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE),
@@ -3268,53 +3280,6 @@ export class Chess {
   private _getRookSquare(color: Color, castleFlag: number): number {
     const square = this._rooks[color][castleFlag]
     return square >= 0 ? square : -1
-  }
-
-  /**
-   * If the game variant is not Chess960, then this function is basically a
-   * 'no-op' and (almost literally) returns whatever move was passed to it.
-   *
-   * If the game variant is Chess960 and an 'illegal' king-onto-rook move is
-   * made (to indicate a desire to castle) the 'illegal' move is converted to
-   * a normal castling move and the 'castle960Flag' is set to indicate the
-   * type of castling move.
-   */
-  private _preprocessMove(
-    move: string | { from: string; to: string; promotion?: string } | null,
-  ): string | PreMove | null {
-    let mv: string | PreMove | null
-    if (move && typeof move === 'object') {
-      mv = {
-        from: move.from,
-        to: move.to,
-      }
-      if (move.promotion) {
-        mv.promotion = move.promotion as PieceSymbol
-      }
-    } else {
-      mv = move // string or null
-    }
-
-    if (mv && this.isChess960()) {
-      // Convert algebraic move (e.g. 'a4a7') to an object; ignore other move types (e.g. 'Bxe5').
-      if (typeof move === 'string' && /^[a-h]\d[a-h]\d$/i.test(move)) {
-        mv = {
-          from: move.substring(0, 2).toLowerCase(),
-          to: move.substring(2, 4).toLowerCase(),
-        }
-      }
-      if (typeof mv === 'object') {
-        const row = mv.from.charAt(1)
-        if (this._isCastlingOntoRook(mv, BITS.KSIDE_CASTLE)) {
-          mv.to = 'g' + row
-          mv.castle960Flag = BITS.KSIDE_CASTLE
-        } else if (this._isCastlingOntoRook(mv, BITS.QSIDE_CASTLE)) {
-          mv.to = 'c' + row
-          mv.castle960Flag = BITS.QSIDE_CASTLE
-        }
-      }
-    }
-    return mv
   }
 }
 

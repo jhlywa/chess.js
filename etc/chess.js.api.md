@@ -116,7 +116,7 @@ export class Chess {
         newlineChar?: string;
     }): void;
     // (undocumented)
-    move(rawMove: string | {
+    move(move: string | {
         from: string;
         to: string;
         promotion?: string;
