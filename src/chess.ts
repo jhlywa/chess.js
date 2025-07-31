@@ -107,7 +107,6 @@ type InternalMove = {
   captured?: PieceSymbol
   promotion?: PieceSymbol
   flags: number
-  rookSq?: number
 }
 
 interface History {
@@ -119,6 +118,7 @@ interface History {
   fenEpSquare: number
   halfMoves: number
   moveNumber: number
+  rooks: string
 }
 
 /**
@@ -669,7 +669,6 @@ function addMove(
   piece: PieceSymbol,
   captured: PieceSymbol | undefined = undefined,
   flags: number = BITS.NORMAL,
-  rookSq?: number,
 ) {
   const r = rank(to)
 
@@ -694,7 +693,6 @@ function addMove(
       piece,
       captured,
       flags,
-      rookSq: flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE) ? rookSq : -1,
     })
   }
 }
@@ -1749,7 +1747,6 @@ export class Chess {
               KING,
               undefined,
               BITS.KSIDE_CASTLE,
-              rookFrom,
             )
           }
         }
@@ -1774,7 +1771,6 @@ export class Chess {
               KING,
               undefined,
               BITS.QSIDE_CASTLE,
-              rookFrom,
             )
           }
         }
@@ -1882,6 +1878,7 @@ export class Chess {
       fenEpSquare: this._fenEpSquare,
       halfMoves: this._halfMoves,
       moveNumber: this._moveNumber,
+      rooks: JSON.stringify(this._rooks),
     })
   }
 
@@ -1944,7 +1941,8 @@ export class Chess {
 
       // if we castled, move the rook next to the king
       if (move.flags & BITS.KSIDE_CASTLE) {
-        const rookFrom = move.rookSq as number
+        const rookFrom = this._findRookWithCastlingRight(us, BITS.KSIDE_CASTLE)
+
         const rookTo = move.to - 1
         this._board[rookTo] = { type: ROOK, color: us }
         this._hash ^= this._pieceKey(rookFrom)
@@ -1953,7 +1951,7 @@ export class Chess {
           delete this._board[rookFrom]
         }
       } else if (move.flags & BITS.QSIDE_CASTLE) {
-        const rookFrom = move.rookSq as number
+        const rookFrom = this._findRookWithCastlingRight(us, BITS.QSIDE_CASTLE)
         const rookTo = move.to + 1
         this._board[rookTo] = { type: ROOK, color: us }
         this._hash ^= this._pieceKey(rookFrom)
@@ -2071,6 +2069,7 @@ export class Chess {
     this._fenEpSquare = old.fenEpSquare
     this._halfMoves = old.halfMoves
     this._moveNumber = old.moveNumber
+    this._rooks = JSON.parse(old.rooks)
 
     this._hash ^= this._epKey()
     this._hash ^= this._castlingKey()
@@ -2110,10 +2109,10 @@ export class Chess {
     if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
       let rookTo: number, rookFrom: number
       if (move.flags & BITS.KSIDE_CASTLE) {
-        rookTo = move.rookSq as number
+        rookTo = this._findRookWithCastlingRight(us, BITS.KSIDE_CASTLE)
         rookFrom = move.to - 1
       } else {
-        rookTo = move.rookSq as number
+        rookTo = this._findRookWithCastlingRight(us, BITS.QSIDE_CASTLE)
         rookFrom = move.to + 1
       }
       this._board[rookTo] = { type: ROOK, color: us }
