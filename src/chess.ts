@@ -3089,30 +3089,30 @@ export class Chess {
    * convenience because they are computed from the other fields.
    *
    * The returned object looks like this:
-   * {
-   *    b: {                        // Black
+   * \{
+   *    b: \{                        // Black
    *      king,                     // Column [0-7] of the black king, or -1 if king is not in row 8.
    *      kingsideRooks,            // Columns [0-7] of all rooks to the right of the king.
    *      queensideRooks,           // Columns [0-7] of all rooks to the left of the king.
    *      leftmostQueensideRookSq,  // The Ox88 square of leftmost queenside rook or undefined if no king or no rook.
    *      rightmostKingsideRookSq,  // The Ox88 square of rightmost kingside rook or undefined if no king or no rook.
-   *      castling: {
+   *      castling: \{
    *        isQueensidePossible,    // True if a rook exists anywhere to the left of the king,
    *        isKingsidePossible,     // True if a rook exists anywhere to the right of the king,
-   *      },
-   *    },
-   *    w: {                        // White (Fields below are similar to 'b' fields, above.)
+   *      \},
+   *    \},
+   *    w: \{                        // White (Fields below are similar to 'b' fields, above.)
    *      king,
    *      kingsideRooks,
    *      queensideRooks,
    *      leftmostQueensideRookSq,
    *      rightmostKingsideRookSq,
-   *      castling: {
+   *      castling: \{
    *        isQueensidePossible,
    *        isKingsidePossible,
-   *      },
-   *    },
-   * }
+   *      \},
+   *    \},
+   * \}
    *
    */
   private _getKingAndRookInfo() {
@@ -3216,7 +3216,7 @@ export class Chess {
     return true
   }
 
-  _isCastlingOntoRook(move: PreMove, castleBits: number): boolean {
+  private _isCastlingOntoRook(move: PreMove, castleBits: number): boolean {
     const us = this._turn
     if (move.from === algebraic(this._kings[us])) {
       // Is king moving?
@@ -3238,7 +3238,7 @@ export class Chess {
    * If the game variant is Chess960 then 'moves' is filtered based on
    * whether castling is desired or not.
    */
-  _filterMoves(moves: InternalMove[], move: PreMove): InternalMove[] {
+  private _filterMoves(moves: InternalMove[], move: PreMove): InternalMove[] {
     if (this.isChess960()) {
       return move.castle960Flag
         ? moves.filter(
@@ -3273,7 +3273,7 @@ export class Chess {
    * a normal castling move and the 'castle960Flag' is set to indicate the
    * type of castling move.
    */
-  _preprocessMove(
+  private _preprocessMove(
     move: string | { from: string; to: string; promotion?: string } | null,
   ): string | PreMove | null {
     let mv: string | PreMove | null
