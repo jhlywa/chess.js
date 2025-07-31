@@ -118,7 +118,10 @@ interface History {
   fenEpSquare: number
   halfMoves: number
   moveNumber: number
-  rooks: string
+  rooks: {
+    b: { [BITS.KSIDE_CASTLE]: number; [BITS.KSIDE_CASTLE]: number }
+    w: { [BITS.KSIDE_CASTLE]: number; [BITS.KSIDE_CASTLE]: number }
+  }
 }
 
 /**
@@ -1872,7 +1875,16 @@ export class Chess {
       fenEpSquare: this._fenEpSquare,
       halfMoves: this._halfMoves,
       moveNumber: this._moveNumber,
-      rooks: JSON.stringify(this._rooks),
+      rooks: {
+        b: {
+          [BITS.KSIDE_CASTLE]: this._rooks.b[BITS.KSIDE_CASTLE],
+          [BITS.QSIDE_CASTLE]: this._rooks.b[BITS.QSIDE_CASTLE],
+        },
+        w: {
+          [BITS.KSIDE_CASTLE]: this._rooks.w[BITS.KSIDE_CASTLE],
+          [BITS.QSIDE_CASTLE]: this._rooks.w[BITS.QSIDE_CASTLE],
+        },
+      },
     })
   }
 
@@ -2069,7 +2081,7 @@ export class Chess {
     this._fenEpSquare = old.fenEpSquare
     this._halfMoves = old.halfMoves
     this._moveNumber = old.moveNumber
-    this._rooks = JSON.parse(old.rooks)
+    this._rooks = old.rooks
 
     this._hash ^= this._epKey()
     this._hash ^= this._castlingKey()
@@ -2862,8 +2874,17 @@ export class Chess {
     this._updateCastlingRights()
 
     // Make a backup
-    const savedRooksState = JSON.stringify(this._rooks)
-    const savedCastlingState = JSON.stringify(this._castling)
+    const savedRooksState = {
+      b: {
+        [BITS.KSIDE_CASTLE]: this._rooks.b[BITS.KSIDE_CASTLE],
+        [BITS.QSIDE_CASTLE]: this._rooks.b[BITS.QSIDE_CASTLE],
+      },
+      w: {
+        [BITS.KSIDE_CASTLE]: this._rooks.w[BITS.KSIDE_CASTLE],
+        [BITS.QSIDE_CASTLE]: this._rooks.w[BITS.QSIDE_CASTLE],
+      },
+    }
+    const savedCastlingState = { b: this._castling.b, w: this._castling.w }
 
     const kingsideRightWanted = wantedRights[KING]
     const queensideRightWanted = wantedRights[QUEEN]
@@ -2920,8 +2941,8 @@ export class Chess {
     }
     if (!result) {
       // Castling failed; restore original state.
-      this._rooks = JSON.parse(savedRooksState)
-      this._castling = JSON.parse(savedCastlingState)
+      this._rooks = savedRooksState
+      this._castling = savedCastlingState
     }
     return result
   }
