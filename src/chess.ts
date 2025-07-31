@@ -739,14 +739,14 @@ export class Chess {
   private _loadedFen = DEFAULT_POSITION
 
   private _rooks = {
-    w: [
-      { square: Ox88.a1, flag: BITS.QSIDE_CASTLE },
-      { square: Ox88.h1, flag: BITS.KSIDE_CASTLE },
-    ],
-    b: [
-      { square: Ox88.a8, flag: BITS.QSIDE_CASTLE },
-      { square: Ox88.h8, flag: BITS.KSIDE_CASTLE },
-    ],
+    w: {
+      [BITS.QSIDE_CASTLE]: Ox88.a1,
+      [BITS.KSIDE_CASTLE]: Ox88.h1,
+    },
+    b: {
+      [BITS.QSIDE_CASTLE]: Ox88.a8,
+      [BITS.KSIDE_CASTLE]: Ox88.h8,
+    },
   }
 
   constructor(
@@ -923,20 +923,20 @@ export class Chess {
       const wCastlingRights = this._getCastlingRights(WHITE)
 
       // Update _rooks squares that are able to castle.
-      this._rooks.w = []
-      this._rooks.b = []
+      this._rooks.w = {}
+      this._rooks.b = {}
 
       if (bCastlingRights[KING] && rk.bks.length) {
-        this._rooks[BLACK].push({ square: rk.bks[0], flag: BITS.KSIDE_CASTLE })
+        this._rooks[BLACK][BITS.KSIDE_CASTLE] = rk.bks[0]
       }
       if (bCastlingRights[QUEEN] && rk.bqs.length) {
-        this._rooks[BLACK].push({ square: rk.bqs[0], flag: BITS.QSIDE_CASTLE })
+        this._rooks[BLACK][BITS.QSIDE_CASTLE] = rk.bqs[0]
       }
       if (wCastlingRights[KING] && rk.wks.length) {
-        this._rooks[WHITE].push({ square: rk.wks[0], flag: BITS.KSIDE_CASTLE })
+        this._rooks[WHITE][BITS.KSIDE_CASTLE] = rk.wks[0]
       }
       if (wCastlingRights[QUEEN] && rk.wqs.length) {
-        this._rooks[WHITE].push({ square: rk.wqs[0], flag: BITS.QSIDE_CASTLE })
+        this._rooks[WHITE][BITS.QSIDE_CASTLE] = rk.wqs[0]
       }
     }
 
@@ -991,7 +991,7 @@ export class Chess {
     let castling = ''
 
     if (wCastlingRights[KING]) {
-      const sq = this._findRookWithCastlingRight(WHITE, BITS.KSIDE_CASTLE)
+      const sq = this._getRookSquare(WHITE, BITS.KSIDE_CASTLE)
       if (inf.w.rightmostKingsideRookSq === sq) {
         castling += 'K'
       } else {
@@ -999,7 +999,7 @@ export class Chess {
       }
     }
     if (wCastlingRights[QUEEN]) {
-      const sq = this._findRookWithCastlingRight(WHITE, BITS.QSIDE_CASTLE)
+      const sq = this._getRookSquare(WHITE, BITS.QSIDE_CASTLE)
       if (inf.w.leftmostQueensideRookSq === sq) {
         castling += 'Q'
       } else {
@@ -1008,16 +1008,16 @@ export class Chess {
     }
 
     if (bCastlingRights[KING]) {
-      const sq = this._findRookWithCastlingRight(BLACK, BITS.KSIDE_CASTLE)
-      if (inf.b.rightmostKingsideRookSq == sq) {
+      const sq = this._getRookSquare(BLACK, BITS.KSIDE_CASTLE)
+      if (inf.b.rightmostKingsideRookSq === sq) {
         castling += 'k'
       } else {
         castling += 'abcdefgh'.charAt(file(sq))
       }
     }
     if (bCastlingRights[QUEEN]) {
-      const sq = this._findRookWithCastlingRight(BLACK, BITS.QSIDE_CASTLE)
-      if (inf.b.leftmostQueensideRookSq == sq) {
+      const sq = this._getRookSquare(BLACK, BITS.QSIDE_CASTLE)
+      if (inf.b.leftmostQueensideRookSq === sq) {
         castling += 'q'
       } else {
         castling += 'abcdefgh'.charAt(file(sq))
@@ -1731,10 +1731,7 @@ export class Chess {
         if (castlingRights[KING]) {
           const kingFrom = this._kings[us]
           const kingTo = us === WHITE ? Ox88.g1 : Ox88.g8
-          const rookFrom = this._findRookWithCastlingRight(
-            us,
-            BITS.KSIDE_CASTLE,
-          )
+          const rookFrom = this._getRookSquare(us, BITS.KSIDE_CASTLE)
           const rookTo = kingTo - 1
           if (
             this._isCastlePathClear(kingFrom, kingTo, rookFrom, rookTo, them)
@@ -1755,10 +1752,7 @@ export class Chess {
         if (castlingRights[QUEEN]) {
           const kingFrom = this._kings[us]
           const kingTo = us === WHITE ? Ox88.c1 : Ox88.c8
-          const rookFrom = this._findRookWithCastlingRight(
-            us,
-            BITS.QSIDE_CASTLE,
-          )
+          const rookFrom = this._getRookSquare(us, BITS.QSIDE_CASTLE)
           const rookTo = kingTo + 1
           if (
             this._isCastlePathClear(kingFrom, kingTo, rookFrom, rookTo, them)
@@ -1941,7 +1935,7 @@ export class Chess {
 
       // if we castled, move the rook next to the king
       if (move.flags & BITS.KSIDE_CASTLE) {
-        const rookFrom = this._findRookWithCastlingRight(us, BITS.KSIDE_CASTLE)
+        const rookFrom = this._getRookSquare(us, BITS.KSIDE_CASTLE)
 
         const rookTo = move.to - 1
         this._board[rookTo] = { type: ROOK, color: us }
@@ -1951,7 +1945,7 @@ export class Chess {
           delete this._board[rookFrom]
         }
       } else if (move.flags & BITS.QSIDE_CASTLE) {
-        const rookFrom = this._findRookWithCastlingRight(us, BITS.QSIDE_CASTLE)
+        const rookFrom = this._getRookSquare(us, BITS.QSIDE_CASTLE)
         const rookTo = move.to + 1
         this._board[rookTo] = { type: ROOK, color: us }
         this._hash ^= this._pieceKey(rookFrom)
@@ -1967,27 +1961,33 @@ export class Chess {
 
     // turn off castling if we move a rook
     if (this._castling[us]) {
-      for (let i = 0, len = this._rooks[us].length; i < len; i++) {
-        if (
-          move.from === this._rooks[us][i].square &&
-          this._castling[us] & this._rooks[us][i].flag
-        ) {
-          this._castling[us] ^= this._rooks[us][i].flag
-          break
-        }
+      if (
+        move.from === this._getRookSquare(us, BITS.KSIDE_CASTLE) &&
+        this._castling[us] & BITS.KSIDE_CASTLE
+      ) {
+        this._castling[us] ^= BITS.KSIDE_CASTLE
+      }
+      if (
+        move.from === this._getRookSquare(us, BITS.QSIDE_CASTLE) &&
+        this._castling[us] & BITS.QSIDE_CASTLE
+      ) {
+        this._castling[us] ^= BITS.QSIDE_CASTLE
       }
     }
 
     // turn off castling if we capture a rook
     if (this._castling[them]) {
-      for (let i = 0, len = this._rooks[them].length; i < len; i++) {
-        if (
-          move.to === this._rooks[them][i].square &&
-          this._castling[them] & this._rooks[them][i].flag
-        ) {
-          this._castling[them] ^= this._rooks[them][i].flag
-          break
-        }
+      if (
+        move.to === this._getRookSquare(them, BITS.KSIDE_CASTLE) &&
+        this._castling[them] & BITS.KSIDE_CASTLE
+      ) {
+        this._castling[them] ^= BITS.KSIDE_CASTLE
+      }
+      if (
+        move.to === this._getRookSquare(them, BITS.QSIDE_CASTLE) &&
+        this._castling[them] & BITS.QSIDE_CASTLE
+      ) {
+        this._castling[them] ^= BITS.QSIDE_CASTLE
       }
     }
 
@@ -2109,10 +2109,10 @@ export class Chess {
     if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
       let rookTo: number, rookFrom: number
       if (move.flags & BITS.KSIDE_CASTLE) {
-        rookTo = this._findRookWithCastlingRight(us, BITS.KSIDE_CASTLE)
+        rookTo = this._getRookSquare(us, BITS.KSIDE_CASTLE)
         rookFrom = move.to - 1
       } else {
-        rookTo = this._findRookWithCastlingRight(us, BITS.QSIDE_CASTLE)
+        rookTo = this._getRookSquare(us, BITS.QSIDE_CASTLE)
         rookFrom = move.to + 1
       }
       this._board[rookTo] = { type: ROOK, color: us }
@@ -2973,16 +2973,8 @@ export class Chess {
     const square = Ox88[algSquare]
     const piece = this._board[square]
     if (piece && piece.type === ROOK) {
-      // Remove existing rook from _rooks
-      const rks = this._rooks[color]
-      for (let i = 0; i < rks.length; i++) {
-        if (rks[i].flag == flag) {
-          rks.splice(i, 1) // Remove 1 item starting at i.
-          break
-        }
-      }
       this._castling[color] |= flag // Set the castling-right.
-      this._rooks[color].push({ square, flag })
+      this._rooks[color][flag] = square
       return true
     }
     return false
@@ -3008,7 +3000,7 @@ export class Chess {
     if (column) {
       fileChr = column
     } else {
-      const rookSq = this._findRookWithCastlingRight(color, flag)
+      const rookSq = this._getRookSquare(color, flag)
       if (rookSq == -1) {
         return false
       }
@@ -3049,22 +3041,16 @@ export class Chess {
     [KING]: string | undefined
     [QUEEN]: string | undefined
   } {
-    const kingside = this._rooks[color].filter(
-      (obj) => obj.flag === BITS.KSIDE_CASTLE,
-    )[0]
-    const queenside = this._rooks[color].filter(
-      (obj) => obj.flag === BITS.QSIDE_CASTLE,
-    )[0]
+    const ksideSq = this._getRookSquare(color, BITS.KSIDE_CASTLE)
+    const qsideSq = this._getRookSquare(color, BITS.QSIDE_CASTLE)
 
     const rights = this._getCastlingRights(color)
 
+    // ksideSq can never be 0, but qsideSq could be 0.
     return {
-      [KING]:
-        rights[KING] && kingside ? this._fileChr(kingside.square) : undefined,
+      [KING]: rights[KING] && ksideSq >= 0 ? this._fileChr(ksideSq) : undefined,
       [QUEEN]:
-        rights[QUEEN] && queenside
-          ? this._fileChr(queenside.square)
-          : undefined,
+        rights[QUEEN] && qsideSq >= 0 ? this._fileChr(qsideSq) : undefined,
     }
   }
 
@@ -3221,9 +3207,9 @@ export class Chess {
       // Is king moving?
       if (this._castling[us] & castleBits) {
         // Is castling allowed?
-        const rks = this._rooks[us].filter((rk) => rk.flag === castleBits) // Rook found?
-        if (rks.length === 1) {
-          return move.to === algebraic(rks[0].square)
+        const square = this._getRookSquare(us, castleBits) // Rook found?
+        if (square >= 0) {
+          return move.to === algebraic(square)
         }
       }
     }
@@ -3253,14 +3239,14 @@ export class Chess {
   }
 
   /**
-   * us: BLACK or WHITE
-   * flag: BITS.KSIDE_CASTLE or BITS.QSIDE_CASTLE
+   * color: BLACK or WHITE
+   * castleFlag: BITS.KSIDE_CASTLE or BITS.QSIDE_CASTLE
    * returns the Ox88 square of the rook with the specified color and castling
    * right, otherwise, returns -1 if no such rook is found.
    */
-  private _findRookWithCastlingRight(us: Color, flag: number): number {
-    const rook = this._rooks[us].filter((rk) => flag & rk.flag)
-    return rook.length == 1 ? rook[0].square : -1
+  private _getRookSquare(color: Color, castleFlag: number): number {
+    const square = this._rooks[color][castleFlag]
+    return square >= 0 ? square : -1
   }
 
   /**
