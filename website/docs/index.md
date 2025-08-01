@@ -102,15 +102,16 @@ export const DEFAULT_POSITION = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K
 export const SQUARES = ['a8', 'b8', 'c8', ..., 'f1', 'g1', 'h1']
 ```
 
-### Constructor: Chess([ fen ], \{ skipValidation = false \} = \{\})
+### Constructor: Chess([ fen ], \{ skipValidation = false, chess960 = false \} = \{\})
 
 The Chess() constructor creates a new chess object that default to the initial
 board position. It accepts two optional parameters : a string which specifies
 the board configuration in
 [Forsyth-Edwards Notation (FEN)](http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation),
-and an object with a `skipValidation` boolean. By default the constructor will
-throw an exception if an invalid FEN string is provided. This behavior can be
-skipped by setting the `skipValidation` boolean.
+and an object with the optional `skipValidation` and `chess960` booleans. By
+default, the constructor will throw an exception if an invalid FEN string is
+provided. This behavior can be skipped by setting the `skipValidation` boolean.
+To load a Chess960 FEN, the `chess960` boolean must be set.
 
 ```ts
 import { Chess } from 'chess.js'
@@ -235,6 +236,12 @@ only included if the side-to-move can legally capture en passant.
 
 The enpassant square will always be included if forceEnpassantSquare is true.
 
+When returning a Chess960 FEN, the letters `KQkq` will be used to indicate that
+the outer-most rook has castling rights. When there are two (or more) rooks on
+one side of the king and the outer-most rook does not have castling rights, then
+the letters `ABCDEFGHabcdefgh` will be used to indicate the file of the (inner)
+rook that has castling rights.
+
 ```ts
 const chess = new Chess()
 
@@ -284,11 +291,27 @@ indicates whether the right is available or not for both kingside and queenside.
 Note this does not indicate if such a move is legal or not in the current
 position as checks etc. also need to be considered.
 
+If a castling-right is available, the file (column) containing the rook that has
+the castling-right will be returned, otherwise `undefined` will be returned.
+
+For a Classical game of chess, the returned file will always be `a` or `h`. A
+Chess960 game may return other files.
+
 ```ts
 const chess = new Chess()
 
 chess.getCastlingRights(BLACK) // black can castle queenside only
-// -> { 'k': false, 'q': true }
+// -> { 'k': undefined, 'q': 'h' }
+
+const chess = new Chess(
+  'qbrnnbk1/2pp2pr/p6p/1p2pp2/8/P3PP2/1PPP2PP/QR1NNBKR w Kq - 0 19',
+  { chess960: true },
+)
+
+chess.getCastlingRights(BLACK)
+// -> { 'k': undefined, 'q': 'c' }
+chess.getCastlingRights(WHITE)
+// -> { 'k': 'h', 'q': undefined }
 ```
 
 ### .getComment()
@@ -458,6 +481,19 @@ chess.isCheckmate()
 // -> true
 ```
 
+### .isChess960()
+
+Returns true if the current game is Chess960; otherwise, returns false.
+
+```ts
+const chess = new Chess(
+  'qbbnnrkr/2pp2pp/p7/1p2pp2/8/P3PP2/1PPP1KPP/QBBNNR1R w hf - 0 9',
+  { chess960: true },
+)
+chess.isChess960()
+// -> true
+```
+
 ### .isDraw()
 
 Returns true or false if the game is drawn (50-move rule or insufficient
@@ -564,11 +600,12 @@ chess.isThreefoldRepetition()
 // -> true
 ```
 
-### .load(fen: string, \{ skipValidation = false, preserveHeaders = false \} = \{\})
+### .load(fen: string, \{ skipValidation = false, preserveHeaders = false, chess960 = false \} = \{\})
 
 Clears the board and loads the provided FEN string. The castling rights, en
 passant square and move numbers are defaulted to `- - 0 1` if omitted. Throws an
-exception if the FEN is invalid.
+exception if the FEN is invalid. A Chess960 FEN may be supplied by setting the
+`chess960` option.
 
 ```ts
 const chess = new Chess()
@@ -927,7 +964,8 @@ chess.getHeaders()
 
 ### .reset()
 
-Reset the board to the initial starting position.
+Reset the board to the most recently loaded FEN. If no FEN has been loaded,
+reset the board to the standard starting position of Classical chess.
 
 ### .setCastlingRights(color, rights)
 
@@ -936,9 +974,16 @@ successfully made. False will be returned when the position doesn't allow the
 requested change i.e. if the corresponding king or rook is not on it's starting
 square.
 
+If 'rights' contains a boolean value, the outer-most rook will be operated on.
+To set a castling-right on an inner-rook for a Chess960 game, supply the file
+(column) of the rook. Supplying the file for a Classical game is also permitted.
+
 ```ts
 // white can't castle kingside but can castle queenside
 chess.setCastlingRights(WHITE, { [KING]: false, [QUEEN]: true })
+
+// white can castle kingside with the rook in the 'c' file, but cannot castle queenside.
+chess.setCastlingRights(WHITE, { [KING]: 'c', [QUEEN]: false })
 ```
 
 ### .setComment(comment)
@@ -1036,10 +1081,28 @@ chess.undo()
 // -> null
 ```
 
-### validateFen(fen):
+### getRandom960Position():
+
+This static function returns a randomly generated starting position for
+Chess960. The returned position will be one of the 960 starting positions that
+Chess960 is named for. The castling field will always be set to `KQkq`. Note:
+The Standard starting position of chess is a valid Chess960 position and will,
+on average, be returned once every 960 times.
+
+```ts
+import { getRandom960Position } from 'chess.js'
+
+getRandom960Position()
+// -> 'bbrkqnrn/pppppppp/8/8/8/8/PPPPPPPP/BBRKQNRN w KQkq - 0 1'
+```
+
+### validateFen(fen, { chess960 = false }):
 
 This static function returns a validation object specifying validity or the
-errors found within the FEN string.
+errors found within the FEN string. It accepts an optional, second parameter
+which specifies whether the FEN string should be validated as a Chess960 FEN. A
+Chess960 FEN allows extra characters in the castling field that would not,
+otherwise, be permitted.
 
 ```ts
 import { validateFen } from 'chess.js'
@@ -1050,4 +1113,10 @@ validateFen('2n1r3/p1k2pp1/B1p3b1/P7/5bP1/2N1B3/1P2KP2/2R5 b - - 4 25')
 validateFen('4r3/8/X12XPk/1p6/pP2p1R1/P1B5/2P2K2/3r4 w - - 1 45')
 // -> { ok: false,
 //     error: '1st field (piece positions) is invalid [invalid piece].' }
+
+validateFen(
+  'bnr1kqrb/pppp1pp1/1n5p/4p3/P3P3/3P2P1/1PP2P1P/BNNRKQRB w GDg - 0 9',
+  { chess960: true },
+)
+// -> { ok: true }
 ```
