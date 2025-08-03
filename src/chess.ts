@@ -3354,7 +3354,7 @@ export class Chess {
           )
         : moves.filter(
             // return all non-castling moves
-            (mv) => mv.flags & (~BITS.KSIDE_CASTLE | ~BITS.QSIDE_CASTLE),
+            (mv) => mv.flags & ~(BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE),
           )
     }
     return moves
