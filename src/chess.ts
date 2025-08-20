@@ -1409,7 +1409,7 @@ export class Chess {
       this.isStalemate() ||
       this.isInsufficientMaterial() ||
       this._isManuallyDrawn ||
-      this.canThreefoldRepetition() && this._nullMovesCount >= 6 // 6 null moves in a row
+      (this.canThreefoldRepetition() && this._nullMovesCount >= 6) // 6 null moves in a row
     )
   }
 
@@ -1763,7 +1763,7 @@ export class Chess {
     this._makeMove(moveObj)
     this._incPositionCount()
 
-    if(prettyMove.san === '--') {
+    if (prettyMove.san === '--') {
       this._nullMovesCount++
     } else {
       this._nullMovesCount = 0
