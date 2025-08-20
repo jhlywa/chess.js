@@ -1404,8 +1404,6 @@ export class Chess {
       this.isStalemate() ||
       this.isInsufficientMaterial() ||
       this.isThreefoldRepetition() ||
-      this.isDrawByFiftyMoves() ||
-      this.isDrawBySeventyFiveMoves() ||
       this._isManuallyDrawn
     )
   }
