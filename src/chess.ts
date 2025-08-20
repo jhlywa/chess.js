@@ -727,6 +727,7 @@ export class Chess {
   private _positionCount = new Map<bigint, number>()
 
   private _isManuallyDrawn = false
+  private _nullMovesCount = 0
 
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
     this._comments = {}
@@ -1407,7 +1408,8 @@ export class Chess {
       this.isDrawByFiftyMoves() ||
       this.isStalemate() ||
       this.isInsufficientMaterial() ||
-      this._isManuallyDrawn
+      this._isManuallyDrawn ||
+      this.canThreefoldRepetition() && this._nullMovesCount >= 6 // 6 null moves in a row
     )
   }
 
@@ -1760,6 +1762,13 @@ export class Chess {
 
     this._makeMove(moveObj)
     this._incPositionCount()
+
+    if(prettyMove.san === '--') {
+      this._nullMovesCount++
+    } else {
+      this._nullMovesCount = 0
+    }
+
     return prettyMove
   }
 
