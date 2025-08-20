@@ -726,6 +726,8 @@ export class Chess {
   // tracks number of times a position has been seen for repetition checking
   private _positionCount = new Map<bigint, number>()
 
+  private _isManuallyDrawn = false
+
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
     this._comments = {}
     this._suffixes = {}
@@ -1379,7 +1381,21 @@ export class Chess {
   }
 
   isDrawByFiftyMoves(): boolean {
-    return this._halfMoves >= 100 // 50 moves per side = 100 half moves
+    return this._halfMoves >= 100 && this._isManuallyDrawn // 50 moves per side = 100 half moves
+  }
+
+  isDrawBySeventyFiveMoves(): boolean {
+    return this._halfMoves >= 150 // 75 moves per side = 150 half moves
+  }
+
+  canDrawByFiftyMoves(): boolean {
+    return this._halfMoves >= 100 && this._isManuallyDrawn // 50 moves per side = 100 half moves
+  }
+
+  draw(): boolean {
+    if (this.isGameOver()) return false
+    this._isManuallyDrawn = true
+    return true
   }
 
   isDraw(): boolean {
@@ -1387,7 +1403,10 @@ export class Chess {
       this.isDrawByFiftyMoves() ||
       this.isStalemate() ||
       this.isInsufficientMaterial() ||
-      this.isThreefoldRepetition()
+      this.isThreefoldRepetition() ||
+      this.isDrawByFiftyMoves() ||
+      this.isDrawBySeventyFiveMoves() ||
+      this._isManuallyDrawn
     )
   }
 
