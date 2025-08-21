@@ -811,6 +811,8 @@ export class Chess {
       this._castling.b |= BITS.QSIDE_CASTLE
     }
 
+    this._updateCastlingRights()
+
     this._epSquare = tokens[3] === '-' ? EMPTY : Ox88[tokens[3] as Square]
     this._fenEpSquare = this._epSquare
     this._halfMoves = parseInt(tokens[4], 10)

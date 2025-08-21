@@ -1,5 +1,13 @@
-import { Chess, DEFAULT_POSITION, SEVEN_TAG_ROSTER } from '../src/chess'
 import { expect, test } from 'vitest'
+import {
+  BLACK,
+  Chess,
+  DEFAULT_POSITION,
+  KING,
+  QUEEN,
+  SEVEN_TAG_ROSTER,
+  WHITE,
+} from '../src/chess'
 
 test('load - default position', () => {
   const chess = new Chess()
@@ -54,6 +62,66 @@ test('load - missing FEN tokens (no castling rights, ep square, or move numbers)
   const chess = new Chess()
   const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b'
   expect(() => chess.load(fen)).not.toThrow()
+})
+
+test('load - full castling rights but white king moved', () => {
+  const chess = new Chess()
+  const fen = 'r3k2r/8/8/8/8/8/8/R2K3R w KQkq - 0 1'
+  chess.load(fen)
+  expect(chess.getCastlingRights(WHITE)).toEqual({
+    [KING]: false,
+    [QUEEN]: false,
+  })
+})
+
+test('load - full castling rights but white kingside rook moved', () => {
+  const chess = new Chess()
+  const fen = 'r3k2r/8/8/8/8/8/8/R3K1R1 w KQkq - 0 1'
+  chess.load(fen)
+  expect(chess.getCastlingRights(WHITE)).toEqual({
+    [KING]: false,
+    [QUEEN]: true,
+  })
+})
+
+test('load - full castling rights but white queenside rook moved', () => {
+  const chess = new Chess()
+  const fen = 'r3k2r/8/8/8/8/8/8/1R2K2R w KQkq - 0 1'
+  chess.load(fen)
+  expect(chess.getCastlingRights(WHITE)).toEqual({
+    [KING]: true,
+    [QUEEN]: false,
+  })
+})
+
+test('load - full castling rights but black king moved', () => {
+  const chess = new Chess()
+  const fen = 'r2k3r/8/8/8/8/8/8/R3K2R w KQkq - 0 1'
+  chess.load(fen)
+  expect(chess.getCastlingRights(BLACK)).toEqual({
+    [KING]: false,
+    [QUEEN]: false,
+  })
+})
+
+test('load - full castling rights but black kingside rook moved', () => {
+  const chess = new Chess()
+  const fen = 'r3k1r1/8/8/8/8/8/8/R3K2R w KQkq - 0 1'
+  chess.load(fen)
+  expect(chess.getCastlingRights(BLACK)).toEqual({
+    [KING]: false,
+    [QUEEN]: true,
+  })
+})
+
+test('load - full castling rights but black queenside rook moved', () => {
+  const chess = new Chess()
+  const fen = '1r2k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1'
+  chess.load(fen)
+  expect(chess.getCastlingRights(BLACK)).toEqual({
+    [KING]: true,
+    [QUEEN]: false,
+  })
 })
 
 test('load - preserveHeaders = false', () => {
