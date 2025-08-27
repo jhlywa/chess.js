@@ -1381,6 +1381,10 @@ export class Chess {
     return this._getPositionCount(this._hash) >= 3 && this._isManuallyDrawn
   }
 
+  isFivefoldRepetition(): boolean {
+    return this._getPositionCount(this._hash) >= 5
+  }
+
   canThreefoldRepetition(): boolean {
     return this._getPositionCount(this._hash) >= 3
   }
@@ -1406,6 +1410,7 @@ export class Chess {
   isDraw(): boolean {
     return (
       this.isDrawByFiftyMoves() ||
+      this.isFivefoldRepetition() ||
       this.isStalemate() ||
       this.isInsufficientMaterial() ||
       this._isManuallyDrawn ||
