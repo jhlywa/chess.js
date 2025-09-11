@@ -352,6 +352,8 @@ const SECOND_RANK = { b: RANK_7, w: RANK_2 }
 
 const TERMINATION_MARKERS = ['1-0', '0-1', '1/2-1/2', '*']
 
+let IS_XFEN = false
+
 // Extracts the zero-based rank of an 0x88 square.
 function rank(square: number): number {
   return square >> 4
@@ -686,7 +688,7 @@ export class Chess {
 
     tokens = fen.split(/\s+/)
 
-    const IS_XFEN = !/[^abcdefghABCDEFGH-]/.test(tokens[2])
+    IS_XFEN = !/[^abcdefghABCDEFGH-]/.test(tokens[2])
 
     if (!skipValidation) {
       const { ok, error } = validateFen(fen)
@@ -1488,229 +1490,109 @@ export class Chess {
      *   b) doing single square move generation on the king's square
      */
 
-    if (forPiece === undefined || forPiece === KING || forPiece === ROOK) {
+    if (forPiece === undefined || forPiece === KING) {
       if (
         !singleSquare ||
         lastSquare === KINGS[us][KING].from ||
-        lastSquare === KINGS[us][QUEEN].from ||
-        lastSquare === ROOKS[us][KING].from ||
-        lastSquare === ROOKS[us][QUEEN].from
+        lastSquare === KINGS[us][QUEEN].from
       ) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
-          const castlingFrom = KINGS[us][KING].from
-          const castlingTo = KINGS[us][KING].to
+          const castlingFrom = !IS_XFEN
+            ? KINGS[us][KING].from
+            : KINGS[us][KING].from
+          const castlingTo = !IS_XFEN
+            ? KINGS[us][KING].to
+            : ROOKS[us][KING].from
+          const castlingKingFrom = KINGS[us][KING].to
+          const castlingKingTo = KINGS[us][KING].from
 
-          const countAttacked = KINGS[us][KING].to - KINGS[us][KING].from
-          const countAttackedPositive = countAttacked >= 0
-          const countRookWay = ROOKS[us][KING].from - ROOKS[us][KING].to
-          const countOccupied =
-            Math.max(ROOKS[us][KING].from, KINGS[us][KING].to) -
-            KINGS[us][KING].from
-          const countOccupiedPositive = countOccupied >= 0
+          let allow = ROOKS[us][KING].from > KINGS[us][KING].from
 
-          let noAttacked = true
-          let noAttackedCount = 0
-          for (
-            let i = 0;
-            countAttackedPositive ? i <= countAttacked : i >= countAttacked;
-            countAttackedPositive ? ++i : --i
-          ) {
-            if (!this._attacked(them, castlingFrom + i)) {
-              noAttackedCount++
-            } else {
-              noAttacked = false
-            }
-          }
-          let noOccupied = true
-          let noOccupiedCount = 0
-          for (
-            let i = 1;
-            countAttackedPositive ? i <= countOccupied : i >= countOccupied;
-            countAttackedPositive ? ++i : --i
-          ) {
-            const index = castlingFrom + i
-            if (!this._board[index] || this._board[index].type === ROOK) {
-              noOccupiedCount++
-            } else {
-              noOccupied = false
-            }
-          }
-          if (
-            noOccupied &&
-            noOccupiedCount > 0 &&
-            noAttacked &&
-            noAttackedCount > 0
-          ) {
-            if (
-              lastSquare != ROOKS[us][QUEEN].from &&
-              countAttackedPositive &&
-              countOccupiedPositive &&
-              castlingTo > castlingFrom &&
-              noAttackedCount >= countRookWay
-            ) {
-              addMove(
-                moves,
-                us,
-                castlingFrom,
-                castlingTo,
-                KING,
-                undefined,
-                BITS.KSIDE_CASTLE,
-              )
-            } else {
-              const castlingFrom = ROOKS[us][KING].from
-              const castlingTo = ROOKS[us][KING].to
-              const countAttacked = ROOKS[us][KING].from - ROOKS[us][KING].to
-              const countAttackedPositive = countAttacked >= 0
-              const countOccupied =
-                ROOKS[us][KING].from -
-                Math.min(KINGS[us][KING].from, ROOKS[us][KING].to)
-
-              let noOccupied = true
-              let noOccupiedCount = 0
-              for (
-                let i = 1;
-                countAttackedPositive
-                  ? i <= countOccupied - 1
-                  : i >= countOccupied + 1;
-                countAttackedPositive ? ++i : --i
-              ) {
-                const index = castlingFrom + i
-                if (!this._board[index] || this._board[index].type === KING) {
-                  noOccupiedCount++
-                } else {
-                  noOccupied = false
-                }
-              }
+          if (allow)
+            for (let sq = castlingKingFrom; sq > castlingKingTo; --sq) {
               if (
-                lastSquare != KINGS[us][KING].from &&
-                (!this._board[ROOKS[us][KING].to] ||
-                  this._board[ROOKS[us][KING].to].type === KING) &&
-                castlingFrom > castlingTo &&
-                noOccupied &&
-                noOccupiedCount >= 0
+                (this._board[sq] && this._board[sq].type !== ROOK) ||
+                this._attacked(them, sq)
               ) {
-                addMove(
-                  moves,
-                  us,
-                  castlingFrom,
-                  castlingTo,
-                  ROOK,
-                  undefined,
-                  BITS.KSIDE_CASTLE,
-                )
+                allow = false
+                break
               }
             }
+
+          if (allow)
+            for (let sq = castlingFrom; sq < castlingTo; ++sq) {
+              if (
+                this._board[sq] &&
+                !(
+                  this._board[sq].type === ROOK || this._board[sq].type === KING
+                )
+              ) {
+                allow = false
+                break
+              }
+            }
+
+          if (allow) {
+            addMove(
+              moves,
+              us,
+              castlingFrom,
+              castlingTo,
+              KING,
+              undefined,
+              BITS.KSIDE_CASTLE,
+            )
           }
         }
 
         // queen-side castling
         if (this._castling[us] & BITS.QSIDE_CASTLE) {
-          const castlingFrom = KINGS[us][QUEEN].from
-          const castlingTo = KINGS[us][QUEEN].to
+          const castlingFrom = !IS_XFEN
+            ? KINGS[us][QUEEN].from
+            : KINGS[us][QUEEN].from
+          const castlingTo = !IS_XFEN
+            ? KINGS[us][QUEEN].to
+            : ROOKS[us][QUEEN].from
+          const castlingKingFrom = KINGS[us][QUEEN].to
+          const castlingKingTo = KINGS[us][QUEEN].from
 
-          const countAttacked = KINGS[us][QUEEN].from - KINGS[us][QUEEN].to
-          const countAttackedPositive = countAttacked >= 0
-          const countRookWay = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from
-          const countOccupied =
-            KINGS[us][QUEEN].from -
-            Math.min(ROOKS[us][QUEEN].from, KINGS[us][QUEEN].to)
-          const countOccupiedPositive = countOccupied >= 0
+          let allow = ROOKS[us][QUEEN].from < KINGS[us][QUEEN].from
 
-          let noAttacked = true
-          let noAttackedCount = 0
-          for (
-            let i = 0;
-            countAttackedPositive ? i <= countAttacked : i >= countAttacked;
-            countAttackedPositive ? ++i : --i
-          ) {
-            if (!this._attacked(them, castlingFrom - i)) {
-              noAttackedCount++
-            } else {
-              noAttacked = false
-            }
-          }
-          let noOccupied = true
-          let noOccupiedCount = 0
-          for (
-            let i = 1;
-            countAttackedPositive ? i <= countOccupied : i >= countOccupied;
-            countAttackedPositive ? ++i : --i
-          ) {
-            const index = castlingFrom - i
-            if (!this._board[index] || this._board[index].type === ROOK) {
-              noOccupiedCount++
-            } else {
-              noOccupied = false
-            }
-          }
-          if (
-            noOccupied &&
-            noOccupiedCount > 0 &&
-            noAttacked &&
-            noAttackedCount > 0
-          ) {
-            if (
-              lastSquare != ROOKS[us][QUEEN].from &&
-              countAttackedPositive &&
-              countOccupiedPositive &&
-              castlingFrom > castlingTo &&
-              noAttackedCount >= countRookWay
-            ) {
-              addMove(
-                moves,
-                us,
-                castlingFrom,
-                castlingTo,
-                KING,
-                undefined,
-                BITS.QSIDE_CASTLE,
-              )
-            } else {
-              const castlingFrom = ROOKS[us][QUEEN].from
-              const castlingTo = ROOKS[us][QUEEN].to
-              const countAttacked = ROOKS[us][QUEEN].to - ROOKS[us][QUEEN].from
-              const countAttackedPositive = countAttacked >= 0
-              const countOccupied =
-                ROOKS[us][QUEEN].to -
-                Math.min(KINGS[us][QUEEN].from, ROOKS[us][QUEEN].from)
-
-              let noOccupied = true
-              let noOccupiedCount = 0
-              for (
-                let i = 1;
-                countAttackedPositive
-                  ? i <= countOccupied - 1
-                  : i >= countOccupied + 1;
-                countAttackedPositive ? ++i : --i
-              ) {
-                const index = castlingFrom + i
-                if (!this._board[index] || this._board[index].type === KING) {
-                  noOccupiedCount++
-                } else {
-                  noOccupied = false
-                }
-              }
+          if (allow)
+            for (let sq = castlingKingFrom; sq < castlingKingTo; ++sq) {
               if (
-                lastSquare != KINGS[us][QUEEN].from &&
-                (!this._board[ROOKS[us][QUEEN].to] ||
-                  this._board[ROOKS[us][QUEEN].to].type === KING) &&
-                castlingFrom < castlingTo &&
-                noOccupied &&
-                noOccupiedCount > 0
+                (this._board[sq] && this._board[sq].type !== ROOK) ||
+                this._attacked(them, sq)
               ) {
-                addMove(
-                  moves,
-                  us,
-                  castlingFrom,
-                  castlingTo,
-                  ROOK,
-                  undefined,
-                  BITS.QSIDE_CASTLE,
-                )
+                allow = false
+                break
               }
             }
+
+          if (allow)
+            for (let sq = castlingFrom; sq > castlingTo; --sq) {
+              if (
+                this._board[sq] &&
+                !(
+                  this._board[sq].type === ROOK || this._board[sq].type === KING
+                )
+              ) {
+                allow = false
+                break
+              }
+            }
+
+          if (allow) {
+            addMove(
+              moves,
+              us,
+              castlingFrom,
+              castlingTo,
+              KING,
+              undefined,
+              BITS.QSIDE_CASTLE,
+            )
           }
         }
       }
@@ -1813,8 +1695,6 @@ export class Chess {
     const them = swapColor(us)
     this._push(move)
 
-    const toPiece = this._board[move.to]
-    const toCount = Math.abs(move.to - move.from)
     this._board[move.to] = this._board[move.from]
     delete this._board[move.from]
 
@@ -1837,72 +1717,26 @@ export class Chess {
       this._kings[us] = move.to
       // if we castled, move the rook next to the king
       if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-        let castlingTo: number, castlingFrom: number
+        let castlingKingFrom: number, castlingKingTo: number
+        let castlingRookFrom: number, castlingRookTo: number
         if (move.flags & BITS.KSIDE_CASTLE) {
-          castlingTo = ROOKS[us][KING].to
-          castlingFrom = ROOKS[us][KING].from
+          castlingKingFrom = KINGS[us][KING].from
+          castlingKingTo = KINGS[us][KING].to
+          castlingRookFrom = ROOKS[us][KING].from
+          castlingRookTo = ROOKS[us][KING].to
         } else {
-          castlingTo = ROOKS[us][QUEEN].to
-          castlingFrom = ROOKS[us][QUEEN].from
+          castlingKingFrom = KINGS[us][QUEEN].from
+          castlingKingTo = KINGS[us][QUEEN].to
+          castlingRookFrom = ROOKS[us][QUEEN].from
+          castlingRookTo = ROOKS[us][QUEEN].to
         }
-        if (castlingFrom != castlingTo) {
-          const toCastlingPiece = this._board[castlingFrom]
-          this._board[castlingTo] = this._board[castlingFrom]
-          delete this._board[castlingFrom]
-          if (
-            toCount >= 1 &&
-            toCastlingPiece &&
-            toCastlingPiece.type === KING
-          ) {
-            this._board[move.to] = toCastlingPiece
-          }
-          if (
-            toCount >= 1 &&
-            toCastlingPiece &&
-            toCastlingPiece.type === ROOK
-          ) {
-            this._board[castlingTo] = toCastlingPiece
-          }
-          if (toCount >= 1 && toPiece && toPiece.type === ROOK) {
-            this._board[castlingTo] = toPiece
-          }
-        }
+        delete this._board[castlingKingFrom]
+        delete this._board[castlingRookFrom]
+        this._board[castlingKingTo] = { type: KING, color: us }
+        this._board[castlingRookTo] = { type: ROOK, color: us }
       }
       // turn off castling
       this._castling[us] = 0
-    }
-
-    // if we moved the rook
-    if (move.piece === ROOK) {
-      // if we castled, move the king next to the rook
-      if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-        let castlingTo: number, castlingFrom: number
-        if (move.flags & BITS.KSIDE_CASTLE) {
-          castlingTo = KINGS[us][KING].to
-          castlingFrom = KINGS[us][KING].from
-        } else {
-          castlingTo = KINGS[us][QUEEN].to
-          castlingFrom = KINGS[us][QUEEN].from
-        }
-        if (this._board[castlingTo]) {
-          delete this._board[castlingTo]
-        }
-        if (toPiece && toPiece.type === KING) {
-          this._board[castlingTo] = toPiece
-        } else {
-          delete this._board[castlingFrom]
-          this._board[castlingTo] = {
-            type: KING as PieceSymbol,
-            color: us as Color,
-          }
-          this._kings[us] = castlingTo
-        }
-        if (toPiece && toPiece.type === KING) {
-          this._board[castlingTo] = toPiece
-        }
-        // turn off castling
-        this._castling[us] = 0
-      }
     }
 
     // turn off castling if we move a rook
@@ -1986,8 +1820,6 @@ export class Chess {
     const us = this._turn
     const them = swapColor(us)
 
-    const fromCount = Math.abs(move.from - move.to)
-    const fromPiece = this._board[move.from]
     this._board[move.from] = this._board[move.to]
     if (this._board[move.from]) this._board[move.from].type = move.piece // to undo any promotions
     delete this._board[move.to]
@@ -2013,66 +1845,23 @@ export class Chess {
       this._kings[us] = move.from
 
       if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-        let castlingTo: number, castlingFrom: number
+        let castlingKingFrom: number, castlingKingTo: number
+        let castlingRookFrom: number, castlingRookTo: number
         if (move.flags & BITS.KSIDE_CASTLE) {
-          castlingTo = ROOKS[us][KING].from
-          castlingFrom = ROOKS[us][KING].to
+          castlingKingTo = KINGS[us][KING].from
+          castlingKingFrom = KINGS[us][KING].to
+          castlingRookTo = ROOKS[us][KING].from
+          castlingRookFrom = ROOKS[us][KING].to
         } else {
-          castlingTo = ROOKS[us][QUEEN].from
-          castlingFrom = ROOKS[us][QUEEN].to
+          castlingKingTo = KINGS[us][QUEEN].from
+          castlingKingFrom = KINGS[us][QUEEN].to
+          castlingRookTo = ROOKS[us][QUEEN].from
+          castlingRookFrom = ROOKS[us][QUEEN].to
         }
-        if (castlingFrom != castlingTo) {
-          const fromCastlingPiece = this._board[castlingFrom]
-          this._board[castlingTo] = this._board[castlingFrom]
-          delete this._board[castlingFrom]
-          if (
-            fromCount >= 1 &&
-            fromCastlingPiece &&
-            fromCastlingPiece.type === KING
-          ) {
-            this._board[move.from] = fromCastlingPiece
-          }
-          if (
-            fromCount >= 1 &&
-            fromCastlingPiece &&
-            fromCastlingPiece.type === ROOK
-          ) {
-            this._board[castlingTo] = fromCastlingPiece
-          }
-          if (fromCount >= 1 && fromPiece && fromPiece.type === ROOK) {
-            this._board[castlingTo] = fromPiece
-          }
-        }
-      }
-    }
-
-    // if we moved the rook
-    if (move.piece === ROOK) {
-      // if we castled, move the king next to the rook
-      if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
-        let castlingTo: number, castlingFrom: number
-        if (move.flags & BITS.KSIDE_CASTLE) {
-          castlingTo = KINGS[us][KING].from
-          castlingFrom = KINGS[us][KING].to
-        } else {
-          castlingTo = KINGS[us][QUEEN].from
-          castlingFrom = KINGS[us][QUEEN].to
-        }
-        if (this._board[castlingFrom]) {
-          delete this._board[castlingFrom]
-        }
-        if (fromPiece && fromPiece.type === KING) {
-          this._board[move.from] = fromPiece
-        } else {
-          this._board[castlingTo] = {
-            type: KING as PieceSymbol,
-            color: us as Color,
-          }
-          this._kings[us] = castlingTo
-        }
-        if (fromPiece && fromPiece.type === KING) {
-          this._board[castlingTo] = fromPiece
-        }
+        delete this._board[castlingKingFrom]
+        delete this._board[castlingRookFrom]
+        this._board[castlingKingTo] = { type: KING, color: us }
+        this._board[castlingRookTo] = { type: ROOK, color: us }
       }
     }
 
