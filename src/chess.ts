@@ -1526,11 +1526,7 @@ export class Chess {
 
           if (allow)
             for (let sq = castlingRookFrom; sq >= castlingRookTo; --sq) {
-              if (
-                this._board[sq] &&
-                this._board[sq].type !== KING &&
-                this._board[sq].type !== ROOK
-              ) {
+              if (this._board[sq] && this._board[sq].type === KING) {
                 allow = false
                 break
               }
@@ -1589,11 +1585,7 @@ export class Chess {
 
           if (allow)
             for (let sq = castlingRookFrom; sq <= castlingRookTo; ++sq) {
-              if (
-                this._board[sq] &&
-                this._board[sq].type !== KING &&
-                this._board[sq].type !== ROOK
-              ) {
+              if (this._board[sq] && this._board[sq].type === KING) {
                 allow = false
                 break
               }
