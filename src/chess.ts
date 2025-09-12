@@ -1490,11 +1490,13 @@ export class Chess {
      *   b) doing single square move generation on the king's square
      */
 
-    if (forPiece === undefined || forPiece === KING) {
+    if (forPiece === undefined || forPiece === KING || forPiece === ROOK) {
       if (
         !singleSquare ||
         lastSquare === KINGS[us][KING].from ||
-        lastSquare === KINGS[us][QUEEN].from
+        lastSquare === KINGS[us][QUEEN].from ||
+        lastSquare === ROOKS[us][KING].from ||
+        lastSquare === ROOKS[us][QUEEN].from
       ) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
@@ -1509,7 +1511,7 @@ export class Chess {
           const castlingRookFrom = ROOKS[us][KING].to
           const castlingRookTo = ROOKS[us][KING].from
 
-          let allow = ROOKS[us][KING].from > KINGS[us][KING].from
+          let allow = KINGS[us][KING].from <= KINGS[us][KING].to
 
           if (allow)
             for (let sq = castlingKingFrom; sq > castlingKingTo; --sq) {
@@ -1523,10 +1525,11 @@ export class Chess {
             }
 
           if (allow)
-            for (let sq = castlingRookFrom; sq > castlingRookTo; --sq) {
+            for (let sq = castlingRookFrom; sq >= castlingRookTo; --sq) {
               if (
-                (this._board[sq] && this._board[sq].type !== KING) ||
-                this._attacked(them, sq)
+                this._board[sq] &&
+                this._board[sq].type !== KING &&
+                this._board[sq].type !== ROOK
               ) {
                 allow = false
                 break
@@ -1534,12 +1537,11 @@ export class Chess {
             }
 
           if (allow)
-            for (let sq = castlingFrom; sq < castlingTo; ++sq) {
+            for (let sq = castlingFrom; sq <= castlingTo; ++sq) {
               if (
                 this._board[sq] &&
-                !(
-                  this._board[sq].type === ROOK || this._board[sq].type === KING
-                )
+                this._board[sq].type !== ROOK &&
+                this._board[sq].type !== KING
               ) {
                 allow = false
                 break
@@ -1572,7 +1574,7 @@ export class Chess {
           const castlingRookFrom = ROOKS[us][QUEEN].to
           const castlingRookTo = ROOKS[us][QUEEN].from
 
-          let allow = ROOKS[us][QUEEN].from < KINGS[us][QUEEN].from
+          let allow = KINGS[us][QUEEN].to <= KINGS[us][QUEEN].from
 
           if (allow)
             for (let sq = castlingKingFrom; sq < castlingKingTo; ++sq) {
@@ -1586,10 +1588,11 @@ export class Chess {
             }
 
           if (allow)
-            for (let sq = castlingRookFrom; sq < castlingRookTo; ++sq) {
+            for (let sq = castlingRookFrom; sq <= castlingRookTo; ++sq) {
               if (
-                (this._board[sq] && this._board[sq].type !== ROOK) ||
-                this._attacked(them, sq)
+                this._board[sq] &&
+                this._board[sq].type !== KING &&
+                this._board[sq].type !== ROOK
               ) {
                 allow = false
                 break
@@ -1600,9 +1603,8 @@ export class Chess {
             for (let sq = castlingFrom; sq > castlingTo; --sq) {
               if (
                 this._board[sq] &&
-                !(
-                  this._board[sq].type === ROOK || this._board[sq].type === KING
-                )
+                this._board[sq].type !== ROOK &&
+                this._board[sq].type !== KING
               ) {
                 allow = false
                 break

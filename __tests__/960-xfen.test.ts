@@ -322,7 +322,7 @@ describe('X-FEN 960 Tests', () => {
       'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R2KR2N w EAea - 0 11',
     )
     const moves = chess.moves({ square: 'a1', piece: 'r' })
-    expect(moves.length).toBe(2)
+    expect(moves.length).toBe(4)
   })
 
   it('X-FEN O-O 960 32', () => {
@@ -330,7 +330,7 @@ describe('X-FEN 960 Tests', () => {
       'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R2KR2N w EAea - 0 11',
     )
     const moves = chess.moves({ square: 'a1' })
-    expect(moves.length).toBe(2)
+    expect(moves.length).toBe(4)
   })
 
   it('X-FEN O-O 960 33', () => {
@@ -346,6 +346,38 @@ describe('X-FEN 960 Tests', () => {
       'rnbkrbqn/p2p1p1p/2p1p1p1/1p6/8/BPN3PB/P1PPPPQP/R2KR2N w EAea - 0 11',
     )
     const moves = chess.moves({ square: 'e1' })
+    expect(moves.length).toBe(4)
+  })
+
+  it('X-FEN O-O-0 960 35', () => {
+    const chess = new Chess(
+      'bqnb1rkr/pp3ppp/3ppn2/2p5/5P2/P2P4/NPP1P1PP/BQ1BNRKR w HFhf - 2 9',
+    )
+    const moves = chess.moves({ square: 'g1' })
+    expect(moves.length).toBe(2)
+  })
+
+  it('X-FEN O-O 960 36', () => {
+    const chess = new Chess(
+      'b1q1rrkb/pppppppp/3nn3/8/P7/1PPP4/4PPPP/BQNNRKRB w GE - 1 9',
+    )
+    const moves = chess.moves({ square: 'g1' })
+    expect(moves.length).toBe(1)
+  })
+
+  it('X-FEN O-O 960 37', () => {
+    const chess = new Chess(
+      'qnbnr1kr/ppp1b1pp/4p3/3p1p2/8/2NPP3/PPP1BPPP/QNB1R1KR w HEhe - 1 9',
+    )
+    const moves = chess.moves()
+    expect(moves.length).toBe(29)
+  })
+
+  it('X-FEN O-O 960 38', () => {
+    const chess = new Chess(
+      'qnbnr1kr/ppp1b1pp/4p3/3p1p2/8/2NPP3/PPP1BPPP/QNB1R1KR w HEhe - 1 9',
+    )
+    const moves = chess.moves({ square: 'g1' })
     expect(moves.length).toBe(2)
   })
 })
