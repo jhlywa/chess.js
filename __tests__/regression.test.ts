@@ -33,25 +33,25 @@ describe('Regression Tests', () => {
     const chess = new Chess()
     const pgn = [
       '[SetUp "1"]',
-      '[FEN "7k/5K2/4R3/8/8/8/8/8 w KQkq - 0 1"]',
+      '[FEN "7k/5K2/4R3/8/8/8/8/8 w - - 0 1"]',
       '',
       '1. Rh6#',
     ]
     chess.loadPgn(pgn.join('\n'))
-    expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b KQkq - 1 1')
+    expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b - - 1 1')
   })
 
   it('Github Issue #85 (black) - SetUp and FEN should be accepted in loadPgn', () => {
     const chess = new Chess()
     const pgn = [
       '[SetUp "1"]',
-      '[FEN "r4r1k/1p4b1/3p3p/5qp1/1RP5/6P1/3NP3/2Q2RKB b KQkq - 0 1"]',
+      '[FEN "r4r1k/1p4b1/3p3p/5qp1/1RP5/6P1/3NP3/2Q2RKB b - - 0 1"]',
       '',
       '1. ... Qc5+',
     ]
     chess.loadPgn(pgn.join('\n'))
     expect(chess.fen()).toBe(
-      'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w KQkq - 1 2',
+      'r4r1k/1p4b1/3p3p/2q3p1/1RP5/6P1/3NP3/2Q2RKB w - - 1 2',
     )
   })
 
@@ -302,5 +302,10 @@ describe('Regression Tests', () => {
     chess.loadPgn(pgn)
 
     expect(chess.moveNumber()).toBe(31)
+  })
+
+  it('Github Issue #552 - ignore invalid castling rights', () => {
+    const chess = new Chess('kb4r1/p2n3P/1PP5/1P6/8/8/6p1/R3KR2 b KQkq - 0 19')
+    expect(chess.isGameOver()).toBe(false) // this was crashing due to invalid castling moves being generated
   })
 })
