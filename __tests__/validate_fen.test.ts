@@ -516,6 +516,11 @@ test.each([
     fen: '3r1r2/3P2pk/1p1R3p/1Bp2p2/6q1/4Q3/PP3P1P/7K w - - 4 30',
     ok: true,
   },
+  // Test cases where side to move is in check
+  {
+    fen: '1n6/8/2Q5/1rK5/8/8/8/5k2 b - - 0 1',
+    ok: false,
+  },
 ])("validateFen $# '$fen' (expected: '$ok')", ({ fen, ok }) => {
   expect(validateFen(fen)).toMatchObject({ ok })
 })
