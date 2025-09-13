@@ -726,6 +726,9 @@ export class Chess {
   // tracks number of times a position has been seen for repetition checking
   private _positionCount = new Map<bigint, number>()
 
+  private _isManuallyDrawn = false
+  private _nullMovesCount = 0
+
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
     this._comments = {}
     this._suffixes = {}
@@ -1377,19 +1380,43 @@ export class Chess {
   }
 
   isThreefoldRepetition(): boolean {
+    return this._getPositionCount(this._hash) >= 3 && this._isManuallyDrawn
+  }
+
+  isFivefoldRepetition(): boolean {
+    return this._getPositionCount(this._hash) >= 5
+  }
+
+  canThreefoldRepetition(): boolean {
     return this._getPositionCount(this._hash) >= 3
   }
 
   isDrawByFiftyMoves(): boolean {
-    return this._halfMoves >= 100 // 50 moves per side = 100 half moves
+    return this._halfMoves >= 100 && this._isManuallyDrawn // 50 moves per side = 100 half moves
+  }
+
+  isDrawBySeventyFiveMoves(): boolean {
+    return this._halfMoves >= 150 // 75 moves per side = 150 half moves
+  }
+
+  canDrawByFiftyMoves(): boolean {
+    return this._halfMoves >= 100 && this._isManuallyDrawn // 50 moves per side = 100 half moves
+  }
+
+  draw(): boolean {
+    if (this.isGameOver()) return false
+    this._isManuallyDrawn = true
+    return true
   }
 
   isDraw(): boolean {
     return (
       this.isDrawByFiftyMoves() ||
+      this.isFivefoldRepetition() ||
       this.isStalemate() ||
       this.isInsufficientMaterial() ||
-      this.isThreefoldRepetition()
+      this._isManuallyDrawn ||
+      (this.canThreefoldRepetition() && this._nullMovesCount >= 6) // 6 null moves in a row
     )
   }
 
@@ -1742,6 +1769,13 @@ export class Chess {
 
     this._makeMove(moveObj)
     this._incPositionCount()
+
+    if (prettyMove.san === '--') {
+      this._nullMovesCount++
+    } else {
+      this._nullMovesCount = 0
+    }
+
     return prettyMove
   }
 
