@@ -12,8 +12,9 @@ export const BLACK = "b";
 
 // @public (undocumented)
 export class Chess {
-    constructor(fen?: string, { skipValidation }?: {
+    constructor(fen?: string, { skipValidation, chess960 }?: {
         skipValidation?: boolean | undefined;
+        chess960?: boolean | undefined;
     });
     // (undocumented)
     ascii(): string;
@@ -46,8 +47,8 @@ export class Chess {
     get(square: Square): Piece | undefined;
     // (undocumented)
     getCastlingRights(color: Color): {
-        [KING]: boolean;
-        [QUEEN]: boolean;
+        [KING]: string | undefined;
+        [QUEEN]: string | undefined;
     };
     // (undocumented)
     getComment(): string;
@@ -87,6 +88,8 @@ export class Chess {
     // (undocumented)
     isCheckmate(): boolean;
     // (undocumented)
+    isChess960(): boolean;
+    // (undocumented)
     isDraw(): boolean;
     // (undocumented)
     isDrawByFiftyMoves(): boolean;
@@ -104,9 +107,10 @@ export class Chess {
     // (undocumented)
     isThreefoldRepetition(): boolean;
     // (undocumented)
-    load(fen: string, { skipValidation, preserveHeaders }?: {
+    load(fen: string, { skipValidation, preserveHeaders, chess960 }?: {
         skipValidation?: boolean | undefined;
         preserveHeaders?: boolean | undefined;
+        chess960?: boolean | undefined;
     }): void;
     // (undocumented)
     loadPgn(pgn: string, { strict, newlineChar, }?: {
@@ -218,7 +222,7 @@ export class Chess {
     // (undocumented)
     reset(): void;
     // (undocumented)
-    setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>): boolean;
+    setCastlingRights(color: Color, wantedRights: Partial<Record<typeof KING | typeof QUEEN, boolean | string>>): boolean;
     // (undocumented)
     setComment(comment: string): void;
     // (undocumented)
@@ -239,6 +243,9 @@ export type Color = 'w' | 'b';
 
 // @public (undocumented)
 export const DEFAULT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+// @public
+export function getRandom960Position(): string;
 
 // @public (undocumented)
 export const KING = "k";
@@ -322,7 +329,9 @@ export type Suffix = (typeof SUFFIX_LIST)[number];
 export const SUFFIX_LIST: readonly ["!", "?", "!!", "!?", "?!", "??"];
 
 // @public (undocumented)
-export function validateFen(fen: string): {
+export function validateFen(fen: string, { chess960 }?: {
+    chess960?: boolean | undefined;
+}): {
     ok: boolean;
     error?: string;
 };
