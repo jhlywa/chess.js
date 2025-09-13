@@ -594,16 +594,12 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
   }
 
   // 12th criterion: is side to move already delivering check?
-  console.log(tokens[1], swapColor(tokens[1] as Color))
-
   const tokensTemp = tokens.slice()
   tokensTemp[1] = swapColor(tokens[1] as Color)
   const tempFen = tokensTemp.join(' ') // swap the side to move
 
-  console.log(tempFen)
   const tempChess = new Chess(tempFen, { skipValidation: true })
   if (tempChess.inCheck()) {
-    console.log(tempChess.inCheck())
     return {
       ok: false,
       error: 'Invalid FEN: side to move is already delivering check',
@@ -2814,6 +2810,3 @@ export class Chess {
     return this._moveNumber
   }
 }
-
-const testFen = 'r3k2r/8/p4p2/3p2p1/4b3/2R2PP1/P6P/4R1K1 b kq - 0 27'
-console.log(validateFen(testFen))
