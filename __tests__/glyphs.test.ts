@@ -13,8 +13,10 @@ describe('Glyph Support', () => {
 
     const fen1 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
     const fen2 = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2'
-    const fen3 = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'
-    const fen4 = 'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3'
+    const fen3 =
+      'rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2'
+    const fen4 =
+      'r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3'
 
     expect(chess.fen()).toEqual(fen4)
 
@@ -63,7 +65,9 @@ describe('Glyph Support', () => {
     expect(chess.getGlyph(currentFen)).toEqual('±')
 
     // Invalid glyph should throw
-    expect(() => chess.setGlyph('invalid' as never)).toThrow('Invalid glyph: invalid')
+    expect(() => chess.setGlyph('invalid' as never)).toThrow(
+      'Invalid glyph: invalid',
+    )
 
     const comments = chess.getComments()
     expect(comments).toContainEqual({
@@ -169,7 +173,7 @@ describe('Glyph Support', () => {
     ]
 
     // Test each glyph can be set and retrieved
-    supportedGlyphs.forEach(glyph => {
+    supportedGlyphs.forEach((glyph) => {
       chess.setGlyph(glyph)
       expect(chess.getGlyph()).toEqual(glyph)
     })
@@ -188,14 +192,14 @@ describe('Glyph Support', () => {
     const comments = chess.getComments()
 
     // Find entries with glyphs
-    const glyphEntries = comments.filter(entry => entry.glyph)
+    const glyphEntries = comments.filter((entry) => entry.glyph)
 
     expect(glyphEntries).toHaveLength(6)
-    expect(glyphEntries.map(e => e.glyph)).toContain('±') // $16
-    expect(glyphEntries.map(e => e.glyph)).toContain('⩱') // $15
-    expect(glyphEntries.map(e => e.glyph)).toContain('↑') // $36
-    expect(glyphEntries.map(e => e.glyph)).toContain('∆') // $140
-    expect(glyphEntries.map(e => e.glyph)).toContain('→') // $40
-    expect(glyphEntries.map(e => e.glyph)).toContain('=∞') // $44
+    expect(glyphEntries.map((e) => e.glyph)).toContain('±') // $16
+    expect(glyphEntries.map((e) => e.glyph)).toContain('⩱') // $15
+    expect(glyphEntries.map((e) => e.glyph)).toContain('↑') // $36
+    expect(glyphEntries.map((e) => e.glyph)).toContain('∆') // $140
+    expect(glyphEntries.map((e) => e.glyph)).toContain('→') // $40
+    expect(glyphEntries.map((e) => e.glyph)).toContain('=∞') // $44
   })
 })
