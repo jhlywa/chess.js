@@ -95,6 +95,33 @@ export const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'] as const
 
 export type Suffix = (typeof SUFFIX_LIST)[number]
 
+export const GLYPH_MAP = {
+  $7: '□', // Only move
+  $22: '⨀', // Zugzwang
+  $10: '=', // Equal position
+  $13: '∞', // Unclear position
+  $14: '⩲', // White is slightly better
+  $15: '⩱', // Black is slightly better
+  $16: '±', // White is better
+  $17: '∓', // Black is better
+  $18: '+−', // White is winning
+  $19: '-+', // Black is winning
+  $146: 'N', // Novelty
+  $32: '↑↑', // Development
+  $36: '↑', // Initiative
+  $40: '→', // Attack
+  $132: '⇆', // Counterplay
+  $138: '⊕', // Time trouble
+  $44: '=∞', // With compensation
+  $140: '∆', // With the idea
+} as const
+
+export const GLYPH_LIST = Object.values(GLYPH_MAP)
+
+export type GlyphKey = keyof typeof GLYPH_MAP
+
+export type Glyph = (typeof GLYPH_LIST)[number]
+
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -719,6 +746,7 @@ export class Chess {
   private _history: History[] = []
   private _comments: Record<string, string> = {}
   private _suffixes: Record<string, Suffix> = {}
+  private _glyphs: Record<string, Glyph> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
   private _hash = 0n
@@ -729,6 +757,7 @@ export class Chess {
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
     this._comments = {}
     this._suffixes = {}
+    this._glyphs = {}
     this.load(fen, { skipValidation })
   }
 
@@ -1010,6 +1039,7 @@ export class Chess {
     this.load(DEFAULT_POSITION)
     this._comments = {}
     this._suffixes = {}
+    this._glyphs = {}
   }
 
   get(square: Square): Piece | undefined {
@@ -2248,6 +2278,17 @@ export class Chess {
           if (suffixAnnotation) {
             this._suffixes[this.fen()] = suffixAnnotation as Suffix
           }
+
+          // Process NAGs and convert to glyphs
+          if (node.nags && node.nags.length > 0) {
+            for (const nag of node.nags) {
+              const glyphKey = `$${nag}` as GlyphKey
+              if (glyphKey in GLYPH_MAP) {
+                this._glyphs[this.fen()] = GLYPH_MAP[glyphKey]
+                break // Use first valid glyph only
+              }
+            }
+          }
         }
       }
 
@@ -2680,27 +2721,32 @@ export class Chess {
     fen: string
     comment?: string
     suffixAnnotation?: string
+    glyph?: string
   }[] {
     this._pruneComments()
 
     const allFenKeys = new Set<string>()
     Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen))
     Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen))
+    Object.keys(this._glyphs).forEach((fen) => allFenKeys.add(fen))
 
     const result: {
       fen: string
       comment?: string
       suffixAnnotation?: string
+      glyph?: string
     }[] = []
 
     for (const fen of allFenKeys) {
       const commentContent = this._comments[fen]
       const suffixAnnotation = this._suffixes[fen]
+      const glyph = this._glyphs[fen]
 
       const entry: {
         fen: string
         comment?: string
         suffixAnnotation?: string
+        glyph?: string
       } = {
         fen: fen,
       }
@@ -2711,6 +2757,10 @@ export class Chess {
 
       if (suffixAnnotation !== undefined) {
         entry.suffixAnnotation = suffixAnnotation
+      }
+
+      if (glyph !== undefined) {
+        entry.glyph = glyph
       }
 
       result.push(entry)
@@ -2746,6 +2796,35 @@ export class Chess {
     const key = fen || this.fen()
     const old = this._suffixes[key]
     delete this._suffixes[key]
+    return old
+  }
+
+  /**
+   * Get the glyph for the given position (or current one).
+   */
+  public getGlyph(fen?: string): Glyph | undefined {
+    const key = fen ?? this.fen()
+    return this._glyphs[key]
+  }
+
+  /**
+   * Set or overwrite the glyph for the given position (or current).
+   * Throws if the glyph isn't one of the allowed GLYPH_LIST values.
+   */
+  public setGlyph(glyph: Glyph, fen?: string): void {
+    if (!GLYPH_LIST.includes(glyph)) {
+      throw new Error(`Invalid glyph: ${glyph}`)
+    }
+    this._glyphs[fen || this.fen()] = glyph
+  }
+
+  /**
+   * Remove the glyph for the given position (or current).
+   */
+  public removeGlyph(fen?: string): Glyph | undefined {
+    const key = fen || this.fen()
+    const old = this._glyphs[key]
+    delete this._glyphs[key]
     return old
   }
 
