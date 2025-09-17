@@ -1369,6 +1369,33 @@ export class Chess {
     }
   }
 
+  private _isCastlePathClear(
+    kingFrom: number,
+    kingTo: number,
+    rookFrom: number,
+    rookTo: number,
+    them: Color,
+  ): boolean {
+    const kingMinSq = Math.min(kingFrom, kingTo)
+    const kingMaxSq = Math.max(kingFrom, kingTo)
+    const minSq = Math.min(kingFrom, kingTo, rookFrom, rookTo)
+    const maxSq = Math.max(kingFrom, kingTo, rookFrom, rookTo)
+    if (kingMinSq < minSq || kingMaxSq > maxSq) {
+      return false
+    }
+    for (let sq = minSq; sq <= maxSq; sq++) {
+      if (sq != kingFrom && sq != rookFrom && this._board[sq]) {
+        return false
+      }
+    }
+    for (let sq = kingMinSq; sq <= kingMaxSq; sq++) {
+      if (this._attacked(them, sq)) {
+        return false
+      }
+    }
+    return true
+  }
+
   private _moves({
     legal = true,
     piece = undefined,
@@ -1490,61 +1517,28 @@ export class Chess {
      *   b) doing single square move generation on the king's square
      */
 
-    if (forPiece === undefined || forPiece === KING || forPiece === ROOK) {
-      if (
-        !singleSquare ||
-        lastSquare === KINGS[us][KING].from ||
-        lastSquare === KINGS[us][QUEEN].from ||
-        lastSquare === ROOKS[us][KING].from ||
-        lastSquare === ROOKS[us][QUEEN].from
-      ) {
+    if (forPiece === undefined || forPiece === KING) {
+      if (!singleSquare || lastSquare === this._kings[us]) {
         // king-side castling
         if (this._castling[us] & BITS.KSIDE_CASTLE) {
-          const castlingFrom = !IS_XFEN
-            ? KINGS[us][KING].from
-            : KINGS[us][KING].from
+          const castlingFrom = KINGS[us][KING].from
           const castlingTo = !IS_XFEN
             ? KINGS[us][KING].to
             : ROOKS[us][KING].from
-          const castlingKingFrom = KINGS[us][KING].to
-          const castlingKingTo = KINGS[us][KING].from
-          const castlingRookFrom = ROOKS[us][KING].to
-          const castlingRookTo = ROOKS[us][KING].from
+          const castlingKingFrom = KINGS[us][KING].from
+          const castlingKingTo = KINGS[us][KING].to
+          const castlingRookFrom = ROOKS[us][KING].from
+          const castlingRookTo = ROOKS[us][KING].to
 
-          let allow = KINGS[us][KING].from <= KINGS[us][KING].to
-
-          if (allow)
-            for (let sq = castlingKingFrom; sq > castlingKingTo; --sq) {
-              if (
-                (this._board[sq] && this._board[sq].type !== ROOK) ||
-                this._attacked(them, sq)
-              ) {
-                allow = false
-                break
-              }
-            }
-
-          if (allow)
-            for (let sq = castlingRookFrom; sq >= castlingRookTo; --sq) {
-              if (this._board[sq] && this._board[sq].type === KING) {
-                allow = false
-                break
-              }
-            }
-
-          if (allow)
-            for (let sq = castlingFrom; sq <= castlingTo; ++sq) {
-              if (
-                this._board[sq] &&
-                this._board[sq].type !== ROOK &&
-                this._board[sq].type !== KING
-              ) {
-                allow = false
-                break
-              }
-            }
-
-          if (allow) {
+          if (
+            this._isCastlePathClear(
+              castlingKingFrom,
+              castlingKingTo,
+              castlingRookFrom,
+              castlingRookTo,
+              them,
+            )
+          ) {
             addMove(
               moves,
               us,
@@ -1559,51 +1553,24 @@ export class Chess {
 
         // queen-side castling
         if (this._castling[us] & BITS.QSIDE_CASTLE) {
-          const castlingFrom = !IS_XFEN
-            ? KINGS[us][QUEEN].from
-            : KINGS[us][QUEEN].from
+          const castlingFrom = KINGS[us][QUEEN].from
           const castlingTo = !IS_XFEN
             ? KINGS[us][QUEEN].to
             : ROOKS[us][QUEEN].from
-          const castlingKingFrom = KINGS[us][QUEEN].to
-          const castlingKingTo = KINGS[us][QUEEN].from
-          const castlingRookFrom = ROOKS[us][QUEEN].to
-          const castlingRookTo = ROOKS[us][QUEEN].from
+          const castlingKingFrom = KINGS[us][QUEEN].from
+          const castlingKingTo = KINGS[us][QUEEN].to
+          const castlingRookFrom = ROOKS[us][QUEEN].from
+          const castlingRookTo = ROOKS[us][QUEEN].to
 
-          let allow = KINGS[us][QUEEN].to <= KINGS[us][QUEEN].from
-
-          if (allow)
-            for (let sq = castlingKingFrom; sq < castlingKingTo; ++sq) {
-              if (
-                (this._board[sq] && this._board[sq].type !== ROOK) ||
-                this._attacked(them, sq)
-              ) {
-                allow = false
-                break
-              }
-            }
-
-          if (allow)
-            for (let sq = castlingRookFrom; sq <= castlingRookTo; ++sq) {
-              if (this._board[sq] && this._board[sq].type === KING) {
-                allow = false
-                break
-              }
-            }
-
-          if (allow)
-            for (let sq = castlingFrom; sq > castlingTo; --sq) {
-              if (
-                this._board[sq] &&
-                this._board[sq].type !== ROOK &&
-                this._board[sq].type !== KING
-              ) {
-                allow = false
-                break
-              }
-            }
-
-          if (allow) {
+          if (
+            this._isCastlePathClear(
+              castlingKingFrom,
+              castlingKingTo,
+              castlingRookFrom,
+              castlingRookTo,
+              them,
+            )
+          ) {
             addMove(
               moves,
               us,

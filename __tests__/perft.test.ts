@@ -9,7 +9,7 @@ test('perft - position 2', () => {
   const chess = new Chess(
     'r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1',
   )
-  expect(chess.perft(3)).toBe(97903)
+  expect(chess.perft(3)).toBe(97862)
 })
 
 test('perft - position 3', () => {
@@ -28,7 +28,7 @@ test('perft - position 5', () => {
   const chess = new Chess(
     'rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8',
   )
-  expect(chess.perft(3)).toBe(62478)
+  expect(chess.perft(3)).toBe(62379)
 })
 
 test('perft - position 6', () => {
