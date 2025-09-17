@@ -216,3 +216,15 @@ test('attackers - readme tests', () => {
   chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
   expect(chess.attackers('c6', BLACK)).toEqual(['e7'])
 })
+
+test('attackers - some attackers', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppp1ppp/8/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR b KQkq - 1 2',
+  )
+  expect(chess.attackers('f7', WHITE).length).toEqual(1)
+})
+
+test('attackers - some attackers', () => {
+  const chess = new Chess('8/8/8/8/8/1k5K/8/Q7 w - - 99 118')
+  expect(chess.moves().length).toEqual(26)
+})
