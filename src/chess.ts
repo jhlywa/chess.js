@@ -1499,12 +1499,12 @@ export class Chess {
         // single square, non-capturing
         to = from + PAWN_OFFSETS[us][0]
         if (!this._board[to]) {
-          this.addMove(moves, us, from, to, PAWN)
+          this._addMove(moves, us, from, to, PAWN)
 
           // double square
           to = from + PAWN_OFFSETS[us][1]
           if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
-            this.addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN)
+            this._addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN)
           }
         }
 
@@ -1514,7 +1514,7 @@ export class Chess {
           if (to & 0x88) continue
 
           if (this._board[to]?.color === them) {
-            this.addMove(
+            this._addMove(
               moves,
               us,
               from,
@@ -1524,7 +1524,7 @@ export class Chess {
               BITS.CAPTURE,
             )
           } else if (to === this._epSquare) {
-            this.addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
+            this._addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
           }
         }
       } else {
@@ -1539,12 +1539,12 @@ export class Chess {
             if (to & 0x88) break
 
             if (!this._board[to]) {
-              this.addMove(moves, us, from, to, type)
+              this._addMove(moves, us, from, to, type)
             } else {
               // own color, stop loop
               if (this._board[to].color === us) break
 
-              this.addMove(
+              this._addMove(
                 moves,
                 us,
                 from,
@@ -1583,7 +1583,7 @@ export class Chess {
             !this._attacked(them, castlingFrom + 1) &&
             !this._attacked(them, castlingTo)
           ) {
-            this.addMove(
+            this._addMove(
               moves,
               us,
               this._kings[us],
@@ -1608,7 +1608,7 @@ export class Chess {
             !this._attacked(them, castlingFrom - 1) &&
             !this._attacked(them, castlingTo)
           ) {
-            this.addMove(
+            this._addMove(
               moves,
               us,
               this._kings[us],
@@ -1648,7 +1648,7 @@ export class Chess {
    * Updates the input moves array in place by adding a new move
    * Considers possible pawn promotions by adding all possible promotions
    */
-  addMove(
+  private _addMove(
     moves: InternalMove[],
     color: Color,
     from: number,
