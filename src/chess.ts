@@ -736,6 +736,7 @@ export class Chess {
           this._castling.w |= BITS.KSIDE_CASTLE
           this._castlingSymbols.wk = c
           this._castlingSymbols.wkc = c
+          if (IS_XFEN) ROOKS[WHITE][KING].from = Ox88.h1 - 'HGFEDCBA'.indexOf(c)
           break
         }
         countK++
@@ -749,6 +750,8 @@ export class Chess {
           this._castling.w |= BITS.QSIDE_CASTLE
           this._castlingSymbols.wq = c
           this._castlingSymbols.wqc = c
+          if (IS_XFEN)
+            ROOKS[WHITE][QUEEN].from = Ox88.a1 + 'ABCDEFGH'.indexOf(c)
           break
         }
         countQ++
@@ -762,6 +765,7 @@ export class Chess {
           this._castling.b |= BITS.KSIDE_CASTLE
           this._castlingSymbols.bk = c
           this._castlingSymbols.bkc = c
+          if (IS_XFEN) ROOKS[BLACK][KING].from = Ox88.h8 - 'hgfedcba'.indexOf(c)
           break
         }
         countK++
@@ -775,6 +779,8 @@ export class Chess {
           this._castling.b |= BITS.QSIDE_CASTLE
           this._castlingSymbols.bq = c
           this._castlingSymbols.bqc = c
+          if (IS_XFEN)
+            ROOKS[BLACK][QUEEN].from = Ox88.a8 + 'abcdefgh'.indexOf(c)
           break
         }
         countQ++
@@ -968,17 +974,33 @@ export class Chess {
 
     if (type === ROOK && !this._board[sq]) {
       if (color === BLACK) {
-        if (sq >= Ox88.a8 && sq <= Ox88.e8 && EMPTY === this._kings[color]) {
+        if (
+          sq >= Ox88.a8 &&
+          sq <= Ox88.e8 &&
+          (sq < this._kings[color] || EMPTY === this._kings[color])
+        ) {
           ROOKS[color][QUEEN].from = sq
         }
-        if (sq >= Ox88.c8 && sq <= Ox88.h8 && sq > this._kings[color]) {
+        if (
+          sq >= Ox88.c8 &&
+          sq <= Ox88.h8 &&
+          (sq > this._kings[color] || EMPTY === this._kings[color])
+        ) {
           ROOKS[color][KING].from = sq
         }
       } else {
-        if (sq >= Ox88.a1 && sq <= Ox88.e1 && EMPTY === this._kings[color]) {
+        if (
+          sq >= Ox88.a1 &&
+          sq <= Ox88.e1 &&
+          (sq < this._kings[color] || EMPTY === this._kings[color])
+        ) {
           ROOKS[color][QUEEN].from = sq
         }
-        if (sq >= Ox88.c1 && sq <= Ox88.h1 && sq > this._kings[color]) {
+        if (
+          sq >= Ox88.c1 &&
+          sq <= Ox88.h1 &&
+          (sq > this._kings[color] || EMPTY === this._kings[color])
+        ) {
           ROOKS[color][KING].from = sq
         }
       }
@@ -1721,6 +1743,7 @@ export class Chess {
         delete this._board[castlingRookFrom]
         this._board[castlingKingTo] = { type: KING, color: us }
         this._board[castlingRookTo] = { type: ROOK, color: us }
+        this._kings[us] = castlingKingTo
       }
       // turn off castling
       this._castling[us] = 0
@@ -1849,6 +1872,7 @@ export class Chess {
         delete this._board[castlingRookFrom]
         this._board[castlingKingTo] = { type: KING, color: us }
         this._board[castlingRookTo] = { type: ROOK, color: us }
+        this._kings[us] = castlingKingTo
       }
     }
 

@@ -971,8 +971,7 @@ const perftData = `
 957 	1krbnnbq/1pp1p1pp/r7/p2p1p2/3PP3/2P3P1/PP3P1P/RKRBNNBQ w CAc - 0 9 	30 	953 	28033 	860530 	25531358 	787205262
 958 	rkr1nbbq/2ppp1pp/1pn5/p4p2/P6P/3P4/1PP1PPPB/RKRNNB1Q w CAca - 1 9 	24 	645 	15689 	446423 	11484012 	341262639
 959 	rkrnnqbb/p1ppp2p/Qp6/4Pp2/5p2/8/PPPP2PP/RKRNN1BB w CAca - 0 9 	35 	929 	32020 	896130 	31272517 	915268405
-960 	bbq1nr1r/pppppk1p/2n2p2/6p1/P4P2/4P1P1/1PPP3P/BBQNNRKR w HF - 1 9 	23 	589 	14744 	387556 	10316716 	280056112
-`
+960 	bbq1nr1r/pppppk1p/2n2p2/6p1/P4P2/4P1P1/1PPP3P/BBQNNRKR w HF - 1 9 	23 	589 	14744 	387556 	10316716 	280056112`
   .trim()
   .split('\n')
 
@@ -1011,7 +1010,7 @@ const clampVal = (val: number, min: number, max: number) => {
  * DEPTH of 6 takes about thirty minutes to test a single position.
  */
 
-const defaultDepth = 1
+const defaultDepth = 3
 const defaultBeg = 1
 const defaultNum = perftData.length
 
@@ -1063,7 +1062,7 @@ describe(
           ' ',
         )
         const chess = new Chess(fen)
-        expect(chess.perft(DEPTH)).toEqual(nodeCounts['d' + DEPTH])
+        expect(chess.perft(DEPTH)).toBe(nodeCounts['d' + DEPTH])
       })
     }
   },
