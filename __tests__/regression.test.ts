@@ -34,12 +34,12 @@ describe('Regression Tests', () => {
     const chess = new Chess()
     const pgn = [
       '[SetUp "1"]',
-      '[FEN "7k/5K2/4R3/8/8/8/8/8 w KQkq - 0 1"]',
+      '[FEN "7k/5K2/4R3/8/8/8/8/8 w - - 0 1"]',
       '',
       '1. Rh6#',
     ]
     chess.loadPgn(pgn.join('\n'))
-    expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b Qkq - 1 1')
+    expect(chess.fen()).toBe('7k/5K2/7R/8/8/8/8/8 b - - 1 1')
   })
 
   it('Github Issue #85 (black) - SetUp and FEN should be accepted in loadPgn', () => {

@@ -149,4 +149,14 @@ describe('960 Tests', () => {
       'nbrnkrbq/pppp1ppp/4p3/8/8/2N5/PPPPPPPP/NBKR1RBQ b kq - 1 2',
     )
   })
+
+  it('O-O 960 15', () => {
+    const chess = new Chess(
+      'r1b1kb1r/pp1p1ppp/2n2n2/q1p1p3/2B1P3/2N2Q2/PPPPNPPP/R1B1K2R w KQkq - 4 6',
+    )
+    chess.move({ from: 'e1', to: 'g1' })
+    expect(chess.fen()).toEqual(
+      'r1b1kb1r/pp1p1ppp/2n2n2/q1p1p3/2B1P3/2N2Q2/PPPPNPPP/R1B2RK1 b kq - 5 6',
+    )
+  })
 })
