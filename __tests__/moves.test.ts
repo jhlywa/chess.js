@@ -1,4 +1,4 @@
-import { Chess, Square, Move } from '../src/chess'
+import { Chess, Square } from '../src/chess'
 import { split } from './utils'
 import { expect, test } from 'vitest'
 
