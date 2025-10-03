@@ -1659,7 +1659,7 @@ export class Chess {
   ) {
     const r = rank(to)
   
-    if (piece === PAWN && ((color === BLACK && r === RANK_1) || (color === WHITE && r === RANK_8))) {
+    if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
       for (let i = 0; i < PROMOTIONS.length; i++) {
         const promotion = PROMOTIONS[i]
         moves.push({
