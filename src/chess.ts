@@ -25,7 +25,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+import { Move } from './Move'
 import { parse } from './pgn'
+import {
+  WHITE,
+  BLACK,
+  PAWN,
+  KNIGHT,
+  BISHOP,
+  ROOK,
+  QUEEN,
+  KING,
+  Color,
+  PieceSymbol,
+  Square,
+  Piece,
+  InternalMove,
+  BITS,
+  rank,
+  file,
+  algebraic,
+} from './types'
+
+// Re-export types and constants from types.ts for backward compatibility
+export {
+  WHITE,
+  BLACK,
+  PAWN,
+  KNIGHT,
+  BISHOP,
+  ROOK,
+  QUEEN,
+  KING,
+  Color,
+  PieceSymbol,
+  Square,
+  Piece,
+  InternalMove,
+  FLAGS,
+  BITS,
+} from './types'
+export { Move } from './Move'
 
 const MASK64 = 0xffffffffffffffffn
 
@@ -67,51 +107,12 @@ const CASTLING_KEYS = Array.from({ length: 16 }, () => rand())
 
 const SIDE_KEY = rand()
 
-export const WHITE = 'w'
-export const BLACK = 'b'
-
-export const PAWN = 'p'
-export const KNIGHT = 'n'
-export const BISHOP = 'b'
-export const ROOK = 'r'
-export const QUEEN = 'q'
-export const KING = 'k'
-
-export type Color = 'w' | 'b'
-export type PieceSymbol = 'p' | 'n' | 'b' | 'r' | 'q' | 'k'
-
-// prettier-ignore
-export type Square =
-    'a8' | 'b8' | 'c8' | 'd8' | 'e8' | 'f8' | 'g8' | 'h8' |
-    'a7' | 'b7' | 'c7' | 'd7' | 'e7' | 'f7' | 'g7' | 'h7' |
-    'a6' | 'b6' | 'c6' | 'd6' | 'e6' | 'f6' | 'g6' | 'h6' |
-    'a5' | 'b5' | 'c5' | 'd5' | 'e5' | 'f5' | 'g5' | 'h5' |
-    'a4' | 'b4' | 'c4' | 'd4' | 'e4' | 'f4' | 'g4' | 'h4' |
-    'a3' | 'b3' | 'c3' | 'd3' | 'e3' | 'f3' | 'g3' | 'h3' |
-    'a2' | 'b2' | 'c2' | 'd2' | 'e2' | 'f2' | 'g2' | 'h2' |
-    'a1' | 'b1' | 'c1' | 'd1' | 'e1' | 'f1' | 'g1' | 'h1'
-
 export const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'] as const
 
 export type Suffix = (typeof SUFFIX_LIST)[number]
 
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
-
-export type Piece = {
-  color: Color
-  type: PieceSymbol
-}
-
-type InternalMove = {
-  color: Color
-  from: number
-  to: number
-  piece: PieceSymbol
-  captured?: PieceSymbol
-  promotion?: PieceSymbol
-  flags: number
-}
 
 interface History {
   move: InternalMove
@@ -124,107 +125,7 @@ interface History {
   moveNumber: number
 }
 
-export class Move {
-  color: Color
-  from: Square
-  to: Square
-  piece: PieceSymbol
-  captured?: PieceSymbol
-  promotion?: PieceSymbol
-
-  /**
-   * @deprecated This field is deprecated and will be removed in version 2.0.0.
-   * Please use move descriptor functions instead: `isCapture`, `isPromotion`,
-   * `isEnPassant`, `isKingsideCastle`, `isQueensideCastle`, `isCastle`, and
-   * `isBigPawn`
-   */
-  flags: string
-
-  san: string
-  lan: string
-  before: string
-  after: string
-
-  constructor(
-    internal: InternalMove,
-    san: string,
-    before: string,
-    after: string,
-  ) {
-    const { color, piece, from, to, flags, captured, promotion } = internal
-
-    const fromAlgebraic = algebraic(from)
-    const toAlgebraic = algebraic(to)
-
-    this.color = color
-    this.piece = piece
-    this.from = fromAlgebraic
-    this.to = toAlgebraic
-
-    this.san = san
-    this.lan = fromAlgebraic + toAlgebraic
-    this.before = before
-    this.after = after
-
-    // Build the text representation of the move flags
-    this.flags = ''
-    for (const flag in BITS) {
-      if (BITS[flag] & flags) {
-        this.flags += FLAGS[flag]
-      }
-    }
-
-    if (captured) {
-      this.captured = captured
-    }
-
-    if (promotion) {
-      this.promotion = promotion
-      this.lan += promotion
-    }
-  }
-
-  isCapture() {
-    return this.flags.indexOf(FLAGS['CAPTURE']) > -1
-  }
-
-  isPromotion() {
-    return this.flags.indexOf(FLAGS['PROMOTION']) > -1
-  }
-
-  isEnPassant() {
-    return this.flags.indexOf(FLAGS['EP_CAPTURE']) > -1
-  }
-
-  isKingsideCastle() {
-    return this.flags.indexOf(FLAGS['KSIDE_CASTLE']) > -1
-  }
-
-  isQueensideCastle() {
-    return this.flags.indexOf(FLAGS['QSIDE_CASTLE']) > -1
-  }
-
-  isBigPawn() {
-    return this.flags.indexOf(FLAGS['BIG_PAWN']) > -1
-  }
-
-  isNullMove() {
-    return this.flags.indexOf(FLAGS['NULL_MOVE']) > -1
-  }
-}
-
 const EMPTY = -1
-
-const FLAGS: Record<string, string> = {
-  NORMAL: 'n',
-  CAPTURE: 'c',
-  BIG_PAWN: 'b',
-  EP_CAPTURE: 'e',
-  PROMOTION: 'p',
-  KSIDE_CASTLE: 'k',
-  QSIDE_CASTLE: 'q',
-  NULL_MOVE: '-',
-}
 
 // prettier-ignore
 export const SQUARES: Square[] = [
@@ -237,17 +138,6 @@ export const SQUARES: Square[] = [
   'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
   'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
 ]
-
-const BITS: Record<string, number> = {
-  NORMAL: 1,
-  CAPTURE: 2,
-  BIG_PAWN: 4,
-  EP_CAPTURE: 8,
-  PROMOTION: 16,
-  KSIDE_CASTLE: 32,
-  QSIDE_CASTLE: 64,
-  NULL_MOVE: 128,
-}
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -445,26 +335,8 @@ const SECOND_RANK = { b: RANK_7, w: RANK_2 }
 
 const SAN_NULLMOVE = '--'
 
-// Extracts the zero-based rank of an 0x88 square.
-function rank(square: number): number {
-  return square >> 4
-}
-
-// Extracts the zero-based file of an 0x88 square.
-function file(square: number): number {
-  return square & 0xf
-}
-
 function isDigit(c: string): boolean {
   return '0123456789'.indexOf(c) !== -1
-}
-
-// Converts a 0x88 square to algebraic notation.
-function algebraic(square: number): Square {
-  const f = file(square)
-  const r = rank(square)
-  return ('abcdefgh'.substring(f, f + 1) +
-    '87654321'.substring(r, r + 1)) as Square
 }
 
 function swapColor(color: Color): Color {
