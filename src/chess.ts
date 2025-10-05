@@ -47,6 +47,7 @@ import {
   file,
   algebraic,
   Ox88,
+  swapColor,
 } from './types'
 
 // Re-export types and constants from types.ts for backward compatibility
@@ -328,10 +329,6 @@ function isDigit(c: string): boolean {
   return '0123456789'.indexOf(c) !== -1
 }
 
-function swapColor(color: Color): Color {
-  return color === WHITE ? BLACK : WHITE
-}
-
 export function validateFen(fen: string): { ok: boolean; error?: string } {
   // 1st criterion: 6 space-seperated fields?
   const tokens = fen.split(/\s+/)
@@ -570,9 +567,7 @@ function strippedSan(move: string): string {
 
 export class Chess {
   private _game!: Game
-  private _turn: Color = WHITE
   private _header: Record<string, string | null> = {}
-  private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
   private _epSquare = -1
   private _fenEpSquare = -1
   private _halfMoves = 0
@@ -596,6 +591,22 @@ export class Chess {
 
   private get _board() {
     return this._game._board
+  }
+
+  private get _turn() {
+    return this._game._turn
+  }
+
+  private set _turn(value: Color) {
+    this._game._turn = value
+  }
+
+  private get _kings() {
+    return this._game._kings
+  }
+
+  private set _kings(value: Record<Color, number>) {
+    this._game._kings = value
   }
 
   clear({ preserveHeaders = false } = {}) {
@@ -879,33 +890,11 @@ export class Chess {
   }
 
   get(square: Square): Piece | undefined {
-    return this._board[Ox88[square]]
+    return this._game.get(square)
   }
 
   findPiece(piece: Piece): Square[] {
-    const squares: Square[] = []
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      // did we run off the end of the board
-      if (i & 0x88) {
-        i += 7
-        continue
-      }
-
-      // if empty square or wrong color
-      if (!this._board[i] || this._board[i]?.color !== piece.color) {
-        continue
-      }
-
-      // check if square contains the requested piece
-      if (
-        this._board[i].color === piece.color &&
-        this._board[i].type === piece.type
-      ) {
-        squares.push(algebraic(i))
-      }
-    }
-
-    return squares
+    return this._game.findPiece(piece)
   }
 
   put(
@@ -1145,16 +1134,11 @@ export class Chess {
   }
 
   attackers(square: Square, attackedBy?: Color): Square[] {
-    if (!attackedBy) {
-      return this._attacked(this._turn, Ox88[square], true)
-    } else {
-      return this._attacked(attackedBy, Ox88[square], true)
-    }
+    return this._game.attackers(square, attackedBy)
   }
 
   private _isKingAttacked(color: Color): boolean {
-    const square = this._kings[color]
-    return square === -1 ? false : this._attacked(swapColor(color), square)
+    return this._game._isKingAttacked(color)
   }
 
   hash(): string {
@@ -1162,7 +1146,7 @@ export class Chess {
   }
 
   isAttacked(square: Square, attackedBy: Color): boolean {
-    return this._attacked(attackedBy, Ox88[square])
+    return this._game.isAttacked(square, attackedBy)
   }
 
   isCheck(): boolean {
