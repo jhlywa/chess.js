@@ -32,9 +32,6 @@ import {
   WHITE,
   BLACK,
   PAWN,
-  KNIGHT,
-  BISHOP,
-  ROOK,
   QUEEN,
   KING,
   Color,
@@ -47,7 +44,6 @@ import {
   file,
   algebraic,
   Ox88,
-  swapColor,
   History,
 } from './types'
 
@@ -860,79 +856,11 @@ export class Chess {
   }
 
   private _updateCastlingRights() {
-    this._hash ^= this._castlingKey()
-
-    const whiteKingInPlace =
-      this._board[Ox88.e1]?.type === KING &&
-      this._board[Ox88.e1]?.color === WHITE
-    const blackKingInPlace =
-      this._board[Ox88.e8]?.type === KING &&
-      this._board[Ox88.e8]?.color === BLACK
-
-    if (
-      !whiteKingInPlace ||
-      this._board[Ox88.a1]?.type !== ROOK ||
-      this._board[Ox88.a1]?.color !== WHITE
-    ) {
-      this._castling.w &= ~BITS.QSIDE_CASTLE
-    }
-
-    if (
-      !whiteKingInPlace ||
-      this._board[Ox88.h1]?.type !== ROOK ||
-      this._board[Ox88.h1]?.color !== WHITE
-    ) {
-      this._castling.w &= ~BITS.KSIDE_CASTLE
-    }
-
-    if (
-      !blackKingInPlace ||
-      this._board[Ox88.a8]?.type !== ROOK ||
-      this._board[Ox88.a8]?.color !== BLACK
-    ) {
-      this._castling.b &= ~BITS.QSIDE_CASTLE
-    }
-
-    if (
-      !blackKingInPlace ||
-      this._board[Ox88.h8]?.type !== ROOK ||
-      this._board[Ox88.h8]?.color !== BLACK
-    ) {
-      this._castling.b &= ~BITS.KSIDE_CASTLE
-    }
-
-    this._hash ^= this._castlingKey()
+    this._game._updateCastlingRights()
   }
 
   private _updateEnPassantSquare() {
-    if (this._epSquare === EMPTY) {
-      return
-    }
-
-    const startSquare = this._epSquare + (this._turn === WHITE ? -16 : 16)
-    const currentSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
-    const attackers = [currentSquare + 1, currentSquare - 1]
-
-    if (
-      this._board[startSquare] !== null ||
-      this._board[this._epSquare] !== null ||
-      this._board[currentSquare]?.color !== swapColor(this._turn) ||
-      this._board[currentSquare]?.type !== PAWN
-    ) {
-      this._hash ^= this._epKey()
-      this._epSquare = EMPTY
-      return
-    }
-
-    const canCapture = (square: number) =>
-      !(square & 0x88) &&
-      this._board[square]?.color === this._turn &&
-      this._board[square]?.type === PAWN
-
-    if (!attackers.some(canCapture)) {
-      this._hash ^= this._epKey()
-      this._epSquare = EMPTY
-    }
+    this._game._updateEnPassantSquare()
   }
 
   private _attacked(color: Color, square: number): boolean
@@ -1865,20 +1793,11 @@ export class Chess {
   }
 
   private _incPositionCount() {
-    this._positionCount.set(
-      this._hash,
-      (this._positionCount.get(this._hash) ?? 0) + 1,
-    )
+    this._game._incPositionCount()
   }
 
   private _decPositionCount(hash: bigint) {
-    const currentCount = this._positionCount.get(hash) ?? 0
-
-    if (currentCount === 1) {
-      this._positionCount.delete(hash)
-    } else {
-      this._positionCount.set(hash, currentCount - 1)
-    }
+    this._game._decPositionCount(hash)
   }
 
   private _pruneComments() {
