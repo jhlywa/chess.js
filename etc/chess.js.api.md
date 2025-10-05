@@ -334,7 +334,7 @@ export const SQUARES: Square[];
 // @public (undocumented)
 export type Suffix = (typeof SUFFIX_LIST)[number];
 
-// @public (undocumented)
+// @public
 export const SUFFIX_LIST: readonly ["!", "?", "!!", "!?", "?!", "??"];
 
 // @public (undocumented)
@@ -343,7 +343,7 @@ export function validateFen(fen: string): {
     error?: string;
 };
 
-// @public
+// @public (undocumented)
 export const WHITE = "w";
 
 // @public
