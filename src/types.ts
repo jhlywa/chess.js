@@ -55,8 +55,66 @@ export const RAYS = [
 
 export const PIECE_MASKS = { p: 0x1, n: 0x2, b: 0x4, r: 0x8, q: 0x10, k: 0x20 }
 
+export const PAWN_OFFSETS = {
+  b: [16, 32, 17, 15],
+  w: [-16, -32, -17, -15],
+}
+
+export const PIECE_OFFSETS = {
+  n: [-18, -33, -31, -14, 18, 33, 31, 14],
+  b: [-17, -15, 17, 15],
+  r: [-16, 1, 16, -1],
+  q: [-17, -16, -15, 1, 17, 16, 15, -1],
+  k: [-17, -16, -15, 1, 17, 16, 15, -1],
+}
+
+export const PROMOTIONS: PieceSymbol[] = [KNIGHT, BISHOP, ROOK, QUEEN]
+
+export const RANK_1 = 7
+export const RANK_2 = 6
+export const RANK_7 = 1
+export const RANK_8 = 0
+
+export const SECOND_RANK = { b: RANK_7, w: RANK_2 }
+
 export function swapColor(color: Color): Color {
   return color === WHITE ? BLACK : WHITE
+}
+
+export function addMove(
+  moves: InternalMove[],
+  color: Color,
+  from: number,
+  to: number,
+  piece: PieceSymbol,
+  captured: PieceSymbol | undefined = undefined,
+  flags: number = BITS.NORMAL,
+) {
+  const r = rank(to)
+
+  if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
+    for (let i = 0; i < PROMOTIONS.length; i++) {
+      const promotion = PROMOTIONS[i]
+      moves.push({
+        color,
+        from,
+        to,
+        piece,
+        captured,
+        promotion,
+        flags: flags | BITS.PROMOTION,
+      })
+    }
+  } else {
+    moves.push({
+      color,
+      from,
+      to,
+      piece,
+      captured,
+      flags,
+    })
+  }
 }
 
 export type Color = 'w' | 'b'
