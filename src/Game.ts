@@ -13,6 +13,8 @@ import {
   PAWN,
   EMPTY,
   swapColor,
+  rank,
+  file,
 } from './types'
 
 export class Game {
@@ -147,6 +149,43 @@ export class Game {
   _isKingAttacked(color: Color): boolean {
     const square = this._kings[color]
     return square === -1 ? false : this._attacked(swapColor(color), square)
+  }
+
+  isCheck(): boolean {
+    return this._isKingAttacked(this._turn)
+  }
+
+  inCheck(): boolean {
+    return this.isCheck()
+  }
+
+  ascii(): string {
+    let s = '   +------------------------+\n'
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+      // display the rank
+      if (file(i) === 0) {
+        s += ' ' + '87654321'[rank(i)] + ' |'
+      }
+
+      if (this._board[i]) {
+        const piece = this._board[i].type
+        const color = this._board[i].color
+        const symbol =
+          color === WHITE ? piece.toUpperCase() : piece.toLowerCase()
+        s += ' ' + symbol + ' '
+      } else {
+        s += ' . '
+      }
+
+      if ((i + 1) & 0x88) {
+        s += '|\n'
+        i += 8
+      }
+    }
+    s += '   +------------------------+\n'
+    s += '     a  b  c  d  e  f  g  h'
+
+    return s
   }
 
   board(): ({ square: Square; type: PieceSymbol; color: Color } | null)[][] {
