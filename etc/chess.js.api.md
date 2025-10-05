@@ -8,6 +8,9 @@
 export const BISHOP = "b";
 
 // @public (undocumented)
+export const BITS: Record<string, number>;
+
+// @public (undocumented)
 export const BLACK = "b";
 
 // @public (undocumented)
@@ -241,6 +244,20 @@ export type Color = 'w' | 'b';
 export const DEFAULT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 // @public (undocumented)
+export const FLAGS: Record<string, string>;
+
+// @public (undocumented)
+export type InternalMove = {
+    color: Color;
+    from: number;
+    to: number;
+    piece: PieceSymbol;
+    captured?: PieceSymbol;
+    promotion?: PieceSymbol;
+    flags: number;
+};
+
+// @public (undocumented)
 export const KING = "k";
 
 // @public (undocumented)
@@ -248,7 +265,6 @@ export const KNIGHT = "n";
 
 // @public (undocumented)
 export class Move {
-    // Warning: (ae-forgotten-export) The symbol "InternalMove" needs to be exported by the entry point chess.d.ts
     constructor(internal: InternalMove, san: string, before: string, after: string);
     // (undocumented)
     after: string;
@@ -318,7 +334,7 @@ export const SQUARES: Square[];
 // @public (undocumented)
 export type Suffix = (typeof SUFFIX_LIST)[number];
 
-// @public (undocumented)
+// @public
 export const SUFFIX_LIST: readonly ["!", "?", "!!", "!?", "?!", "??"];
 
 // @public (undocumented)
