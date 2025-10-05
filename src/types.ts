@@ -209,6 +209,17 @@ export const BITS: Record<string, number> = {
   NULL_MOVE: 128,
 }
 
+export interface History {
+  move: InternalMove
+  kings: Record<Color, number>
+  turn: Color
+  castling: Record<Color, number>
+  epSquare: number
+  fenEpSquare: number
+  halfMoves: number
+  moveNumber: number
+}
+
 // Extracts the zero-based rank of an 0x88 square.
 export function rank(square: number): number {
   return square >> 4
@@ -241,4 +252,15 @@ export const Ox88: Record<Square, number> = {
   a3:  80, b3:  81, c3:  82, d3:  83, e3:  84, f3:  85, g3:  86, h3:  87,
   a2:  96, b2:  97, c2:  98, d2:  99, e2: 100, f2: 101, g2: 102, h2: 103,
   a1: 112, b1: 113, c1: 114, d1: 115, e1: 116, f1: 117, g1: 118, h1: 119
+}
+
+export const ROOKS = {
+  w: [
+    { square: Ox88.a1, flag: BITS.QSIDE_CASTLE },
+    { square: Ox88.h1, flag: BITS.KSIDE_CASTLE },
+  ],
+  b: [
+    { square: Ox88.a8, flag: BITS.QSIDE_CASTLE },
+    { square: Ox88.h8, flag: BITS.KSIDE_CASTLE },
+  ],
 }
