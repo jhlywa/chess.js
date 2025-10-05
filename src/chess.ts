@@ -48,6 +48,7 @@ import {
   algebraic,
   Ox88,
   swapColor,
+  SIDE_KEY,
 } from './types'
 
 // Re-export types and constants from types.ts for backward compatibility
@@ -69,46 +70,7 @@ export {
   BITS,
 } from './types'
 export { Move } from './Move'
-
-const MASK64 = 0xffffffffffffffffn
-
-function rotl(x: bigint, k: bigint): bigint {
-  return ((x << k) | (x >> (64n - k))) & 0xffffffffffffffffn
-}
-
-function wrappingMul(x: bigint, y: bigint) {
-  return (x * y) & MASK64
-}
-
-// xoroshiro128**
-export function xoroshiro128(state: bigint) {
-  return function () {
-    let s0 = BigInt(state & MASK64)
-    let s1 = BigInt((state >> 64n) & MASK64)
-
-    const result = wrappingMul(rotl(wrappingMul(s0, 5n), 7n), 9n)
-
-    s1 ^= s0
-    s0 = (rotl(s0, 24n) ^ s1 ^ (s1 << 16n)) & MASK64
-    s1 = rotl(s1, 37n)
-
-    state = (s1 << 64n) | s0
-
-    return result
-  }
-}
-
-const rand = xoroshiro128(0xa187eb39cdcaed8f31c4b365b102e01en)
-
-const PIECE_KEYS = Array.from({ length: 2 }, () =>
-  Array.from({ length: 6 }, () => Array.from({ length: 128 }, () => rand())),
-)
-
-const EP_KEYS = Array.from({ length: 8 }, () => rand())
-
-const CASTLING_KEYS = Array.from({ length: 16 }, () => rand())
-
-const SIDE_KEY = rand()
+export { xoroshiro128 } from './types'
 
 export const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'] as const
 
@@ -237,19 +199,6 @@ const HEADER_TEMPLATE = {
  *    to check for blocking pieces. E7 (20) + 16 = E6 (36) + 16 = E5 (52) etc.
  */
 
-const PAWN_OFFSETS = {
-  b: [16, 32, 17, 15],
-  w: [-16, -32, -17, -15],
-}
-
-const PIECE_OFFSETS = {
-  n: [-18, -33, -31, -14, 18, 33, 31, 14],
-  b: [-17, -15, 17, 15],
-  r: [-16, 1, 16, -1],
-  q: [-17, -16, -15, 1, 17, 16, 15, -1],
-  k: [-17, -16, -15, 1, 17, 16, 15, -1],
-}
-
 // prettier-ignore
 const ATTACKS = [
   20, 0, 0, 0, 0, 0, 0, 24,  0, 0, 0, 0, 0, 0,20, 0,
@@ -292,19 +241,6 @@ const PIECE_MASKS = { p: 0x1, n: 0x2, b: 0x4, r: 0x8, q: 0x10, k: 0x20 }
 
 const SYMBOLS = 'pnbrqkPNBRQK'
 
-const PROMOTIONS: PieceSymbol[] = [KNIGHT, BISHOP, ROOK, QUEEN]
-
-const RANK_1 = 7
-const RANK_2 = 6
-/*
- * const RANK_3 = 5
- * const RANK_4 = 4
- * const RANK_5 = 3
- * const RANK_6 = 2
- */
-const RANK_7 = 1
-const RANK_8 = 0
-
 const SIDES = {
   [KING]: BITS.KSIDE_CASTLE,
   [QUEEN]: BITS.QSIDE_CASTLE,
@@ -320,8 +256,6 @@ const ROOKS = {
     { square: Ox88.h8, flag: BITS.KSIDE_CASTLE },
   ],
 }
-
-const SECOND_RANK = { b: RANK_7, w: RANK_2 }
 
 const SAN_NULLMOVE = '--'
 
@@ -506,42 +440,6 @@ function getDisambiguator(move: InternalMove, moves: InternalMove[]): string {
   }
 
   return ''
-}
-
-function addMove(
-  moves: InternalMove[],
-  color: Color,
-  from: number,
-  to: number,
-  piece: PieceSymbol,
-  captured: PieceSymbol | undefined = undefined,
-  flags: number = BITS.NORMAL,
-) {
-  const r = rank(to)
-
-  if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
-    for (let i = 0; i < PROMOTIONS.length; i++) {
-      const promotion = PROMOTIONS[i]
-      moves.push({
-        color,
-        from,
-        to,
-        piece,
-        captured,
-        promotion,
-        flags: flags | BITS.PROMOTION,
-      })
-    }
-  } else {
-    moves.push({
-      color,
-      from,
-      to,
-      piece,
-      captured,
-      flags,
-    })
-  }
 }
 
 function inferPieceType(san: string): PieceSymbol | undefined {
@@ -840,61 +738,19 @@ export class Chess {
   }
 
   private _pieceKey(i: number) {
-    if (!this._board[i]) {
-      return 0n
-    }
-
-    const { color, type } = this._board[i]
-
-    const colorIndex = {
-      w: 0,
-      b: 1,
-    }[color]
-
-    const typeIndex = {
-      p: 0,
-      n: 1,
-      b: 2,
-      r: 3,
-      q: 4,
-      k: 5,
-    }[type]
-
-    return PIECE_KEYS[colorIndex][typeIndex][i]
+    return this._game._pieceKey(i)
   }
 
   private _epKey() {
-    return this._epSquare === EMPTY ? 0n : EP_KEYS[this._epSquare & 7]
+    return this._game._epKey()
   }
 
   private _castlingKey() {
-    const index = (this._castling.w >> 5) | (this._castling.b >> 3)
-    return CASTLING_KEYS[index]
+    return this._game._castlingKey()
   }
 
   private _computeHash() {
-    let hash = 0n
-
-    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-      // did we run off the end of the board
-      if (i & 0x88) {
-        i += 7
-        continue
-      }
-
-      if (this._board[i]) {
-        hash ^= this._pieceKey(i)
-      }
-    }
-
-    hash ^= this._epKey()
-    hash ^= this._castlingKey()
-
-    if (this._turn === 'b') {
-      hash ^= SIDE_KEY
-    }
-
-    return hash
+    return this._game._computeHash()
   }
 
   /*
@@ -1190,11 +1046,11 @@ export class Chess {
   }
 
   isCheckmate(): boolean {
-    return this.isCheck() && this._moves().length === 0
+    return this._game.isCheckmate(this._moves())
   }
 
   isStalemate(): boolean {
-    return !this.isCheck() && this._moves().length === 0
+    return this._game.isStalemate(this._moves())
   }
 
   isInsufficientMaterial(): boolean {
@@ -1210,16 +1066,11 @@ export class Chess {
   }
 
   isDraw(): boolean {
-    return (
-      this.isDrawByFiftyMoves() ||
-      this.isStalemate() ||
-      this.isInsufficientMaterial() ||
-      this.isThreefoldRepetition()
-    )
+    return this._game.isDraw(this._moves())
   }
 
   isGameOver(): boolean {
-    return this.isCheckmate() || this.isDraw()
+    return this._game.isGameOver(this._moves())
   }
 
   isPromotion({ from, to }: { from: Square; to: Square }): boolean {

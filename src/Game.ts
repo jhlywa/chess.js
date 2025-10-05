@@ -24,8 +24,10 @@ import {
   SECOND_RANK,
   KING,
   addMove,
-  ROOK,
-  QUEEN,
+  PIECE_KEYS,
+  EP_KEYS,
+  CASTLING_KEYS,
+  SIDE_KEY,
 } from './types'
 
 export class Game {
@@ -489,5 +491,86 @@ export class Game {
     }
 
     return output
+  }
+
+  // Zobrist hashing methods
+  _pieceKey(i: number) {
+    if (!this._board[i]) {
+      return 0n
+    }
+
+    const { color, type } = this._board[i]
+
+    const colorIndex = {
+      w: 0,
+      b: 1,
+    }[color]
+
+    const typeIndex = {
+      p: 0,
+      n: 1,
+      b: 2,
+      r: 3,
+      q: 4,
+      k: 5,
+    }[type]
+
+    return PIECE_KEYS[colorIndex][typeIndex][i]
+  }
+
+  _epKey() {
+    return this._epSquare === EMPTY ? 0n : EP_KEYS[this._epSquare & 7]
+  }
+
+  _castlingKey() {
+    const index = (this._castling.w >> 5) | (this._castling.b >> 3)
+    return CASTLING_KEYS[index]
+  }
+
+  _computeHash() {
+    let hash = 0n
+
+    for (let i = Ox88.a8; i <= Ox88.h1; i++) {
+      // did we run off the end of the board
+      if (i & 0x88) {
+        i += 7
+        continue
+      }
+
+      if (this._board[i]) {
+        hash ^= this._pieceKey(i)
+      }
+    }
+
+    hash ^= this._epKey()
+    hash ^= this._castlingKey()
+
+    if (this._turn === 'b') {
+      hash ^= SIDE_KEY
+    }
+
+    return hash
+  }
+
+  // Game status methods
+  isCheckmate(legalMoves: InternalMove[]): boolean {
+    return this.isCheck() && legalMoves.length === 0
+  }
+
+  isStalemate(legalMoves: InternalMove[]): boolean {
+    return !this.isCheck() && legalMoves.length === 0
+  }
+
+  isDraw(legalMoves: InternalMove[]): boolean {
+    return (
+      this.isDrawByFiftyMoves() ||
+      this.isStalemate(legalMoves) ||
+      this.isInsufficientMaterial() ||
+      this.isThreefoldRepetition()
+    )
+  }
+
+  isGameOver(legalMoves: InternalMove[]): boolean {
+    return this.isCheckmate(legalMoves) || this.isDraw(legalMoves)
   }
 }
