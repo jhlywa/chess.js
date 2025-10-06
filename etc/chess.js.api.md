@@ -15,6 +15,7 @@ export class Chess {
     constructor(fen?: string, { skipValidation }?: {
         skipValidation?: boolean | undefined;
     });
+    addNag(nag: NAG, fen?: string): void;
     // (undocumented)
     ascii(): string;
     // (undocumented)
@@ -56,11 +57,11 @@ export class Chess {
         fen: string;
         comment?: string;
         suffixAnnotation?: string;
-        glyph?: string;
+        nags?: NAG[];
     }[];
-    getGlyph(fen?: string): Glyph | undefined;
     // (undocumented)
     getHeaders(): Record<string, string>;
+    getNags(fen?: string): NAG[] | undefined;
     getSuffixAnnotation(fen?: string): Suffix | undefined;
     // (undocumented)
     hash(): string;
@@ -214,9 +215,10 @@ export class Chess {
         fen: string;
         comment: string;
     }[];
-    removeGlyph(fen?: string): Glyph | undefined;
     // (undocumented)
     removeHeader(key: string): boolean;
+    removeNag(nag: NAG, fen?: string): boolean;
+    removeNags(fen?: string): NAG[] | undefined;
     removeSuffixAnnotation(fen?: string): Suffix | undefined;
     // (undocumented)
     reset(): void;
@@ -224,9 +226,9 @@ export class Chess {
     setCastlingRights(color: Color, rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>): boolean;
     // (undocumented)
     setComment(comment: string): void;
-    setGlyph(glyph: Glyph, fen?: string): void;
     // (undocumented)
     setHeader(key: string, value: string): Record<string, string>;
+    setNags(nags: NAG[], fen?: string): void;
     setSuffixAnnotation(suffix: Suffix, fen?: string): void;
     // (undocumented)
     setTurn(color: Color): boolean;
@@ -243,37 +245,6 @@ export type Color = 'w' | 'b';
 
 // @public (undocumented)
 export const DEFAULT_POSITION = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
-// @public (undocumented)
-export type Glyph = (typeof GLYPH_LIST)[number];
-
-// @public (undocumented)
-export const GLYPH_LIST: ("□" | "⨀" | "=" | "∞" | "⩲" | "⩱" | "±" | "∓" | "+−" | "-+" | "N" | "↑↑" | "↑" | "→" | "⇆" | "⊕" | "=∞" | "∆")[];
-
-// @public (undocumented)
-export const GLYPH_MAP: {
-    readonly $7: "□";
-    readonly $22: "⨀";
-    readonly $10: "=";
-    readonly $13: "∞";
-    readonly $14: "⩲";
-    readonly $15: "⩱";
-    readonly $16: "±";
-    readonly $17: "∓";
-    readonly $18: "+−";
-    readonly $19: "-+";
-    readonly $146: "N";
-    readonly $32: "↑↑";
-    readonly $36: "↑";
-    readonly $40: "→";
-    readonly $132: "⇆";
-    readonly $138: "⊕";
-    readonly $44: "=∞";
-    readonly $140: "∆";
-};
-
-// @public (undocumented)
-export type GlyphKey = keyof typeof GLYPH_MAP;
 
 // @public (undocumented)
 export const KING = "k";
@@ -322,6 +293,34 @@ export class Move {
     // (undocumented)
     to: Square;
 }
+
+// @public (undocumented)
+export type NAG = number;
+
+// @public (undocumented)
+export const NAG_TO_SYMBOL: {
+    readonly 7: "□";
+    readonly 22: "⨀";
+    readonly 10: "=";
+    readonly 13: "∞";
+    readonly 14: "⩲";
+    readonly 15: "⩱";
+    readonly 16: "±";
+    readonly 17: "∓";
+    readonly 18: "+−";
+    readonly 19: "-+";
+    readonly 146: "N";
+    readonly 32: "↑↑";
+    readonly 36: "↑";
+    readonly 40: "→";
+    readonly 132: "⇆";
+    readonly 138: "⊕";
+    readonly 44: "=∞";
+    readonly 140: "∆";
+};
+
+// @public
+export function nagToGlyph(nag: NAG): string | undefined;
 
 // @public (undocumented)
 export const PAWN = "p";
