@@ -57,11 +57,11 @@ export class Chess {
         fen: string;
         comment?: string;
         suffixAnnotation?: string;
-        nags?: NAG[];
+        nags: NAG[];
     }[];
     // (undocumented)
     getHeaders(): Record<string, string>;
-    getNags(fen?: string): NAG[] | undefined;
+    getNags(fen?: string): NAG[];
     getSuffixAnnotation(fen?: string): Suffix | undefined;
     // (undocumented)
     hash(): string;
@@ -218,7 +218,7 @@ export class Chess {
     // (undocumented)
     removeHeader(key: string): boolean;
     removeNag(nag: NAG, fen?: string): boolean;
-    removeNags(fen?: string): NAG[] | undefined;
+    removeNags(fen?: string): NAG[];
     removeSuffixAnnotation(fen?: string): Suffix | undefined;
     // (undocumented)
     reset(): void;

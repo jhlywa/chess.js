@@ -94,11 +94,11 @@ describe('NAG Support', () => {
     // Remove all NAGs
     const removedAll = chess.removeNags()
     expect(removedAll).toEqual([36])
-    expect(chess.getNags()).toBeUndefined()
+    expect(chess.getNags()).toEqual([])
 
-    // Remove non-existent should return undefined
+    // Remove non-existent should return empty array
     const removedAgain = chess.removeNags()
-    expect(removedAgain).toBeUndefined()
+    expect(removedAgain).toEqual([])
 
     // Comments should be empty after removal
     expect(chess.getComments()).toEqual([])
@@ -114,13 +114,13 @@ describe('NAG Support', () => {
     // Set NAG for previous position
     chess.addNag(40, fen1) // → - Attack
     expect(chess.getNags(fen1)).toEqual([40])
-    expect(chess.getNags(fen2)).toBeUndefined()
-    expect(chess.getNags()).toBeUndefined() // Current position has no NAG
+    expect(chess.getNags(fen2)).toEqual([])
+    expect(chess.getNags()).toEqual([]) // Current position has no NAG
 
     // Remove NAG by FEN
     const removed = chess.removeNags(fen1)
     expect(removed).toEqual([40])
-    expect(chess.getNags(fen1)).toBeUndefined()
+    expect(chess.getNags(fen1)).toEqual([])
   })
 
   it('integration with comments and suffixes', () => {
@@ -153,7 +153,7 @@ describe('NAG Support', () => {
 
     chess.reset()
     expect(chess.getComments()).toEqual([])
-    expect(chess.getNags()).toBeUndefined()
+    expect(chess.getNags()).toEqual([])
   })
 
   it('nagToGlyph utility function', () => {

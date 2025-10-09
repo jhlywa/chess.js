@@ -91,6 +91,7 @@ test('loadPgn - works - comments', () => {
     {
       fen: 'rn1qkbnr/ppp2ppp/3p4/4p3/3PP1b1/5N2/PPP2PPP/RNBQKB1R w KQkq - 1 4',
       comment: 'This is a weak move already.--Fischer',
+      nags: [],
     },
     {
       fen: 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9',
@@ -98,6 +99,7 @@ test('loadPgn - works - comments', () => {
         "Black is in what's like a zugzwang position, here. He can't " +
         "develop the [Queen's] knight because the pawn, is hanging, the " +
         'bishop is blocked because of the Queen.--Fischer',
+      nags: [],
     },
   ]
   const pgn = `
@@ -141,12 +143,14 @@ test('loadPgn - works - comments (before first move)', () => {
         'and my previous record against Kevin was 4 losses and 1 draw ' +
         'out of 5 games.  All of our previous games were between ' +
         '1992-1998. ',
+      nags: [],
     },
     {
       fen: 'rnbqkb1r/pppp1ppp/4pn2/8/2PP4/6P1/PP2PP1P/RNBQKBNR b KQkq - 0 3',
       comment:
         ' Avrukh says to play 3.g3 instead of 3.Nf3 in case the Knight ' +
         'later comes to e2, as in the Bogo-Indian. ',
+      nags: [],
     },
   ]
   const pgn = `
@@ -243,11 +247,13 @@ test('loadPgn - works - preserves RAV inside comments', () => {
     {
       fen: 'rnbqkbnr/pp1p1ppp/4p3/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3',
       comment: ' Sicilian Defence, French Variation ',
+      nags: [],
     },
     {
       fen: '3q1rk1/1b1rbp1p/p2ppnp1/1p6/3BPP2/P1NB3Q/1PP3PP/4RR1K w - - 0 18',
       comment: ' (0.05 → 1.03) Inaccuracy. The best move was h6. ',
       suffixAnnotation: '?',
+      nags: [],
     },
   ]
   const pgn = `
@@ -274,6 +280,7 @@ test('loadPgn - works - mixed RAV and comments', () => {
     {
       fen: 'rnbqk2r/ppp1ppbp/5np1/3p4/3P1B2/4PN1P/PPP2PP1/RN1QKB1R b KQkq - 0 5',
       comment: ' 5. Be2 O-O 6. O-O c5 7. c3 Nc6 ',
+      nags: [],
     },
   ]
   const pgn = `
@@ -391,6 +398,7 @@ test('loadPgn - works - parses different newline characters', () => {
     {
       fen: 'rn1qkbnr/ppp2ppp/3p4/4p3/3PP1b1/5N2/PPP2PPP/RNBQKB1R w KQkq - 1 4',
       comment: 'This is a weak move already.--Fischer',
+      nags: [],
     },
     {
       fen: 'rn2kb1r/pp2qppp/2p2n2/4p1B1/2B1P3/1QN5/PPP2PPP/R3K2R b KQkq - 1 9',
@@ -398,6 +406,7 @@ test('loadPgn - works - parses different newline characters', () => {
         "Black is in what's like a zugzwang position, here. He can't " +
         "develop the [Queen's] knight because the pawn, is hanging, the " +
         'bishop is blocked because of the Queen.--Fischer',
+      nags: [],
     },
   ]
   const pgn = [

@@ -2286,9 +2286,9 @@ export class Chess {
             this._suffixes[this.fen()] = suffixAnnotation as Suffix
           }
 
-          // Store NAGs directly as numbers
+          // Store NAGs
           if (node.nags && node.nags.length > 0) {
-            this._nags[this.fen()] = node.nags.map((nag) => parseInt(nag, 10))
+            this._nags[this.fen()] = node.nags
           }
         }
       }
@@ -2722,7 +2722,7 @@ export class Chess {
     fen: string
     comment?: string
     suffixAnnotation?: string
-    nags?: NAG[]
+    nags: NAG[]
   }[] {
     this._pruneComments()
 
@@ -2735,7 +2735,7 @@ export class Chess {
       fen: string
       comment?: string
       suffixAnnotation?: string
-      nags?: NAG[]
+      nags: NAG[]
     }[] = []
 
     for (const fen of allFenKeys) {
@@ -2747,9 +2747,10 @@ export class Chess {
         fen: string
         comment?: string
         suffixAnnotation?: string
-        nags?: NAG[]
+        nags: NAG[]
       } = {
         fen: fen,
+        nags: nags ?? [],
       }
 
       if (commentContent !== undefined) {
@@ -2758,10 +2759,6 @@ export class Chess {
 
       if (suffixAnnotation !== undefined) {
         entry.suffixAnnotation = suffixAnnotation
-      }
-
-      if (nags !== undefined && nags.length > 0) {
-        entry.nags = nags
       }
 
       result.push(entry)
@@ -2803,9 +2800,9 @@ export class Chess {
   /**
    * Get the NAGs for the given position (or current one).
    */
-  public getNags(fen?: string): NAG[] | undefined {
+  public getNags(fen?: string): NAG[] {
     const key = fen ?? this.fen()
-    return this._nags[key]
+    return this._nags[key] ?? []
   }
 
   /**
@@ -2835,9 +2832,9 @@ export class Chess {
    * Remove all NAGs for the given position (or current).
    * Returns the removed NAGs.
    */
-  public removeNags(fen?: string): NAG[] | undefined {
+  public removeNags(fen?: string): NAG[] {
     const key = fen || this.fen()
-    const old = this._nags[key]
+    const old = this._nags[key] ?? []
     delete this._nags[key]
     return old
   }
