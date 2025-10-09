@@ -137,10 +137,14 @@ describe('Manipulate Comments', () => {
     const e4 = chess.fen()
     chess.setComment('good move')
     expect(chess.getComment()).toEqual('good move')
-    expect(chess.getComments()).toEqual([{ fen: e4, comment: 'good move', nags: [] }])
+    expect(chess.getComments()).toEqual([
+      { fen: e4, comment: 'good move', nags: [] },
+    ])
     chess.move('e5')
     expect(chess.getComment()).toBeUndefined()
-    expect(chess.getComments()).toEqual([{ fen: e4, comment: 'good move', nags: [] }])
+    expect(chess.getComments()).toEqual([
+      { fen: e4, comment: 'good move', nags: [] },
+    ])
     expect(chess.pgn().endsWith('1. e4 {good move} e5 *')).toBe(true)
   })
 
