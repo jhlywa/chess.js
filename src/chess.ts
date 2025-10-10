@@ -627,6 +627,19 @@ export function validateFen(fen: string): { ok: boolean; error?: string } {
     }
   }
 
+  // 12th criterion: is side to move already delivering check?
+  const tokensTemp = tokens.slice()
+  tokensTemp[1] = swapColor(tokens[1] as Color)
+  const tempFen = tokensTemp.join(' ') // swap the side to move
+
+  const tempChess = new Chess(tempFen, { skipValidation: true })
+  if (tempChess.inCheck()) {
+    return {
+      ok: false,
+      error: 'Invalid FEN: side to move is already delivering check',
+    }
+  }
+
   return { ok: true }
 }
 
