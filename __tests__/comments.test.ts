@@ -25,21 +25,25 @@ describe('Suffix-Only Support', () => {
       {
         fen: fen1,
         comment: 'English Opening',
+        nags: [],
       },
       {
         fen: fen2,
         comment: 'Aggressive',
         suffixAnnotation: '!?',
+        nags: [],
       },
       {
         fen: fen3,
         comment: 'Best Move',
         suffixAnnotation: '!!',
+        nags: [],
       },
       {
         fen: fen4,
         comment: 'Blunder',
         suffixAnnotation: '??',
+        nags: [],
       },
     ])
   })
@@ -68,15 +72,18 @@ describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
       {
         fen: fenC4,
         comment: 'Comment for c4',
+        nags: [],
       },
       {
         fen: fenE5,
         comment: 'Comment and Suffix for e5',
         suffixAnnotation: '!?',
+        nags: [],
       },
       {
         fen: fenNf3,
         suffixAnnotation: '!!',
+        nags: [],
       },
     ]
 
@@ -98,6 +105,7 @@ describe('Chess getComments - First Approach (Suffix-Only Handling)', () => {
     expect(entryForCurrentFen).toEqual({
       fen: currentFen,
       suffixAnnotation: '?!',
+      nags: [],
     })
   })
 })
@@ -118,7 +126,7 @@ describe('Manipulate Comments', () => {
     chess.setComment('starting position')
     expect(chess.getComment()).toEqual('starting position')
     expect(chess.getComments()).toEqual([
-      { fen: chess.fen(), comment: 'starting position' },
+      { fen: chess.fen(), comment: 'starting position', nags: [] },
     ])
     expect(chess.pgn().endsWith('{starting position} *')).toBe(true)
   })
@@ -129,10 +137,14 @@ describe('Manipulate Comments', () => {
     const e4 = chess.fen()
     chess.setComment('good move')
     expect(chess.getComment()).toEqual('good move')
-    expect(chess.getComments()).toEqual([{ fen: e4, comment: 'good move' }])
+    expect(chess.getComments()).toEqual([
+      { fen: e4, comment: 'good move', nags: [] },
+    ])
     chess.move('e5')
     expect(chess.getComment()).toBeUndefined()
-    expect(chess.getComments()).toEqual([{ fen: e4, comment: 'good move' }])
+    expect(chess.getComments()).toEqual([
+      { fen: e4, comment: 'good move', nags: [] },
+    ])
     expect(chess.pgn().endsWith('1. e4 {good move} e5 *')).toBe(true)
   })
 
@@ -143,7 +155,7 @@ describe('Manipulate Comments', () => {
     chess.setComment('dubious move')
     expect(chess.getComment()).toEqual('dubious move')
     expect(chess.getComments()).toEqual([
-      { fen: chess.fen(), comment: 'dubious move' },
+      { fen: chess.fen(), comment: 'dubious move', nags: [] },
     ])
     expect(chess.pgn().endsWith('1. e4 e6 {dubious move} *')).toBe(true)
   })
@@ -161,7 +173,7 @@ describe('Manipulate Comments', () => {
     chess.setComment('starting position')
     expect(chess.getComment()).toEqual('starting position')
     expect(chess.getComments()).toEqual([
-      { fen: initial, comment: 'starting position' },
+      { fen: initial, comment: 'starting position', nags: [] },
     ])
     expect(chess.pgn().endsWith('{starting position} *')).toBe(true)
 
@@ -170,8 +182,8 @@ describe('Manipulate Comments', () => {
     chess.setComment('good move')
     expect(chess.getComment()).toEqual('good move')
     expect(chess.getComments()).toEqual([
-      { fen: initial, comment: 'starting position' },
-      { fen: e4, comment: 'good move' },
+      { fen: initial, comment: 'starting position', nags: [] },
+      { fen: e4, comment: 'good move', nags: [] },
     ])
     expect(
       chess.pgn().endsWith('{starting position} 1. e4 {good move} *'),
@@ -182,9 +194,9 @@ describe('Manipulate Comments', () => {
     chess.setComment('dubious move')
     expect(chess.getComment()).toEqual('dubious move')
     expect(chess.getComments()).toEqual([
-      { fen: initial, comment: 'starting position' },
-      { fen: e4, comment: 'good move' },
-      { fen: e6, comment: 'dubious move' },
+      { fen: initial, comment: 'starting position', nags: [] },
+      { fen: e4, comment: 'good move', nags: [] },
+      { fen: e6, comment: 'dubious move', nags: [] },
     ])
     expect(
       chess
@@ -206,9 +218,9 @@ describe('Manipulate Comments', () => {
     const e6 = chess.fen()
     chess.setComment('dubious move')
     expect(chess.getComments()).toEqual([
-      { fen: initial, comment: 'starting position' },
-      { fen: e4, comment: 'good move' },
-      { fen: e6, comment: 'dubious move' },
+      { fen: initial, comment: 'starting position', nags: [] },
+      { fen: e4, comment: 'good move', nags: [] },
+      { fen: e6, comment: 'dubious move', nags: [] },
     ])
     expect(chess.removeComment()).toEqual('dubious move')
     expect(
@@ -230,7 +242,7 @@ describe('Manipulate Comments', () => {
     chess.move('d4')
     chess.setComment('positional')
     expect(chess.getComments()).toEqual([
-      { fen: chess.fen(), comment: 'positional' },
+      { fen: chess.fen(), comment: 'positional', nags: [] },
     ])
     expect(chess.pgn().endsWith('1. d4 {positional} *')).toBe(true)
   })
@@ -241,7 +253,7 @@ describe('Manipulate Comments', () => {
       chess.move('e4')
       chess.setComment('good move')
       expect(chess.getComments()).toEqual([
-        { fen: chess.fen(), comment: 'good move' },
+        { fen: chess.fen(), comment: 'good move', nags: [] },
       ])
       fn(chess)
       expect(chess.getComments()).toEqual([])

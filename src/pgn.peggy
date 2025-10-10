@@ -87,7 +87,7 @@ suffixAnnotation "suffix annotation"
 	= $[!?] |1..2|
       
 nag "NAG"
-	= _ '$' nag:$[0-9]+ { return nag }
+	= _ '$' nag:$[0-9]+ { return parseInt(nag, 10) }
 
 comment
 	= braceComment / restOfLineComment

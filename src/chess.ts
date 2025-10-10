@@ -95,6 +95,40 @@ export const SUFFIX_LIST = ['!', '?', '!!', '!?', '?!', '??'] as const
 
 export type Suffix = (typeof SUFFIX_LIST)[number]
 
+// NAG (Numeric Annotation Glyph) to symbol mapping
+/* eslint-disable @typescript-eslint/naming-convention */
+export const NAG_TO_SYMBOL = {
+  7: '□', // Only move
+  22: '⨀', // Zugzwang
+  10: '=', // Equal position
+  13: '∞', // Unclear position
+  14: '⩲', // White is slightly better
+  15: '⩱', // Black is slightly better
+  16: '±', // White is better
+  17: '∓', // Black is better
+  18: '+−', // White is winning
+  19: '-+', // Black is winning
+  146: 'N', // Novelty
+  32: '↑↑', // Development
+  36: '↑', // Initiative
+  40: '→', // Attack
+  132: '⇆', // Counterplay
+  138: '⊕', // Time trouble
+  44: '=∞', // With compensation
+  140: '∆', // With the idea
+} as const
+/* eslint-enable @typescript-eslint/naming-convention */
+
+export type NAG = number
+
+/**
+ * Convert a NAG (Numeric Annotation Glyph) to its text symbol representation.
+ * Returns undefined if the NAG has no corresponding symbol.
+ */
+export function nagToGlyph(nag: NAG): string | undefined {
+  return NAG_TO_SYMBOL[nag as keyof typeof NAG_TO_SYMBOL]
+}
+
 export const DEFAULT_POSITION =
   'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
@@ -719,6 +753,7 @@ export class Chess {
   private _history: History[] = []
   private _comments: Record<string, string> = {}
   private _suffixes: Record<string, Suffix> = {}
+  private _nags: Record<string, NAG[]> = {}
   private _castling: Record<Color, number> = { w: 0, b: 0 }
 
   private _hash = 0n
@@ -729,6 +764,7 @@ export class Chess {
   constructor(fen = DEFAULT_POSITION, { skipValidation = false } = {}) {
     this._comments = {}
     this._suffixes = {}
+    this._nags = {}
     this.load(fen, { skipValidation })
   }
 
@@ -1010,6 +1046,7 @@ export class Chess {
     this.load(DEFAULT_POSITION)
     this._comments = {}
     this._suffixes = {}
+    this._nags = {}
   }
 
   get(square: Square): Piece | undefined {
@@ -2248,6 +2285,11 @@ export class Chess {
           if (suffixAnnotation) {
             this._suffixes[this.fen()] = suffixAnnotation as Suffix
           }
+
+          // Store NAGs
+          if (node.nags && node.nags.length > 0) {
+            this._nags[this.fen()] = node.nags
+          }
         }
       }
 
@@ -2680,29 +2722,35 @@ export class Chess {
     fen: string
     comment?: string
     suffixAnnotation?: string
+    nags: NAG[]
   }[] {
     this._pruneComments()
 
     const allFenKeys = new Set<string>()
     Object.keys(this._comments).forEach((fen) => allFenKeys.add(fen))
     Object.keys(this._suffixes).forEach((fen) => allFenKeys.add(fen))
+    Object.keys(this._nags).forEach((fen) => allFenKeys.add(fen))
 
     const result: {
       fen: string
       comment?: string
       suffixAnnotation?: string
+      nags: NAG[]
     }[] = []
 
     for (const fen of allFenKeys) {
       const commentContent = this._comments[fen]
       const suffixAnnotation = this._suffixes[fen]
+      const nags = this._nags[fen]
 
       const entry: {
         fen: string
         comment?: string
         suffixAnnotation?: string
+        nags: NAG[]
       } = {
         fen: fen,
+        nags: nags ?? [],
       }
 
       if (commentContent !== undefined) {
@@ -2747,6 +2795,68 @@ export class Chess {
     const old = this._suffixes[key]
     delete this._suffixes[key]
     return old
+  }
+
+  /**
+   * Get the NAGs for the given position (or current one).
+   */
+  public getNags(fen?: string): NAG[] {
+    const key = fen ?? this.fen()
+    return this._nags[key] ?? []
+  }
+
+  /**
+   * Add a NAG to the given position (or current).
+   * Supports multiple NAGs per position.
+   */
+  public addNag(nag: NAG, fen?: string): void {
+    const key = fen || this.fen()
+    if (!this._nags[key]) {
+      this._nags[key] = []
+    }
+    // Avoid duplicates
+    if (!this._nags[key].includes(nag)) {
+      this._nags[key].push(nag)
+    }
+  }
+
+  /**
+   * Set NAGs for the given position (or current), replacing any existing NAGs.
+   */
+  public setNags(nags: NAG[], fen?: string): void {
+    const key = fen || this.fen()
+    this._nags[key] = [...nags] // Create a copy
+  }
+
+  /**
+   * Remove all NAGs for the given position (or current).
+   * Returns the removed NAGs.
+   */
+  public removeNags(fen?: string): NAG[] {
+    const key = fen || this.fen()
+    const old = this._nags[key] ?? []
+    delete this._nags[key]
+    return old
+  }
+
+  /**
+   * Remove a specific NAG from the given position (or current).
+   * Returns true if the NAG was found and removed.
+   */
+  public removeNag(nag: NAG, fen?: string): boolean {
+    const key = fen || this.fen()
+    const nags = this._nags[key]
+    if (!nags) return false
+
+    const index = nags.indexOf(nag)
+    if (index === -1) return false
+
+    nags.splice(index, 1)
+    // Clean up empty arrays
+    if (nags.length === 0) {
+      delete this._nags[key]
+    }
+    return true
   }
 
   /**
