@@ -684,42 +684,6 @@ function getDisambiguator(move: InternalMove, moves: InternalMove[]): string {
   return ''
 }
 
-function addMove(
-  moves: InternalMove[],
-  color: Color,
-  from: number,
-  to: number,
-  piece: PieceSymbol,
-  captured: PieceSymbol | undefined = undefined,
-  flags: number = BITS.NORMAL,
-) {
-  const r = rank(to)
-
-  if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
-    for (let i = 0; i < PROMOTIONS.length; i++) {
-      const promotion = PROMOTIONS[i]
-      moves.push({
-        color,
-        from,
-        to,
-        piece,
-        captured,
-        promotion,
-        flags: flags | BITS.PROMOTION,
-      })
-    }
-  } else {
-    moves.push({
-      color,
-      from,
-      to,
-      piece,
-      captured,
-      flags,
-    })
-  }
-}
-
 function inferPieceType(san: string): PieceSymbol | undefined {
   let pieceType = san.charAt(0)
   if (pieceType >= 'a' && pieceType <= 'h') {
@@ -1572,12 +1536,12 @@ export class Chess {
         // single square, non-capturing
         to = from + PAWN_OFFSETS[us][0]
         if (!this._board[to]) {
-          addMove(moves, us, from, to, PAWN)
+          this._addMove(moves, us, from, to, PAWN)
 
           // double square
           to = from + PAWN_OFFSETS[us][1]
           if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
-            addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN)
+            this._addMove(moves, us, from, to, PAWN, undefined, BITS.BIG_PAWN)
           }
         }
 
@@ -1587,7 +1551,7 @@ export class Chess {
           if (to & 0x88) continue
 
           if (this._board[to]?.color === them) {
-            addMove(
+            this._addMove(
               moves,
               us,
               from,
@@ -1597,7 +1561,7 @@ export class Chess {
               BITS.CAPTURE,
             )
           } else if (to === this._epSquare) {
-            addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
+            this._addMove(moves, us, from, to, PAWN, PAWN, BITS.EP_CAPTURE)
           }
         }
       } else {
@@ -1612,12 +1576,12 @@ export class Chess {
             if (to & 0x88) break
 
             if (!this._board[to]) {
-              addMove(moves, us, from, to, type)
+              this._addMove(moves, us, from, to, type)
             } else {
               // own color, stop loop
               if (this._board[to].color === us) break
 
-              addMove(
+              this._addMove(
                 moves,
                 us,
                 from,
@@ -1656,7 +1620,7 @@ export class Chess {
             !this._attacked(them, castlingFrom + 1) &&
             !this._attacked(them, castlingTo)
           ) {
-            addMove(
+            this._addMove(
               moves,
               us,
               this._kings[us],
@@ -1681,7 +1645,7 @@ export class Chess {
             !this._attacked(them, castlingFrom - 1) &&
             !this._attacked(them, castlingTo)
           ) {
-            addMove(
+            this._addMove(
               moves,
               us,
               this._kings[us],
@@ -1715,6 +1679,46 @@ export class Chess {
     }
 
     return legalMoves
+  }
+
+  /**
+   * Updates the input moves array in place by adding a new move
+   * Considers possible pawn promotions by adding all possible promotions
+   */
+  private _addMove(
+    moves: InternalMove[],
+    color: Color,
+    from: number,
+    to: number,
+    piece: PieceSymbol,
+    captured: PieceSymbol | undefined = undefined,
+    flags: number = BITS.NORMAL,
+  ) {
+    const r = rank(to)
+  
+    if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
+      for (let i = 0; i < PROMOTIONS.length; i++) {
+        const promotion = PROMOTIONS[i]
+        moves.push({
+          color,
+          from,
+          to,
+          piece,
+          captured,
+          promotion,
+          flags: flags | BITS.PROMOTION,
+        })
+      }
+    } else {
+      moves.push({
+        color,
+        from,
+        to,
+        piece,
+        captured,
+        flags,
+      })
+    }
   }
 
   move(
