@@ -169,8 +169,8 @@ export class Move {
   /**
    * @deprecated This field is deprecated and will be removed in version 2.0.0.
    * Please use move descriptor functions instead: `isCapture`, `isPromotion`,
-   * `isEnPassant`, `isKingsideCastle`, `isQueensideCastle`, `isCastle`, and
-   * `isBigPawn`
+   * `isEnPassant`, `isKingsideCastle`, `isQueensideCastle`, `isCastle`,
+   * `isBigPawn`, and `isCheck`
    */
   flags: string
 
@@ -244,6 +244,10 @@ export class Move {
 
   isNullMove() {
     return this.flags.indexOf(FLAGS['NULL_MOVE']) > -1
+  }
+
+  isCheck() {
+    return this.san.includes('+') || this.san.includes('#')
   }
 }
 

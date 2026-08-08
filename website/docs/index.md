@@ -798,6 +798,7 @@ The `Move` object has helper methods that describe the type of move:
 - `.isPromotion()` - is the move a pawn promotion?
 - `.isKingsideCastle()` - is the move a kingside castle?
 - `.isQueensideCastle()` - is the move a queenside castle?
+- `.isCheck()` - does the move put the opponent's king in check?
 
 ### .pgn([ options ])
 

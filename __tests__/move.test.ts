@@ -12,6 +12,7 @@ test('move - works - standard algebraic notation', () => {
   expect(move.isEnPassant()).toEqual(false)
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
   expect(move.after).toEqual(chess.fen())
   expect(chess.fen()).toEqual(next)
 
@@ -33,6 +34,7 @@ test('move - works - standard algebraic notation (mates)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(true)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -59,6 +61,7 @@ test('move - works - standard algebraic notation (white en passant)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -84,6 +87,7 @@ test('move - works - standard algebraic notation (black en passant)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -109,6 +113,7 @@ test('move - works - standard algebraic notation (pin disambiguates piece)', () 
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -132,6 +137,7 @@ test('move - works - permissive parser (accepts overly disambiguated piece)', ()
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -155,6 +161,7 @@ test('move - works - permissive parser (accepts correctly disambiguated piece)',
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -186,6 +193,7 @@ test('move - works - verbose', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(true)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -204,6 +212,7 @@ test('move - works - verbose - promotion field ignored if not promoting', () => 
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(true)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -223,6 +232,7 @@ test('move - works - verbose - under promotion', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -255,6 +265,7 @@ test('move - works - permissive parser (piece capture without x)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -279,6 +290,7 @@ test('move - works - permissive parser (pawn capture without x)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -303,6 +315,7 @@ test('move - works - permissive parser (en passant capture without x)', () => {
   expect(move.isKingsideCastle()).toEqual(false)
   expect(move.isQueensideCastle()).toEqual(false)
   expect(move.isBigPawn()).toEqual(false)
+  expect(move.isCheck()).toEqual(false)
 
   expect(chess.hash()).toEqual(new Chess(next).hash())
   chess.undo()
@@ -324,6 +337,7 @@ test('move - works - kingside castling', () => {
     expect(move.isEnPassant()).toEqual(false)
     expect(move.isKingsideCastle()).toEqual(true)
     expect(move.isQueensideCastle()).toEqual(false)
+    expect(move.isCheck()).toEqual(false)
     expect(move.after).toEqual(chess.fen())
     expect(chess.fen()).toEqual(next)
 
@@ -348,6 +362,7 @@ test('move - works - queenside castling', () => {
     expect(move.isEnPassant()).toEqual(false)
     expect(move.isKingsideCastle()).toEqual(false)
     expect(move.isQueensideCastle()).toEqual(true)
+    expect(move.isCheck()).toEqual(false)
     expect(move.after).toEqual(chess.fen())
     expect(chess.fen()).toEqual(next)
 
@@ -369,4 +384,36 @@ test('move - works - ambiguous capitalization in move notation', () => {
   const move = chess.move('b1c3')
   expect(move.san).not.toEqual('B1c3')
   expect(move.san).toEqual('Nc3')
+})
+
+test('move - works - isCheck', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2',
+  )
+  const nonCheckMove = chess.move('Nf3')
+  expect(nonCheckMove.isCheck()).toEqual(false)
+
+  const checkMoveChess = new Chess(
+    'rnb1kbnr/pppp1ppp/8/8/4Pp1q/2N5/PPPP2PP/R1BQKBNR w KQkq - 2 4',
+  )
+  const moves = checkMoveChess.moves({ verbose: true })
+  const ke2 = moves.find((m) => m.san === 'Ke2')!
+  expect(ke2.isCheck()).toEqual(false)
+
+  const mateChess = new Chess('7k/3R4/3p2Q1/6Q1/2N1N3/8/8/3R3K w - - 0 1')
+  const mateMove = mateChess.move('Rd8#')
+  expect(mateMove.isCheck()).toEqual(true)
+
+  const checkChess = new Chess(
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+  )
+  checkChess.move('e4')
+  checkChess.move('e5')
+  const checkMove = checkChess.move('Qh5')
+  expect(checkMove.san).toEqual('Qh5')
+  expect(checkMove.isCheck()).toEqual(false)
+  checkChess.move('g6')
+  const checkMove2 = checkChess.move('Qxe5+')
+  expect(checkMove2.san).toEqual('Qxe5+')
+  expect(checkMove2.isCheck()).toEqual(true)
 })
