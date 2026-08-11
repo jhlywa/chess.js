@@ -145,6 +145,9 @@ type InternalMove = {
   captured?: PieceSymbol
   promotion?: PieceSymbol
   flags: number
+  // Chess960 specific: save rook positions for castling undo
+  rookFrom?: number
+  rookTo?: number
 }
 
 interface History {
@@ -746,21 +749,22 @@ function strippedSan(move: string): string {
 }
 
 export class Chess {
-  private _board = new Array<Piece>(128)
-  private _turn: Color = WHITE
+  protected _board = new Array<Piece>(128)
+  protected _turn: Color = WHITE
   private _header: Record<string, string | null> = {}
-  private _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
-  private _epSquare = -1
-  private _fenEpSquare = -1
-  private _halfMoves = 0
-  private _moveNumber = 0
-  private _history: History[] = []
+  protected _kings: Record<Color, number> = { w: EMPTY, b: EMPTY }
+  protected _epSquare = -1
+  protected _fenEpSquare = -1
+  protected _halfMoves = 0
+  protected _moveNumber = 0
+  protected _history: History[] = []
   private _comments: Record<string, string> = {}
   private _suffixes: Record<string, Suffix> = {}
   private _nags: Record<string, NAG[]> = {}
-  private _castling: Record<Color, number> = { w: 0, b: 0 }
+  protected _castling: Record<Color, number> = { w: 0, b: 0 }
 
-  private _hash = 0n
+
+  protected _hash = 0n
 
   // tracks number of times a position has been seen for repetition checking
   private _positionCount = new Map<bigint, number>()
@@ -970,7 +974,7 @@ export class Chess {
     ].join(' ')
   }
 
-  private _pieceKey(i: number) {
+  protected _pieceKey(i: number) {
     if (!this._board[i]) {
       return 0n
     }
@@ -994,11 +998,11 @@ export class Chess {
     return PIECE_KEYS[colorIndex][typeIndex][i]
   }
 
-  private _epKey() {
+  protected _epKey() {
     return this._epSquare === EMPTY ? 0n : EP_KEYS[this._epSquare & 7]
   }
 
-  private _castlingKey() {
+  protected _castlingKey() {
     const index = (this._castling.w >> 5) | (this._castling.b >> 3)
     return CASTLING_KEYS[index]
   }
@@ -1096,7 +1100,7 @@ export class Chess {
     return false
   }
 
-  private _set(sq: number, piece: Piece) {
+  protected _set(sq: number, piece: Piece) {
     this._hash ^= this._pieceKey(sq)
     this._board[sq] = piece
     this._hash ^= this._pieceKey(sq)
@@ -1142,7 +1146,7 @@ export class Chess {
     return true
   }
 
-  private _clear(sq: number) {
+  protected _clear(sq: number) {
     this._hash ^= this._pieceKey(sq)
     delete this._board[sq]
   }
@@ -1161,7 +1165,7 @@ export class Chess {
     return piece
   }
 
-  private _updateCastlingRights() {
+  protected _updateCastlingRights() {
     this._hash ^= this._castlingKey()
 
     const whiteKingInPlace =
@@ -1237,10 +1241,10 @@ export class Chess {
     }
   }
 
-  private _attacked(color: Color, square: number): boolean
-  private _attacked(color: Color, square: number, verbose: false): boolean
-  private _attacked(color: Color, square: number, verbose: true): Square[]
-  private _attacked(color: Color, square: number, verbose?: boolean) {
+  protected _attacked(color: Color, square: number): boolean
+  protected _attacked(color: Color, square: number, verbose: false): boolean
+  protected _attacked(color: Color, square: number, verbose: true): Square[]
+  protected _attacked(color: Color, square: number, verbose?: boolean) {
     const attackers: Square[] = []
     for (let i = Ox88.a8; i <= Ox88.h1; i++) {
       // did we run off the end of the board
@@ -1525,7 +1529,7 @@ export class Chess {
     }
   }
 
-  private _moves({
+  protected _moves({
     legal = true,
     piece = undefined,
     square = undefined,
@@ -1786,7 +1790,7 @@ export class Chess {
     return prettyMove
   }
 
-  private _push(move: InternalMove) {
+  protected _push(move: InternalMove) {
     this._history.push({
       move,
       kings: { b: this._kings.b, w: this._kings.w },
@@ -1799,7 +1803,7 @@ export class Chess {
     })
   }
 
-  private _movePiece(from: number, to: number) {
+  protected _movePiece(from: number, to: number) {
     this._hash ^= this._pieceKey(from)
 
     this._board[to] = this._board[from]
@@ -1808,7 +1812,7 @@ export class Chess {
     this._hash ^= this._pieceKey(to)
   }
 
-  private _makeMove(move: InternalMove) {
+  protected _makeMove(move: InternalMove) {
     const us = this._turn
     const them = swapColor(us)
     this._push(move)
@@ -1954,7 +1958,7 @@ export class Chess {
     return null
   }
 
-  private _undoMove(): InternalMove | null {
+  protected _undoMove(): InternalMove | null {
     const old = this._history.pop()
     if (old === undefined) {
       return null
@@ -2911,5 +2915,1043 @@ export class Chess {
 
   moveNumber(): number {
     return this._moveNumber
+  }
+}
+
+/**
+ * Chess960 (Fischer Random Chess) Implementation
+ * 
+ * Extends the base Chess class to support all 960 possible starting positions
+ */
+export class Chess960 extends Chess {
+  private _rooks: Record<Color, Array<{ square: number; flag: number }>> = {
+    w: [],
+    b: [],
+  }
+
+  /**
+   * Create a new Chess960 game
+   * 
+   * @param position - Position number (0-959), X-FEN string, or undefined for random
+   * @param options - Configuration options
+   * 
+   * @example
+   * // Create position 518 (standard chess starting position)
+   * const chess = new Chess960(518)
+   * 
+   * @example
+   * // Create from X-FEN string
+   * const chess = new Chess960('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w HAha - 0 1')
+   * 
+   * @example
+   * // Create random Chess960 position
+   * const chess = new Chess960()
+   */
+  constructor(
+    position?: number | string | { skipValidation?: boolean; random?: boolean },
+    options?: { skipValidation?: boolean; random?: boolean }
+  ) {
+    let fen: string
+    let opts = options || {}
+
+    // Handle case where first argument is an options object
+    if (typeof position === 'object' && position !== null) {
+      opts = position
+      position = undefined
+    }
+
+    if (position === undefined) {
+      if (opts.random) {
+        // Generate random position
+        const randomPosition = Math.floor(Math.random() * 960)
+        fen = Chess960.generatePositionFen(randomPosition)
+      } else {
+        // Default to standard chess position (518)
+        fen = Chess960.generatePositionFen(518)
+      }
+    } else if (typeof position === 'number') {
+      // Generate from position number
+      if (position < 0 || position >= 960) {
+        throw new Error('Position number must be between 0 and 959')
+      }
+      fen = Chess960.generatePositionFen(position)
+    } else {
+      // Use provided FEN string
+      fen = position
+    }
+    super(fen, opts)
+    this._initializeRooks()
+  }
+
+  /**
+   * Initialize rook tracking from current board position
+   */
+  private _initializeRooks(): void {
+    this._rooks = { w: [], b: [] }
+
+    // Scan the back ranks for rooks
+    // White's back rank (rank 1)
+    for (let sq = Ox88.a1; sq <= Ox88.h1; sq++) {
+      const piece = this.get(algebraic(sq))
+      if (piece && piece.type === ROOK && piece.color === WHITE) {
+        const kingSquare = this._getKingSquare(WHITE)
+        const flag = sq > kingSquare ? BITS.KSIDE_CASTLE : BITS.QSIDE_CASTLE
+        this._rooks.w.push({ square: sq, flag })
+      }
+    }
+
+    // Black's back rank (rank 8)
+    for (let sq = Ox88.a8; sq <= Ox88.h8; sq++) {
+      const piece = this.get(algebraic(sq))
+      if (piece && piece.type === ROOK && piece.color === BLACK) {
+        const kingSquare = this._getKingSquare(BLACK)
+        const flag = sq > kingSquare ? BITS.KSIDE_CASTLE : BITS.QSIDE_CASTLE
+        this._rooks.b.push({ square: sq, flag })
+      }
+    }
+  }
+
+  /**
+   * Get the king's square for a given color
+   */
+  private _getKingSquare(color: Color): number {
+    const rankNum = color === WHITE ? 1 : 8
+    for (let fileNum = 0; fileNum < 8; fileNum++) {
+      const square = `${'abcdefgh'[fileNum]}${rankNum}` as Square
+      const piece = this.get(square)
+      if (piece && piece.type === KING && piece.color === color) {
+        return Ox88[square]
+      }
+    }
+    return -1
+  }
+
+  /**
+   * Generate a Chess960 starting position FEN from a position number (0-959)
+   * 
+   * Algorithm based on the Scharnagl numbering system:
+   * - Bishops must be on opposite colors
+   * - King must be between the two rooks
+   * 
+   * @param n - Position number (0-959)
+   * @returns FEN string for the starting position
+   */
+  static generatePositionFen(n: number): string {
+    if (n < 0 || n >= 960) {
+      throw new Error('Position number must be between 0 and 959')
+    }
+
+    const pieces = new Array(8).fill('')
+
+    // Place bishops on opposite colored squares
+    const lightSquares = [1, 3, 5, 7]
+    const lightBishopIndex = n % 4
+    pieces[lightSquares[lightBishopIndex]] = 'B'
+    n = Math.floor(n / 4)
+
+    const darkSquares = [0, 2, 4, 6]
+    const darkBishopIndex = n % 4
+    pieces[darkSquares[darkBishopIndex]] = 'B'
+    n = Math.floor(n / 4)
+
+    // Place queen
+    const emptySquares = pieces
+      .map((p, i) => (p === '' ? i : -1))
+      .filter((i) => i !== -1)
+    const queenIndex = n % 6
+    pieces[emptySquares[queenIndex]] = 'Q'
+    n = Math.floor(n / 6)
+
+    // Place knights
+    const knightPlacements = [
+      [0, 1], [0, 2], [0, 3], [0, 4],
+      [1, 2], [1, 3], [1, 4],
+      [2, 3], [2, 4],
+      [3, 4],
+    ]
+    const knightPlacement = knightPlacements[n]
+    const remainingSquares = pieces
+      .map((p, i) => (p === '' ? i : -1))
+      .filter((i) => i !== -1)
+    pieces[remainingSquares[knightPlacement[0]]] = 'N'
+    pieces[remainingSquares[knightPlacement[1]]] = 'N'
+
+    // Place rooks and king (R-K-R pattern)
+    const finalSquares = pieces
+      .map((p, i) => (p === '' ? i : -1))
+      .filter((i) => i !== -1)
+    pieces[finalSquares[0]] = 'R'
+    pieces[finalSquares[1]] = 'K'
+    pieces[finalSquares[2]] = 'R'
+
+    // Build FEN string
+    const backRank = pieces.join('').toLowerCase()
+    const fen = `${backRank}/pppppppp/8/8/8/8/PPPPPPPP/${pieces.join('').toUpperCase()} w KQkq - 0 1`
+
+    return fen
+  }
+
+  /**
+   * Get the position number (0-959) for the current Chess960 position
+   * Returns -1 if the position is not a valid Chess960 starting position
+   */
+  getPositionNumber(): number {
+    // Implementation left for future enhancement
+    return -1
+  }
+
+  /**
+   * Check if current position is a valid Chess960 starting position
+   */
+  isValidChess960Position(): boolean {
+    const fen = this.fen()
+    const ranks = fen.split(' ')[0].split('/')
+    
+    // Must be move 1 (halfmove 0, fullmove 1)
+    if (fen.split(' ')[4] !== '0' || fen.split(' ')[5] !== '1') {
+      return false
+    }
+    
+    // Check white's back rank (rank 8 in FEN, index 7)
+    const whiteBackRank = ranks[7].toLowerCase()
+    
+    // Check black's back rank (rank 1 in FEN, index 0)
+    const blackBackRank = ranks[0].toLowerCase()
+    
+    // Both back ranks should match (mirrored)
+    if (whiteBackRank.toUpperCase() !== ranks[7] || blackBackRank !== ranks[0]) {
+      return false
+    }
+    
+    // Pawns must be on ranks 2 and 7
+    if (ranks[6] !== 'PPPPPPPP' || ranks[1] !== 'pppppppp') {
+      return false
+    }
+    
+    // Middle ranks must be empty
+    for (let i = 2; i <= 5; i++) {
+      if (ranks[i] !== '8') {
+        return false
+      }
+    }
+    
+    // Check piece count on white's back rank
+    const pieces = whiteBackRank
+    if (
+      pieces.split('r').length - 1 !== 2 ||
+      pieces.split('n').length - 1 !== 2 ||
+      pieces.split('b').length - 1 !== 2 ||
+      pieces.split('q').length - 1 !== 1 ||
+      pieces.split('k').length - 1 !== 1
+    ) {
+      return false
+    }
+
+    // Check bishops on opposite colors
+    const bishopIndices: number[] = []
+    for (let i = 0; i < pieces.length; i++) {
+      if (pieces[i] === 'b') {
+        bishopIndices.push(i)
+      }
+    }
+    if (bishopIndices.length !== 2) return false
+    if (bishopIndices[0] % 2 === bishopIndices[1] % 2) return false
+
+    // Check king between rooks
+    const kingIndex = pieces.indexOf('k')
+    const rook1Index = pieces.indexOf('r')
+    const rook2Index = pieces.lastIndexOf('r')
+    if (kingIndex < rook1Index || kingIndex > rook2Index) {
+      return false
+    }
+
+    return true
+  }
+
+  /**
+   * Override load to support X-FEN notation
+   */
+  override load(fen: string, options: { skipValidation?: boolean; preserveHeaders?: boolean } = {}) {
+    // First, check if this is X-FEN (has file letters in castling)
+    const tokens = fen.split(/\s+/)
+    if (tokens.length >= 3) {
+      const castlingPart = tokens[2]
+      const hasXFEN = /[A-Ha-h]/.test(castlingPart)
+      
+      if (hasXFEN) {
+        // Convert X-FEN to standard FEN for loading, then fix castling
+        const standardFen = this._convertXFENToStandard(fen)
+        super.load(standardFen, options)
+        this._parseXFENCastling(castlingPart)
+        this._initializeRooks()
+        return
+      }
+    }
+    
+    // Standard FEN loading
+    super.load(fen, options)
+    this._initializeRooks()
+  }
+
+  /**
+   * Convert X-FEN to standard FEN (temporarily use KQkq for loading)
+   */
+  private _convertXFENToStandard(xfen: string): string {
+    const tokens = xfen.split(/\s+/)
+    // Replace X-FEN castling with standard KQkq for initial load
+    tokens[2] = 'KQkq'
+    return tokens.join(' ')
+  }
+
+  /**
+   * Parse X-FEN castling notation
+   */
+  private _parseXFENCastling(castlingString: string): void {
+    // This will be called after the position is loaded
+    // We'll update the castling rights based on X-FEN notation
+    
+    // Reset castling
+    this._castling = { w: 0, b: 0 }
+    this._rooks = { w: [], b: [] }
+
+    // Parse white castling rights (uppercase letters)
+    const whiteFiles = castlingString.match(/[A-H]/g)
+    if (whiteFiles) {
+      for (const fileLetter of whiteFiles) {
+        const fileIndex = fileLetter.charCodeAt(0) - 'A'.charCodeAt(0)
+        const sq = Ox88.a1 + fileIndex
+        
+        // Determine if kingside or queenside based on king position
+        const kingSquare = this._getKingSquare(WHITE)
+        const flag = sq > kingSquare ? BITS.KSIDE_CASTLE : BITS.QSIDE_CASTLE
+        
+        this._castling.w |= flag
+        this._rooks.w.push({ square: sq, flag })
+      }
+    }
+
+    // Parse black castling rights (lowercase letters)
+    const blackFiles = castlingString.match(/[a-h]/g)
+    if (blackFiles) {
+      for (const fileLetter of blackFiles) {
+        const fileIndex = fileLetter.charCodeAt(0) - 'a'.charCodeAt(0)
+        const sq = Ox88.a8 + fileIndex
+        
+        const kingSquare = this._getKingSquare(BLACK)
+        const flag = sq > kingSquare ? BITS.KSIDE_CASTLE : BITS.QSIDE_CASTLE
+        
+        this._castling.b |= flag
+        this._rooks.b.push({ square: sq, flag })
+      }
+    }
+
+    // Also handle standard notation mixed with X-FEN
+    if (castlingString.includes('K')) {
+      this._castling.w |= BITS.KSIDE_CASTLE
+      // Find the kingside rook
+      for (let sq = Ox88.h1; sq >= Ox88.c1; sq--) {
+        const piece = this.get(algebraic(sq))
+        if (piece && piece.type === ROOK && piece.color === WHITE) {
+          if (!this._rooks.w.some(r => r.square === sq)) {
+            this._rooks.w.push({ square: sq, flag: BITS.KSIDE_CASTLE })
+          }
+          break
+        }
+      }
+    }
+    
+    if (castlingString.includes('Q')) {
+      this._castling.w |= BITS.QSIDE_CASTLE
+      for (let sq = Ox88.a1; sq <= Ox88.g1; sq++) {
+        const piece = this.get(algebraic(sq))
+        if (piece && piece.type === ROOK && piece.color === WHITE) {
+          if (!this._rooks.w.some(r => r.square === sq)) {
+            this._rooks.w.push({ square: sq, flag: BITS.QSIDE_CASTLE })
+          }
+          break
+        }
+      }
+    }
+
+    if (castlingString.includes('k')) {
+      this._castling.b |= BITS.KSIDE_CASTLE
+      for (let sq = Ox88.h8; sq >= Ox88.c8; sq--) {
+        const piece = this.get(algebraic(sq))
+        if (piece && piece.type === ROOK && piece.color === BLACK) {
+          if (!this._rooks.b.some(r => r.square === sq)) {
+            this._rooks.b.push({ square: sq, flag: BITS.KSIDE_CASTLE })
+          }
+          break
+        }
+      }
+    }
+
+    if (castlingString.includes('q')) {
+      this._castling.b |= BITS.QSIDE_CASTLE
+      for (let sq = Ox88.a8; sq <= Ox88.g8; sq++) {
+        const piece = this.get(algebraic(sq))
+        if (piece && piece.type === ROOK && piece.color === BLACK) {
+          if (!this._rooks.b.some(r => r.square === sq)) {
+            this._rooks.b.push({ square: sq, flag: BITS.QSIDE_CASTLE })
+          }
+          break
+        }
+      }
+    }
+  }
+
+  /**
+   * Override fen() to generate X-FEN notation
+   */
+  override fen(options: { forceEnpassantSquare?: boolean; useXFEN?: boolean } = {}): string {
+    const standardFen = super.fen(options)
+    
+    // If useXFEN is explicitly false, return standard FEN
+    if (options.useXFEN === false) {
+      return standardFen
+    }
+
+    // Check if we need X-FEN (non-standard rook positions)
+    const needsXFEN = this._needsXFEN()
+    
+    if (!needsXFEN) {
+      return standardFen
+    }
+
+    // Generate X-FEN
+    const tokens = standardFen.split(' ')
+    tokens[2] = this._generateXFENCastling()
+    
+    return tokens.join(' ')
+  }
+
+  /**
+   * Check if position needs X-FEN notation
+   */
+  private _needsXFEN(): boolean {
+    // Check if any rook is not in standard position
+    for (const rook of this._rooks.w) {
+      if (rook.flag === BITS.KSIDE_CASTLE && rook.square !== Ox88.h1) {
+        return true
+      }
+      if (rook.flag === BITS.QSIDE_CASTLE && rook.square !== Ox88.a1) {
+        return true
+      }
+    }
+    
+    for (const rook of this._rooks.b) {
+      if (rook.flag === BITS.KSIDE_CASTLE && rook.square !== Ox88.h8) {
+        return true
+      }
+      if (rook.flag === BITS.QSIDE_CASTLE && rook.square !== Ox88.a8) {
+        return true
+      }
+    }
+    
+    return false
+  }
+
+  /**
+   * Generate X-FEN castling string
+   */
+  private _generateXFENCastling(): string {
+    let castling = ''
+
+    // White kingside
+    if (this._castling.w & BITS.KSIDE_CASTLE) {
+      const sq = this._searchRook(WHITE, BITS.KSIDE_CASTLE)
+      if (sq !== -1) {
+        if (this._isOutermostRook(WHITE, BITS.KSIDE_CASTLE, sq)) {
+          castling += 'K'
+        } else {
+          castling += 'ABCDEFGH'[file(sq)]
+        }
+      }
+    }
+
+    // White queenside
+    if (this._castling.w & BITS.QSIDE_CASTLE) {
+      const sq = this._searchRook(WHITE, BITS.QSIDE_CASTLE)
+      if (sq !== -1) {
+        if (this._isOutermostRook(WHITE, BITS.QSIDE_CASTLE, sq)) {
+          castling += 'Q'
+        } else {
+          castling += 'ABCDEFGH'[file(sq)]
+        }
+      }
+    }
+
+    // Black kingside
+    if (this._castling.b & BITS.KSIDE_CASTLE) {
+      const sq = this._searchRook(BLACK, BITS.KSIDE_CASTLE)
+      if (sq !== -1) {
+        if (this._isOutermostRook(BLACK, BITS.KSIDE_CASTLE, sq)) {
+          castling += 'k'
+        } else {
+          castling += 'abcdefgh'[file(sq)]
+        }
+      }
+    }
+
+    // Black queenside
+    if (this._castling.b & BITS.QSIDE_CASTLE) {
+      const sq = this._searchRook(BLACK, BITS.QSIDE_CASTLE)
+      if (sq !== -1) {
+        if (this._isOutermostRook(BLACK, BITS.QSIDE_CASTLE, sq)) {
+          castling += 'q'
+        } else {
+          castling += 'abcdefgh'[file(sq)]
+        }
+      }
+    }
+
+    return castling || '-'
+  }
+
+  /**
+   * Search for a rook with specific castling flag
+   */
+  private _searchRook(color: Color, flag: number): number {
+    for (const rook of this._rooks[color]) {
+      if (flag & rook.flag) {
+        return rook.square
+      }
+    }
+    return -1
+  }
+
+  /**
+   * Check if rook is the outermost rook (for K/Q vs file letter notation)
+   */
+  private _isOutermostRook(color: Color, flag: number, sq: number): boolean {
+    if (flag === BITS.KSIDE_CASTLE) {
+      // Check if this is the h-file rook
+      const endSq = color === WHITE ? Ox88.h1 : Ox88.h8
+      return sq === endSq
+    } else {
+      // Check if this is the a-file rook
+      const endSq = color === WHITE ? Ox88.a1 : Ox88.a8
+      return sq === endSq
+    }
+  }
+
+  /**
+   * Override move to handle King-to-Rook castling notation in Chess960
+   */
+  override move(
+    move: string | { from: string; to: string; promotion?: string } | null,
+    { strict = false }: { strict?: boolean } = {},
+  ): Move {
+    if (typeof move === 'object' && move !== null && 'from' in move && 'to' in move) {
+      const fromOx88 = Ox88[move.from as Square]
+      const toOx88 = Ox88[move.to as Square]
+      
+      if (fromOx88 !== undefined && toOx88 !== undefined) {
+        const piece = this._board[fromOx88]
+        const targetPiece = this._board[toOx88]
+        
+        // If king moves to its own rook, it's a castling attempt
+        if (
+          piece && piece.type === KING &&
+          targetPiece && targetPiece.type === ROOK &&
+          piece.color === targetPiece.color
+        ) {
+          const moves = this._moves()
+          for (const m of moves) {
+            if (m.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+               if (m.from === fromOx88 && m.rookFrom === toOx88) {
+                  // Change 'to' to the king's actual destination
+                  move = { ...move, to: algebraic(m.to) }
+                  break
+               }
+            }
+          }
+        }
+      }
+    }
+    
+    return super.move(move, { strict })
+  }
+
+  /**
+   * Override _moves to implement Chess960 castling logic
+   * FIX: Temporarily disable castling rights to prevent base class from generating invalid castling moves
+   */
+  protected override _moves(options: {
+    legal?: boolean
+    piece?: PieceSymbol
+    square?: Square
+  } = {}): InternalMove[] {
+    // CRITICAL FIX: Disable base castling generation by temporarily clearing castling rights
+    const savedCastling = { w: this._castling.w, b: this._castling.b }
+    this._castling.w = 0
+    this._castling.b = 0
+
+    // Get all non-castling moves from base class
+    const moves = super._moves(options)
+
+    // Restore castling rights
+    this._castling.w = savedCastling.w
+    this._castling.b = savedCastling.b
+
+    const us = this._turn
+    const them = swapColor(us)
+
+    // only generate castling if king or no square filter
+    if (!options.square || options.square === algebraic(this._kings[us])) {
+      const kingFrom = this._kings[us]
+
+      // kingside
+      if (this._castling[us] & BITS.KSIDE_CASTLE) {
+        const rookSq = this._searchRook(us, BITS.KSIDE_CASTLE)
+        if (rookSq !== -1) {
+          const kingTo = us === WHITE ? Ox88.g1 : Ox88.g8
+          const rookTo = us === WHITE ? Ox88.f1 : Ox88.f8
+          if (this._canCastle960(kingFrom, kingTo, rookSq, rookTo, them)) {
+            moves.push({
+              color: us,
+              from: kingFrom,
+              to: kingTo,
+              piece: KING,
+              flags: BITS.KSIDE_CASTLE,
+              rookFrom: rookSq,
+              rookTo: rookTo,
+            })
+          }
+        }
+      }
+
+      // queenside
+      if (this._castling[us] & BITS.QSIDE_CASTLE) {
+        const rookSq = this._searchRook(us, BITS.QSIDE_CASTLE)
+        if (rookSq !== -1) {
+          const kingTo = us === WHITE ? Ox88.c1 : Ox88.c8
+          const rookTo = us === WHITE ? Ox88.d1 : Ox88.d8
+          if (this._canCastle960(kingFrom, kingTo, rookSq, rookTo, them)) {
+            moves.push({
+              color: us,
+              from: kingFrom,
+              to: kingTo,
+              piece: KING,
+              flags: BITS.QSIDE_CASTLE,
+              rookFrom: rookSq,
+              rookTo: rookTo,
+            })
+          }
+        }
+      }
+    }
+
+    return moves
+  }
+
+  /**
+   * Override to prevent base class from corrupting Chess960 castling rights
+   * Base class assumes king on e1/e8 and rooks on a/h files
+   * In Chess960, these can be anywhere, so we manage castling rights explicitly
+   */
+  protected override _updateCastlingRights(): void {
+    // DO NOTHING - castling rights are managed explicitly via _rooks array and X-FEN
+    // Base class logic assumes standard chess positions and will incorrectly remove rights
+  }
+
+  /**
+   * Check if Chess960 castling is legal
+   */
+  private _canCastle960(
+    kingFrom: number,
+    kingTo: number,
+    rookFrom: number,
+    rookTo: number,
+    them: Color
+  ): boolean {
+    // King can't be in check at start
+    if (this._attacked(them, kingFrom)) return false
+
+    // 1️⃣ Get king path: actual squares the king passes through
+    const kingPath: number[] = []
+    const direction = kingTo > kingFrom ? 1 : -1
+    let sq = kingFrom
+    while (sq !== kingTo) {
+      kingPath.push(sq)
+      sq += direction
+    }
+    kingPath.push(kingTo)
+
+    // 2️⃣ Check emptiness along king path (excluding starting square)
+    for (let i = 1; i < kingPath.length; i++) {
+      // skip rook if it sits in the path
+      if (kingPath[i] === rookFrom) continue
+      if (this._board[kingPath[i]]) return false
+    }
+
+    // 3️⃣ Check rook path emptiness (excluding starting square)
+    const rookPath: number[] = []
+    const rdir = rookTo > rookFrom ? 1 : -1
+    let r = rookFrom
+    while (r !== rookTo) {
+      rookPath.push(r)
+      r += rdir
+    }
+    rookPath.push(rookTo)
+
+    for (let i = 1; i < rookPath.length; i++) {
+      // Skip if king is on this square (king will move away)
+      if (rookPath[i] === kingFrom) continue
+      // The destination square must be empty or be where the king will vacate
+      if (this._board[rookPath[i]]) return false
+    }
+
+    // 4️⃣ Attacked check only on king path squares (except starting square)
+    for (let i = 1; i < kingPath.length; i++) {
+      if (this._attacked(them, kingPath[i])) return false
+    }
+
+    return true
+  }
+
+  /**
+   * Override _makeMove to handle Chess960 castling
+   * Properly saves state and updates game state for castling moves
+   */
+  protected override _makeMove(move: InternalMove): void {
+    const us = move.color
+    const them = swapColor(us)
+
+    // handle Chess960 castling
+    if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+      const isKS = (move.flags & BITS.KSIDE_CASTLE) !== 0
+      const rookFrom = this._searchRook(us, isKS ? BITS.KSIDE_CASTLE : BITS.QSIDE_CASTLE)
+
+      if (rookFrom !== -1) {
+        const kingFrom = move.from
+        const kingTo = move.to
+        const rookTo = isKS
+          ? (us === WHITE ? Ox88.f1 : Ox88.f8)
+          : (us === WHITE ? Ox88.d1 : Ox88.d8)
+
+        // CRITICAL: Save state to history BEFORE making the move
+        this._push(move)
+
+        // Update hash for castling and en passant
+        this._hash ^= this._epKey()
+        this._hash ^= this._castlingKey()
+
+        // Update hash for king movement
+        this._hash ^= this._pieceKey(kingFrom)
+        
+        // Capture pieces
+        const kingPiece = this._board[kingFrom]!
+        const rookPiece = this._board[rookFrom]!
+
+        // Remove pieces from source
+        delete this._board[kingFrom]
+        // Only delete rookFrom if it's different from kingTo (already handled by overwrite?)
+        // actually, safely deleting both is fine as long as we captured them.
+        // But if rookFrom == kingFrom (impossible), or other overlaps?
+        // In valid chess, kingFrom != rookFrom.
+        // kingTo != rookTo.
+        // But kingTo == rookFrom is possible (swap).
+        // rookTo == kingFrom is possible (swap).
+        
+        if (kingFrom !== rookFrom) {
+             delete this._board[rookFrom]
+        }
+        
+        // Update hash for rook movement (if it moves)
+        if (rookFrom !== rookTo) {
+           this._hash ^= this._pieceKey(rookFrom)
+        }
+
+        // Place pieces at destination
+        this._board[kingTo] = kingPiece
+        this._kings[us] = kingTo
+        if (rookFrom !== rookTo) {
+             this._board[rookTo] = rookPiece
+        } else {
+             // If rook doesn't move, we must ensure it's still there or put back
+             // If king moved to where rook was, rook is gone from board (deleted above).
+             // But valid chess: if rookFrom == rookTo, then it's not a swap with King (King moves to G/C file).
+             // If King checks, maybe King moves to G1, Rook stays at H1. OK.
+             // If Rook stays, we shouldn't have deleted it if it wasn't necessary.
+             // But my logic above deleted it.
+             this._board[rookTo] = rookPiece
+        }
+
+        // Update hash for king at new position
+        this._hash ^= this._pieceKey(kingTo)
+
+        // Update hash for rook at new position
+        if (rookFrom !== rookTo) {
+          this._hash ^= this._pieceKey(rookTo)
+        }
+
+        // Clear castling rights for this color
+        this._castling[us] = 0
+
+        // Update hash for new castling state
+        this._hash ^= this._castlingKey()
+
+        // Clear en passant square
+        this._epSquare = EMPTY
+        this._fenEpSquare = EMPTY
+
+        // Increment half moves (castling is not a pawn move or capture)
+        this._halfMoves++
+
+        // Increment move number if black just moved
+        if (us === BLACK) {
+          this._moveNumber++
+        }
+
+        // Switch turn
+        this._turn = them
+        this._hash ^= SIDE_KEY
+
+        return
+      }
+    }
+
+    // normal move - fully implemented here to handle Chess960 castling rights correctly
+    this._push(move)
+
+    if (move.flags & BITS.NULL_MOVE) {
+      if (us === BLACK) {
+        this._moveNumber++
+      }
+      this._halfMoves++
+      this._turn = them
+
+      this._epSquare = EMPTY
+
+      return
+    }
+
+    this._hash ^= this._epKey()
+    this._hash ^= this._castlingKey()
+
+    if (move.captured) {
+      this._hash ^= this._pieceKey(move.to)
+    }
+
+    this._movePiece(move.from, move.to)
+
+    // if ep capture, remove the captured pawn
+    if (move.flags & BITS.EP_CAPTURE) {
+      if (this._turn === BLACK) {
+        this._clear(move.to - 16)
+      } else {
+        this._clear(move.to + 16)
+      }
+    }
+
+    // if pawn promotion, replace with new piece
+    if (move.promotion) {
+      this._clear(move.to)
+      this._set(move.to, { type: move.promotion, color: us })
+    }
+
+    // if we moved the king
+    if (this._board[move.to] && this._board[move.to].type === KING) {
+      this._kings[us] = move.to
+
+      // Not handling castling here because we handled it in the block above
+      // But we must clear rights
+      this._castling[us] = 0
+    }
+
+    // turn off castling if we move a rook (using dynamic _rooks)
+    if (this._castling[us]) {
+      for (const rook of this._rooks[us]) {
+        if (
+          move.from === rook.square &&
+          this._castling[us] & rook.flag
+        ) {
+          this._castling[us] ^= rook.flag
+          break
+        }
+      }
+    }
+
+    // turn off castling if we capture a rook (using dynamic _rooks)
+    if (this._castling[them]) {
+      for (const rook of this._rooks[them]) {
+        if (
+          move.to === rook.square &&
+          this._castling[them] & rook.flag
+        ) {
+          this._castling[them] ^= rook.flag
+          break
+        }
+      }
+    }
+
+    this._hash ^= this._castlingKey()
+
+    // if big pawn move, update the en passant square
+    if (move.flags & BITS.BIG_PAWN) {
+      let epSquare
+
+      if (us === BLACK) {
+        epSquare = move.to - 16
+      } else {
+        epSquare = move.to + 16
+      }
+
+      this._fenEpSquare = epSquare
+
+      if (
+        (!((move.to - 1) & 0x88) &&
+          this._board[move.to - 1]?.type === PAWN &&
+          this._board[move.to - 1]?.color === them) ||
+        (!((move.to + 1) & 0x88) &&
+          this._board[move.to + 1]?.type === PAWN &&
+          this._board[move.to + 1]?.color === them)
+      ) {
+        this._epSquare = epSquare
+        this._hash ^= this._epKey()
+      } else {
+        this._epSquare = EMPTY
+      }
+    } else {
+      this._epSquare = EMPTY
+      this._fenEpSquare = EMPTY
+    }
+
+    // reset the 50 move counter if a pawn is moved or a piece is captured
+    if (move.piece === PAWN) {
+      this._halfMoves = 0
+    } else if (move.flags & (BITS.CAPTURE | BITS.EP_CAPTURE)) {
+      this._halfMoves = 0
+    } else {
+      this._halfMoves++
+    }
+
+    if (us === BLACK) {
+      this._moveNumber++
+    }
+
+    this._turn = them
+    this._hash ^= SIDE_KEY
+  }
+
+  /**
+   * Override _undoMove to handle Chess960 castling properly
+   * The base class assumes standard rook positions which breaks Chess960
+   */
+  protected override _undoMove(): InternalMove | null {
+    const old = this._history.pop()
+    if (old === undefined) {
+      return null
+    }
+
+    this._hash ^= this._epKey()
+    this._hash ^= this._castlingKey()
+
+    const move = old.move
+
+    // For castling moves, we need to handle Chess960 rook positions
+    if (move.flags & (BITS.KSIDE_CASTLE | BITS.QSIDE_CASTLE)) {
+      const us = old.turn
+      
+      // Use the saved rook positions from the move object
+      const rookOriginalPos = move.rookFrom ?? -1
+      const rookCurrentPos = move.rookTo ?? -1
+
+      // Restore state
+      this._kings = old.kings
+      this._turn = old.turn
+      this._castling = old.castling
+      this._epSquare = old.epSquare
+      this._fenEpSquare = old.fenEpSquare
+      this._halfMoves = old.halfMoves
+      this._moveNumber = old.moveNumber
+
+      this._hash ^= this._epKey()
+      this._hash ^= this._castlingKey()
+      this._hash ^= SIDE_KEY
+
+      // Move king back (but only if it actually moved!)
+      if (move.from !== move.to) {
+        this._hash ^= this._pieceKey(move.to)
+        this._hash ^= this._pieceKey(move.from)
+      }
+
+      // Move rook back (if it actually moved!)
+      if (rookOriginalPos !== -1 && rookOriginalPos !== rookCurrentPos) {
+        this._hash ^= this._pieceKey(rookCurrentPos)
+        this._hash ^= this._pieceKey(rookOriginalPos)
+      }
+
+      // Restore pieces safely (handling swaps)
+      const kingPiece = this._board[move.to]
+      const rookPiece = this._board[rookCurrentPos]
+
+      if (move.from !== move.to) {
+          delete this._board[move.to]
+      }
+      
+      if (rookOriginalPos !== -1 && rookOriginalPos !== rookCurrentPos) {
+           delete this._board[rookCurrentPos]
+      }
+
+      // Place back at original positions
+      if (kingPiece) {
+          this._board[move.from] = kingPiece
+      }
+      
+      if (rookPiece && rookOriginalPos !== -1) {
+          this._board[rookOriginalPos] = rookPiece
+      }
+
+      return move
+    }
+
+    // For non-castling moves, use the base implementation
+    // Restore state
+    this._kings = old.kings
+    this._turn = old.turn
+    this._castling = old.castling
+    this._epSquare = old.epSquare
+    this._fenEpSquare = old.fenEpSquare
+    this._halfMoves = old.halfMoves
+    this._moveNumber = old.moveNumber
+
+    this._hash ^= this._epKey()
+    this._hash ^= this._castlingKey()
+    this._hash ^= SIDE_KEY
+
+    const us = this._turn
+    const them = swapColor(us)
+
+    if (move.flags & BITS.NULL_MOVE) {
+      return move
+    }
+
+    this._movePiece(move.to, move.from)
+
+    // to undo any promotions
+    if (move.promotion) {
+      this._clear(move.from)
+      this._set(move.from, { type: move.piece, color: us })
+    }
+
+    if (move.captured) {
+      if (move.flags & BITS.EP_CAPTURE) {
+        // en passant capture
+        let index: number
+        if (us === BLACK) {
+          index = move.to - 16
+        } else {
+          index = move.to + 16
+        }
+        this._set(index, { type: PAWN, color: them })
+      } else {
+        // regular capture
+        this._set(move.to, { type: move.captured, color: them })
+      }
+    }
+
+    return move
   }
 }
