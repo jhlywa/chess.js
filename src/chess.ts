@@ -1572,6 +1572,7 @@ export class Chess {
       let to: number
       if (type === PAWN) {
         if (forPiece && forPiece !== type) continue
+        if (rank(from) === RANK_1 || rank(from) === RANK_8) continue
 
         // single square, non-capturing
         to = from + PAWN_OFFSETS[us][0]
