@@ -154,7 +154,7 @@ test('put - occupying white en passant square clears it', () => {
     'rnbqkbnr/pppppp1p/8/8/3PPPp1/8/PPP3PP/RNBQKBNR b KQkq f3 0 3',
   )
 
-  chess.put({ type: KNIGHT, color: BLACK }, 'f3')
+  chess.put({ type: BISHOP, color: BLACK }, 'f3')
   expect(chess.moves()).not.toContain('gxf3')
 
   expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
@@ -184,11 +184,11 @@ test('put - replacing black pawn clears white en passant square 1', () => {
 
 test('put - replacing black pawn clears white en passant square 2', () => {
   const chess = new Chess(
-    'rnbqkbnr/p1pppppp/8/8/1pPPP3/8/PP3PPP/RNBQKBNR b KQkq c3 0 3',
+    'rnbqkbnr/p1pppppp/8/8/2pPPP2/8/PP3PPP/RNBQKBNR b KQkq d3 0 3',
   )
 
-  chess.put({ type: BISHOP, color: BLACK }, 'b4')
-  expect(chess.moves()).not.toContain('bxc3')
+  chess.put({ type: KNIGHT, color: BLACK }, 'c4')
+  expect(chess.moves()).not.toContain('cxd3')
 
   expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
@@ -209,7 +209,7 @@ test('put - occupying black en passant square clears it', () => {
     'rnbqkbnr/pppp2pp/8/4ppP1/8/8/PPPPPP1P/RNBQKBNR w KQkq f6 0 3',
   )
 
-  chess.put({ type: KNIGHT, color: WHITE }, 'f6')
+  chess.put({ type: BISHOP, color: WHITE }, 'f6')
   expect(chess.moves()).not.toContain('gxf6')
 
   expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
@@ -239,11 +239,11 @@ test('put - replacing white pawn clears black en passant square 1', () => {
 
 test('put - replacing white pawn clears black en passant square 2', () => {
   const chess = new Chess(
-    'rnbqkbnr/pp2pppp/8/1Ppp4/8/8/P1PPPPPP/RNBQKBNR w KQkq c6 0 3',
+    'rnbqkbnr/pp2pppp/8/2Ppp3/8/8/P1PPPPPP/RNBQKBNR w KQkq d6 0 3',
   )
 
-  chess.put({ type: BISHOP, color: WHITE }, 'b5')
-  expect(chess.moves()).not.toContain('bxc6')
+  chess.put({ type: BISHOP, color: WHITE }, 'c5')
+  expect(chess.moves()).not.toContain('cxd6')
 
   expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
