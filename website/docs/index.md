@@ -130,9 +130,10 @@ let chess = new Chess(
 )
 ```
 
-### .ascii()
+### .ascii(newline = '\n')
 
-Returns a string containing an ASCII diagram of the current position.
+Returns a string containing an ASCII diagram of the current position. The
+newline character can be overriden if required.
 
 ```ts
 const chess = new Chess()

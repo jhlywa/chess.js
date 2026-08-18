@@ -17,7 +17,7 @@ export class Chess {
     });
     addNag(nag: NAG, fen?: string): void;
     // (undocumented)
-    ascii(): string;
+    ascii(newline?: string): string;
     // (undocumented)
     attackers(square: Square, attackedBy?: Color): Square[];
     // (undocumented)
