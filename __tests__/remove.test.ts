@@ -157,6 +157,52 @@ test('remove - removing white pawn clears black en passant square 2', () => {
   expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
 
+test('remove - unrelated square preserves white en passant square', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppppp1p/8/8/3PPPp1/8/PPP3PP/RNBQKBNR b KQkq f3 0 3',
+  )
+
+  chess.remove('a7')
+  expect(chess.moves()).toContain('gxf3')
+  expect(chess.fen()).toContain(' f3 ')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+})
+
+test('remove - unrelated square preserves black en passant square', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppp2pp/8/4ppP1/8/8/PPPPPP1P/RNBQKBNR w KQkq f6 0 3',
+  )
+
+  chess.remove('a2')
+  expect(chess.moves()).toContain('gxf6')
+  expect(chess.fen()).toContain(' f6 ')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+})
+
+test('remove - removing the last capturing pawn retains the fen en passant square', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppppp1p/8/8/3PPPp1/8/PPP3PP/RNBQKBNR b KQkq f3 0 3',
+  )
+
+  chess.remove('g4')
+  expect(chess.moves()).not.toContain('gxf3')
+  expect(chess.fen()).toContain(' - ')
+  expect(chess.fen({ forceEnpassantSquare: true })).toContain(' f3 ')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+})
+
+test('remove - removing the two square pawn clears it from the fen', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppppp1p/8/8/3PPPp1/8/PPP3PP/RNBQKBNR b KQkq f3 0 3',
+  )
+
+  chess.remove('f4')
+  expect(chess.fen({ forceEnpassantSquare: true })).toContain(' - ')
+})
+
 test('remove - reaching initial position deletes setup headers', () => {
   const chess = new Chess()
   chess.loadPgn(`[SetUp "1"]

@@ -247,3 +247,48 @@ test('put - replacing white pawn clears black en passant square 2', () => {
 
   expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
 })
+
+test('put - unrelated square preserves white en passant square', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppppp1p/8/8/3PPPp1/8/PPP3PP/RNBQKBNR b KQkq f3 0 3',
+  )
+
+  chess.put({ type: KNIGHT, color: BLACK }, 'a6')
+  expect(chess.moves()).toContain('gxf3')
+  expect(chess.fen()).toContain(' f3 ')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+})
+
+test('put - unrelated square preserves black en passant square', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppp2pp/8/4ppP1/8/8/PPPPPP1P/RNBQKBNR w KQkq f6 0 3',
+  )
+
+  chess.put({ type: KNIGHT, color: WHITE }, 'h3')
+  expect(chess.moves()).toContain('gxf6')
+  expect(chess.fen()).toContain(' f6 ')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+})
+
+test('put - adding a second capturing pawn preserves en passant square', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppp2pp/8/4ppP1/8/8/PPPPPP1P/RNBQKBNR w KQkq f6 0 3',
+  )
+
+  chess.put({ type: PAWN, color: WHITE }, 'e5')
+  expect(chess.moves()).toContain('gxf6')
+  expect(chess.moves()).toContain('exf6')
+
+  expect(chess.hash()).toEqual(new Chess(chess.fen()).hash())
+})
+
+test('put - occupying the en passant square clears it from the fen', () => {
+  const chess = new Chess(
+    'rnbqkbnr/pppp2pp/8/4ppP1/8/8/PPPPPP1P/RNBQKBNR w KQkq f6 0 3',
+  )
+
+  chess.put({ type: KNIGHT, color: WHITE }, 'f6')
+  expect(chess.fen({ forceEnpassantSquare: true })).toContain(' - ')
+})
