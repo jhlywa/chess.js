@@ -1215,14 +1215,24 @@ export class Chess {
     const currentSquare = this._epSquare + (this._turn === WHITE ? 16 : -16)
     const attackers = [currentSquare + 1, currentSquare - 1]
 
+    /*
+     * The en passant square is no longer reachable if the board no longer
+     * describes a position where a pawn has just moved two squares: the
+     * square it came from and the square it skipped must both be empty, and
+     * the pawn itself must still be sitting on the square it landed on.
+     *
+     * NB: empty squares hold `undefined`, not `null`, so these checks must
+     * use loose equality.
+     */
     if (
-      this._board[startSquare] !== null ||
-      this._board[this._epSquare] !== null ||
+      this._board[startSquare] != null ||
+      this._board[this._epSquare] != null ||
       this._board[currentSquare]?.color !== swapColor(this._turn) ||
       this._board[currentSquare]?.type !== PAWN
     ) {
       this._hash ^= this._epKey()
       this._epSquare = EMPTY
+      this._fenEpSquare = EMPTY
       return
     }
 
@@ -1231,6 +1241,12 @@ export class Chess {
       this._board[square]?.color === this._turn &&
       this._board[square]?.type === PAWN
 
+    /*
+     * The two square pawn move is still on the board, but no pawn is left to
+     * capture en passant. Only clear _epSquare - _fenEpSquare is retained so
+     * that fen({ forceEnpassantSquare: true }) keeps reporting the square, as
+     * it does after a big pawn move with no capturing pawn.
+     */
     if (!attackers.some(canCapture)) {
       this._hash ^= this._epKey()
       this._epSquare = EMPTY
