@@ -4,16 +4,150 @@
 [![npm](https://img.shields.io/npm/v/chess.js?color=blue)](https://www.npmjs.com/package/chess.js)
 [![npm](https://img.shields.io/npm/dm/chess.js)](https://www.npmjs.com/package/chess.js)
 
-chess.js is a TypeScript chess library used for chess move
-generation/validation, piece placement/movement, and check/checkmate/stalemate
-detection - basically everything but the AI.
+chess.js is a TypeScript chess library used for chess move generation/validation,
+piece placement/movement, and check/checkmate/stalemate detection. It handles the
+chess rules and game state, but deliberately does not provide a chess UI or AI.
 
-chess.js has been extensively tested in node.js and most modern browsers.
+It has been extensively tested in Node.js and most modern browsers.
+
+## Quick Start
+
+Install chess.js:
+
+```sh
+npm install chess.js
+```
+
+Create a game, make moves, inspect the position, and undo a move:
+
+```js
+import { Chess } from 'chess.js'
+
+const chess = new Chess()
+
+chess.move('e4')
+chess.move('e5')
+chess.move('Nf3')
+
+console.log(chess.moves())     // legal moves for the current side
+console.log(chess.fen())       // current position as FEN
+console.log(chess.history())   // moves played so far
+
+chess.undo()
+```
+
+### The three functions you'll use most
+
+| Function | Purpose |
+| --- | --- |
+| `moves()` | Generate legal moves from the current position |
+| `move()` | Make a legal move |
+| `history()` | Read the moves that have already been played |
+
+## Table of Contents
+
+- [Quick Start](#quick-start)
+- [API at a Glance](#api-at-a-glance)
+- [Installation](#installation)
+- [Importing](#importing)
+- [Example Code](#example-code)
+- [User Interface](#user-interface)
+- [Parsers](#parsers-permissive--strict)
+- [API](#api)
+  - [Game state and status](#game-state-and-status)
+  - [Move generation and execution](#move-generation-and-execution)
+  - [Board and position manipulation](#board-and-position-manipulation)
+  - [FEN and PGN](#fen-and-pgn)
+  - [History, comments, and headers](#history-comments-and-headers)
+  - [Utilities](#utilities)
+- [FEN in 30 Seconds](#fen-in-30-seconds)
+- [Building a Chess UI](#building-a-chess-ui)
+- [TypeScript](#typescript)
+- [API Reference](#api-reference)
+
+## API at a Glance
+
+### Game state and status
+
+| Want to... | Use |
+| --- | --- |
+| Check whose turn it is | `turn()` |
+| Check whether the side to move is in check | `inCheck()` |
+| Check for checkmate | `isCheckmate()` |
+| Check for stalemate | `isStalemate()` |
+| Check for a draw | `isDraw()` |
+| Check for threefold repetition | `isThreefoldRepetition()` |
+| Check the 50-move rule | `isDrawByFiftyMoves()` |
+| Check insufficient material | `isInsufficientMaterial()` |
+| Check whether the game has ended | `isGameOver()` |
+| Get the current move number | `moveNumber()` |
+
+### Move generation and execution
+
+| Want to... | Use |
+| --- | --- |
+| Get all legal moves | `moves()` |
+| Get moves for one square | `moves({ square })` |
+| Get moves for one piece type | `moves({ piece })` |
+| Make a move | `move()` |
+| Undo the last move | `undo()` |
+| Detect promotion | `isPromotion()` |
+| Get the move history | `history()` |
+
+### Board and position manipulation
+
+| Want to... | Use |
+| --- | --- |
+| Get the whole board | `board()` |
+| Get the piece on a square | `get()` |
+| Find pieces | `findPiece()` |
+| Add a piece | `put()` |
+| Remove a piece | `remove()` |
+| Clear the board | `clear()` |
+| Reset to the starting position | `reset()` |
+| Load a FEN position | `load()` |
+| Get the current FEN | `fen()` |
+
+### FEN and PGN
+
+| Want to... | Use |
+| --- | --- |
+| Load FEN | `load()` |
+| Generate FEN | `fen()` |
+| Load PGN | `loadPgn()` |
+| Generate PGN | `pgn()` |
+| Validate FEN | `validateFen()` |
+
+### History, comments, and headers
+
+| Want to... | Use |
+| --- | --- |
+| Read move history | `history()` |
+| Add a position comment | `setComment()` |
+| Read a position comment | `getComment()` |
+| Remove a position comment | `removeComment()` |
+| Read all comments | `getComments()` |
+| Remove all comments | `removeComments()` |
+| Set a PGN header | `setHeader()` |
+| Read PGN headers | `getHeaders()` |
+| Remove a PGN header | `removeHeader()` |
+
+### Utilities
+
+| Want to... | Use |
+| --- | --- |
+| Get attackers of a square | `attackers()` |
+| Check whether a square is attacked | `isAttacked()` |
+| Get castling rights | `getCastlingRights()` |
+| Change castling rights | `setCastlingRights()` |
+| Change side to move | `setTurn()` |
+| Get square color | `squareColor()` |
+| Get a position hash | `hash()` |
+| Get an ASCII board | `ascii()` |
 
 ## Installation
 
-Run the following command to install the most recent version of chess.js from
-NPM:
+Run the following command to install the most recent version of chess.js from NPM:
 
 ```sh
 npm install chess.js
@@ -21,7 +155,7 @@ npm install chess.js
 
 ## Importing
 
-### Import (as ESM)
+### Import as ESM
 
 ```js
 import { Chess } from 'chess.js'
@@ -35,48 +169,110 @@ ECMAScript modules (ESM) can be directly imported in a browser:
 </script>
 ```
 
-### Import (as CommonJS)
+### Import as CommonJS
 
 ```js
 const { Chess } = require('chess.js')
 ```
 
-## Example Code
+## FEN in 30 Seconds
 
-The code below plays a random game of chess:
+FEN (Forsyth-Edwards Notation) describes one chess position in a compact string:
+
+```text
+board position | side to move | castling rights | en passant | halfmove clock | fullmove number
+```
+
+For example:
+
+```text
+rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
+```
+
+The six fields mean:
+
+1. **Board position**: ranks 8 through 1, with `/` separating ranks and numbers representing consecutive empty squares.
+2. **Side to move**: `w` for White or `b` for Black.
+3. **Castling rights**: `K`, `Q`, `k`, `q`, or `-`.
+4. **En passant target square**: the square associated with a possible en passant capture, or `-`.
+5. **Halfmove clock**: moves since the last pawn move or capture.
+6. **Fullmove number**: starts at `1` and increments after Black's move.
+
+chess.js can load and generate FEN with `load()` and `fen()`. By default, the generated FEN only includes an en passant square when the side to move can legally capture en passant. Use `fen({ forceEnpassantSquare: true })` when you need the square included regardless.
+
+## Building a Chess UI
+
+chess.js is intentionally headless. Your UI is responsible for rendering the board, receiving user input, and displaying things such as captured pieces, clocks, and move history.
+
+A typical UI flow looks like this:
 
 ```js
+function tryMove(from, to, promotion = 'q') {
+  try {
+    const move = chess.move({ from, to, promotion })
+
+    renderBoard(chess.board())
+    renderMove(move)
+
+    if (chess.isGameOver()) {
+      renderGameResult()
+    }
+
+    return move
+  } catch {
+    // The attempted move was illegal.
+    return null
+  }
+}
+```
+
+For a promotion-capable UI, call `isPromotion({ from, to })` before making the move so that you can ask the user which piece they want.
+
+### Important: `isAttacked()` is not a legal-move test
+
+`isAttacked(square, color)` answers whether a piece of the specified color attacks the square according to the board's attack relationships. A pinned piece can still count as attacking a square.
+
+If your UI needs to know whether the user can actually move a piece to a destination, use `moves()` or `move()` rather than treating `isAttacked()` as a legal-move generator.
+
+## TypeScript
+
+chess.js is written in TypeScript, so TypeScript projects can import the same API directly:
+
+```ts
 import { Chess } from 'chess.js'
 
 const chess = new Chess()
 
-while (!chess.isGameOver()) {
-  const moves = chess.moves()
-  const move = moves[Math.floor(Math.random() * moves.length)]
-  chess.move(move)
-}
-console.log(chess.pgn())
+const moves = chess.moves()
+const move = chess.move({
+  from: 'e2',
+  to: 'e4',
+})
+
+console.log(move.san)
 ```
 
-## User Interface
+When using verbose move generation, the returned move objects expose fields such as `from`, `to`, `piece`, `san`, `lan`, `before`, and `after`. Capture and promotion information is included when applicable.
 
-By design, chess.js is a headless library and does not include user interface
-elements. Many developers have successfully integrated chess.js with the
-[chessboard.js](http://chessboardjs.com) library. See
-[chessboard.js - Random vs Random](http://chessboardjs.com/examples#5002) for an
-example.
+### Move object mental model
 
-## Parsers (permissive / strict)
+```text
+from       where the piece started
+to         where it ended
+piece      moving piece
+captured   captured piece, when applicable
+promotion  promotion piece, when applicable
+san        Standard Algebraic Notation
+lan        Long Algebraic Notation
+before     FEN before the move
+after      FEN after the move
+```
 
-This library includes two parsers (`permissive` and `strict`) which are used to
-parse different forms of chess move notation. The `permissive` parser (the
-default) is able to handle many non-standard derivatives of algebraic notation
-(e.g. `Nf3`, `g1f3`, `g1-f3`, `Ng1f3`, `Ng1-f3`, `Ng1xf3`). The `strict` parser
-only accepts moves in Standard Algebraic Notation and requires that they
-strictly adhere to the specification. The `strict` parser runs slightly faster
-but will not parse any non-standard notation.
+## API Reference
 
-## API
+The reference below preserves the complete method-level API documentation, examples, and behavior descriptions.
+
+## API Reference
 
 ### Constants
 
@@ -130,6 +326,8 @@ let chess = new Chess(
 )
 ```
 
+### Utilities
+
 ### .ascii()
 
 Returns a string containing an ASCII diagram of the current position.
@@ -155,6 +353,8 @@ chess.ascii()
 //        +------------------------+
 //          a  b  c  d  e  f  g  h'
 ```
+
+### Board attacks and status
 
 ### .attackers(square, [ color ])
 
@@ -185,6 +385,8 @@ chess.load('4k3/4n3/8/8/8/8/4R3/4K3 w - - 0 1')
 chess.attackers('c6', BLACK)
 // -> ['e7'] (pieces still attack a square even if they are pinned)
 ```
+
+### Board and position manipulation
 
 ### .board()
 
@@ -233,7 +435,7 @@ chess.fen()
 Returns the FEN string for the current position. Note, the en passant square is
 only included if the side-to-move can legally capture en passant.
 
-The enpassant square will always be included if forceEnpassantSquare is true.
+The en passant square will always be included if forceEnpassantSquare is true.
 
 ```ts
 const chess = new Chess()
@@ -349,6 +551,8 @@ chess.hash()
 // -> '3436f01fd716346e'
 ```
 
+### History and move data
+
 ### .history([ options ])
 
 Returns a list containing the moves of the current game. Options is an optional
@@ -412,6 +616,8 @@ chess.history({ verbose: true })
 //   }
 // ]
 ```
+
+### Game state and status
 
 ### .inCheck()
 
@@ -585,6 +791,8 @@ chess.load('8/4p3/8/8/8/8/4P3/6K1 w - - 1 45', { skipValidation: true })
 // -> Works!
 ```
 
+### PGN
+
 ### .loadPgn(pgn, [ options ])
 
 Load the moves of a game stored in
@@ -669,6 +877,8 @@ chess.loadPgn(sloppyPgn, { newlineChar: ':' })
 chess.loadPgn(sloppyPgn, { newlineChar: ':', strict: true })
 // Error: Invalid move in PGN: Pc2c4
 ```
+
+### Move generation and execution
 
 ### .move(move, [ options ])
 
@@ -800,6 +1010,8 @@ The `Move` object has helper methods that describe the type of move:
 - `.isQueensideCastle()` - is the move a queenside castle?
 - `.isCheck()` - does the move put the opponent's king in check?
 
+### PGN output
+
 ### .pgn([ options ])
 
 Returns the game in PGN format. Options is an optional parameter which may
@@ -817,6 +1029,8 @@ chess.move('Nc6')
 chess.pgn({ maxWidth: 5, newline: '<br />' })
 // -> '[White "Plunky"]<br />[Black "Plinkie"]<br /><br />1. e4 e5<br />2. Nc3 Nc6'
 ```
+
+### Board manipulation
 
 ### .put(piece, square)
 
@@ -865,6 +1079,8 @@ chess.remove('h1')
 chess.remove('e1')
 // -> undefined
 ```
+
+### Comments and headers
 
 ### .removeComment()
 
@@ -926,6 +1142,8 @@ chess.getHeaders()
 // -> { White: 'Morphy', Black: 'Anderssen'}
 ```
 
+### Game state and position control
+
 ### .reset()
 
 Reset the board to the initial starting position.
@@ -980,12 +1198,14 @@ chess.setTurn('b')
 // -> false
 ```
 
+### Utilities
+
 ### .squareColor(square)
 
 Returns the color of the square ('light' or 'dark').
 
 ```ts
-const chess = Chess()
+const chess = new Chess()
 chess.squareColor('h1')
 // -> 'light'
 chess.squareColor('a7')
@@ -1003,6 +1223,8 @@ chess.load('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1')
 chess.turn()
 // -> 'b'
 ```
+
+### History control
 
 ### .undo()
 
@@ -1036,6 +1258,8 @@ chess.fen()
 chess.undo()
 // -> null
 ```
+
+### Validation
 
 ### validateFen(fen):
 
