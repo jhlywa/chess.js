@@ -73,10 +73,10 @@ moveTextSection
 	= root:line _ marker:gameTerminationMarker? _ { return { root, marker} }
 
 line
-	= comment:comment? moves:move* { return lineToTree(rootNode(comment), ...moves.flat()) }
+	= comment:comments? moves:move* { return lineToTree(rootNode(comment), ...moves.flat()) }
 
 move
-	= _ moveNumber? _ san:san suffixAnnotation:suffixAnnotation? nags:nag*  _ comment:comment? variations:variation* { return node(san, suffixAnnotation, nags, comment, variations) }
+	= _ moveNumber? _ san:san suffixAnnotation:suffixAnnotation? nags:nag*  _ comment:comments? variations:variation* { return node(san, suffixAnnotation, nags, comment, variations) }
 moveNumber "move number"
     = [0-9]*'.' _ [.]*
 
@@ -88,6 +88,11 @@ suffixAnnotation "suffix annotation"
       
 nag "NAG"
 	= _ '$' nag:$[0-9]+ { return parseInt(nag, 10) }
+
+// Comments that follow each other, such as Lichess's { [%eval 0.18] } { [%clk 0:30:00] },
+// are kept as one comment
+comments
+	= first:comment rest:(_ @comment)* { return rest.length ? [first, ...rest].map((c) => c.trim()).join(' ') : first }
 
 comment
 	= braceComment / restOfLineComment
@@ -102,7 +107,7 @@ variation "variation"
     = _ '(' line:line _ ')' { return line }
 
 gameTerminationMarker "game termination marker"
-	= result:('1-0' / '0-1' / '1/2-1/2' / '*') _ comment:comment? { return { result, comment } }
+	= result:('1-0' / '0-1' / '1/2-1/2' / '*') _ comment:comments? { return { result, comment } }
 
 _ "whitespace"
   = [\x20\t\r\n]*

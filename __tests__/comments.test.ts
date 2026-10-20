@@ -400,3 +400,38 @@ describe('Load Comments', () => {
     })
   })
 })
+
+describe('Consecutive Comments', () => {
+  const fenE4 = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'
+
+  it('joins comments that follow a move', () => {
+    const chess = new Chess()
+    chess.loadPgn('1. e4 { [%eval 0.18] } { [%clk 0:30:00] } 1... e5 *')
+
+    expect(chess.history()).toEqual(['e4', 'e5'])
+    expect(chess.getComments()).toEqual([
+      { fen: fenE4, comment: '[%eval 0.18] [%clk 0:30:00]', nags: [] },
+    ])
+  })
+
+  it('joins comments before the first move, of both kinds', () => {
+    const chess = new Chess()
+    chess.loadPgn('{ start } ; rest of line\n1. e4 { first } { second } *')
+
+    expect(chess.getComments()).toEqual([
+      {
+        fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        comment: 'start rest of line',
+        nags: [],
+      },
+      { fen: fenE4, comment: 'first second', nags: [] },
+    ])
+  })
+
+  it('keeps a single comment as it is', () => {
+    const chess = new Chess()
+    chess.loadPgn('1. e4 { [%eval 0.18] } *')
+
+    expect(chess.getComment()).toEqual(' [%eval 0.18] ')
+  })
+})
