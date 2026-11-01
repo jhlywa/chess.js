@@ -859,6 +859,7 @@ export class Chess {
     this._moveNumber = parseInt(tokens[5], 10)
 
     this._hash = this._computeHash()
+    this._updateEnPassantSquare()
     this._updateSetup(fen)
     this._incPositionCount()
   }
@@ -1216,8 +1217,8 @@ export class Chess {
     const attackers = [currentSquare + 1, currentSquare - 1]
 
     if (
-      this._board[startSquare] !== null ||
-      this._board[this._epSquare] !== null ||
+      this._board[startSquare] != null ||
+      this._board[this._epSquare] != null ||
       this._board[currentSquare]?.color !== swapColor(this._turn) ||
       this._board[currentSquare]?.type !== PAWN
     ) {
