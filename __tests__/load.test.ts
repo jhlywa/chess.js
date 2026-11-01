@@ -58,6 +58,23 @@ test('load - bad ep square (e9)', () => {
   expect(() => chess.load(fen)).toThrow()
 })
 
+test('load - drops an en passant square without the captured pawn - #591', () => {
+  const chess = new Chess('4k3/8/8/3P4/8/8/8/4K3 w - e6 0 1')
+
+  expect(chess.get('e5')).toEqual(undefined)
+  expect(chess.moves()).not.toContain('dxe6')
+  expect(chess.get('e5')).toEqual(undefined)
+  expect(chess.fen()).toEqual('4k3/8/8/3P4/8/8/8/4K3 w - - 0 1')
+})
+
+test('load - preserves a valid en passant square', () => {
+  const fen = '4k3/8/8/3Pp3/8/8/8/4K3 w - e6 0 1'
+  const chess = new Chess(fen)
+
+  expect(chess.moves()).toContain('dxe6')
+  expect(chess.fen()).toEqual(fen)
+})
+
 test('load - missing FEN tokens (no castling rights, ep square, or move numbers)', () => {
   const chess = new Chess()
   const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b'
