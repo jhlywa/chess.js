@@ -604,6 +604,9 @@ The `strict` flag is a boolean (default: `false`) that instructs chess.js to
 only parse moves in Standard Algebraic Notation form. See `.move` documentation
 for more information about non-SAN notations.
 
+Within PGN header values, `\"` is decoded as a double quote and `\\` as a
+backslash. Header values returned by `.getHeaders()` contain the decoded text.
+
 The method will throw and exception if the PGN fails to parse.
 
 ```ts
@@ -804,6 +807,9 @@ The `Move` object has helper methods that describe the type of move:
 
 Returns the game in PGN format. Options is an optional parameter which may
 include max width and/or a newline character settings.
+
+Double quotes and backslashes in header values are escaped according to the PGN
+format. Pass the original, unescaped text to `.setHeader()`.
 
 ```ts
 const chess = new Chess()
