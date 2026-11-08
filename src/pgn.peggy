@@ -67,7 +67,7 @@ tagName "tag name"
 	= $[a-zA-Z]+
 
 tagValue "tag value"
-	= $[^"]*
+	= chars:('\\' char:('"' / '\\') { return char } / [^"])* { return chars.join('') }
 
 moveTextSection
 	= root:line _ marker:gameTerminationMarker? _ { return { root, marker} }

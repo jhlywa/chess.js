@@ -2045,7 +2045,10 @@ export class Chess {
        * do have to check for null placeholders, though, and omit them
        */
       const headerTag = this._header[i]
-      if (headerTag) result.push(`[${i} "${this._header[i]}"]` + newline)
+      if (headerTag) {
+        const escaped = headerTag.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+        result.push(`[${i} "${escaped}"]` + newline)
+      }
       headerExists = true
     }
 
