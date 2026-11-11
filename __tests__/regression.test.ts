@@ -29,6 +29,21 @@ describe('Regression Tests', () => {
     expect(chess.moves().join(' ')).toBe('Kd2 Ke2 Kxf2 Kf1 Kd1')
   })
 
+  it('a pawn on the first or last rank has no moves', () => {
+    for (const square of ['h8', 'a1'] as const) {
+      for (const color of ['w', 'b'] as const) {
+        const chess = new Chess()
+        chess.clear()
+        chess.put({ type: 'k', color: 'w' }, 'e1')
+        chess.put({ type: 'k', color: 'b' }, 'e8')
+        chess.put({ type: 'p', color }, square)
+        chess.setTurn(color)
+        expect(chess.moves({ square, verbose: true })).toEqual([])
+        expect(() => chess.moves()).not.toThrow()
+      }
+    }
+  })
+
   it('Github Issue #85 (white) - SetUp and FEN should be accepted in loadPgn', () => {
     const chess = new Chess()
     const pgn = [

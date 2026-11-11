@@ -1568,6 +1568,11 @@ export class Chess {
       let to: number
       if (type === PAWN) {
         if (forPiece && forPiece !== type) continue
+        /*
+         * A pawn on the first or last rank can only come from a hand-set position, and
+         * its moves would step off the board. It has none.
+         */
+        if (rank(from) === RANK_1 || rank(from) === RANK_8) continue
 
         // single square, non-capturing
         to = from + PAWN_OFFSETS[us][0]
