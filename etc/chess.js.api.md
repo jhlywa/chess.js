@@ -12,8 +12,9 @@ export const BLACK = "b";
 
 // @public (undocumented)
 export class Chess {
-    constructor(fen?: string, { skipValidation }?: {
+    constructor(fen?: string, { skipValidation, chess960 }?: {
         skipValidation?: boolean | undefined;
+        chess960?: boolean | undefined;
     });
     addNag(nag: NAG, fen?: string): void;
     // (undocumented)
@@ -89,6 +90,7 @@ export class Chess {
     isCheck(): boolean;
     // (undocumented)
     isCheckmate(): boolean;
+    isChess960(): boolean;
     // (undocumented)
     isDraw(): boolean;
     // (undocumented)
@@ -106,10 +108,10 @@ export class Chess {
     isStalemate(): boolean;
     // (undocumented)
     isThreefoldRepetition(): boolean;
-    // (undocumented)
-    load(fen: string, { skipValidation, preserveHeaders }?: {
+    load(fen: string, { skipValidation, preserveHeaders, chess960, }?: {
         skipValidation?: boolean | undefined;
         preserveHeaders?: boolean | undefined;
+        chess960?: boolean | undefined;
     }): void;
     // (undocumented)
     loadPgn(pgn: string, { strict, newlineChar, }?: {
@@ -355,8 +357,10 @@ export type Suffix = (typeof SUFFIX_LIST)[number];
 // @public (undocumented)
 export const SUFFIX_LIST: readonly ["!", "?", "!!", "!?", "?!", "??"];
 
-// @public (undocumented)
-export function validateFen(fen: string): {
+// @public
+export function validateFen(fen: string, { chess960 }?: {
+    chess960?: boolean;
+}): {
     ok: boolean;
     error?: string;
 };
