@@ -58,6 +58,61 @@ test('load - bad ep square (e9)', () => {
   expect(() => chess.load(fen)).toThrow()
 })
 
+test('load - drops impossible en passant square without captured pawn - #591', () => {
+  const fen = '4k3/8/8/3P4/8/8/8/4K3 w - e6 0 1'
+  const chess = new Chess(fen)
+  const boardBefore = chess.board()
+
+  expect(chess.get('e5')).toBeUndefined()
+  expect(chess.moves()).not.toContain('dxe6')
+  expect(chess.get('e5')).toBeUndefined()
+  expect(chess.board()).toEqual(boardBefore)
+
+  expect(chess.fen()).toEqual('4k3/8/8/3P4/8/8/8/4K3 w - - 0 1')
+  expect(chess.board()).toEqual(boardBefore)
+})
+
+test('load - drops impossible en passant square with occupied target - #591', () => {
+  const fen = '4k3/8/4N3/3Pp3/8/8/8/4K3 w - e6 0 1'
+  const chess = new Chess(fen)
+  const boardBefore = chess.board()
+
+  expect(chess.get('e6')).toEqual({ type: 'n', color: 'w' })
+  expect(chess.moves()).not.toContain('dxe6')
+  expect(chess.fen()).toEqual('4k3/8/4N3/3Pp3/8/8/8/4K3 w - - 0 1')
+  expect(chess.board()).toEqual(boardBefore)
+})
+
+test('load - drops impossible black en passant square without captured pawn - #591', () => {
+  const fen = '4k3/8/8/8/3P4/8/8/4K3 b - e3 0 1'
+  const chess = new Chess(fen)
+  const boardBefore = chess.board()
+
+  expect(chess.get('e4')).toBeUndefined()
+  expect(chess.moves()).not.toContain('dxe3')
+  expect(chess.get('e4')).toBeUndefined()
+  expect(chess.board()).toEqual(boardBefore)
+  expect(chess.fen()).toEqual('4k3/8/8/8/3P4/8/8/4K3 b - - 0 1')
+})
+
+test('load - preserves a valid en passant square - #591', () => {
+  const fen = '4k3/8/8/3Pp3/8/8/8/4K3 w - e6 0 1'
+  const chess = new Chess(fen)
+
+  expect(chess.get('e5')).toEqual({ type: 'p', color: 'b' })
+  expect(chess.moves()).toContain('dxe6')
+  expect(chess.fen()).toEqual(fen)
+})
+
+test('load - forceEnpassantSquare still prints a FEN ep square with no capturer', () => {
+  const fen = '4k3/8/8/4p3/8/8/8/4K3 w - e6 0 1'
+  const chess = new Chess(fen)
+
+  expect(chess.moves()).not.toContain('dxe6')
+  expect(chess.fen()).toEqual('4k3/8/8/4p3/8/8/8/4K3 w - - 0 1')
+  expect(chess.fen({ forceEnpassantSquare: true })).toEqual(fen)
+})
+
 test('load - missing FEN tokens (no castling rights, ep square, or move numbers)', () => {
   const chess = new Chess()
   const fen = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b'
