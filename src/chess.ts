@@ -1521,7 +1521,8 @@ export class Chess {
     if (verbose) {
       return moves.map((move) => this._createMove(move))
     } else {
-      return moves.map((move) => this._moveToSan(move, moves))
+      const legalMoves = square ? this._moves({ legal: true }) : moves
+      return moves.map((move) => this._moveToSan(move, legalMoves))
     }
   }
 
