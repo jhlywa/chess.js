@@ -2883,6 +2883,7 @@ export class Chess {
     color: Color,
     rights: Partial<Record<typeof KING | typeof QUEEN, boolean>>,
   ): boolean {
+    this._hash ^= this._castlingKey()
     for (const side of [KING, QUEEN] as const) {
       if (rights[side] !== undefined) {
         if (rights[side]) {
@@ -2892,6 +2893,7 @@ export class Chess {
         }
       }
     }
+    this._hash ^= this._castlingKey()
 
     this._updateCastlingRights()
     const result = this.getCastlingRights(color)
