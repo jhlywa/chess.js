@@ -2677,8 +2677,10 @@ export class Chess {
   private _pruneComments() {
     const reversedHistory = []
     const currentComments: Record<string, string> = {}
+    const currentFens = new Set<string>()
 
     const copyComment = (fen: string) => {
+      currentFens.add(fen)
       if (fen in this._comments) {
         currentComments[fen] = this._comments[fen]
       }
@@ -2699,6 +2701,12 @@ export class Chess {
       copyComment(this.fen())
     }
     this._comments = currentComments
+    for (const fen of Object.keys(this._suffixes)) {
+      if (!currentFens.has(fen)) delete this._suffixes[fen]
+    }
+    for (const fen of Object.keys(this._nags)) {
+      if (!currentFens.has(fen)) delete this._nags[fen]
+    }
   }
 
   getComment(): string {
