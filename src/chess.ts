@@ -2102,6 +2102,12 @@ export class Chess {
       moveString =
         moveString + ' ' + this._moveToSan(move, this._moves({ legal: true }))
       this._makeMove(move)
+
+      const fen = this.fen()
+      moveString += this._suffixes[fen] ?? ''
+      if (this._nags[fen]?.length) {
+        moveString += ' ' + this._nags[fen].map((nag) => `$${nag}`).join(' ')
+      }
     }
 
     // are there any other leftover moves?
