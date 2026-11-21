@@ -1820,7 +1820,10 @@ export class Chess {
       this._halfMoves++
       this._turn = them
 
+      this._hash ^= this._epKey()
       this._epSquare = EMPTY
+      this._fenEpSquare = EMPTY
+      this._hash ^= SIDE_KEY
 
       return
     }
