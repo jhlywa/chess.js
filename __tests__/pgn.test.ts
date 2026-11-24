@@ -67,6 +67,38 @@ describe('PGN', () => {
     },
   ]
 
+  test.each(['setHeader', 'loadPgn'])(
+    'pgn - works - preserves empty headers from %s',
+    (method) => {
+      const chess = new Chess()
+      if (method === 'setHeader') {
+        chess.setHeader('Opening', '')
+        chess.setHeader('Source', '')
+      } else {
+        chess.loadPgn('[Opening ""]\n[Source ""]\n\n1. e4 *')
+      }
+
+      const pgn = chess.pgn()
+      expect(pgn).toContain('[Opening ""]')
+      expect(pgn).toContain('[Source ""]')
+
+      const roundTrip = new Chess()
+      roundTrip.loadPgn(pgn)
+      expect(roundTrip.getHeaders()).toEqual(chess.getHeaders())
+    },
+  )
+
+  test('pgn - works - omits unset and removed headers', () => {
+    const chess = new Chess()
+    chess.setHeader('Variation', '')
+    chess.removeHeader('Variation')
+
+    const pgn = chess.pgn()
+    expect(pgn).not.toContain('[Opening ')
+    expect(pgn).not.toContain('[Variation ')
+    expect(pgn).toContain('[Event "?"]')
+  })
+
   test('pgn - works - removes header', () => {
     const chess = new Chess()
     const pgn = `
